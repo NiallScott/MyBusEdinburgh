@@ -50,7 +50,8 @@ sealed interface FileDownloadResponse {
          * @property throwable The [Throwable] which causes this error.
          */
         data class IoError(
-            val throwable: Throwable) : Error
+            val throwable: Throwable
+        ) : Error
 
         /**
          * The file download failed due to an error from the server.

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,29 +27,21 @@
 package uk.org.rivernile.android.bustracker.ui.serviceschooser
 
 import androidx.lifecycle.SavedStateHandle
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import app.cash.turbine.turbineScope
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Rule
-import org.junit.Test
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /**
  * Tests for [State].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class StateTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Test
     fun selectedServicesFlowInitiallyEmitsEmptySetWhenArgumentsNotSet() = runTest {
@@ -57,7 +49,7 @@ class StateTest {
 
         val result = state.selectedServicesFlow.first()
 
-        assertEquals(emptySet<String>(), result)
+        assertEquals(emptySet(), result)
     }
 
     @Test
@@ -68,11 +60,14 @@ class StateTest {
                 mapOf(
                     Arguments.STATE_PARAMS to ServicesChooserParams.AllServices(
                         0,
-                        emptyList()))))
+                        emptyList())
+                )
+            )
+        )
 
         val result = state.selectedServicesFlow.first()
 
-        assertEquals(emptySet<String>(), result)
+        assertEquals(emptySet(), result)
     }
 
     @Test
@@ -82,7 +77,10 @@ class StateTest {
                 mapOf(
                     Arguments.STATE_PARAMS to ServicesChooserParams.AllServices(
                         0,
-                        listOf("1", "2", "3")))))
+                        listOf("1", "2", "3"))
+                )
+            )
+        )
         val expected = setOf("1", "2", "3")
 
         val result = state.selectedServicesFlow.first()
@@ -107,7 +105,10 @@ class StateTest {
                 mapOf(
                     Arguments.STATE_PARAMS to ServicesChooserParams.AllServices(
                         0,
-                        emptyList()))))
+                        emptyList())
+                )
+            )
+        )
 
         val result = state.hasSelectedServicesFlow.first()
 
@@ -121,7 +122,10 @@ class StateTest {
                 mapOf(
                     Arguments.STATE_PARAMS to ServicesChooserParams.AllServices(
                         0,
-                        listOf("1", "2", "3")))))
+                        listOf("1", "2", "3"))
+                )
+            )
+        )
 
         val result = state.hasSelectedServicesFlow.first()
 
@@ -144,7 +148,10 @@ class StateTest {
                 mapOf(
                     Arguments.STATE_PARAMS to ServicesChooserParams.AllServices(
                         0,
-                        emptyList()))))
+                        emptyList())
+                )
+            )
+        )
 
         val result = state.selectedServices
 
@@ -158,7 +165,10 @@ class StateTest {
                 mapOf(
                     Arguments.STATE_PARAMS to ServicesChooserParams.AllServices(
                         0,
-                        listOf("1", "2", "3")))))
+                        listOf("1", "2", "3"))
+                )
+            )
+        )
         val expected = arrayListOf("1", "2", "3")
 
         val result = state.selectedServices
@@ -193,7 +203,10 @@ class StateTest {
                 mapOf(
                     Arguments.STATE_PARAMS to ServicesChooserParams.AllServices(
                         0,
-                        listOf("1", "2", "3")))))
+                        listOf("1", "2", "3"))
+                )
+            )
+        )
         val expected = arrayListOf("1", "2", "3", "4")
 
         state.onServiceClicked("4")
@@ -208,7 +221,10 @@ class StateTest {
                 mapOf(
                     Arguments.STATE_PARAMS to ServicesChooserParams.AllServices(
                         0,
-                        listOf("1", "2", "3")))))
+                        listOf("1", "2", "3"))
+                )
+            )
+        )
         val expected = arrayListOf("1", "3")
 
         state.onServiceClicked("2")
@@ -233,7 +249,10 @@ class StateTest {
                 mapOf(
                     Arguments.STATE_PARAMS to ServicesChooserParams.AllServices(
                         0,
-                        listOf("1", "2", "3")))))
+                        listOf("1", "2", "3"))
+                )
+            )
+        )
 
         state.onClearAllClicked()
 
@@ -244,37 +263,31 @@ class StateTest {
     fun representativeExample1() = runTest {
         val state = State(SavedStateHandle())
 
-        val selectedServicesObserver = state.selectedServicesFlow.test(this)
-        val hasSelectedServicesFlow = state.hasSelectedServicesFlow.test(this)
-        advanceUntilIdle()
-        state.onServiceClicked("1")
-        advanceUntilIdle()
-        state.onServiceClicked("2")
-        advanceUntilIdle()
-        state.onServiceClicked("3")
-        advanceUntilIdle()
-        state.onServiceClicked("2")
-        advanceUntilIdle()
-        state.onClearAllClicked()
-        advanceUntilIdle()
-        state.onServiceClicked("3")
-        advanceUntilIdle()
-        selectedServicesObserver.finish()
-        hasSelectedServicesFlow.finish()
+        turbineScope {
+            val selectedServicesTurbine = state.selectedServicesFlow.testIn(backgroundScope)
+            val hasSelectedServicesTurbine = state.hasSelectedServicesFlow.testIn(backgroundScope)
+            state.onServiceClicked("1")
+            state.onServiceClicked("2")
+            state.onServiceClicked("3")
+            state.onServiceClicked("2")
+            state.onClearAllClicked()
+            state.onServiceClicked("3")
 
-        selectedServicesObserver.assertValues(
-            emptySet(),
-            setOf("1"),
-            setOf("1", "2"),
-            setOf("1", "2", "3"),
-            setOf("1", "3"),
-            emptySet(),
-            setOf("3"))
-        hasSelectedServicesFlow.assertValues(
-            false,
-            true,
-            false,
-            true)
+            assertEquals(emptySet(), selectedServicesTurbine.awaitItem())
+            assertEquals(setOf("1"), selectedServicesTurbine.awaitItem())
+            assertEquals(setOf("1", "2"), selectedServicesTurbine.awaitItem())
+            assertEquals(setOf("1", "2", "3"), selectedServicesTurbine.awaitItem())
+            assertEquals(setOf("1", "3"), selectedServicesTurbine.awaitItem())
+            assertEquals(emptySet(), selectedServicesTurbine.awaitItem())
+            assertEquals(setOf("3"), selectedServicesTurbine.awaitItem())
+            selectedServicesTurbine.ensureAllEventsConsumed()
+
+            assertFalse(hasSelectedServicesTurbine.awaitItem())
+            assertTrue(hasSelectedServicesTurbine.awaitItem())
+            assertFalse(hasSelectedServicesTurbine.awaitItem())
+            assertTrue(hasSelectedServicesTurbine.awaitItem())
+            hasSelectedServicesTurbine.ensureAllEventsConsumed()
+        }
     }
 
     @Test
@@ -284,28 +297,28 @@ class StateTest {
                 mapOf(
                     Arguments.STATE_PARAMS to ServicesChooserParams.AllServices(
                         0,
-                        listOf("1", "2", "3")))))
+                        listOf("1", "2", "3"))
+                )
+            )
+        )
 
-        val selectedServicesObserver = state.selectedServicesFlow.test(this)
-        val hasSelectedServicesFlow = state.hasSelectedServicesFlow.test(this)
-        advanceUntilIdle()
-        state.onServiceClicked("2")
-        advanceUntilIdle()
-        state.onClearAllClicked()
-        advanceUntilIdle()
-        state.onServiceClicked("3")
-        advanceUntilIdle()
-        selectedServicesObserver.finish()
-        hasSelectedServicesFlow.finish()
+        turbineScope {
+            val selectedServicesTurbine = state.selectedServicesFlow.testIn(backgroundScope)
+            val hasSelectedServicesTurbine = state.hasSelectedServicesFlow.testIn(backgroundScope)
+            state.onServiceClicked("2")
+            state.onClearAllClicked()
+            state.onServiceClicked("3")
 
-        selectedServicesObserver.assertValues(
-            setOf("1", "2", "3"),
-            setOf("1", "3"),
-            emptySet(),
-            setOf("3"))
-        hasSelectedServicesFlow.assertValues(
-            true,
-            false,
-            true)
+            assertEquals(setOf("1", "2", "3"), selectedServicesTurbine.awaitItem())
+            assertEquals(setOf("1", "3"), selectedServicesTurbine.awaitItem())
+            assertEquals(emptySet(), selectedServicesTurbine.awaitItem())
+            assertEquals(setOf("3"), selectedServicesTurbine.awaitItem())
+            selectedServicesTurbine.ensureAllEventsConsumed()
+
+            assertTrue(hasSelectedServicesTurbine.awaitItem())
+            assertFalse(hasSelectedServicesTurbine.awaitItem())
+            assertTrue(hasSelectedServicesTurbine.awaitItem())
+            hasSelectedServicesTurbine.ensureAllEventsConsumed()
+        }
     }
 }

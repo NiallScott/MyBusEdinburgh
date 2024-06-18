@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,4 +41,5 @@ internal data class RoomStopDetails(
     override val stopCode: String,
     @Embedded override val stopName: RoomStopName,
     @Embedded override val location: RoomStopLocation,
-    override val orientation: StopOrientation) : StopDetails
+    override val orientation: StopOrientation
+) : StopDetails

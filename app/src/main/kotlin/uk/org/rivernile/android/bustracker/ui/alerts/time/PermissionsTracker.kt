@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,7 +43,8 @@ import javax.inject.Inject
  */
 @ViewModelScoped
 class PermissionsTracker @Inject constructor(
-        private val savedStateHandle: SavedStateHandle) {
+    private val savedStateHandle: SavedStateHandle
+) {
 
     companion object {
 
@@ -64,9 +65,10 @@ class PermissionsTracker @Inject constructor(
      * components can modify their behaviour.
      */
     val permissionsStateFlow get() = _permissionsStateFlow
-            .combine(
-                    savedStateHandle.getStateFlow(STATE_REQUESTED_PERMISSIONS, false),
-                    this::mapToPermissionsState)
+        .combine(
+            savedStateHandle.getStateFlow(STATE_REQUESTED_PERMISSIONS, false),
+            this::mapToPermissionsState
+        )
 
     /**
      * A [LiveData] which emits when permissions should be requested from the user.
@@ -96,8 +98,9 @@ class PermissionsTracker @Inject constructor(
      * @return The resulting [PermissionsState].
      */
     private fun mapToPermissionsState(
-            uiPermissionsState: UiPermissionsState,
-            requestedPermissions: Boolean?): PermissionsState {
+        uiPermissionsState: UiPermissionsState,
+        requestedPermissions: Boolean?
+    ): PermissionsState {
         val postNotificationsPermissionState = when {
             uiPermissionsState.hasPostNotificationsPermission -> PermissionState.GRANTED
             requestedPermissions != true -> PermissionState.UNGRANTED

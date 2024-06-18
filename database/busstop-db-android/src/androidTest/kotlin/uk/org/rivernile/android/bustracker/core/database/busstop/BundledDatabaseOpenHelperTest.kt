@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,25 +33,19 @@ import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.platform.app.InstrumentationRegistry
 import okio.IOException
 import okio.use
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.any
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
-import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
+import uk.org.rivernile.android.bustracker.core.log.FakeExceptionLogger
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertIs
+import kotlin.test.assertTrue
 
 /**
  * Tests for [BundledDatabaseOpenHelper].
  *
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner::class)
 class BundledDatabaseOpenHelperTest {
 
     companion object {
@@ -60,12 +54,11 @@ class BundledDatabaseOpenHelperTest {
         private const val ASSET_PREPACKAGED_DATABASE_PATH = "busstops10.db"
     }
 
-    @Mock
-    private lateinit var exceptionLogger: ExceptionLogger
+    private val exceptionLogger = FakeExceptionLogger()
 
     private lateinit var openHelper: BundledDatabaseOpenHelper
 
-    @Before
+    @BeforeTest
     fun setUp() {
         // This is done at the starting of the test to ensure we start with a clean slate.
         deleteExistingDatabase()
@@ -74,18 +67,20 @@ class BundledDatabaseOpenHelperTest {
             .builder(context)
             .name(DB_NAME)
             .callback(object : SupportSQLiteOpenHelper.Callback(2) {
-                override fun onCreate(db: SupportSQLiteDatabase) { }
+                override fun onCreate(db: SupportSQLiteDatabase) = Unit
 
                 override fun onUpgrade(
                     db: SupportSQLiteDatabase,
                     oldVersion: Int,
-                    newVersion: Int) { }
+                    newVersion: Int
+                ) = Unit
             })
             .build()
 
         val databaseOpener = DatabaseOpener(
             context,
-            FrameworkSQLiteOpenHelperFactory())
+            FrameworkSQLiteOpenHelperFactory()
+        )
 
         openHelper = BundledDatabaseOpenHelper(
             context,
@@ -93,10 +88,11 @@ class BundledDatabaseOpenHelperTest {
             context.getString(R.string.asset_db_version).toLong(),
             ASSET_PREPACKAGED_DATABASE_PATH,
             databaseOpener,
-            exceptionLogger)
+            exceptionLogger
+        )
     }
 
-    @After
+    @AfterTest
     fun tearDown() {
         // This is done again at the end of the test to clean up.
         deleteExistingDatabase()
@@ -132,8 +128,7 @@ class BundledDatabaseOpenHelperTest {
             assertEquals(2, db.version)
         }
 
-        verify(exceptionLogger, never())
-            .log(any())
+        assertTrue(exceptionLogger.loggedThrowables.isEmpty())
     }
 
     @Test
@@ -160,8 +155,10 @@ class BundledDatabaseOpenHelperTest {
             assertEquals(2, db.version)
         }
 
-        verify(exceptionLogger)
-            .log(any<IOException>())
+        with(exceptionLogger.loggedThrowables) {
+            assertEquals(1, size)
+            assertIs<IOException>(last())
+        }
     }
 
     @Test
@@ -188,8 +185,10 @@ class BundledDatabaseOpenHelperTest {
             assertEquals(2, db.version)
         }
 
-        verify(exceptionLogger)
-            .log(any<IOException>())
+        with(exceptionLogger.loggedThrowables) {
+            assertEquals(1, size)
+            assertIs<IOException>(last())
+        }
     }
 
     @Test
@@ -201,12 +200,13 @@ class BundledDatabaseOpenHelperTest {
             .builder(context)
             .name(DB_NAME)
             .callback(object : SupportSQLiteOpenHelper.Callback(1) {
-                override fun onCreate(db: SupportSQLiteDatabase) { }
+                override fun onCreate(db: SupportSQLiteDatabase) = Unit
 
                 override fun onUpgrade(
                     db: SupportSQLiteDatabase,
                     oldVersion: Int,
-                    newVersion: Int) { }
+                    newVersion: Int
+                ) = Unit
             })
             .build()
         FrameworkSQLiteOpenHelperFactory().create(dbConfiguration).writableDatabase.close()
@@ -228,8 +228,10 @@ class BundledDatabaseOpenHelperTest {
             assertEquals(2, db.version)
         }
 
-        verify(exceptionLogger)
-            .log(any<SQLException>())
+        with(exceptionLogger.loggedThrowables) {
+            assertEquals(1, size)
+            assertIs<SQLException>(last())
+        }
     }
 
     @Test
@@ -253,7 +255,8 @@ class BundledDatabaseOpenHelperTest {
                 override fun onUpgrade(
                     db: SupportSQLiteDatabase,
                     oldVersion: Int,
-                    newVersion: Int) { }
+                    newVersion: Int
+                ) = Unit
             })
             .build()
         FrameworkSQLiteOpenHelperFactory().create(dbConfiguration).writableDatabase.close()
@@ -297,7 +300,8 @@ class BundledDatabaseOpenHelperTest {
                 override fun onUpgrade(
                     db: SupportSQLiteDatabase,
                     oldVersion: Int,
-                    newVersion: Int) { }
+                    newVersion: Int
+                ) = Unit
             })
             .build()
         FrameworkSQLiteOpenHelperFactory().create(dbConfiguration).writableDatabase.close()
@@ -347,7 +351,8 @@ class BundledDatabaseOpenHelperTest {
                 override fun onUpgrade(
                     db: SupportSQLiteDatabase,
                     oldVersion: Int,
-                    newVersion: Int) { }
+                    newVersion: Int
+                ) = Unit
             })
             .build()
         FrameworkSQLiteOpenHelperFactory().create(dbConfiguration).writableDatabase.close()
@@ -368,8 +373,7 @@ class BundledDatabaseOpenHelperTest {
             assertEquals(2, db.version)
         }
 
-        verify(exceptionLogger, never())
-            .log(any())
+        assertTrue(exceptionLogger.loggedThrowables.isEmpty())
     }
 
     @Test
@@ -399,7 +403,8 @@ class BundledDatabaseOpenHelperTest {
                 override fun onUpgrade(
                     db: SupportSQLiteDatabase,
                     oldVersion: Int,
-                    newVersion: Int) { }
+                    newVersion: Int
+                ) = Unit
             })
             .build()
         FrameworkSQLiteOpenHelperFactory().create(dbConfiguration).writableDatabase.close()
@@ -420,8 +425,7 @@ class BundledDatabaseOpenHelperTest {
             assertEquals(2, db.version)
         }
 
-        verify(exceptionLogger, never())
-            .log(any())
+        assertTrue(exceptionLogger.loggedThrowables.isEmpty())
     }
 
     private fun deleteExistingDatabase() {

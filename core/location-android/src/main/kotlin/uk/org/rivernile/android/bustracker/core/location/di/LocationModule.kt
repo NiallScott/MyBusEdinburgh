@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -93,7 +93,8 @@ internal interface LocationModule {
         fun provideLocationSource(
             context: Context,
             platformLocationSourceProvider: Provider<PlatformLocationSource>,
-            googlePlayLocationSourceProvider: Provider<GooglePlayLocationSource>): LocationSource {
+            googlePlayLocationSourceProvider: Provider<GooglePlayLocationSource>
+        ): LocationSource {
             return if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) ==
                 ConnectionResult.SUCCESS) {
                 googlePlayLocationSourceProvider.get()
@@ -104,8 +105,8 @@ internal interface LocationModule {
 
         @Provides
         fun provideFusedLocationProviderClient(
-            context: Context): FusedLocationProviderClient =
-            LocationServices.getFusedLocationProviderClient(context)
+            context: Context
+        ): FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
 
         @Provides
         fun provideLocationManager(context: Context): LocationManager =

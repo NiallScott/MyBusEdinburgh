@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -44,7 +44,8 @@ sealed interface UiServiceListing {
      * @property stopCode The stop code the service listing is for.
      */
     data class InProgress(
-            override val stopCode: String) : UiServiceListing
+        override val stopCode: String
+    ) : UiServiceListing
 
     /**
      * The service listing is empty.
@@ -52,7 +53,8 @@ sealed interface UiServiceListing {
      * @property stopCode The stop code the service listing is for.
      */
     data class Empty(
-            override val stopCode: String) : UiServiceListing
+        override val stopCode: String
+    ) : UiServiceListing
 
     /**
      * The service listing was successful.
@@ -61,6 +63,7 @@ sealed interface UiServiceListing {
      * @property services The service listing.
      */
     data class Success(
-            override val stopCode: String,
-            val services: List<String>) : UiServiceListing
+        override val stopCode: String,
+        val services: List<String>
+    ) : UiServiceListing
 }

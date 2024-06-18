@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -57,7 +57,8 @@ import javax.inject.Inject
 internal class CheckTimesTask @Inject constructor(
     private val alertsRepository: AlertsRepository,
     private val trackerEndpoint: TrackerEndpoint,
-    private val alertNotificationDispatcher: AlertNotificationDispatcher) {
+    private val alertNotificationDispatcher: AlertNotificationDispatcher
+) {
 
     /**
      * Perform a check of the arrival times for all known [ArrivalAlert]s to see if any arrivals
@@ -108,7 +109,8 @@ internal class CheckTimesTask @Inject constructor(
         if (qualifyingServices.isNotEmpty()) {
             alertNotificationDispatcher.dispatchTimeAlertNotification(
                 arrivalAlert,
-                qualifyingServices)
+                qualifyingServices
+            )
             alertsRepository.removeArrivalAlert(arrivalAlert.id)
         }
     }

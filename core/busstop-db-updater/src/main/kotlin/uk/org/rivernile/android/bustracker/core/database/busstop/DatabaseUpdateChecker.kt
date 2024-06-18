@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -44,7 +44,8 @@ import javax.net.SocketFactory
 class DatabaseUpdateChecker @Inject internal constructor(
     private val apiEndpoint: ApiEndpoint,
     private val databaseRepository: BusStopDatabaseRepository,
-    private val databaseUpdater: DatabaseUpdater) {
+    private val databaseUpdater: DatabaseUpdater
+) {
 
     /**
      * Check for any new database updates, and if an update is available, update the database.

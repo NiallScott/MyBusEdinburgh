@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -48,7 +48,8 @@ import javax.inject.Inject
  */
 @ViewModelScoped
 class ExpandedServicesTracker @Inject constructor(
-    private val savedState: SavedStateHandle) {
+    private val savedState: SavedStateHandle
+) {
 
     companion object {
 

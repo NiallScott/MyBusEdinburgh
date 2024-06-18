@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,11 +27,6 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -44,7 +39,10 @@ import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersionResponse
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 /**
  * Tests for [DatabaseUpdateChecker].
@@ -53,9 +51,6 @@ import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
  */
 @RunWith(MockitoJUnitRunner::class)
 class DatabaseUpdateCheckerTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var apiEndpoint: ApiEndpoint
@@ -66,12 +61,13 @@ class DatabaseUpdateCheckerTest {
 
     private lateinit var checker: DatabaseUpdateChecker
 
-    @Before
+    @BeforeTest
     fun setUp() {
         checker = DatabaseUpdateChecker(
             apiEndpoint,
             databaseRepository,
-            databaseUpdater)
+            databaseUpdater
+        )
     }
 
     @Test
@@ -134,5 +130,5 @@ class DatabaseUpdateCheckerTest {
     }
 
     private fun createDatabaseVersion() =
-            DatabaseVersion("MBE", "abc123", "http://host/db.db", "abcdef1234567890")
+        DatabaseVersion("MBE", "abc123", "http://host/db.db", "abcdef1234567890")
 }

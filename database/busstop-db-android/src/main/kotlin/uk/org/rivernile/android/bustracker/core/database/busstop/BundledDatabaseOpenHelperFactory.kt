@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,8 +46,8 @@ internal class BundledDatabaseOpenHelperFactory @Inject constructor(
     private val context: Context,
     private val frameworkSQLiteOpenHelperFactory: FrameworkSQLiteOpenHelperFactory,
     private val databaseOpener: DatabaseOpener,
-    private val exceptionLogger: ExceptionLogger)
-    : SupportSQLiteOpenHelper.Factory {
+    private val exceptionLogger: ExceptionLogger
+) : SupportSQLiteOpenHelper.Factory {
 
     companion object {
 
@@ -55,13 +55,15 @@ internal class BundledDatabaseOpenHelperFactory @Inject constructor(
     }
 
     override fun create(
-        configuration: SupportSQLiteOpenHelper.Configuration): SupportSQLiteOpenHelper {
+        configuration: SupportSQLiteOpenHelper.Configuration
+    ): SupportSQLiteOpenHelper {
         return BundledDatabaseOpenHelper(
             context,
             frameworkSQLiteOpenHelperFactory.create(configuration),
             context.getString(R.string.asset_db_version).toLong(),
             ASSET_PREPACKAGED_DATABASE_PATH,
             databaseOpener,
-            exceptionLogger)
+            exceptionLogger
+        )
     }
 }

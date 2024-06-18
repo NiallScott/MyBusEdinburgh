@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -66,8 +66,8 @@ internal class BundledDatabaseOpenHelper(
     private val minimumUpdateTimestamp: Long,
     private val bundledDatabaseAssetPath: String,
     private val databaseOpener: DatabaseOpener,
-    private val exceptionLogger: ExceptionLogger)
-    : SupportSQLiteOpenHelper by delegate {
+    private val exceptionLogger: ExceptionLogger
+) : SupportSQLiteOpenHelper by delegate {
 
     companion object {
 

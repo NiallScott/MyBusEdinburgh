@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -57,7 +57,8 @@ import javax.inject.Inject
  */
 internal class PlatformLocationSource @Inject constructor(
     private val locationManager: LocationManager,
-    private val permissionChecker: AndroidLocationPermissionChecker) : LocationSource {
+    private val permissionChecker: AndroidLocationPermissionChecker
+) : LocationSource {
 
     companion object {
 
@@ -108,7 +109,7 @@ internal class PlatformLocationSource @Inject constructor(
                 // compatibility, we need to loop through all providers to determine existence.
                 locationManager.allProviders.forEach {
                     if (it == LocationManager.NETWORK_PROVIDER ||
-                            it == LocationManager.GPS_PROVIDER) {
+                        it == LocationManager.GPS_PROVIDER) {
                         // Request location updates from both network and GPS providers. We'll only
                         // get location updates from active providers, but we can just ignore their
                         // active state as the OS will deal with that for us.
@@ -121,7 +122,8 @@ internal class PlatformLocationSource @Inject constructor(
                             USER_VISIBLE_LOCATION_MIN_TIME_MILLIS,
                             USER_VISIBLE_LOCATION_MIN_DISTANCE_METERS,
                             locationListener,
-                            Looper.getMainLooper())
+                            Looper.getMainLooper()
+                        )
                     }
                 }
 

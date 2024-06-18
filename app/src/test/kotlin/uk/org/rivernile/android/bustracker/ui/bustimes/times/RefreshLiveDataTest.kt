@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,15 +27,15 @@
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import org.junit.Before
 import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import uk.org.rivernile.android.bustracker.testutils.LiveDataTestObserver
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 /**
  * Tests for [RefreshLiveData].
@@ -55,7 +55,7 @@ class RefreshLiveDataTest {
 
     private lateinit var liveData: RefreshLiveData
 
-    @Before
+    @BeforeTest
     fun setUp() {
         liveData = RefreshLiveData(refreshController)
     }
@@ -65,9 +65,9 @@ class RefreshLiveDataTest {
         liveData.observeForever(observer)
 
         verify(refreshController)
-                .setActiveState(true)
+            .setActiveState(true)
         verify(refreshController, never())
-                .setActiveState(false)
+            .setActiveState(false)
     }
 
     @Test
@@ -76,8 +76,8 @@ class RefreshLiveDataTest {
         liveData.removeObserver(observer)
 
         verify(refreshController)
-                .setActiveState(true)
+            .setActiveState(true)
         verify(refreshController)
-                .setActiveState(false)
+            .setActiveState(false)
     }
 }

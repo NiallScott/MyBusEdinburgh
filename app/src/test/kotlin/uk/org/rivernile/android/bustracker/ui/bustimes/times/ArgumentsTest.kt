@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,47 +27,40 @@
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
 import androidx.lifecycle.SavedStateHandle
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.advanceUntilIdle
+import app.cash.turbine.test
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
-import org.junit.Test
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 /**
  * Tests for [Arguments].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class ArgumentsTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Test
     fun stopCodeEmitsNullByDefault() = runTest {
         val arguments = Arguments(SavedStateHandle())
 
-        val observer = arguments.stopCodeFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(null)
+        arguments.stopCodeFlow.test {
+            assertNull(awaitItem())
+            ensureAllEventsConsumed()
+        }
     }
 
     @Test
     fun stopCodeEmitsValueSetInSavedStateHandle() = runTest {
         val arguments = Arguments(
             SavedStateHandle(
-                mapOf(
-                    Arguments.STATE_STOP_CODE to "123456")))
+                mapOf(Arguments.STATE_STOP_CODE to "123456")
+            )
+        )
 
-        val observer = arguments.stopCodeFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues("123456")
+        arguments.stopCodeFlow.test {
+            assertEquals("123456", awaitItem())
+            ensureAllEventsConsumed()
+        }
     }
 }

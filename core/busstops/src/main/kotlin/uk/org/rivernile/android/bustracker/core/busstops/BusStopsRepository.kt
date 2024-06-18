@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,7 +45,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class BusStopsRepository @Inject internal constructor(
-    private val stopDao: StopDao) {
+    private val stopDao: StopDao
+) {
 
     /**
      * Get a [Flow] which returns [StopName] for the given `stopCode`. If the stop name is updated
@@ -92,7 +93,8 @@ class BusStopsRepository @Inject internal constructor(
         minLongitude: Double,
         maxLatitude: Double,
         maxLongitude: Double,
-        serviceFilter: Set<String>?): Flow<List<StopDetailsWithServices>?> =
+        serviceFilter: Set<String>?
+    ): Flow<List<StopDetailsWithServices>?> =
         serviceFilter?.ifEmpty { null }?.let {
             stopDao.getStopDetailsWithinSpanFlow(
                 minLatitude,

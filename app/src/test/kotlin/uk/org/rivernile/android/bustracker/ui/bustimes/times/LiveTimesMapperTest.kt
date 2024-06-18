@@ -60,7 +60,8 @@ class LiveTimesMapperTest {
         val result = mapper.mapLiveTimesAndColoursToUiResult(
             "123456",
             LiveTimesResult.InProgress,
-            null)
+            null
+        )
 
         assertEquals(UiResult.InProgress, result)
     }

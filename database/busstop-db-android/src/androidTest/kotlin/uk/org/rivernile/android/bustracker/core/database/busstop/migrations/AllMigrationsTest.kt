@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,14 +29,11 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.migrations
 import androidx.room.Room
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.platform.app.InstrumentationRegistry
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.core.database.busstop.BundledDatabaseOpenHelperFactory
 import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseOpener
 import uk.org.rivernile.android.bustracker.core.database.busstop.RoomBusStopDatabase
-import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
+import uk.org.rivernile.android.bustracker.core.log.FakeExceptionLogger
+import kotlin.test.Test
 import kotlin.test.fail
 
 /**
@@ -44,16 +41,12 @@ import kotlin.test.fail
  *
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner::class)
 class AllMigrationsTest {
 
     companion object {
 
         private const val TEST_DB = "stopdb-migration-test"
     }
-
-    @Mock
-    private lateinit var exceptionLogger: ExceptionLogger
 
     @Test
     fun migrateAll() {
@@ -68,13 +61,17 @@ class AllMigrationsTest {
             FrameworkSQLiteOpenHelperFactory(),
             DatabaseOpener(
                 context,
-                FrameworkSQLiteOpenHelperFactory()),
-            exceptionLogger)
+                FrameworkSQLiteOpenHelperFactory()
+            ),
+            FakeExceptionLogger()
+        )
 
-        Room.databaseBuilder(
-            context,
-            RoomBusStopDatabase::class.java,
-            TEST_DB)
+        Room
+            .databaseBuilder(
+                context,
+                RoomBusStopDatabase::class.java,
+                TEST_DB
+            )
             .addMigrations(*allMigrations)
             .openHelperFactory(openHelperFactory)
             .build()

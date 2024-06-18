@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,7 +43,8 @@ import javax.net.SocketFactory
  */
 internal class ApiServiceFactory @Inject constructor(
     @ForInternalApi private val retrofit: Retrofit,
-    @ForInternalApi private val okHttpClient: OkHttpClient) {
+    @ForInternalApi private val okHttpClient: OkHttpClient
+) {
 
     /**
      * An instance which goes over the default network route. This is lazily initialised.

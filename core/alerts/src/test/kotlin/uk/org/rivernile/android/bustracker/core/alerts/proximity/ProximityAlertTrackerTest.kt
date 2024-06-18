@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,9 +27,6 @@
 package uk.org.rivernile.android.bustracker.core.alerts.proximity
 
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -41,7 +38,8 @@ import uk.org.rivernile.android.bustracker.core.alerts.ProximityAlert
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopLocation
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 /**
  * Tests for [ProximityAlertTracker].
@@ -56,9 +54,6 @@ class ProximityAlertTrackerTest {
         private const val MAX_DURATION_MILLIS = 3600000L
     }
 
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
-
     @Mock
     private lateinit var busStopsRepository: BusStopsRepository
     @Mock
@@ -68,12 +63,13 @@ class ProximityAlertTrackerTest {
 
     private lateinit var tracker: ProximityAlertTracker
 
-    @Before
+    @BeforeTest
     fun setUp() {
         tracker = ProximityAlertTracker(
             busStopsRepository,
             geofencingManager,
-            timeUtils)
+            timeUtils
+        )
     }
 
     @Test
@@ -128,5 +124,6 @@ class ProximityAlertTrackerTest {
 
     private data class MockStopLocation(
         override val latitude: Double,
-        override val longitude: Double) : StopLocation
+        override val longitude: Double
+    ) : StopLocation
 }

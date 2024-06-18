@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,7 +39,8 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class ServiceListingRetriever @Inject constructor(
-        private val serviceStopsRepository: ServiceStopsRepository) {
+    private val serviceStopsRepository: ServiceStopsRepository
+) {
 
     /**
      * Gets a [kotlinx.coroutines.flow.Flow] of [UiServiceListing] which is the service listing
@@ -51,10 +52,10 @@ class ServiceListingRetriever @Inject constructor(
      */
     fun getServiceListingFlow(stopCode: String?) = stopCode?.ifBlank { null }?.let { sc ->
         serviceStopsRepository.getServicesForStopFlow(sc)
-                .map {
-                    mapToUiServiceListing(sc, it)
-                }
-                .onStart { emit(UiServiceListing.InProgress(sc)) }
+            .map {
+                mapToUiServiceListing(sc, it)
+            }
+            .onStart { emit(UiServiceListing.InProgress(sc)) }
     } ?: flowOf(null)
 
     /**
@@ -66,8 +67,9 @@ class ServiceListingRetriever @Inject constructor(
      * [services] is not `null` and not empty. Otherwise it will be [UiServiceListing.Empty].
      */
     private fun mapToUiServiceListing(
-            stopCode: String,
-            services: List<String>?) = services?.ifEmpty { null }?.let {
+        stopCode: String,
+        services: List<String>?
+    ) = services?.ifEmpty { null }?.let {
         UiServiceListing.Success(stopCode, it)
     } ?: UiServiceListing.Empty(stopCode)
 }

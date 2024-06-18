@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,9 +40,9 @@ dependencies {
     implementation(libs.okhttp)
 
     // Testing dependencies
-    testImplementation(project(":testutils"))
-    testImplementation(libs.junit)
+    testImplementation(testFixtures(project(":endpoint:internal-api-endpoint")))
     testImplementation(libs.coroutines.test)
-    testImplementation(libs.mockito)
-    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.turbine)
 }

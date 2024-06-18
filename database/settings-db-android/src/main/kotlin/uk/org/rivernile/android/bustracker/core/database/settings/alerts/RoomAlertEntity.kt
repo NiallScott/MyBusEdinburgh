@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -44,4 +44,5 @@ internal data class RoomAlertEntity(
     val stopCode: String,
     val distanceFrom: Int?,
     val serviceNames: String?,
-    val timeTrigger: Int?)
+    val timeTrigger: Int?
+)

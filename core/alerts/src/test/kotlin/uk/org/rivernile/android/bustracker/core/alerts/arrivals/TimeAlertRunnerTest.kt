@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,10 +33,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -45,7 +41,9 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertTrue
 
 /**
  * Tests for [TimeAlertRunner].
@@ -56,9 +54,6 @@ import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 @RunWith(MockitoJUnitRunner::class)
 class TimeAlertRunnerTest {
 
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
-
     @Mock
     private lateinit var checkTimesTask: CheckTimesTask
     @Mock
@@ -66,11 +61,12 @@ class TimeAlertRunnerTest {
 
     private lateinit var runner: TimeAlertRunner
 
-    @Before
+    @BeforeTest
     fun setUp() {
         runner = TimeAlertRunner(
             checkTimesTask,
-            alertsRepository)
+            alertsRepository
+        )
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,37 +26,29 @@
 
 package uk.org.rivernile.android.bustracker.ui.favourites.addedit
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.flow
+import app.cash.turbine.test
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopName
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.coroutines.test
+import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [FavouriteStopFetcher].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class FavouriteStopFetcherTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var favouritesRepository: FavouritesRepository
@@ -65,151 +57,139 @@ class FavouriteStopFetcherTest {
 
     private lateinit var fetcher: FavouriteStopFetcher
 
-    @Before
+    @BeforeTest
     fun setUp() {
         fetcher = FavouriteStopFetcher(favouritesRepository, busStopsRepository)
     }
 
     @Test
     fun loadFavouriteStopAndDetailsWithNullStopCodeEmitsInProgress() = runTest {
-        val observer = fetcher.loadFavouriteStopAndDetails(null).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiState.InProgress)
+        fetcher.loadFavouriteStopAndDetails(null).test {
+            assertEquals(UiState.InProgress, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun loadFavouriteStopAndDetailsWithEmptyStopCodeEmitsInProgress() = runTest {
-        val observer = fetcher.loadFavouriteStopAndDetails("").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiState.InProgress)
+        fetcher.loadFavouriteStopAndDetails("").test {
+            assertEquals(UiState.InProgress, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun loadFavouriteStopAndDetailsWithNoFavouriteOrDetailsEmitsAddMode() = runTest {
         whenever(favouritesRepository.getFavouriteStopFlow("123456"))
-                .thenReturn(flowOf(null))
+            .thenReturn(flowOf(null))
         whenever(busStopsRepository.getNameForStopFlow("123456"))
-                .thenReturn(flowOf(null))
+            .thenReturn(intervalFlowOf(10L, 10L, null))
 
-        val observer = fetcher.loadFavouriteStopAndDetails("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiState.InProgress, UiState.Mode.Add("123456", null))
+        fetcher.loadFavouriteStopAndDetails("123456").test {
+            assertEquals(UiState.InProgress, awaitItem())
+            assertEquals(UiState.Mode.Add("123456", null), awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun loadFavouriteStopAndDetailsWithNoFavouriteButStopNameEmitsAddMode() = runTest {
-        val stopName = MockStopName("Name", "Locality")
+        val stopName = FakeStopName("Name", "Locality")
         whenever(favouritesRepository.getFavouriteStopFlow("123456"))
-                .thenReturn(flowOf(null))
+            .thenReturn(flowOf(null))
         whenever(busStopsRepository.getNameForStopFlow("123456"))
-                .thenReturn(flowOf(stopName))
+            .thenReturn(intervalFlowOf(10L, 10L, stopName))
 
-        val observer = fetcher.loadFavouriteStopAndDetails("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-                UiState.InProgress,
-                UiState.Mode.Add("123456", stopName))
+        fetcher.loadFavouriteStopAndDetails("123456").test {
+            assertEquals(UiState.InProgress, awaitItem())
+            assertEquals(UiState.Mode.Add("123456", stopName), awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun loadFavouriteStopAndDetailsWithFavouriteButNoDetailsEmitsEditMode() = runTest {
         val favouriteStop = FavouriteStop("123456", "Stored name")
         whenever(favouritesRepository.getFavouriteStopFlow("123456"))
-                .thenReturn(flowOf(favouriteStop))
+            .thenReturn(flowOf(favouriteStop))
         whenever(busStopsRepository.getNameForStopFlow("123456"))
-                .thenReturn(flowOf(null))
+            .thenReturn(intervalFlowOf(10L, 10L, null))
 
-        val observer = fetcher.loadFavouriteStopAndDetails("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-                UiState.InProgress,
-                UiState.Mode.Edit("123456", null, favouriteStop))
+        fetcher.loadFavouriteStopAndDetails("123456").test {
+            assertEquals(UiState.InProgress, awaitItem())
+            assertEquals(UiState.Mode.Edit("123456", null, favouriteStop), awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun loadFavouriteStopAndDetailsWithFavouriteAndStopNameEmitsEditMode() = runTest {
         val favouriteStop = FavouriteStop("123456", "Stored name")
-        val stopName = MockStopName("Name", "Locality")
+        val stopName = FakeStopName("Name", "Locality")
         whenever(favouritesRepository.getFavouriteStopFlow("123456"))
-                .thenReturn(flowOf(favouriteStop))
+            .thenReturn(flowOf(favouriteStop))
         whenever(busStopsRepository.getNameForStopFlow("123456"))
-                .thenReturn(flowOf(stopName))
+            .thenReturn(intervalFlowOf(10L, 10L, stopName))
 
-        val observer = fetcher.loadFavouriteStopAndDetails("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-                UiState.InProgress,
-                UiState.Mode.Edit("123456", stopName, favouriteStop))
+        fetcher.loadFavouriteStopAndDetails("123456").test {
+            assertEquals(UiState.InProgress, awaitItem())
+            assertEquals(UiState.Mode.Edit("123456", stopName, favouriteStop), awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun loadFavouriteStopAndDetailsPropagatesUpdatesToFavouriteStop() = runTest {
         val favouriteStop1 = FavouriteStop("123456", "Stored name 1")
         val favouriteStop2 = FavouriteStop("123456", "Stored name 2")
-        val stopName = MockStopName("Name", "Locality")
+        val stopName = FakeStopName("Name", "Locality")
         whenever(favouritesRepository.getFavouriteStopFlow("123456"))
-                .thenReturn(flow {
-                    emit(favouriteStop1)
-                    delay(100L)
-                    emit(favouriteStop2)
-                    delay(100L)
-                    emit(null)
-                })
+            .thenReturn(
+                intervalFlowOf(
+                    10L,
+                    100L,
+                    favouriteStop1,
+                    favouriteStop2,
+                    null
+                )
+            )
         whenever(busStopsRepository.getNameForStopFlow("123456"))
-                .thenReturn(flowOf(stopName))
+            .thenReturn(flowOf(stopName))
 
-        val observer = fetcher.loadFavouriteStopAndDetails("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-                UiState.InProgress,
-                UiState.Mode.Edit("123456", stopName, favouriteStop1),
-                UiState.Mode.Edit("123456", stopName, favouriteStop2),
-                UiState.Mode.Add("123456", stopName))
+        fetcher.loadFavouriteStopAndDetails("123456").test {
+            assertEquals(UiState.InProgress, awaitItem())
+            assertEquals(UiState.Mode.Edit("123456", stopName, favouriteStop1), awaitItem())
+            assertEquals(UiState.Mode.Edit("123456", stopName, favouriteStop2), awaitItem())
+            assertEquals(UiState.Mode.Add("123456", stopName), awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun loadFavouriteStopAndDetailsPropagatesUpdatesToStopName() = runTest {
         val favouriteStop = FavouriteStop("123456", "Stored name")
-        val stopName1 = MockStopName("Name 1", "Locality")
-        val stopName2 = MockStopName("Name 2", "Locality")
-        val stopName3 = MockStopName("Name 3", "Locality")
+        val stopName1 = FakeStopName("Name 1", "Locality")
+        val stopName2 = FakeStopName("Name 2", "Locality")
+        val stopName3 = FakeStopName("Name 3", "Locality")
         whenever(favouritesRepository.getFavouriteStopFlow("123456"))
-                .thenReturn(flowOf(favouriteStop))
+            .thenReturn(flowOf(favouriteStop))
         whenever(busStopsRepository.getNameForStopFlow("123456"))
-                .thenReturn(flow {
-                    emit(stopName1)
-                    delay(100L)
-                    emit(stopName2)
-                    delay(100L)
-                    emit(stopName3)
-                })
+            .thenReturn(
+                intervalFlowOf(
+                    10L,
+                    100L,
+                    stopName1,
+                    stopName2,
+                    stopName3
+                )
+            )
 
-        val observer = fetcher.loadFavouriteStopAndDetails("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-                UiState.InProgress,
-                UiState.Mode.Edit("123456", stopName1, favouriteStop),
-                UiState.Mode.Edit("123456", stopName2, favouriteStop),
-                UiState.Mode.Edit("123456", stopName3, favouriteStop))
+        fetcher.loadFavouriteStopAndDetails("123456").test {
+            assertEquals(UiState.InProgress, awaitItem())
+            assertEquals(UiState.Mode.Edit("123456", stopName1, favouriteStop), awaitItem())
+            assertEquals(UiState.Mode.Edit("123456", stopName2, favouriteStop), awaitItem())
+            assertEquals(UiState.Mode.Edit("123456", stopName3, favouriteStop), awaitItem())
+            awaitComplete()
+        }
     }
-
-    private data class MockStopName(
-        override val name: String,
-        override val locality: String?) : StopName
 }

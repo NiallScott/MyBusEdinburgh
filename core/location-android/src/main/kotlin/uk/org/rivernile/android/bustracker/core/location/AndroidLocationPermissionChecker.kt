@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,7 +43,8 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 internal class AndroidLocationPermissionChecker @Inject constructor(
-    private val context: Context) {
+    private val context: Context
+) {
 
     /**
      * Has either [Manifest.permission.ACCESS_FINE_LOCATION] or
@@ -64,7 +65,8 @@ internal class AndroidLocationPermissionChecker @Inject constructor(
     private fun checkFineLocationPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
             context,
-            Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     /**
@@ -76,6 +78,7 @@ internal class AndroidLocationPermissionChecker @Inject constructor(
     private fun checkCoarseLocationPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
             context,
-            Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
     }
 }

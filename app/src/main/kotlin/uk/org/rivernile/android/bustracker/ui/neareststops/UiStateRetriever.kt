@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -55,7 +55,8 @@ import kotlin.math.absoluteValue
 class UiStateRetriever @Inject constructor(
     private val locationRepository: LocationRepository,
     private val busStopsRepository: BusStopsRepository,
-    private val configRepository: ConfigRepository) {
+    private val configRepository: ConfigRepository
+) {
 
     /**
      * Return a [Flow] which emits [UiState]s. This is based upon the state of the provided
@@ -68,7 +69,8 @@ class UiStateRetriever @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getUiStateFlow(
         permissionStateFlow: Flow<PermissionsState>,
-        serviceFilterFlow: Flow<Set<String>?>): Flow<UiState> {
+        serviceFilterFlow: Flow<Set<String>?>
+    ): Flow<UiState> {
         return if (locationRepository.hasLocationFeature) {
             permissionStateFlow
                 .map(this::isPermissionsSufficient)
@@ -92,7 +94,8 @@ class UiStateRetriever @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun handlePermissionsStateChanged(
         isPermissionsSufficient: Boolean,
-        serviceFilterFlow: Flow<Set<String>?>): Flow<UiState> {
+        serviceFilterFlow: Flow<Set<String>?>
+    ): Flow<UiState> {
         return if (isPermissionsSufficient) {
             locationRepository.isLocationEnabledFlow
                 .distinctUntilChanged()
@@ -115,7 +118,8 @@ class UiStateRetriever @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun handleLocationEnabled(
         isEnabled: Boolean,
-        serviceFilterFlow: Flow<Set<String>?>): Flow<UiState> {
+        serviceFilterFlow: Flow<Set<String>?>
+    ): Flow<UiState> {
         return if (isEnabled) {
             locationRepository.userVisibleLocationFlow
                 .flatMapLatest { loadNearestStops(it, serviceFilterFlow) }
@@ -138,7 +142,8 @@ class UiStateRetriever @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun loadNearestStops(
         location: DeviceLocation,
-        serviceFilterFlow: Flow<Set<String>?>): Flow<UiState> {
+        serviceFilterFlow: Flow<Set<String>?>
+    ): Flow<UiState> {
         return serviceFilterFlow
             .flatMapLatest { loadNearestStops(location, it) }
     }
@@ -155,7 +160,8 @@ class UiStateRetriever @Inject constructor(
      */
     private fun loadNearestStops(
         location: DeviceLocation,
-        serviceFilter: Set<String>?): Flow<UiState> {
+        serviceFilter: Set<String>?
+    ): Flow<UiState> {
         val latitudeSpan = configRepository.nearestStopsLatitudeSpan
         val longitudeSpan = configRepository.nearestStopsLongitudeSpan
 
@@ -164,12 +170,14 @@ class UiStateRetriever @Inject constructor(
         val minLongitude = location.longitude - longitudeSpan
         val maxLongitude = location.longitude + longitudeSpan
 
-        return busStopsRepository.getStopDetailsWithinSpanFlow(
-            minLatitude,
-            minLongitude,
-            maxLatitude,
-            maxLongitude,
-            serviceFilter)
+        return busStopsRepository
+            .getStopDetailsWithinSpanFlow(
+                minLatitude,
+                minLongitude,
+                maxLatitude,
+                maxLongitude,
+                serviceFilter
+            )
             .map { mapToNearestStops(it, location) }
     }
 
@@ -187,7 +195,8 @@ class UiStateRetriever @Inject constructor(
      */
     private fun mapToNearestStops(
         stops: List<StopDetailsWithServices>?,
-        location: DeviceLocation): UiState {
+        location: DeviceLocation
+    ): UiState {
         return stops?.ifEmpty { null }?.let { stopsNonNull ->
             stopsNonNull.map { mapToNearestStop(it, location) }
                 .sortedBy { it.distance }
@@ -204,7 +213,8 @@ class UiStateRetriever @Inject constructor(
      */
     private fun mapToNearestStop(
         stop: StopDetailsWithServices,
-        location: DeviceLocation): UiNearestStop {
+        location: DeviceLocation
+    ): UiNearestStop {
         val stopLocation = DeviceLocation(stop.location.latitude, stop.location.longitude)
         val distanceBetween = locationRepository.distanceBetween(stopLocation, location)
 
@@ -214,7 +224,8 @@ class UiStateRetriever @Inject constructor(
             stop.serviceListing,
             distanceBetween.absoluteValue.toInt(),
             stop.orientation,
-            false)
+            false
+        )
     }
 
     /**

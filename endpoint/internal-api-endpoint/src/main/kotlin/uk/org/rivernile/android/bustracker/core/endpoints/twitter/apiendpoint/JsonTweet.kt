@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,4 +43,5 @@ internal data class JsonTweet internal constructor(
     @SerialName("created_at") internal val createdAt: String? = null,
     @SerialName("text") internal val text: String? = null,
     @SerialName("entities") internal val entities: JsonEntities? = null,
-    @SerialName("user") internal val user: JsonUser? = null)
+    @SerialName("user") internal val user: JsonUser? = null
+)

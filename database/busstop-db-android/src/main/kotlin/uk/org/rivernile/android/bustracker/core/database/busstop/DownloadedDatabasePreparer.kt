@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -49,7 +49,8 @@ internal class DownloadedDatabasePreparer @Inject constructor(
     private val databaseOpener: DatabaseOpener,
     private val databaseFactory: RoomBusStopDatabaseFactory,
     private val exceptionLogger: ExceptionLogger,
-    @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
+    @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher
+) {
 
     /**
      * Prepare a downloaded database by migrating it to the expected schema prior to it replacing

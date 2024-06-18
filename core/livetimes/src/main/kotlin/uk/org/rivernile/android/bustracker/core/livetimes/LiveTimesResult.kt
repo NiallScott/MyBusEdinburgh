@@ -47,7 +47,8 @@ sealed interface LiveTimesResult {
      * @property liveTimes The [LiveTimes].
      */
     data class Success(
-        val liveTimes: LiveTimes) : LiveTimesResult
+        val liveTimes: LiveTimes
+    ) : LiveTimesResult
 
     /**
      * This sealed interface and its descendants encapsulate error responses from requesting live
@@ -66,7 +67,8 @@ sealed interface LiveTimesResult {
          * @property receiveTime The time the error was received at.
          */
         data class NoConnectivity(
-            override val receiveTime: Long) : Error
+            override val receiveTime: Long
+        ) : Error
 
         /**
          * This response was not successful due to an Io error.
@@ -76,7 +78,8 @@ sealed interface LiveTimesResult {
          */
         data class Io(
             override val receiveTime: Long,
-            val throwable: Throwable) : Error
+            val throwable: Throwable
+        ) : Error
 
         /**
          * This sealed interface and its descendants encapsulate possible server errors from
@@ -90,7 +93,8 @@ sealed interface LiveTimesResult {
              * @property receiveTime The time the error was received at.
              */
             data class Authentication(
-                override val receiveTime: Long) : ServerError
+                override val receiveTime: Long
+            ) : ServerError
 
             /**
              * The server is reporting it is down for maintenance.
@@ -98,7 +102,8 @@ sealed interface LiveTimesResult {
              * @property receiveTime The time the error was received at.
              */
             data class Maintenance(
-                override val receiveTime: Long) : ServerError
+                override val receiveTime: Long
+            ) : ServerError
 
             /**
              * The server is reporting it is currently overloaded.
@@ -106,7 +111,8 @@ sealed interface LiveTimesResult {
              * @property receiveTime The time the error was received at.
              */
             data class SystemOverloaded(
-                override val receiveTime: Long) : ServerError
+                override val receiveTime: Long
+            ) : ServerError
 
             /**
              * There was some other error which we don't handle.
@@ -114,7 +120,8 @@ sealed interface LiveTimesResult {
              * @property receiveTime The time the error was received at.
              */
             data class Other(
-                override val receiveTime: Long) : ServerError
+                override val receiveTime: Long
+            ) : ServerError
         }
     }
 }

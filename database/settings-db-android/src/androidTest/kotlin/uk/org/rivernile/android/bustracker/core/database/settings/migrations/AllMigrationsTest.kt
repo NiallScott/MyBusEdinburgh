@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,11 +32,11 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.platform.app.InstrumentationRegistry
-import org.junit.Before
 import org.junit.Rule
-import org.junit.Test
 import uk.org.rivernile.android.bustracker.core.database.OldDatabaseCreator
 import uk.org.rivernile.android.bustracker.core.database.settings.RoomSettingsDatabase
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 /**
  * Test all database migrations, from version 1 up to the current database version.
@@ -55,11 +55,12 @@ class AllMigrationsTest {
         InstrumentationRegistry.getInstrumentation(),
         RoomSettingsDatabase::class.java,
         emptyList(),
-        FrameworkSQLiteOpenHelperFactory())
+        FrameworkSQLiteOpenHelperFactory()
+    )
 
     private lateinit var oldDatabaseCreator: OldDatabaseCreator
 
-    @Before
+    @BeforeTest
     fun setUp() {
         oldDatabaseCreator = OldDatabaseCreator()
     }
@@ -75,10 +76,12 @@ class AllMigrationsTest {
         // Exception when the database schema is not in the expected state. This is evaluated after
         // all the migrations have been performed - so the post-migration state must match the state
         // of a freshly created database.
-        Room.databaseBuilder(
-            InstrumentationRegistry.getInstrumentation().targetContext,
-            RoomSettingsDatabase::class.java,
-            TEST_DB)
+        Room
+            .databaseBuilder(
+                InstrumentationRegistry.getInstrumentation().targetContext,
+                RoomSettingsDatabase::class.java,
+                TEST_DB
+            )
             .addMigrations(*allMigrations)
             .build()
             .openHelper
@@ -107,10 +110,12 @@ class AllMigrationsTest {
         // Exception when the database schema is not in the expected state. This is evaluated after
         // all the migrations have been performed - so the post-migration state must match the state
         // of a freshly created database.
-        Room.databaseBuilder(
-            InstrumentationRegistry.getInstrumentation().targetContext,
-            RoomSettingsDatabase::class.java,
-            TEST_DB)
+        Room
+            .databaseBuilder(
+                InstrumentationRegistry.getInstrumentation().targetContext,
+                RoomSettingsDatabase::class.java,
+                TEST_DB
+            )
             .addMigrations(*allMigrations)
             .build()
             .openHelper
@@ -152,10 +157,12 @@ class AllMigrationsTest {
         // Exception when the database schema is not in the expected state. This is evaluated after
         // all the migrations have been performed - so the post-migration state must match the state
         // of a freshly created database.
-        Room.databaseBuilder(
-            InstrumentationRegistry.getInstrumentation().targetContext,
-            RoomSettingsDatabase::class.java,
-            TEST_DB)
+        Room
+            .databaseBuilder(
+                InstrumentationRegistry.getInstrumentation().targetContext,
+                RoomSettingsDatabase::class.java,
+                TEST_DB
+            )
             .addMigrations(*allMigrations)
             .build()
             .openHelper
@@ -225,10 +232,12 @@ class AllMigrationsTest {
         // Exception when the database schema is not in the expected state. This is evaluated after
         // all the migrations have been performed - so the post-migration state must match the state
         // of a freshly created database.
-        Room.databaseBuilder(
-            InstrumentationRegistry.getInstrumentation().targetContext,
-            RoomSettingsDatabase::class.java,
-            TEST_DB)
+        Room
+            .databaseBuilder(
+                InstrumentationRegistry.getInstrumentation().targetContext,
+                RoomSettingsDatabase::class.java,
+                TEST_DB
+            )
             .addMigrations(*allMigrations)
             .build()
             .openHelper
@@ -240,5 +249,6 @@ class AllMigrationsTest {
         arrayOf(
             Migration1To4(),
             Migration2To4(),
-            Migration3To4())
+            Migration3To4()
+        )
 }

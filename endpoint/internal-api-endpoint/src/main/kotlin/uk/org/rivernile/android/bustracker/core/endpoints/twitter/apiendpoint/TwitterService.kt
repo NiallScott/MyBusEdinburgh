@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -47,5 +47,6 @@ internal interface TwitterService {
     @GET("TwitterStatuses")
     suspend fun getLatestTweets(
         @Query("key") apiKey: String,
-        @Query("appName") appName: String): Response<List<JsonTweet>?>
+        @Query("appName") appName: String
+    ): Response<List<JsonTweet>?>
 }

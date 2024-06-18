@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,22 +29,21 @@ package uk.org.rivernile.android.bustracker.core.database.busstop
 import android.os.Build
 import androidx.test.filters.SdkSuppress
 import androidx.test.platform.app.InstrumentationRegistry
+import app.cash.turbine.test
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Rule
-import org.junit.Test
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.coroutines.test
 import java.io.File
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 /**
  * Tests for [AndroidBusStopDatabase].
@@ -52,16 +51,12 @@ import java.io.File
  * @author Niall Scott
  */
 @SdkSuppress(minSdkVersion = Build.VERSION_CODES.P) // Because Mockk.
-@OptIn(ExperimentalCoroutinesApi::class)
 class AndroidBusStopDatabaseTest {
 
     companion object {
 
         private const val DATABASE_NAME = "busstops10.db"
     }
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @get:Rule
     val mockkRule = MockKRule(this)
@@ -79,15 +74,16 @@ class AndroidBusStopDatabaseTest {
         coEvery { downloadedDatabasePreparer.prepareDownloadedDatabase(testDb) } returns false
         val database = createDatabase()
 
-        val isDatabaseOpenObserver = database.isDatabaseOpenFlow.test(this)
-        val result = database.replaceDatabase(testDb)
-        isDatabaseOpenObserver.finish()
+        database.isDatabaseOpenFlow.test {
+            val result = database.replaceDatabase(testDb)
 
-        assertFalse(result)
+            assertFalse(result)
+            assertTrue(awaitItem())
+            ensureAllEventsConsumed()
+        }
         verify(exactly = 1) {
             testDb.delete()
         }
-        isDatabaseOpenObserver.assertValues(true)
     }
 
     @Test
@@ -101,13 +97,15 @@ class AndroidBusStopDatabaseTest {
         coEvery { downloadedDatabasePreparer.prepareDownloadedDatabase(testDb) } returns true
         val database = createDatabase()
 
-        val isDatabaseOpenObserver = database.isDatabaseOpenFlow.test(this)
-        advanceUntilIdle()
-        val result = database.replaceDatabase(testDb)
-        advanceUntilIdle()
-        isDatabaseOpenObserver.finish()
+        database.isDatabaseOpenFlow.test {
+            val result = database.replaceDatabase(testDb)
 
-        assertTrue(result)
+            assertTrue(result)
+            assertTrue(awaitItem())
+            assertFalse(awaitItem())
+            assertTrue(awaitItem())
+            ensureAllEventsConsumed()
+        }
         verify(exactly = 1) {
             existingDb.close()
         }
@@ -117,16 +115,16 @@ class AndroidBusStopDatabaseTest {
         verify(exactly = 1) {
             testDb.renameTo(context.getDatabasePath(DATABASE_NAME))
         }
-        isDatabaseOpenObserver.assertValues(true, false, true)
     }
 
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
 
-    private fun createDatabase(): AndroidBusStopDatabase {
+    private fun TestScope.createDatabase(): AndroidBusStopDatabase {
         return AndroidBusStopDatabase(
             context,
             databaseFactory,
             downloadedDatabasePreparer,
-            coroutineRule.testDispatcher)
+            StandardTestDispatcher(testScheduler)
+        )
     }
 }

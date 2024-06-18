@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,7 +41,8 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class IsMyLocationEnabledDetector @Inject constructor(
-        private val locationRepository: LocationRepository) {
+    private val locationRepository: LocationRepository
+) {
 
     /**
      * Get a [Flow] which emits whether the My Location feature should be enabled or not.
@@ -50,12 +51,13 @@ class IsMyLocationEnabledDetector @Inject constructor(
      * @return A [Flow] which emits whether the My Location feature should be enabled or not.
      */
     fun getIsMyLocationFeatureEnabledFlow(
-            permissionStateFlow: Flow<PermissionsState>): Flow<Boolean> {
+            permissionStateFlow: Flow<PermissionsState>
+    ): Flow<Boolean> {
         return if (locationRepository.hasLocationFeature) {
             permissionStateFlow.combine(
-                    locationRepository.isLocationEnabledFlow,
-                    this::calculateIsMyLocationFeatureEnabled)
-                    .distinctUntilChanged()
+                locationRepository.isLocationEnabledFlow,
+                this::calculateIsMyLocationFeatureEnabled)
+                .distinctUntilChanged()
         } else {
             flowOf(false)
         }
@@ -71,8 +73,8 @@ class IsMyLocationEnabledDetector @Inject constructor(
      */
     private fun calculateIsMyLocationFeatureEnabled(
             permissionState: PermissionsState,
-            isLocationEnabled: Boolean) =
-            isLocationEnabled &&
-                    (permissionState.coarseLocationPermission == PermissionState.GRANTED ||
-                            permissionState.fineLocationPermission == PermissionState.GRANTED)
+            isLocationEnabled: Boolean
+    ) = isLocationEnabled &&
+            (permissionState.coarseLocationPermission == PermissionState.GRANTED ||
+                    permissionState.fineLocationPermission == PermissionState.GRANTED)
 }

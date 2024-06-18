@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,7 +45,8 @@ import javax.inject.Singleton
 internal class RoomBusStopDatabaseFactory @Inject constructor(
     private val context: Context,
     private val migration1To2: Migration1To2,
-    private val bundledDatabaseOpenHelperFactory: BundledDatabaseOpenHelperFactory) {
+    private val bundledDatabaseOpenHelperFactory: BundledDatabaseOpenHelperFactory
+) {
 
     /**
      * Create an instance of [RoomBusStopDatabase].
@@ -58,7 +59,8 @@ internal class RoomBusStopDatabaseFactory @Inject constructor(
      */
     fun createRoomBusStopDatabase(
         databaseName: String,
-        allowAssetExtraction: Boolean): RoomBusStopDatabase {
+        allowAssetExtraction: Boolean
+    ): RoomBusStopDatabase {
         val builder = Room.databaseBuilder(context, RoomBusStopDatabase::class.java, databaseName)
             .addMigrations(migration1To2)
 

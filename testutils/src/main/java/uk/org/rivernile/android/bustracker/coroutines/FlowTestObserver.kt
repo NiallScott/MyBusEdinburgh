@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,19 +29,8 @@ package uk.org.rivernile.android.bustracker.coroutines
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-
-/**
- * Enable testing on a [Flow] object.
- *
- * @param T The type of data the [Flow] emits.
- * @param scope The [CoroutineScope] to execute the [Flow] under.
- * @return A [FlowTestObserver] for the given [Flow].
- */
-fun <T> Flow<T>.test(scope: CoroutineScope): FlowTestObserver<T> = FlowTestObserver(scope, this)
 
 /**
  * This is used to aid in the testing of [Flow] objects.
@@ -53,8 +42,9 @@ fun <T> Flow<T>.test(scope: CoroutineScope): FlowTestObserver<T> = FlowTestObser
  * @param flow The [Flow] that is being tested.
  */
 class FlowTestObserver<T>(
-        private val scope: CoroutineScope,
-        flow: Flow<T>? = null) {
+    private val scope: CoroutineScope,
+    flow: Flow<T>? = null
+) {
 
     private val values = mutableListOf<T>()
 
@@ -81,15 +71,6 @@ class FlowTestObserver<T>(
         } else {
             throw IllegalStateException("Already observing a Flow.")
         }
-    }
-
-    /**
-     * Assert that a [Flow] has never emitted any values.
-     */
-    fun assertNoValues(): FlowTestObserver<T> {
-        assertTrue(values.isEmpty())
-
-        return this
     }
 
     /**

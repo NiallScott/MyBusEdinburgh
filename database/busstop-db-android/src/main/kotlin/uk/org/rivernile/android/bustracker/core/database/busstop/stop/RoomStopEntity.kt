@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -47,8 +47,10 @@ import androidx.room.PrimaryKey
     indices = [
         Index(
             name = "bus_stop_index",
-            value = [ "stopCode" ])
-    ])
+            value = [ "stopCode" ]
+        )
+    ]
+)
 internal data class RoomStopEntity(
     @PrimaryKey val id: Int,
     val stopCode: String,
@@ -56,4 +58,5 @@ internal data class RoomStopEntity(
     val latitude: Double?,
     val longitude: Double?,
     val orientation: Int?,
-    val locality: String?)
+    val locality: String?
+)

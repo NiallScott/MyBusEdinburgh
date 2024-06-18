@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -78,7 +78,8 @@ internal class PreferenceModule {
     @Singleton
     fun providePreferencesDataStore(
         context: Context,
-        exceptionLogger: ExceptionLogger): DataStore<Preferences> {
+        exceptionLogger: ExceptionLogger
+    ): DataStore<Preferences> {
         return PreferenceDataStoreFactory.create(
             corruptionHandler = ReplaceFileCorruptionHandler {
                 exceptionLogger.log(it)
@@ -88,7 +89,9 @@ internal class PreferenceModule {
                 SharedPreferencesMigration(
                     context,
                     SHARED_PREFERENCES_NAME,
-                    keysToMigrate)),
+                    keysToMigrate
+                )
+            ),
             produceFile = { context.preferencesDataStoreFile(DATA_STORE_PREFERENCES_NAME) }
         )
     }
@@ -108,8 +111,10 @@ internal class PreferenceModule {
         PREF_MAP_LAST_LATITUDE,
         PREF_MAP_LAST_LONGITUDE,
         PREF_MAP_LAST_ZOOM,
-        PREF_MAP_LAST_MAP_TYPE)
+        PREF_MAP_LAST_MAP_TYPE
+    )
 
+    @Suppress("unused")
     @InstallIn(SingletonComponent::class)
     @Module
     interface Bindings {
@@ -117,6 +122,7 @@ internal class PreferenceModule {
         @Suppress("unused")
         @Binds
         fun bindPreferenceDataStorage(
-            androidPreferenceDataStorage: AndroidPreferenceDataStorage): PreferenceDataStorage
+            androidPreferenceDataStorage: AndroidPreferenceDataStorage
+        ): PreferenceDataStorage
     }
 }

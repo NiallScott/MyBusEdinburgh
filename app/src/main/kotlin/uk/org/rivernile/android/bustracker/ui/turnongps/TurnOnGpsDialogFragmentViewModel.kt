@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,6 +34,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForViewModelCoroutineScope
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import javax.inject.Inject
@@ -44,13 +45,16 @@ import javax.inject.Inject
  * @param preferenceRepository The preference repository.
  * @param applicationCoroutineScope The application [CoroutineScope].
  * @param defaultDispatcher The default [CoroutineDispatcher].
+ * @param viewModelCoroutineScope The [ViewModel] [CoroutineScope].
  * @author Niall Scott
  */
 @HiltViewModel
 class TurnOnGpsDialogFragmentViewModel @Inject constructor(
     private val preferenceRepository: PreferenceRepository,
     @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
-    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
+    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
+    @ForViewModelCoroutineScope private val viewModelCoroutineScope: CoroutineScope
+) : ViewModel(viewModelCoroutineScope) {
 
     /**
      * This [LiveData] is fired when the user should be presented with the system location settings

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,9 +27,6 @@
 package uk.org.rivernile.android.bustracker.core.alerts.proximity
 
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -40,7 +37,8 @@ import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.alerts.AlertNotificationDispatcher
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.alerts.ProximityAlert
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 /**
  * Tests for [AreaEnteredHandler].
@@ -49,9 +47,6 @@ import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
  */
 @RunWith(MockitoJUnitRunner::class)
 class AreaEnteredHandlerTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var alertsRepository: AlertsRepository
@@ -62,12 +57,13 @@ class AreaEnteredHandlerTest {
 
     private lateinit var handler: AreaEnteredHandler
 
-    @Before
+    @BeforeTest
     fun setUp() {
         handler = AreaEnteredHandler(
             alertsRepository,
             geofencingManager,
-            notificationDispatcher)
+            notificationDispatcher
+        )
     }
 
     @Test

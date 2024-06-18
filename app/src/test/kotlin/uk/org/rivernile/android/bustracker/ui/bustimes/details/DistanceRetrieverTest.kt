@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,48 +26,41 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.details
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
+import app.cash.turbine.test
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopDetails
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopLocation
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopName
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopLocation
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
 import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.coroutines.test
+import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [DistanceRetriever].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class DistanceRetrieverTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var locationRepository: LocationRepository
 
     private lateinit var retriever: DistanceRetriever
 
-    @Before
+    @BeforeTest
     fun setUp() {
         retriever = DistanceRetriever(locationRepository)
     }
@@ -78,27 +71,24 @@ class DistanceRetrieverTest {
         val stopDetailsFlow = flowOf(stopDetails)
         givenHasLocationFeatureState(false)
 
-        val observer = retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow)
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiItem.Distance.NoLocationFeature)
+        retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow).test {
+            assertEquals(UiItem.Distance.NoLocationFeature, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun createDistanceFlowWithoutLocationPermissionsEmitsPermissionDenied() = runTest {
         val permissionsStateFlow = flowOf(
-                PermissionsState(PermissionState.DENIED, PermissionState.UNGRANTED))
+            PermissionsState(PermissionState.DENIED, PermissionState.UNGRANTED)
+        )
         val stopDetailsFlow = flowOf(stopDetails)
         givenHasLocationFeatureState(true)
 
-        val observer = retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow)
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiItem.Distance.PermissionDenied)
+        retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow).test {
+            assertEquals(UiItem.Distance.PermissionDenied, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -107,14 +97,12 @@ class DistanceRetrieverTest {
         val stopDetailsFlow = flowOf(stopDetails)
         givenHasLocationFeatureState(true)
         whenever(locationRepository.isLocationEnabledFlow)
-                .thenReturn(flowOf(false))
+            .thenReturn(flowOf(false))
 
-        val observer = retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow)
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiItem.Distance.LocationOff)
+        retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow).test {
+            assertEquals(UiItem.Distance.LocationOff, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -123,16 +111,14 @@ class DistanceRetrieverTest {
         val stopDetailsFlow = flowOf<StopDetails?>(null)
         givenHasLocationFeatureState(true)
         whenever(locationRepository.isLocationEnabledFlow)
-                .thenReturn(flowOf(true))
+            .thenReturn(flowOf(true))
         whenever(locationRepository.userVisibleLocationFlow)
-                .thenReturn(flowOf(DeviceLocation(9.0, 8.0)))
+            .thenReturn(flowOf(DeviceLocation(9.0, 8.0)))
 
-        val observer = retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow)
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiItem.Distance.Unknown)
+        retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow).test {
+            assertEquals(UiItem.Distance.Unknown, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -141,16 +127,14 @@ class DistanceRetrieverTest {
         val stopDetailsFlow = flowOf<StopDetails?>(stopDetails)
         givenHasLocationFeatureState(true)
         whenever(locationRepository.isLocationEnabledFlow)
-                .thenReturn(flowOf(true))
+            .thenReturn(flowOf(true))
         whenever(locationRepository.userVisibleLocationFlow)
-                .thenReturn(emptyFlow())
+            .thenReturn(emptyFlow())
 
-        val observer = retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow)
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiItem.Distance.Unknown)
+        retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow).test {
+            assertEquals(UiItem.Distance.Unknown, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -159,20 +143,20 @@ class DistanceRetrieverTest {
         val stopDetailsFlow = flowOf<StopDetails?>(stopDetails)
         givenHasLocationFeatureState(true)
         whenever(locationRepository.isLocationEnabledFlow)
-                .thenReturn(flowOf(true))
+            .thenReturn(flowOf(true))
         whenever(locationRepository.userVisibleLocationFlow)
-                .thenReturn(flowOf(DeviceLocation(9.0, 8.0)))
-        whenever(locationRepository.distanceBetween(
+            .thenReturn(flowOf(DeviceLocation(9.0, 8.0)))
+        whenever(locationRepository
+            .distanceBetween(
                 DeviceLocation(9.0, 8.0),
-                DeviceLocation(1.0, 2.0)))
-                .thenReturn(-1f)
+                DeviceLocation(1.0, 2.0)
+            )
+        ).thenReturn(-1f)
 
-        val observer = retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow)
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiItem.Distance.Unknown)
+        retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow).test {
+            assertEquals(UiItem.Distance.Unknown, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -181,22 +165,21 @@ class DistanceRetrieverTest {
         val stopDetailsFlow = flowOf<StopDetails?>(stopDetails)
         givenHasLocationFeatureState(true)
         whenever(locationRepository.isLocationEnabledFlow)
-                .thenReturn(flowOf(true))
+            .thenReturn(flowOf(true))
         whenever(locationRepository.userVisibleLocationFlow)
-                .thenReturn(flowOf(DeviceLocation(9.0, 8.0)))
-        whenever(locationRepository.distanceBetween(
+            .thenReturn(flowOf(DeviceLocation(9.0, 8.0)))
+        whenever(locationRepository
+            .distanceBetween(
                 DeviceLocation(9.0, 8.0),
-                DeviceLocation(1.0, 2.0)))
-                .thenReturn(0f)
+                DeviceLocation(1.0, 2.0)
+            )
+        ).thenReturn(0f)
 
-        val observer = retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow)
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-                UiItem.Distance.Unknown,
-                UiItem.Distance.Known(0f))
+        retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow).test {
+            assertEquals(UiItem.Distance.Unknown, awaitItem())
+            assertEquals(UiItem.Distance.Known(0f), awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -205,95 +188,73 @@ class DistanceRetrieverTest {
         val stopDetailsFlow = flowOf<StopDetails?>(stopDetails)
         givenHasLocationFeatureState(true)
         whenever(locationRepository.isLocationEnabledFlow)
-                .thenReturn(flowOf(true))
+            .thenReturn(flowOf(true))
         whenever(locationRepository.userVisibleLocationFlow)
-                .thenReturn(flowOf(DeviceLocation(9.0, 8.0)))
-        whenever(locationRepository.distanceBetween(
+            .thenReturn(flowOf(DeviceLocation(9.0, 8.0)))
+        whenever(locationRepository
+            .distanceBetween(
                 DeviceLocation(9.0, 8.0),
-                DeviceLocation(1.0, 2.0)))
-                .thenReturn(5200f)
+                DeviceLocation(1.0, 2.0)
+            )
+        ).thenReturn(5200f)
 
-        val observer = retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow)
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-                UiItem.Distance.Unknown,
-                UiItem.Distance.Known(5.2f))
+        retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow).test {
+            assertEquals(UiItem.Distance.Unknown, awaitItem())
+            assertEquals(UiItem.Distance.Known(5.2f), awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun createDistanceFlowWithRepresentativeExample() = runTest {
-        val permissionsStateFlow = flow {
-            emit(PermissionsState(PermissionState.DENIED, PermissionState.UNGRANTED))
-            delay(100L)
-            emit(grantedPermissionsState)
-        }
+        val permissionsStateFlow = intervalFlowOf(
+            0L,
+            100L,
+            PermissionsState(PermissionState.DENIED, PermissionState.UNGRANTED),
+            grantedPermissionsState
+        )
         givenHasLocationFeatureState(true)
         whenever(locationRepository.isLocationEnabledFlow)
-                .thenReturn(flow {
-                    emit(false)
-                    delay(200L)
-                    emit(true)
-                })
-        val stopDetailsFlow = flow {
-            emit(null)
-            delay(300L)
-            emit(stopDetails)
-        }
+            .thenReturn(intervalFlowOf(0L, 200L, false, true))
+        val stopDetailsFlow = intervalFlowOf(0L, 300L, null, stopDetails)
         whenever(locationRepository.userVisibleLocationFlow)
-                .thenReturn(flow {
-                    delay(400L)
-                    emit(DeviceLocation(9.0, 8.0))
-                })
-        whenever(locationRepository.distanceBetween(
+            .thenReturn(
+                intervalFlowOf(0L, 400L, DeviceLocation(9.0, 8.0))
+            )
+        whenever(locationRepository
+            .distanceBetween(
                 DeviceLocation(9.0, 8.0),
-                DeviceLocation(1.0, 2.0)))
-                .thenReturn(5200f)
+                DeviceLocation(1.0, 2.0)
+            )
+        ).thenReturn(5200f)
 
-        val observer = retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow)
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-                UiItem.Distance.PermissionDenied,
-                UiItem.Distance.LocationOff,
-                UiItem.Distance.Unknown,
-                UiItem.Distance.Known(5.2f))
+        retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow).test {
+            assertEquals(UiItem.Distance.PermissionDenied, awaitItem())
+            assertEquals(UiItem.Distance.LocationOff, awaitItem())
+            assertEquals(UiItem.Distance.Unknown, awaitItem())
+            assertEquals(UiItem.Distance.Known(5.2f), awaitItem())
+            awaitComplete()
+        }
     }
 
     private fun givenHasLocationFeatureState(hasLocationFeature: Boolean) {
         whenever(locationRepository.hasLocationFeature)
-                .thenReturn(hasLocationFeature)
+            .thenReturn(hasLocationFeature)
     }
 
     private val grantedPermissionsState get() =
         PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED)
 
-    private val stopDetails get() = MockStopDetails(
+    private val stopDetails get() = FakeStopDetails(
         "123456",
-        MockStopName(
+        FakeStopName(
             "Name",
-            "Locality"),
-        MockStopLocation(
+            "Locality"
+        ),
+        FakeStopLocation(
             1.0,
-            2.0),
-        StopOrientation.EAST)
-
-    private data class MockStopName(
-        override val name: String,
-        override val locality: String?) : StopName
-
-    private data class MockStopLocation(
-        override val latitude: Double,
-        override val longitude: Double) : StopLocation
-
-    private data class MockStopDetails(
-        override val stopCode: String,
-        override val stopName: StopName,
-        override val location: StopLocation,
-        override val orientation: StopOrientation
-    ) : StopDetails
+            2.0
+        ),
+        StopOrientation.EAST
+    )
 }

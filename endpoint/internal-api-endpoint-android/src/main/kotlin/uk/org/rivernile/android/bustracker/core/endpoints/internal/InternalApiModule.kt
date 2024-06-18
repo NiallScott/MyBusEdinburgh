@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,8 +38,10 @@ import uk.org.rivernile.android.bustracker.core.endpoints.twitter.di.TwitterModu
  * @author Niall Scott
  */
 @InstallIn(SingletonComponent::class)
-@Module(includes = [
-    ApiModule::class,
-    TwitterModule::class
-])
+@Module(
+    includes = [
+        ApiModule::class,
+        TwitterModule::class
+    ]
+)
 internal interface InternalApiModule

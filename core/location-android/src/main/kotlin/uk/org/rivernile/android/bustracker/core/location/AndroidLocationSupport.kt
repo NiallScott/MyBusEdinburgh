@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -55,8 +55,8 @@ internal class AndroidLocationSupport @Inject constructor(
     private val context: Context,
     private val packageManager: PackageManager,
     private val locationManager: LocationManager,
-    private val isLocationEnabledFetcher: IsLocationEnabledFetcher)
-    : HasLocationFeatureDetector, IsLocationEnabledDetector, DistanceCalculator {
+    private val isLocationEnabledFetcher: IsLocationEnabledFetcher
+) : HasLocationFeatureDetector, IsLocationEnabledDetector, DistanceCalculator {
 
     override val hasLocationFeature get() =
         packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION)
@@ -79,8 +79,10 @@ internal class AndroidLocationSupport @Inject constructor(
             }
         }
 
-        context.registerReceiver(locationEnabledReceiver,
-            IntentFilter(LocationManager.MODE_CHANGED_ACTION))
+        context.registerReceiver(
+            locationEnabledReceiver,
+            IntentFilter(LocationManager.MODE_CHANGED_ACTION)
+        )
         getAndSendIsLocationEnabled(channel)
 
         awaitClose {
@@ -98,7 +100,8 @@ internal class AndroidLocationSupport @Inject constructor(
             first.longitude,
             second.latitude,
             second.longitude,
-            results)
+            results
+        )
 
         return results[0]
     }

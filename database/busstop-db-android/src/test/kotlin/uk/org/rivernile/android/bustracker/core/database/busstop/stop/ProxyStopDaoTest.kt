@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,13 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import app.cash.turbine.test
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -40,21 +36,18 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopDatabase
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [ProxyStopDao].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class ProxyStopDaoTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var database: AndroidBusStopDatabase
@@ -64,7 +57,7 @@ class ProxyStopDaoTest {
 
     private lateinit var dao: ProxyStopDao
 
-    @Before
+    @BeforeTest
     fun setUp() {
         dao = ProxyStopDao(database)
 
@@ -81,13 +74,14 @@ class ProxyStopDaoTest {
         whenever(roomStopDao.getNameForStopFlow("123456"))
             .thenReturn(
                 flowOf(first),
-                flowOf(second))
+                flowOf(second)
+            )
 
-        val observer = dao.getNameForStopFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(first, second)
+        dao.getNameForStopFlow("123456").test {
+            assertEquals(first, awaitItem())
+            assertEquals(second, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -99,13 +93,14 @@ class ProxyStopDaoTest {
         whenever(roomStopDao.getLocationForStopFlow("123456"))
             .thenReturn(
                 flowOf(first),
-                flowOf(second))
+                flowOf(second)
+            )
 
-        val observer = dao.getLocationForStopFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(first, second)
+        dao.getLocationForStopFlow("123456").test {
+            assertEquals(first, awaitItem())
+            assertEquals(second, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -117,13 +112,14 @@ class ProxyStopDaoTest {
         whenever(roomStopDao.getStopDetailsFlow("123456"))
             .thenReturn(
                 flowOf(first),
-                flowOf(second))
+                flowOf(second)
+            )
 
-        val observer = dao.getStopDetailsFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(first, second)
+        dao.getStopDetailsFlow("123456").test {
+            assertEquals(first, awaitItem())
+            assertEquals(second, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -135,13 +131,14 @@ class ProxyStopDaoTest {
         whenever(roomStopDao.getStopDetailsFlow(setOf("123456")))
             .thenReturn(
                 flowOf(first),
-                flowOf(second))
+                flowOf(second)
+            )
 
-        val observer = dao.getStopDetailsFlow(setOf("123456")).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(first, second)
+        dao.getStopDetailsFlow(setOf("123456")).test {
+            assertEquals(first, awaitItem())
+            assertEquals(second, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -153,13 +150,14 @@ class ProxyStopDaoTest {
         whenever(roomStopDao.getStopDetailsWithServiceFilterFlow(setOf("1")))
             .thenReturn(
                 flowOf(first),
-                flowOf(second))
+                flowOf(second)
+            )
 
-        val observer = dao.getStopDetailsWithServiceFilterFlow(setOf("1")).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(first, second)
+        dao.getStopDetailsWithServiceFilterFlow(setOf("1")).test {
+            assertEquals(first, awaitItem())
+            assertEquals(second, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -175,13 +173,14 @@ class ProxyStopDaoTest {
             any()))
             .thenReturn(
                 flowOf(first),
-                flowOf(second))
+                flowOf(second)
+            )
 
-        val observer = dao.getStopDetailsWithinSpanFlow(1.1, 2.2, 3.3, 4.4).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(first, second)
+        dao.getStopDetailsWithinSpanFlow(1.1, 2.2, 3.3, 4.4).test {
+            assertEquals(first, awaitItem())
+            assertEquals(second, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -198,13 +197,14 @@ class ProxyStopDaoTest {
             any()))
             .thenReturn(
                 flowOf(first),
-                flowOf(second))
+                flowOf(second)
+            )
 
-        val observer = dao.getStopDetailsWithinSpanFlow(1.1, 2.2, 3.3, 4.4, setOf("1")).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(first, second)
+        dao.getStopDetailsWithinSpanFlow(1.1, 2.2, 3.3, 4.4, setOf("1")).test {
+            assertEquals(first, awaitItem())
+            assertEquals(second, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -216,12 +216,13 @@ class ProxyStopDaoTest {
         whenever(roomStopDao.getStopSearchResultsFlow("abc123"))
             .thenReturn(
                 flowOf(first),
-                flowOf(second))
+                flowOf(second)
+            )
 
-        val observer = dao.getStopSearchResultsFlow("abc123").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(first, second)
+        dao.getStopSearchResultsFlow("abc123").test {
+            assertEquals(first, awaitItem())
+            assertEquals(second, awaitItem())
+            awaitComplete()
+        }
     }
 }

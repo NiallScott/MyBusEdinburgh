@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,10 +30,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.SerializationException
 import okhttp3.ResponseBody.Companion.toResponseBody
 import okio.IOException
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -48,7 +44,9 @@ import uk.org.rivernile.android.bustracker.core.endpoints.twitter.LatestTweetsRe
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [ApiTwitterEndpoint].
@@ -62,9 +60,6 @@ class ApiTwitterEndpointTest {
 
         private const val MOCK_API_KEY = "apiKey"
     }
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var twitterService: TwitterService
@@ -80,15 +75,16 @@ class ApiTwitterEndpointTest {
 
     private lateinit var endpoint: ApiTwitterEndpoint
 
-    @Before
+    @BeforeTest
     fun setUp() {
         endpoint = ApiTwitterEndpoint(
-                twitterService,
-                connectivityRepository,
-                apiKeyGenerator,
-                appName,
-                tweetsMapper,
-                exceptionLogger)
+            twitterService,
+            connectivityRepository,
+            apiKeyGenerator,
+            appName,
+            tweetsMapper,
+            exceptionLogger
+        )
     }
 
     @Test
@@ -108,7 +104,7 @@ class ApiTwitterEndpointTest {
         givenHasGeneratedHashedApiKey()
         val exception = IOException()
         whenever(twitterService.getLatestTweets(MOCK_API_KEY, appName))
-                .thenAnswer { throw exception }
+            .thenAnswer { throw exception }
 
         val result = endpoint.getLatestTweets()
 
@@ -137,7 +133,7 @@ class ApiTwitterEndpointTest {
         givenHasInternetConnectivity(true)
         givenHasGeneratedHashedApiKey()
         whenever(twitterService.getLatestTweets(MOCK_API_KEY, appName))
-                .thenReturn(Response.error(500, "Server error".toResponseBody()))
+            .thenReturn(Response.error(500, "Server error".toResponseBody()))
 
         val result = endpoint.getLatestTweets()
 
@@ -151,7 +147,7 @@ class ApiTwitterEndpointTest {
         givenHasInternetConnectivity(true)
         givenHasGeneratedHashedApiKey()
         whenever(twitterService.getLatestTweets(MOCK_API_KEY, appName))
-                .thenReturn(Response.error(401, "Unauthorized".toResponseBody()))
+            .thenReturn(Response.error(401, "Unauthorized".toResponseBody()))
 
         val result = endpoint.getLatestTweets()
 
@@ -165,9 +161,9 @@ class ApiTwitterEndpointTest {
         givenHasInternetConnectivity(true)
         givenHasGeneratedHashedApiKey()
         whenever(tweetsMapper.mapTweets(null))
-                .thenReturn(null)
+            .thenReturn(null)
         whenever(twitterService.getLatestTweets(MOCK_API_KEY, appName))
-                .thenReturn(Response.success(null))
+            .thenReturn(Response.success(null))
 
         val result = endpoint.getLatestTweets()
 
@@ -181,9 +177,9 @@ class ApiTwitterEndpointTest {
         givenHasInternetConnectivity(true)
         givenHasGeneratedHashedApiKey()
         whenever(tweetsMapper.mapTweets(emptyList()))
-                .thenReturn(null)
+            .thenReturn(null)
         whenever(twitterService.getLatestTweets(MOCK_API_KEY, appName))
-                .thenReturn(Response.success(emptyList()))
+            .thenReturn(Response.success(emptyList()))
 
         val result = endpoint.getLatestTweets()
 
@@ -199,9 +195,9 @@ class ApiTwitterEndpointTest {
         val jsonTweets = listOf<JsonTweet>(mock(), mock(), mock())
         val tweets = listOf<Tweet>(mock(), mock(), mock())
         whenever(tweetsMapper.mapTweets(jsonTweets))
-                .thenReturn(tweets)
+            .thenReturn(tweets)
         whenever(twitterService.getLatestTweets(MOCK_API_KEY, appName))
-                .thenReturn(Response.success(jsonTweets))
+            .thenReturn(Response.success(jsonTweets))
 
         val result = endpoint.getLatestTweets()
 
@@ -212,11 +208,11 @@ class ApiTwitterEndpointTest {
 
     private fun givenHasInternetConnectivity(hasInternetConnectivity: Boolean) {
         whenever(connectivityRepository.hasInternetConnectivity)
-                .thenReturn(hasInternetConnectivity)
+            .thenReturn(hasInternetConnectivity)
     }
 
     private fun givenHasGeneratedHashedApiKey() {
         whenever(apiKeyGenerator.generateHashedApiKey())
-                .thenReturn(MOCK_API_KEY)
+            .thenReturn(MOCK_API_KEY)
     }
 }

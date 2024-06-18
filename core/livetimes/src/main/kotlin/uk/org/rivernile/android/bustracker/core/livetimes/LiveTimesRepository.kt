@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,7 +41,8 @@ import javax.inject.Inject
  */
 class LiveTimesRepository @Inject internal constructor(
     private val trackerEndpoint: TrackerEndpoint,
-    private val liveTimesMapper: LiveTimesMapper) {
+    private val liveTimesMapper: LiveTimesMapper
+) {
 
     /**
      * Get a [Flow] object which contains the [LiveTimesResult] of loading [LiveTimes].
@@ -52,7 +53,8 @@ class LiveTimesRepository @Inject internal constructor(
      */
     fun getLiveTimesFlow(
         stopCode: String,
-        numberOfDepartures: Int): Flow<LiveTimesResult> = flow {
+        numberOfDepartures: Int
+    ): Flow<LiveTimesResult> = flow {
         emit(LiveTimesResult.InProgress)
         emit(fetchLiveTimes(stopCode, numberOfDepartures))
     }
@@ -67,8 +69,10 @@ class LiveTimesRepository @Inject internal constructor(
      */
     private suspend fun fetchLiveTimes(
         stopCode: String,
-        numberOfDepartures: Int): LiveTimesResult {
+        numberOfDepartures: Int
+    ): LiveTimesResult {
         return liveTimesMapper.mapToLiveTimesResult(
-            trackerEndpoint.getLiveTimes(stopCode, numberOfDepartures))
+            trackerEndpoint.getLiveTimes(stopCode, numberOfDepartures)
+        )
     }
 }

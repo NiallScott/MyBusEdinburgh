@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,7 +46,8 @@ import javax.inject.Inject
  */
 internal class AndroidPreferenceDataStorage @Inject constructor(
     private val dataStoreSource: PreferenceDataStoreSource,
-    private val exceptionLogger: ExceptionLogger) : PreferenceDataStorage {
+    private val exceptionLogger: ExceptionLogger
+) : PreferenceDataStorage {
 
     companion object {
 
@@ -110,7 +111,8 @@ internal class AndroidPreferenceDataStorage @Inject constructor(
             AlertNotificationPreferences(
                 hasSound = it[keyAlertSound] ?: DEFAULT_ALERT_SOUND,
                 hasVibration = it[keyAlertVibrate] ?: DEFAULT_ALERT_VIBRATE,
-                hasLedFlash = it[keyAlertLed] ?: DEFAULT_ALERT_LED)
+                hasLedFlash = it[keyAlertLed] ?: DEFAULT_ALERT_LED
+            )
         }
         .distinctUntilChanged()
 
@@ -173,14 +175,16 @@ internal class AndroidPreferenceDataStorage @Inject constructor(
                 LastMapCameraLocation(
                     latitude = it[keyMapLastLatitude]?.toDouble() ?: DEFAULT_LATITUDE,
                     longitude = it[keyMapLastLongitude]?.toDouble() ?: DEFAULT_LONGITUDE,
-                    zoomLevel = zoom)
+                    zoomLevel = zoom
+                )
             } catch (e: NumberFormatException) {
                 exceptionLogger.log(e)
 
                 LastMapCameraLocation(
                     latitude = DEFAULT_LATITUDE,
                     longitude = DEFAULT_LONGITUDE,
-                    zoomLevel = zoom)
+                    zoomLevel = zoom
+                )
             }
         }
         .distinctUntilChanged()

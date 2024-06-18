@@ -200,13 +200,13 @@ dependencies {
     implementation(libs.picasso)
 
     // Test dependencies
-    androidTestImplementation(project(":testutils"))
+    androidTestImplementation(testFixtures(project(":core:feature")))
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.androidx.fragment.testing)
     androidTestImplementation(libs.androidx.test.espresso)
     androidTestImplementation(libs.androidx.test.espresso.intents)
-    androidTestImplementation(libs.mockito.android)
+    androidTestImplementation(libs.kotlin.test.junit)
 
     testImplementation(testFixtures(project(":database:busstop-db-core")))
     testImplementation(project(":testutils"))

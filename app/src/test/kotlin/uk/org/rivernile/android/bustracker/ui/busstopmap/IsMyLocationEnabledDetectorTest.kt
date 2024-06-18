@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,150 +26,116 @@
 
 package uk.org.rivernile.android.bustracker.ui.busstopmap
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import app.cash.turbine.test
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 /**
  * Tests for [IsMyLocationEnabledDetector].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class IsMyLocationEnabledDetectorTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var locationRepository: LocationRepository
 
     private lateinit var  detector: IsMyLocationEnabledDetector
 
-    @Before
+    @BeforeTest
     fun setUp() {
         detector = IsMyLocationEnabledDetector(locationRepository)
     }
 
     @Test
-    fun getIsMyLocationFeatureEnabledFlowEmitsFalseWhenDoesNotHaveLocationFeature()  {
-        runTest(UnconfinedTestDispatcher()) {
-            whenever(locationRepository.hasLocationFeature)
-                    .thenReturn(false)
-            val permissionsState = PermissionsState(
-                    PermissionState.GRANTED,
-                    PermissionState.GRANTED)
+    fun getIsMyLocationFeatureEnabledFlowEmitsFalseWhenDoesNotHaveLocationFeature() = runTest  {
+        whenever(locationRepository.hasLocationFeature)
+            .thenReturn(false)
+        val permissionsState = PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED)
 
-            val observer = detector.getIsMyLocationFeatureEnabledFlow(flowOf(permissionsState))
-                    .test(this)
-            observer.finish()
-
-            observer.assertValues(false)
+        detector.getIsMyLocationFeatureEnabledFlow(flowOf(permissionsState)).test {
+            assertFalse(awaitItem())
+            awaitComplete()
         }
     }
 
     @Test
-    fun getIsMyLocationFeatureEnabledFlowEmitsFalseWhenLocationIsNotEnabled()  {
-        runTest(UnconfinedTestDispatcher()) {
-            givenHasLocationFeature()
-            whenever(locationRepository.isLocationEnabledFlow)
-                    .thenReturn(flowOf(false))
-            val permissionsState = PermissionsState(
-                    PermissionState.GRANTED,
-                    PermissionState.GRANTED)
+    fun getIsMyLocationFeatureEnabledFlowEmitsFalseWhenLocationIsNotEnabled() = runTest  {
+        givenHasLocationFeature()
+        whenever(locationRepository.isLocationEnabledFlow)
+            .thenReturn(flowOf(false))
+        val permissionsState = PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED)
 
-            val observer = detector.getIsMyLocationFeatureEnabledFlow(flowOf(permissionsState))
-                    .test(this)
-            observer.finish()
-
-            observer.assertValues(false)
+        detector.getIsMyLocationFeatureEnabledFlow(flowOf(permissionsState)).test {
+            assertFalse(awaitItem())
+            awaitComplete()
         }
     }
 
     @Test
-    fun getIsMyLocationFeatureEnabledFlowEmitsFalseWhenDoesNotHaveAnyLocationPermission()  {
-        runTest(UnconfinedTestDispatcher()) {
-            givenHasLocationFeature()
-            whenever(locationRepository.isLocationEnabledFlow)
-                    .thenReturn(flowOf(true))
-            val permissionsState = PermissionsState(
-                    PermissionState.UNGRANTED,
-                    PermissionState.UNGRANTED)
+    fun getIsMyLocationFeatureEnabledFlowEmitsFalseWhenDoesNotHaveAnyLocationPermission() = runTest  {
+        givenHasLocationFeature()
+        whenever(locationRepository.isLocationEnabledFlow)
+            .thenReturn(flowOf(true))
+        val permissionsState = PermissionsState(
+                PermissionState.UNGRANTED,
+                PermissionState.UNGRANTED
+        )
 
-            val observer = detector.getIsMyLocationFeatureEnabledFlow(flowOf(permissionsState))
-                    .test(this)
-            observer.finish()
-
-            observer.assertValues(false)
+        detector.getIsMyLocationFeatureEnabledFlow(flowOf(permissionsState)).test {
+            assertFalse(awaitItem())
+            awaitComplete()
         }
     }
 
     @Test
-    fun getIsMyLocationFeatureEnabledFlowEmitsTrueWhenHasCoarseLocationPermission()  {
-        runTest(UnconfinedTestDispatcher()) {
-            givenHasLocationFeature()
-            whenever(locationRepository.isLocationEnabledFlow)
-                    .thenReturn(flowOf(true))
-            val permissionsState = PermissionsState(
-                    PermissionState.UNGRANTED,
-                    PermissionState.GRANTED)
+    fun getIsMyLocationFeatureEnabledFlowEmitsTrueWhenHasCoarseLocationPermission() = runTest  {
+        givenHasLocationFeature()
+        whenever(locationRepository.isLocationEnabledFlow)
+            .thenReturn(flowOf(true))
+        val permissionsState = PermissionsState(PermissionState.UNGRANTED, PermissionState.GRANTED)
 
-            val observer = detector.getIsMyLocationFeatureEnabledFlow(flowOf(permissionsState))
-                    .test(this)
-            observer.finish()
-
-            observer.assertValues(true)
+        detector.getIsMyLocationFeatureEnabledFlow(flowOf(permissionsState)).test {
+            assertTrue(awaitItem())
+            awaitComplete()
         }
     }
 
     @Test
-    fun getIsMyLocationFeatureEnabledFlowEmitsTrueWhenHasFineLocationPermission()  {
-        runTest(UnconfinedTestDispatcher()) {
-            givenHasLocationFeature()
-            whenever(locationRepository.isLocationEnabledFlow)
-                    .thenReturn(flowOf(true))
-            val permissionsState = PermissionsState(
-                    PermissionState.GRANTED,
-                    PermissionState.UNGRANTED)
+    fun getIsMyLocationFeatureEnabledFlowEmitsTrueWhenHasFineLocationPermission() = runTest  {
+        givenHasLocationFeature()
+        whenever(locationRepository.isLocationEnabledFlow)
+            .thenReturn(flowOf(true))
+        val permissionsState = PermissionsState(PermissionState.GRANTED, PermissionState.UNGRANTED)
 
-            val observer = detector.getIsMyLocationFeatureEnabledFlow(flowOf(permissionsState))
-                    .test(this)
-            observer.finish()
-
-            observer.assertValues(true)
+        detector.getIsMyLocationFeatureEnabledFlow(flowOf(permissionsState)).test {
+            assertTrue(awaitItem())
+            awaitComplete()
         }
     }
 
     @Test
-    fun getIsMyLocationFeatureEnabledFlowEmitsTrueWhenHasAllLocationPermissions()  {
-        runTest(UnconfinedTestDispatcher()) {
-            givenHasLocationFeature()
-            whenever(locationRepository.isLocationEnabledFlow)
-                    .thenReturn(flowOf(true))
-            val permissionsState = PermissionsState(
-                    PermissionState.GRANTED,
-                    PermissionState.GRANTED)
+    fun getIsMyLocationFeatureEnabledFlowEmitsTrueWhenHasAllLocationPermissions() = runTest  {
+        givenHasLocationFeature()
+        whenever(locationRepository.isLocationEnabledFlow)
+            .thenReturn(flowOf(true))
+        val permissionsState = PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED)
 
-            val observer = detector.getIsMyLocationFeatureEnabledFlow(flowOf(permissionsState))
-                    .test(this)
-            observer.finish()
-
-            observer.assertValues(true)
+        detector.getIsMyLocationFeatureEnabledFlow(flowOf(permissionsState)).test {
+            assertTrue(awaitItem())
+            awaitComplete()
         }
     }
 
@@ -177,40 +143,40 @@ class IsMyLocationEnabledDetectorTest {
     fun getIsMyLocationFeatureEnabledTransitionsStateWhenLocationEnabledChanges() = runTest {
         givenHasLocationFeature()
         whenever(locationRepository.isLocationEnabledFlow)
-                .thenReturn(intervalFlowOf(0L, 10L, false, true, false))
-        val permissionsState = PermissionsState(
-                PermissionState.GRANTED,
-                PermissionState.GRANTED)
+            .thenReturn(intervalFlowOf(0L, 10L, false, true, false))
+        val permissionsState = PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED)
 
-        val observer = detector.getIsMyLocationFeatureEnabledFlow(flowOf(permissionsState))
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(false, true, false)
+        detector.getIsMyLocationFeatureEnabledFlow(flowOf(permissionsState)).test {
+            assertFalse(awaitItem())
+            assertTrue(awaitItem())
+            assertFalse(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getIsMyLocationFeatureEnabledTransitionsStateWhenPermissionStateChanges() = runTest {
         givenHasLocationFeature()
         whenever(locationRepository.isLocationEnabledFlow)
-                .thenReturn(flowOf(true))
+            .thenReturn(flowOf(true))
         val permissionsStateFlow = intervalFlowOf(
-                0L,
-                10L,
-                PermissionsState(PermissionState.UNGRANTED, PermissionState.UNGRANTED),
-                PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED),
-                PermissionsState(PermissionState.UNGRANTED, PermissionState.UNGRANTED))
+            0L,
+            10L,
+            PermissionsState(PermissionState.UNGRANTED, PermissionState.UNGRANTED),
+            PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED),
+            PermissionsState(PermissionState.UNGRANTED, PermissionState.UNGRANTED)
+        )
 
-        val observer = detector.getIsMyLocationFeatureEnabledFlow(permissionsStateFlow).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(false, true, false)
+        detector.getIsMyLocationFeatureEnabledFlow(permissionsStateFlow).test {
+            assertFalse(awaitItem())
+            assertTrue(awaitItem())
+            assertFalse(awaitItem())
+            awaitComplete()
+        }
     }
 
     private fun givenHasLocationFeature() {
         whenever(locationRepository.hasLocationFeature)
-                .thenReturn(true)
+            .thenReturn(true)
     }
 }

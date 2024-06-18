@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,42 +28,26 @@ package uk.org.rivernile.android.bustracker.core.alerts
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.core.features.FakeFeatureRepository
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.android.bustracker.ui.main.MainActivity
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 /**
  * Tests for [AppDeeplinkIntentFactory].
  *
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner::class)
 class AppDeeplinkIntentFactoryTest {
-
-    @Mock
-    private lateinit var featureRepository: FeatureRepository
-
-    private lateinit var factory: AppDeeplinkIntentFactory
-
-    @Before
-    fun setUp() {
-        factory = AppDeeplinkIntentFactory(
-                ApplicationProvider.getApplicationContext(),
-                featureRepository)
-    }
 
     @Test
     fun createShowBusTimesIntentCreatesExpectedIntent() {
-        val context: Context = ApplicationProvider.getApplicationContext()
+        val factory = createAppDeeplinkIntentFactory()
+        val context = ApplicationProvider.getApplicationContext<Context>()
 
         val result = factory.createShowBusTimesIntent("123456")
 
@@ -76,8 +60,11 @@ class AppDeeplinkIntentFactoryTest {
 
     @Test
     fun createShowStopOnMapIntentReturnsNullWhenStopMapUiFeatureIsNotEnabled() {
-        whenever(featureRepository.hasStopMapUiFeature)
-                .thenReturn(false)
+        val factory = createAppDeeplinkIntentFactory(
+            featureRepository = FakeFeatureRepository(
+                onHasStopMapUiFeature = { false }
+            )
+        )
 
         val result = factory.createShowStopOnMapIntent("123456")
 
@@ -86,9 +73,12 @@ class AppDeeplinkIntentFactoryTest {
 
     @Test
     fun createShowStopOnMapIntentCreatesExpectedIntentWhenStopMapUiFeatureIsEnabled() {
-        val context: Context = ApplicationProvider.getApplicationContext()
-        whenever(featureRepository.hasStopMapUiFeature)
-                .thenReturn(true)
+        val factory = createAppDeeplinkIntentFactory(
+            featureRepository = FakeFeatureRepository(
+                onHasStopMapUiFeature = { true }
+            )
+        )
+        val context = ApplicationProvider.getApplicationContext<Context>()
 
         val result = factory.createShowStopOnMapIntent("123456")
 
@@ -100,12 +90,22 @@ class AppDeeplinkIntentFactoryTest {
 
     @Test
     fun createManageAlertsIntentCreatesExpectedIntent() {
-        val context: Context = ApplicationProvider.getApplicationContext()
+        val factory = createAppDeeplinkIntentFactory()
+        val context = ApplicationProvider.getApplicationContext<Context>()
 
         val result = factory.createManageAlertsIntent()
 
         assertNull(result.component)
         assertEquals(context.packageName, result.`package`)
         assertEquals(MainActivity.ACTION_MANAGE_ALERTS, result.action)
+    }
+
+    private fun createAppDeeplinkIntentFactory(
+        featureRepository: FeatureRepository = FakeFeatureRepository()
+    ): AppDeeplinkIntentFactory {
+        return AppDeeplinkIntentFactory(
+            ApplicationProvider.getApplicationContext(),
+            featureRepository
+        )
     }
 }

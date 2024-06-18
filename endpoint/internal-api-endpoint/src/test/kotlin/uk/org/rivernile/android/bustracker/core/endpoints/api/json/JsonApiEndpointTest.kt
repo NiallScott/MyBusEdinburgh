@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,10 +30,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.SerializationException
 import okhttp3.ResponseBody.Companion.toResponseBody
 import okio.IOException
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -47,7 +43,9 @@ import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiKeyGenerator
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersionResponse
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [JsonApiEndpoint].
@@ -69,9 +67,6 @@ class JsonApiEndpointTest {
         private const val MOCK_CHECKSUM = "checksum"
     }
 
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
-
     @Mock
     private lateinit var apiServiceFactory: ApiServiceFactory
     @Mock
@@ -84,16 +79,17 @@ class JsonApiEndpointTest {
 
     private lateinit var endpoint: JsonApiEndpoint
 
-    @Before
+    @BeforeTest
     fun setUp() {
         endpoint = JsonApiEndpoint(
-                apiServiceFactory,
-                apiKeyGenerator,
-                MOCK_SCHEMA_TYPE,
-                exceptionLogger)
+            apiServiceFactory,
+            apiKeyGenerator,
+            MOCK_SCHEMA_TYPE,
+            exceptionLogger
+        )
 
         whenever(apiServiceFactory.getApiInstance(anyOrNull()))
-                .thenReturn(apiService)
+            .thenReturn(apiService)
     }
 
     @Test
@@ -101,7 +97,7 @@ class JsonApiEndpointTest {
         givenApiKeyGeneratedReturnsHashedApiKey()
         val ioException = IOException()
         whenever(apiService.getDatabaseVersion(HASHED_API_KEY, MOCK_SCHEMA_TYPE))
-                .thenAnswer { throw ioException }
+            .thenAnswer { throw ioException }
         val expected = DatabaseVersionResponse.Error.Io(ioException)
 
         val result = endpoint.getDatabaseVersion(null)
@@ -130,7 +126,7 @@ class JsonApiEndpointTest {
     fun getDatabaseVersionReturnsServerErrorWhenApiServiceHasErrorCode() = runTest {
         givenApiKeyGeneratedReturnsHashedApiKey()
         whenever(apiService.getDatabaseVersion(HASHED_API_KEY, MOCK_SCHEMA_TYPE))
-                .thenReturn(Response.error(500, "Server error".toResponseBody()))
+            .thenReturn(Response.error(500, "Server error".toResponseBody()))
         val expected = DatabaseVersionResponse.Error.ServerError
 
         val result = endpoint.getDatabaseVersion(null)
@@ -144,7 +140,7 @@ class JsonApiEndpointTest {
     fun getDatabaseVersionReturnsServerErrorWhenApiServiceIsSuccessWithEmptyBody() = runTest {
         givenApiKeyGeneratedReturnsHashedApiKey()
         whenever(apiService.getDatabaseVersion(HASHED_API_KEY, MOCK_SCHEMA_TYPE))
-                .thenReturn(Response.success<JsonDatabaseVersion>(200, null))
+            .thenReturn(Response.success<JsonDatabaseVersion>(200, null))
         val expected = DatabaseVersionResponse.Error.ServerError
 
         val result = endpoint.getDatabaseVersion(null)
@@ -158,12 +154,13 @@ class JsonApiEndpointTest {
     fun getDatabaseVersionReturnsServerErrorWhenApiServiceReturnsMissingSchemaVersion() = runTest {
         givenApiKeyGeneratedReturnsHashedApiKey()
         val jsonDatabaseVersion = JsonDatabaseVersion(
-                null,
-                MOCK_TOPOLOGY_ID,
-                MOCK_DATABASE_URL,
-                MOCK_CHECKSUM)
+            null,
+            MOCK_TOPOLOGY_ID,
+            MOCK_DATABASE_URL,
+            MOCK_CHECKSUM
+        )
         whenever(apiService.getDatabaseVersion(HASHED_API_KEY, MOCK_SCHEMA_TYPE))
-                .thenReturn(Response.success(200, jsonDatabaseVersion))
+            .thenReturn(Response.success(200, jsonDatabaseVersion))
         val expected = DatabaseVersionResponse.Error.ServerError
 
         val result = endpoint.getDatabaseVersion(null)
@@ -177,12 +174,13 @@ class JsonApiEndpointTest {
     fun getDatabaseVersionReturnsServerErrorWhenApiServiceReturnsMissingTopologyId() = runTest {
         givenApiKeyGeneratedReturnsHashedApiKey()
         val jsonDatabaseVersion = JsonDatabaseVersion(
-                MOCK_SCHEMA_VERSION,
-                null,
-                MOCK_DATABASE_URL,
-                MOCK_CHECKSUM)
+            MOCK_SCHEMA_VERSION,
+            null,
+            MOCK_DATABASE_URL,
+            MOCK_CHECKSUM
+        )
         whenever(apiService.getDatabaseVersion(HASHED_API_KEY, MOCK_SCHEMA_TYPE))
-                .thenReturn(Response.success(200, jsonDatabaseVersion))
+            .thenReturn(Response.success(200, jsonDatabaseVersion))
         val expected = DatabaseVersionResponse.Error.ServerError
 
         val result = endpoint.getDatabaseVersion(null)
@@ -196,12 +194,13 @@ class JsonApiEndpointTest {
     fun getDatabaseVersionReturnsServerErrorWhenApiServiceReturnsMissingDatabaseUrl() = runTest {
         givenApiKeyGeneratedReturnsHashedApiKey()
         val jsonDatabaseVersion = JsonDatabaseVersion(
-                MOCK_SCHEMA_VERSION,
-                MOCK_TOPOLOGY_ID,
-                null,
-                MOCK_CHECKSUM)
+            MOCK_SCHEMA_VERSION,
+            MOCK_TOPOLOGY_ID,
+            null,
+            MOCK_CHECKSUM
+        )
         whenever(apiService.getDatabaseVersion(HASHED_API_KEY, MOCK_SCHEMA_TYPE))
-                .thenReturn(Response.success(200, jsonDatabaseVersion))
+            .thenReturn(Response.success(200, jsonDatabaseVersion))
         val expected = DatabaseVersionResponse.Error.ServerError
 
         val result = endpoint.getDatabaseVersion(null)
@@ -215,12 +214,13 @@ class JsonApiEndpointTest {
     fun getDatabaseVersionReturnsServerErrorWhenApiServiceReturnsMissingChecksum() = runTest {
         givenApiKeyGeneratedReturnsHashedApiKey()
         val jsonDatabaseVersion = JsonDatabaseVersion(
-                MOCK_SCHEMA_VERSION,
-                MOCK_TOPOLOGY_ID,
-                MOCK_DATABASE_URL,
-                null)
+            MOCK_SCHEMA_VERSION,
+            MOCK_TOPOLOGY_ID,
+            MOCK_DATABASE_URL,
+            null
+        )
         whenever(apiService.getDatabaseVersion(HASHED_API_KEY, MOCK_SCHEMA_TYPE))
-                .thenReturn(Response.success(200, jsonDatabaseVersion))
+            .thenReturn(Response.success(200, jsonDatabaseVersion))
         val expected = DatabaseVersionResponse.Error.ServerError
 
         val result = endpoint.getDatabaseVersion(null)
@@ -234,18 +234,21 @@ class JsonApiEndpointTest {
     fun getDatabaseVersionReturnsSuccessWhenApiServiceReturnsValidObject() = runTest {
         givenApiKeyGeneratedReturnsHashedApiKey()
         val jsonDatabaseVersion = JsonDatabaseVersion(
+            MOCK_SCHEMA_VERSION,
+            MOCK_TOPOLOGY_ID,
+            MOCK_DATABASE_URL,
+            MOCK_CHECKSUM
+        )
+        whenever(apiService.getDatabaseVersion(HASHED_API_KEY, MOCK_SCHEMA_TYPE))
+            .thenReturn(Response.success(200, jsonDatabaseVersion))
+        val expected = DatabaseVersionResponse.Success(
+            DatabaseVersion(
                 MOCK_SCHEMA_VERSION,
                 MOCK_TOPOLOGY_ID,
                 MOCK_DATABASE_URL,
-                MOCK_CHECKSUM)
-        whenever(apiService.getDatabaseVersion(HASHED_API_KEY, MOCK_SCHEMA_TYPE))
-                .thenReturn(Response.success(200, jsonDatabaseVersion))
-        val expected = DatabaseVersionResponse.Success(
-                DatabaseVersion(
-                        MOCK_SCHEMA_VERSION,
-                        MOCK_TOPOLOGY_ID,
-                        MOCK_DATABASE_URL,
-                        MOCK_CHECKSUM))
+                MOCK_CHECKSUM
+            )
+        )
 
         val result = endpoint.getDatabaseVersion(null)
 
@@ -256,6 +259,6 @@ class JsonApiEndpointTest {
 
     private fun givenApiKeyGeneratedReturnsHashedApiKey() {
         whenever(apiKeyGenerator.generateHashedApiKey())
-                .thenReturn(HASHED_API_KEY)
+            .thenReturn(HASHED_API_KEY)
     }
 }

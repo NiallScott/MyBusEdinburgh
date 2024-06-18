@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,7 +37,8 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class ServiceStopsRepository @Inject internal constructor(
-    private val serviceStopDao: ServiceStopDao) {
+    private val serviceStopDao: ServiceStopDao
+) {
 
     /**
      * Get a [Flow] which emits the [List] of service names which serve the given `stopCode`. If the
@@ -59,6 +60,7 @@ class ServiceStopsRepository @Inject internal constructor(
      * those stops.
      */
     fun getServicesForStopsFlow(
-        stopCodes: Set<String>): Flow<Map<String, List<String>>?> =
+        stopCodes: Set<String>
+    ): Flow<Map<String, List<String>>?> =
         serviceStopDao.getServicesForStopsFlow(stopCodes)
 }

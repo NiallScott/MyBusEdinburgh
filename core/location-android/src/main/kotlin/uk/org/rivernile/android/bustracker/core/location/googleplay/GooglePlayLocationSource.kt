@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -61,7 +61,8 @@ import kotlin.coroutines.suspendCoroutine
  */
 internal class GooglePlayLocationSource @Inject constructor(
     private val fusedLocationProviderClient: FusedLocationProviderClient,
-    private val permissionChecker: AndroidLocationPermissionChecker) : LocationSource {
+    private val permissionChecker: AndroidLocationPermissionChecker
+) : LocationSource {
 
     companion object {
 
@@ -103,7 +104,8 @@ internal class GooglePlayLocationSource @Inject constructor(
                 fusedLocationProviderClient.requestLocationUpdates(
                     userVisibleLocationRequest,
                     callback,
-                    Looper.getMainLooper())
+                    Looper.getMainLooper()
+                )
 
                 awaitClose {
                     fusedLocationProviderClient.removeLocationUpdates(callback)

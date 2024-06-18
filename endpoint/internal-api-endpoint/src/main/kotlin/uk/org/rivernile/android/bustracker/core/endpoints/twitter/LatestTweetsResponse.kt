@@ -40,7 +40,8 @@ sealed interface LatestTweetsResponse {
      * @property tweets The tweet data.
      */
     data class Success(
-        val tweets: List<Tweet>?) : LatestTweetsResponse
+        val tweets: List<Tweet>?
+    ) : LatestTweetsResponse
 
     /**
      * This interface describes errors which can arise from getting the latest tweets.
@@ -58,7 +59,8 @@ sealed interface LatestTweetsResponse {
          * @property throwable The [Throwable] which caused this error.
          */
         data class Io(
-            val throwable: Throwable) : Error
+            val throwable: Throwable
+        ) : Error
 
         /**
          * This response was not successful because authentication failed against the endpoint.

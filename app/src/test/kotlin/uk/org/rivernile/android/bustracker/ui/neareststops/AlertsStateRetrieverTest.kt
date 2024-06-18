@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,33 +26,29 @@
 
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import app.cash.turbine.test
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /**
  * Tests for [AlertsStateRetriever].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class AlertsStateRetrieverTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var featureRepository: FeatureRepository
@@ -61,118 +57,125 @@ class AlertsStateRetrieverTest {
 
     private lateinit var retriever: AlertsStateRetriever
 
-    @Before
+    @BeforeTest
     fun setUp() {
         retriever = AlertsStateRetriever(
-                featureRepository,
-                alertsRepository)
+            featureRepository,
+            alertsRepository
+        )
     }
 
     @Test
     fun isArrivalAlertVisibleFlowEmitsFalseWhenDoesNotHaveArrivalAlertFeature() = runTest {
         whenever(featureRepository.hasArrivalAlertFeature)
-                .thenReturn(false)
+            .thenReturn(false)
 
-        val observer = retriever.isArrivalAlertVisibleFlow.test(this)
-        advanceUntilIdle()
-
-        observer.assertValues(false)
+        retriever.isArrivalAlertVisibleFlow.test {
+            assertFalse(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun isArrivalAlertVisibleFlowEmitsTrueWhenDoesHaveArrivalAlertFeature() = runTest {
         whenever(featureRepository.hasArrivalAlertFeature)
-                .thenReturn(true)
+            .thenReturn(true)
 
-        val observer = retriever.isArrivalAlertVisibleFlow.test(this)
-        advanceUntilIdle()
-
-        observer.assertValues(true)
+        retriever.isArrivalAlertVisibleFlow.test {
+            assertTrue(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun isProximityAlertVisibleFlowEmitsFalseWhenDoesNotHaveProximityAlertFeature() = runTest {
         whenever(featureRepository.hasProximityAlertFeature)
-                .thenReturn(false)
+            .thenReturn(false)
 
-        val observer = retriever.isProximityAlertVisibleFlow.test(this)
-        advanceUntilIdle()
-
-        observer.assertValues(false)
+        retriever.isProximityAlertVisibleFlow.test {
+            assertFalse(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun isProximityAlertVisibleFlowEmitsTrueWhenDoesHaveProximityAlertFeature() = runTest {
         whenever(featureRepository.hasProximityAlertFeature)
-                .thenReturn(true)
+            .thenReturn(true)
 
-        val observer = retriever.isProximityAlertVisibleFlow.test(this)
-        advanceUntilIdle()
-
-        observer.assertValues(true)
+        retriever.isProximityAlertVisibleFlow.test {
+            assertTrue(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getHasArrivalAlertFlowEmitsNullWhenStopCodeIsNull() = runTest {
         val stopCodeFlow = flowOf(null)
 
-        val observer = retriever.getHasArrivalAlertFlow(stopCodeFlow).test(this)
-        advanceUntilIdle()
-
-        observer.assertValues(null)
+        retriever.getHasArrivalAlertFlow(stopCodeFlow).test {
+            assertNull(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getHasArrivalAlertFlowEmitsNullWhenStopCodeIsEmpty() = runTest {
         val stopCodeFlow = flowOf("")
 
-        val observer = retriever.getHasArrivalAlertFlow(stopCodeFlow).test(this)
-        advanceUntilIdle()
-
-        observer.assertValues(null)
+        retriever.getHasArrivalAlertFlow(stopCodeFlow).test {
+            assertNull(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getHasArrivalAlertFlowEmitsValuesFromAlertsRepository() = runTest {
         val stopCodeFlow = flowOf("123456")
         whenever(alertsRepository.hasArrivalAlertFlow("123456"))
-                .thenReturn(flowOf(false, true, false))
+            .thenReturn(flowOf(false, true, false))
 
-        val observer = retriever.getHasArrivalAlertFlow(stopCodeFlow).test(this)
-        advanceUntilIdle()
-
-        observer.assertValues(null, false, true, false)
+        retriever.getHasArrivalAlertFlow(stopCodeFlow).test {
+            assertNull(awaitItem())
+            assertEquals(false, awaitItem())
+            assertEquals(true, awaitItem())
+            assertEquals(false, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getHasProximityAlertFlowEmitsNullWhenStopCodeIsNull() = runTest {
         val stopCodeFlow = flowOf(null)
 
-        val observer = retriever.getHasProximityAlertFlow(stopCodeFlow).test(this)
-        advanceUntilIdle()
-
-        observer.assertValues(null)
+        retriever.getHasProximityAlertFlow(stopCodeFlow).test {
+            assertNull(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getHasProximityAlertFlowEmitsNullWhenStopCodeIsEmpty() = runTest {
         val stopCodeFlow = flowOf("")
 
-        val observer = retriever.getHasProximityAlertFlow(stopCodeFlow).test(this)
-        advanceUntilIdle()
-
-        observer.assertValues(null)
+        retriever.getHasProximityAlertFlow(stopCodeFlow).test {
+            assertNull(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getHasProximityAlertFlowEmitsValuesFromAlertsRepository() = runTest {
         val stopCodeFlow = flowOf("123456")
         whenever(alertsRepository.hasProximityAlertFlow("123456"))
-                .thenReturn(flowOf(false, true, false))
+            .thenReturn(flowOf(false, true, false))
 
-        val observer = retriever.getHasProximityAlertFlow(stopCodeFlow).test(this)
-        advanceUntilIdle()
-
-        observer.assertValues(null, false, true, false)
+        retriever.getHasProximityAlertFlow(stopCodeFlow).test {
+            assertNull(awaitItem())
+            assertEquals(false, awaitItem())
+            assertEquals(true, awaitItem())
+            assertEquals(false, awaitItem())
+            awaitComplete()
+        }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,10 +29,10 @@ package uk.org.rivernile.android.bustracker.ui.main
 import android.app.Activity
 import android.content.Intent
 import androidx.test.platform.app.InstrumentationRegistry
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * Tests for [ScanQrCode].
@@ -51,7 +51,7 @@ class ScanQrCodeTest {
 
     private lateinit var contract: ScanQrCode
 
-    @Before
+    @BeforeTest
     fun setUp() {
         contract = ScanQrCode()
     }
@@ -60,7 +60,8 @@ class ScanQrCodeTest {
     fun createIntentCreatesCorrectIntent() {
         val intent = contract.createIntent(
             InstrumentationRegistry.getInstrumentation().targetContext,
-            Unit)
+            Unit
+        )
 
         assertEquals(BARCODE_ACTION, intent.action)
         assertEquals(ZXING_PACKAGE_NAME, intent.`package`)

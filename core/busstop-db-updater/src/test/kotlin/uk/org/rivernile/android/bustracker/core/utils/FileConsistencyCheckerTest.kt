@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,15 +26,15 @@
 
 package uk.org.rivernile.android.bustracker.core.utils
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import java.io.File
 import java.io.IOException
+import kotlin.test.Test
 
 /**
  * Unit tests for [FileConsistencyChecker].
@@ -43,18 +43,9 @@ import java.io.IOException
  */
 class FileConsistencyCheckerTest {
 
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
-
-    private lateinit var fileConsistencyChecker: FileConsistencyChecker
-
-    @Before
-    fun setUp() {
-        fileConsistencyChecker = FileConsistencyChecker(coroutineRule.testDispatcher)
-    }
-
     @Test(expected = IOException::class)
     fun throwsIoExceptionWhenFileDoesNotExistOrIsInaccessible() = runTest {
+        val fileConsistencyChecker = createFileConsistencyChecker()
         val file = File("/path/does/not/exist")
 
         fileConsistencyChecker.checkFileMatchesHash(file, "abc123")
@@ -62,6 +53,7 @@ class FileConsistencyCheckerTest {
 
     @Test
     fun correctlyCalculatesHashForEmptyFile() = runTest {
+        val fileConsistencyChecker = createFileConsistencyChecker()
         val file = getFileForPath("/empty_file.txt")
 
         val result = fileConsistencyChecker.checkFileMatchesHash(file,
@@ -72,6 +64,7 @@ class FileConsistencyCheckerTest {
 
     @Test
     fun correctlyCalculatesHashForNonEmptyFile() = runTest {
+        val fileConsistencyChecker = createFileConsistencyChecker()
         val file = getFileForPath("/non_empty_file.txt")
 
         val result = fileConsistencyChecker.checkFileMatchesHash(file,
@@ -82,6 +75,7 @@ class FileConsistencyCheckerTest {
 
     @Test
     fun returnsFalseWhenHashDoesNotMatchOnEmptyFile() = runTest {
+        val fileConsistencyChecker = createFileConsistencyChecker()
         val file = getFileForPath("/empty_file.txt")
 
         val result = fileConsistencyChecker.checkFileMatchesHash(file, "abc123")
@@ -91,6 +85,7 @@ class FileConsistencyCheckerTest {
 
     @Test
     fun returnsFalseWhenHashDoesNotMatchOnNonEmptyFile() = runTest {
+        val fileConsistencyChecker = createFileConsistencyChecker()
         val file = getFileForPath("/non_empty_file.txt")
 
         val result = fileConsistencyChecker.checkFileMatchesHash(file, "abc123")
@@ -100,4 +95,9 @@ class FileConsistencyCheckerTest {
 
     private fun getFileForPath(path: String) =
             javaClass.getResource(path)?.file?.let(::File) ?: throw UnsupportedOperationException()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun TestScope.createFileConsistencyChecker(): FileConsistencyChecker {
+        return FileConsistencyChecker(UnconfinedTestDispatcher(testScheduler))
+    }
 }

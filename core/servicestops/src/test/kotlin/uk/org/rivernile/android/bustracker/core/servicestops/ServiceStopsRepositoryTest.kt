@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,84 +26,84 @@
 
 package uk.org.rivernile.android.bustracker.core.servicestops
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.advanceUntilIdle
+import app.cash.turbine.test
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.FakeServiceStopDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.ServiceStopDao
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 /**
  * Tests for [ServiceStopsRepository].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(MockitoJUnitRunner::class)
 class ServiceStopsRepositoryTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
-
-    @Mock
-    private lateinit var serviceStopDao: ServiceStopDao
-
-    private lateinit var repository: ServiceStopsRepository
-
-    @Before
-    fun setUp() {
-        repository = ServiceStopsRepository(serviceStopDao)
-    }
 
     @Test
     fun getServicesForStopFlowReturnsFlowFromDao() = runTest {
-        whenever(serviceStopDao.getServicesForStopFlow("123456"))
-            .thenReturn(intervalFlowOf(
-                0L,
-                10L,
-                null,
-                listOf("1"),
-                listOf("1", "2")))
+        val repository = createServiceStopsRepository(
+            serviceStopDao = FakeServiceStopDao(
+                onGetServicesForStopFlow = {
+                    assertEquals("123456", it)
+                    intervalFlowOf(
+                        0L,
+                        10L,
+                        null,
+                        listOf("1"),
+                        listOf("1", "2")
+                    )
+                }
+            )
+        )
 
-        val observer = repository.getServicesForStopFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            null,
-            listOf("1"),
-            listOf("1", "2"))
+        repository.getServicesForStopFlow("123456").test {
+            assertNull(awaitItem())
+            assertEquals(listOf("1"), awaitItem())
+            assertEquals(listOf("1", "2"), awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getServicesForStopsFlowReturnsFlowFromDao() = runTest {
-        whenever(serviceStopDao.getServicesForStopsFlow(setOf("123456", "987654")))
-            .thenReturn(intervalFlowOf(
-                0L,
-                10L,
-                null,
-                mapOf("123456" to listOf("1")),
+        val repository = createServiceStopsRepository(
+            serviceStopDao = FakeServiceStopDao(
+                onGetServicesForStopsFlow = {
+                    assertEquals(setOf("123456", "987654"), it)
+                    intervalFlowOf(
+                        0L,
+                        10L,
+                        null,
+                        mapOf("123456" to listOf("1")),
+                        mapOf(
+                            "123456" to listOf("1"),
+                            "987654" to listOf("1", "2")
+                        )
+                    )
+                }
+            )
+        )
+
+        repository.getServicesForStopsFlow(setOf("123456", "987654")).test {
+            assertNull(awaitItem())
+            assertEquals(mapOf("123456" to listOf("1")), awaitItem())
+            assertEquals(
                 mapOf(
                     "123456" to listOf("1"),
-                    "987654" to listOf("1", "2"))))
+                    "987654" to listOf("1", "2")
+                ),
+                awaitItem()
+            )
+            awaitComplete()
+        }
+    }
 
-        val observer = repository.getServicesForStopsFlow(setOf("123456", "987654")).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            null,
-            mapOf("123456" to listOf("1")),
-            mapOf(
-                "123456" to listOf("1"),
-                "987654" to listOf("1", "2")))
+    private fun createServiceStopsRepository(
+        serviceStopDao: ServiceStopDao = FakeServiceStopDao()
+    ): ServiceStopsRepository {
+        return ServiceStopsRepository(serviceStopDao)
     }
 }

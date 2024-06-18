@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,14 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.advanceUntilIdle
+import app.cash.turbine.test
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -48,21 +42,21 @@ import uk.org.rivernile.android.bustracker.core.database.settings.alerts.AlertsD
 import uk.org.rivernile.android.bustracker.core.database.settings.alerts.ArrivalAlertEntity
 import uk.org.rivernile.android.bustracker.core.database.settings.alerts.ProximityAlertEntity
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /**
  * Tests for [AlertsRepository].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class AlertsRepositoryTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var arrivalAlertTaskLauncher: ArrivalAlertTaskLauncher
@@ -75,13 +69,14 @@ class AlertsRepositoryTest {
 
     private lateinit var repository: AlertsRepository
 
-    @Before
+    @BeforeTest
     fun setUp() {
         repository = AlertsRepository(
             arrivalAlertTaskLauncher,
             proximityAlertTaskLauncher,
             alertsDao,
-            timeUtils)
+            timeUtils
+        )
 
         whenever(timeUtils.currentTimeMills)
             .thenReturn(123L)
@@ -95,7 +90,8 @@ class AlertsRepositoryTest {
             123L,
             "123456",
             listOf("1", "2", "3"),
-            5)
+            5
+        )
 
         repository.addArrivalAlert(request)
 
@@ -112,7 +108,8 @@ class AlertsRepositoryTest {
             0,
             123L,
             "123456",
-            50)
+            50
+        )
 
         repository.addProximityAlert(request)
 
@@ -188,38 +185,46 @@ class AlertsRepositoryTest {
                 10L,
                 "1",
                 listOf("1"),
-                1),
+                1
+            ),
             ArrivalAlertEntity(
                 2,
                 20L,
                 "2",
                 listOf("1", "2"),
-                2),
+                2
+            ),
             ArrivalAlertEntity(
                 3,
                 30L,
                 "3",
                 listOf("1", "2", "3"),
-                3))
+                3
+            )
+        )
         val expected = listOf(
             ArrivalAlert(
                 1,
                 10L,
                 "1",
                 listOf("1"),
-                1),
+                1
+            ),
             ArrivalAlert(
                 2,
                 20L,
                 "2",
                 listOf("1", "2"),
-                2),
+                2
+            ),
             ArrivalAlert(
                 3,
                 30L,
                 "3",
                 listOf("1", "2", "3"),
-                3))
+                3
+            )
+        )
         whenever(alertsDao.getAllArrivalAlerts())
             .thenReturn(items)
 
@@ -265,11 +270,12 @@ class AlertsRepositoryTest {
         whenever(alertsDao.getHasArrivalAlertFlow("123456"))
             .thenReturn(intervalFlowOf(0L, 10L, false, false, true, true, false))
 
-        val observer = repository.hasArrivalAlertFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(false, true, false)
+        repository.hasArrivalAlertFlow("123456").test {
+            assertFalse(awaitItem())
+            assertTrue(awaitItem())
+            assertFalse(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -277,11 +283,12 @@ class AlertsRepositoryTest {
         whenever(alertsDao.getHasProximityAlertFlow("123456"))
             .thenReturn(intervalFlowOf(0L, 10L, false, false, true, true, false))
 
-        val observer = repository.hasProximityAlertFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(false, true, false)
+        repository.hasProximityAlertFlow("123456").test {
+            assertFalse(awaitItem())
+            assertTrue(awaitItem())
+            assertFalse(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -289,11 +296,12 @@ class AlertsRepositoryTest {
         whenever(alertsDao.arrivalAlertCountFlow)
             .thenReturn(intervalFlowOf(0L, 10L, 0, 0, 1, 1, 2, 2, 3))
 
-        val observer = repository.arrivalAlertCountFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(0, 1, 2, 3)
+        repository.arrivalAlertCountFlow.test {
+            assertEquals(0, awaitItem())
+            assertEquals(1, awaitItem())
+            assertEquals(2, awaitItem())
+            assertEquals(3, awaitItem())
+        }
     }
 
     @Test
@@ -312,19 +320,18 @@ class AlertsRepositoryTest {
             listOf(alert1),
             listOf(alert1),
             listOf(alert1, alert2, alert3),
-            listOf(alert2))
+            listOf(alert2)
+        )
         whenever(alertsDao.allProximityAlertsFlow)
             .thenReturn(flow)
 
-        val observer = repository.allProximityAlertsFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            null,
-            listOf(expected1),
-            listOf(expected1, expected2, expected3),
-            listOf(expected2))
+        repository.allProximityAlertsFlow.test {
+            assertNull(awaitItem())
+            assertEquals(listOf(expected1), awaitItem())
+            assertEquals(listOf(expected1, expected2, expected3), awaitItem())
+            assertEquals(listOf(expected2), awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -348,24 +355,27 @@ class AlertsRepositoryTest {
             listOf(proximityAlert1),
             listOf(arrivalAlert1, arrivalAlert2, proximityAlert1, proximityAlert2),
             listOf(arrivalAlert1, arrivalAlert2, proximityAlert1, proximityAlert2),
-            listOf(arrivalAlert2, proximityAlert2))
+            listOf(arrivalAlert2, proximityAlert2)
+        )
         whenever(alertsDao.allAlertsFlow)
             .thenReturn(flow)
 
-        val observer = repository.allAlertsFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            null,
-            listOf(expectedArrivalAlert1),
-            listOf(expectedProximityAlert1),
-            listOf(
-                expectedArrivalAlert1,
-                expectedArrivalAlert2,
-                expectedProximityAlert1,
-                expectedProximityAlert2),
-            listOf(expectedArrivalAlert2, expectedProximityAlert2))
+        repository.allAlertsFlow.test {
+            assertNull(awaitItem())
+            assertEquals(listOf(expectedArrivalAlert1), awaitItem())
+            assertEquals(listOf(expectedProximityAlert1), awaitItem())
+            assertEquals(
+                listOf(
+                    expectedArrivalAlert1,
+                    expectedArrivalAlert2,
+                    expectedProximityAlert1,
+                    expectedProximityAlert2
+                ),
+                awaitItem()
+            )
+            assertEquals(listOf(expectedArrivalAlert2, expectedProximityAlert2), awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test

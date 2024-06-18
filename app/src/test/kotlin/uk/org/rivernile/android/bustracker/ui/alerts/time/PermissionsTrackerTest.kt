@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,22 +28,19 @@ package uk.org.rivernile.android.bustracker.ui.alerts.time
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.advanceUntilIdle
+import app.cash.turbine.test
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
-import org.junit.Test
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.coroutines.test
 import uk.org.rivernile.android.bustracker.testutils.test
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [PermissionsTracker].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class PermissionsTrackerTest {
 
     companion object {
@@ -52,19 +49,16 @@ class PermissionsTrackerTest {
     }
 
     @get:Rule
-    val coroutineRule = MainCoroutineRule()
-    @get:Rule
     val rule = InstantTaskExecutorRule()
 
     @Test
     fun permissionsStateFlowEmitsPermissionUngrantedByDefault() = runTest {
         val permissionsTracker = createPermissionsTracker()
 
-        val observer = permissionsTracker.permissionsStateFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(PermissionsState(PermissionState.UNGRANTED))
+        permissionsTracker.permissionsStateFlow.test {
+            assertEquals(PermissionsState(PermissionState.UNGRANTED), awaitItem())
+            ensureAllEventsConsumed()
+        }
     }
 
     @Test
@@ -72,11 +66,10 @@ class PermissionsTrackerTest {
         val permissionsTracker = createPermissionsTracker()
         permissionsTracker.permissionsState = UiPermissionsState(true)
 
-        val observer = permissionsTracker.permissionsStateFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(PermissionsState(PermissionState.GRANTED))
+        permissionsTracker.permissionsStateFlow.test {
+            assertEquals(PermissionsState(PermissionState.GRANTED), awaitItem())
+            ensureAllEventsConsumed()
+        }
     }
 
     @Test
@@ -84,52 +77,54 @@ class PermissionsTrackerTest {
         val permissionsTracker = createPermissionsTracker()
         permissionsTracker.permissionsState = UiPermissionsState(false)
 
-        val observer = permissionsTracker.permissionsStateFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(PermissionsState(PermissionState.UNGRANTED))
+        permissionsTracker.permissionsStateFlow.test {
+            assertEquals(PermissionsState(PermissionState.UNGRANTED), awaitItem())
+            ensureAllEventsConsumed()
+        }
     }
 
     @Test
     fun permissionsStateFlowEmitsPermissionDeniedDefaultHasAskedForPermission() = runTest {
         val permissionsTracker = createPermissionsTracker(
-                SavedStateHandle(
-                        mapOf(STATE_REQUESTED_PERMISSIONS to true)))
+            SavedStateHandle(
+                mapOf(STATE_REQUESTED_PERMISSIONS to true)
+            )
+        )
 
-        val observer = permissionsTracker.permissionsStateFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(PermissionsState(PermissionState.DENIED))
+        permissionsTracker.permissionsStateFlow.test {
+            assertEquals(PermissionsState(PermissionState.DENIED), awaitItem())
+            ensureAllEventsConsumed()
+        }
     }
 
     @Test
     fun permissionsStateFlowEmitsPermissionGrantedWhenGrantedAndHasAskedForPermission() = runTest {
         val permissionsTracker = createPermissionsTracker(
-                SavedStateHandle(
-                        mapOf(STATE_REQUESTED_PERMISSIONS to true)))
+            SavedStateHandle(
+                mapOf(STATE_REQUESTED_PERMISSIONS to true)
+            )
+        )
         permissionsTracker.permissionsState = UiPermissionsState(true)
 
-        val observer = permissionsTracker.permissionsStateFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(PermissionsState(PermissionState.GRANTED))
+        permissionsTracker.permissionsStateFlow.test {
+            assertEquals(PermissionsState(PermissionState.GRANTED), awaitItem())
+            ensureAllEventsConsumed()
+        }
     }
 
     @Test
     fun permissionsStateFlowEmitsPermissionDeniedWhenUngrantedAndHasAskedForPermission() = runTest {
         val permissionsTracker = createPermissionsTracker(
-                SavedStateHandle(
-                        mapOf(STATE_REQUESTED_PERMISSIONS to true)))
+            SavedStateHandle(
+                mapOf(STATE_REQUESTED_PERMISSIONS to true)
+            )
+        )
         permissionsTracker.permissionsState = UiPermissionsState(false)
 
-        val observer = permissionsTracker.permissionsStateFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(PermissionsState(PermissionState.DENIED))
+        permissionsTracker.permissionsStateFlow.test {
+            assertEquals(PermissionsState(PermissionState.DENIED), awaitItem())
+            ensureAllEventsConsumed()
+        }
     }
 
     @Test
@@ -156,8 +151,10 @@ class PermissionsTrackerTest {
     @Test
     fun onRequestPermissionsClickedDoesNotRequestPermissionsWhenPreviouslyRequested() {
         val permissionsTracker = createPermissionsTracker(
-                SavedStateHandle(
-                        mapOf(STATE_REQUESTED_PERMISSIONS to true)))
+            SavedStateHandle(
+                mapOf(STATE_REQUESTED_PERMISSIONS to true)
+            )
+        )
 
         val observer = permissionsTracker.requestPermissionsLiveData.test()
         permissionsTracker.onRequestPermissionsClicked()
@@ -166,5 +163,5 @@ class PermissionsTrackerTest {
     }
 
     private fun createPermissionsTracker(savedState: SavedStateHandle = SavedStateHandle()) =
-            PermissionsTracker(savedState)
+        PermissionsTracker(savedState)
 }

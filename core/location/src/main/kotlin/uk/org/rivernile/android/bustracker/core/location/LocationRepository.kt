@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -51,7 +51,8 @@ class LocationRepository @Inject internal constructor(
     private val hasLocationFeatureDetector: HasLocationFeatureDetector,
     private val isLocationEnabledDetector: IsLocationEnabledDetector,
     private val locationSource: LocationSource,
-    private val distanceCalculator: DistanceCalculator) {
+    private val distanceCalculator: DistanceCalculator
+) {
 
     /**
      * Does this device have location-aware features or not?

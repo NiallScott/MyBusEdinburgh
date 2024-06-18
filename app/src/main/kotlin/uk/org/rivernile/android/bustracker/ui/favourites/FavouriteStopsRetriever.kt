@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -47,7 +47,8 @@ import javax.inject.Inject
  */
 class FavouriteStopsRetriever @Inject constructor(
     private val favouritesRepository: FavouritesRepository,
-    private val serviceStopsRepository: ServiceStopsRepository) {
+    private val serviceStopsRepository: ServiceStopsRepository
+) {
 
     /**
      * This produces a [Flow] which emits [List]s of [UiFavouriteStop]s.
@@ -90,11 +91,11 @@ class FavouriteStopsRetriever @Inject constructor(
      */
     private fun combineFavouritesAndServices(
         favouriteStops: List<FavouriteStop>,
-        stopServices: Map<String, List<String>>?) =
-            favouriteStops.map {
-                UiFavouriteStop(
-                    it,
-                    stopServices?.get(it.stopCode),
-                    false)
-            }
+        stopServices: Map<String, List<String>>?
+    ) = favouriteStops.map {
+            UiFavouriteStop(
+                it,
+                stopServices?.get(it.stopCode),
+                false)
+        }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,43 +26,37 @@
 
 package uk.org.rivernile.android.bustracker.ui.alerts.proximity
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import app.cash.turbine.test
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopName
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.coroutines.test
+import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [UiStateCalculator].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class UiStateCalculatorTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var locationRepository: LocationRepository
 
     private lateinit var calculator: UiStateCalculator
 
-    @Before
+    @BeforeTest
     fun setUp() {
         calculator = UiStateCalculator(locationRepository)
     }
@@ -70,119 +64,104 @@ class UiStateCalculatorTest {
     @Test
     fun createUiStateFlowEmitsNoLocationFeatureWhenNoLocationFeature() = runTest {
         whenever(locationRepository.hasLocationFeature)
-                .thenReturn(false)
+            .thenReturn(false)
         val permissionStateFlow = flowOf(PermissionState.GRANTED)
         val stopDetailsFlow = flowOf(StopDetails("123456", null))
 
-        val observer = calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiState.ERROR_NO_LOCATION_FEATURE)
+        calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test {
+            assertEquals(UiState.ERROR_NO_LOCATION_FEATURE, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun createUiStateFlowEmitsPermissionUngrantedWhenPermissionUngranted() = runTest {
         whenever(locationRepository.hasLocationFeature)
-                .thenReturn(true)
+            .thenReturn(true)
         whenever(locationRepository.isLocationEnabledFlow)
-                .thenReturn(flowOf(true))
+            .thenReturn(flowOf(true))
         val permissionStateFlow = flowOf(PermissionState.UNGRANTED)
         val stopDetailsFlow = flowOf(StopDetails("123456", null))
 
-        val observer = calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiState.ERROR_PERMISSION_UNGRANTED)
+        calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test {
+            assertEquals(UiState.ERROR_PERMISSION_UNGRANTED, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun createUiStateFlowEmitsPermissionDeniedWhenPermissionDenied() = runTest {
         whenever(locationRepository.hasLocationFeature)
-                .thenReturn(true)
+            .thenReturn(true)
         whenever(locationRepository.isLocationEnabledFlow)
-                .thenReturn(flowOf(true))
+            .thenReturn(flowOf(true))
         val permissionStateFlow = flowOf(PermissionState.DENIED)
         val stopDetailsFlow = flowOf(StopDetails("123456", null))
 
-        val observer = calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiState.ERROR_PERMISSION_DENIED)
+        calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test {
+            assertEquals(UiState.ERROR_PERMISSION_DENIED, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun createUiStateFlowEmitsProgressWhenStopDetailsIsNull() = runTest {
         whenever(locationRepository.hasLocationFeature)
-                .thenReturn(true)
+            .thenReturn(true)
         whenever(locationRepository.isLocationEnabledFlow)
-                .thenReturn(flowOf(true))
+            .thenReturn(flowOf(true))
         val permissionStateFlow = flowOf(PermissionState.GRANTED)
         val stopDetailsFlow = flowOf(null)
 
-        val observer = calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiState.PROGRESS)
+        calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test {
+            assertEquals(UiState.PROGRESS, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun createUiStateFlowEmitsContentWhenStopDetailsIsAvailable() = runTest {
         whenever(locationRepository.hasLocationFeature)
-                .thenReturn(true)
+            .thenReturn(true)
         whenever(locationRepository.isLocationEnabledFlow)
-                .thenReturn(flowOf(true))
+            .thenReturn(flowOf(true))
         val permissionStateFlow = flowOf(PermissionState.GRANTED)
         val stopDetailsFlow = flowOf(StopDetails("123456", null))
 
-        val observer = calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiState.CONTENT)
+        calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test {
+            assertEquals(UiState.CONTENT, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun createUiStateFlowEmitsCorrectValuesWithRepresentativeExample() = runTest {
         whenever(locationRepository.hasLocationFeature)
-                .thenReturn(true)
+            .thenReturn(true)
         whenever(locationRepository.isLocationEnabledFlow)
-                .thenReturn(flow {
-                    emit(false)
-                    delay(300L)
-                    emit(true)
-                })
-        val permissionStateFlow = flow {
-            emit(PermissionState.UNGRANTED)
-            delay(100L)
-            emit(PermissionState.DENIED)
-            delay(100L)
-            emit(PermissionState.GRANTED)
-        }
+            .thenReturn(intervalFlowOf(0L, 300L, false, true))
+        val permissionStateFlow = intervalFlowOf(
+            0L,
+            100L,
+            PermissionState.UNGRANTED,
+            PermissionState.DENIED,
+            PermissionState.GRANTED
+        )
         val stopDetailsFlow = flow {
             emit(null)
             delay(400L)
             emit(StopDetails("123456", null))
             delay(100L)
-            emit(StopDetails("123456", MockStopName("Name", "Locality")))
+            emit(StopDetails("123456", FakeStopName("Name", "Locality")))
         }
 
-        val observer = calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-                UiState.ERROR_PERMISSION_UNGRANTED,
-                UiState.ERROR_PERMISSION_DENIED,
-                UiState.ERROR_LOCATION_DISABLED,
-                UiState.PROGRESS,
-                UiState.CONTENT)
+        calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test {
+            assertEquals(UiState.ERROR_PERMISSION_UNGRANTED, awaitItem())
+            assertEquals(UiState.ERROR_PERMISSION_DENIED, awaitItem())
+            assertEquals(UiState.ERROR_LOCATION_DISABLED, awaitItem())
+            assertEquals(UiState.PROGRESS, awaitItem())
+            assertEquals(UiState.CONTENT, awaitItem())
+            awaitComplete()
+        }
     }
-
-    private data class MockStopName(
-        override val name: String,
-        override val locality: String?) : StopName
 }

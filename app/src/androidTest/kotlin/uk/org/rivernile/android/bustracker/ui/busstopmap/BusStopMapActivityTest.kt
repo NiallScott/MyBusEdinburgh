@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,23 +31,21 @@ import android.content.Context
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
-import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
+import androidx.test.espresso.intent.rule.IntentsRule
 import androidx.test.filters.LargeTest
 import androidx.test.rule.GrantPermissionRule
 import org.hamcrest.CoreMatchers.allOf
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Before
 import org.junit.Rule
-import org.junit.Test
 import uk.org.rivernile.android.bustracker.core.bundle.getParcelableCompat
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.edinburghbustracker.android.R
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
 
 /**
  * [android.app.Activity] test cases for [BusStopMapActivity].
@@ -58,18 +56,11 @@ import uk.org.rivernile.edinburghbustracker.android.R
 class BusStopMapActivityTest {
 
     @get:Rule
+    val intentsRule = IntentsRule()
+
+    @get:Rule
     val permissionRule: GrantPermissionRule =
-            GrantPermissionRule.grant(Manifest.permission.ACCESS_FINE_LOCATION)
-
-    @Before
-    fun setUp() {
-        Intents.init()
-    }
-
-    @After
-    fun tearDown() {
-        Intents.release()
-    }
+        GrantPermissionRule.grant(Manifest.permission.ACCESS_FINE_LOCATION)
 
     @Test
     fun startingActivityWithNoArgumentsInIntentDoesNotSetStopCodeOrLatLon() {
@@ -83,7 +74,7 @@ class BusStopMapActivityTest {
     @Test
     fun startingActivityWithStopCodeArgumentSetsStopCodeInFragment() {
         val intent = Intent(applicationContext, BusStopMapActivity::class.java)
-                .putExtra(BusStopMapActivity.EXTRA_STOP_CODE, "123456")
+            .putExtra(BusStopMapActivity.EXTRA_STOP_CODE, "123456")
 
         launchActivity<BusStopMapActivity>(intent).use { scenario ->
             scenario.onActivity { activity ->
@@ -98,8 +89,8 @@ class BusStopMapActivityTest {
     @Test
     fun startActivityWithLatLonArgumentsSetsLatLonInFragment() {
         val intent = Intent(applicationContext, BusStopMapActivity::class.java)
-                .putExtra(BusStopMapActivity.EXTRA_LATITUDE, 1.0)
-                .putExtra(BusStopMapActivity.EXTRA_LONGITUDE, 2.0)
+            .putExtra(BusStopMapActivity.EXTRA_LATITUDE, 1.0)
+            .putExtra(BusStopMapActivity.EXTRA_LONGITUDE, 2.0)
         val expectedLocation = UiLatLon(1.0, 2.0)
 
         launchActivity<BusStopMapActivity>(intent).use { scenario ->
@@ -114,7 +105,7 @@ class BusStopMapActivityTest {
     @Test
     fun startingActivityWithLatitudeButNoLongitudeArgumentsIgnoresArguments() {
         val intent = Intent(applicationContext, BusStopMapActivity::class.java)
-                .putExtra(BusStopMapActivity.EXTRA_LATITUDE, 1.0)
+            .putExtra(BusStopMapActivity.EXTRA_LATITUDE, 1.0)
 
         launchActivity<BusStopMapActivity>(intent).use { scenario ->
             scenario.onActivity { activity ->
@@ -126,7 +117,7 @@ class BusStopMapActivityTest {
     @Test
     fun startingActivityWithLongitudeButNoLatitudeArgumentsIgnoresArguments() {
         val intent = Intent(applicationContext, BusStopMapActivity::class.java)
-                .putExtra(BusStopMapActivity.EXTRA_LONGITUDE, 2.0)
+            .putExtra(BusStopMapActivity.EXTRA_LONGITUDE, 2.0)
 
         launchActivity<BusStopMapActivity>(intent).use { scenario ->
             scenario.onActivity { activity ->
@@ -143,13 +134,16 @@ class BusStopMapActivityTest {
             }
         }
 
-        intended(allOf(
+        intended(
+            allOf(
                 hasComponent(DisplayStopDataActivity::class.java.name),
-                hasExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, "123456")))
+                hasExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, "123456")
+            )
+        )
     }
 
     private val applicationContext get() = ApplicationProvider.getApplicationContext<Context>()
 
     private val BusStopMapActivity.busStopMapFragment get() =
-            supportFragmentManager.findFragmentById(R.id.fragmentContainer) as BusStopMapFragment
+        supportFragmentManager.findFragmentById(R.id.fragmentContainer) as BusStopMapFragment
 }

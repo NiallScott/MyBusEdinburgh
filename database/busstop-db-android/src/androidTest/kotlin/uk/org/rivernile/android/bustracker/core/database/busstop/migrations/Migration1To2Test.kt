@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,11 +32,11 @@ import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
-import org.junit.Before
 import org.junit.Rule
-import org.junit.Test
 import uk.org.rivernile.android.bustracker.core.database.OldDatabaseCreator
 import uk.org.rivernile.android.bustracker.core.database.busstop.RoomBusStopDatabase
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 import kotlin.test.assertTrue
 
 /**
@@ -56,11 +56,12 @@ class Migration1To2Test {
         InstrumentationRegistry.getInstrumentation(),
         RoomBusStopDatabase::class.java,
         emptyList(),
-        FrameworkSQLiteOpenHelperFactory())
+        FrameworkSQLiteOpenHelperFactory()
+    )
 
     private lateinit var oldDatabaseCreator: OldDatabaseCreator
 
-    @Before
+    @BeforeTest
     fun setUp() {
         oldDatabaseCreator = OldDatabaseCreator()
     }
@@ -653,13 +654,13 @@ class Migration1To2Test {
 
     private fun openOldDatabase(
         name: String = TEST_DB,
-        callbacks: SupportSQLiteOpenHelper.Callback = openHelperCallback) =
-        oldDatabaseCreator.openDatabase(name, callbacks)
+        callbacks: SupportSQLiteOpenHelper.Callback = openHelperCallback
+    ) = oldDatabaseCreator.openDatabase(name, callbacks)
 
     private fun runMigrationsAndValidate(
         name: String = TEST_DB,
-        validateDroppedTables: Boolean = true) =
-        helper.runMigrationsAndValidate(name, 2, validateDroppedTables, Migration1To2())
+        validateDroppedTables: Boolean = true
+    ) = helper.runMigrationsAndValidate(name, 2, validateDroppedTables, Migration1To2())
 
     private fun SupportSQLiteDatabase.assertIndicesExist() {
         query("PRAGMA index_info(service_point_index)").use {

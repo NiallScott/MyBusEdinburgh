@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,39 +26,33 @@
 
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import app.cash.turbine.test
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 /**
  * Tests for [FavouritesStateRetriever].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class FavouritesStateRetrieverTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var favouritesRepository: FavouritesRepository
 
     private lateinit var retriever: FavouritesStateRetriever
 
-    @Before
+    @BeforeTest
     fun setUp() {
         retriever = FavouritesStateRetriever(favouritesRepository)
     }
@@ -67,31 +61,34 @@ class FavouritesStateRetrieverTest {
     fun getIsAddedAsFavouriteStopEmitsNullWhenStopCodeIsNull() = runTest {
         val stopCodeFlow = flowOf(null)
 
-        val observer = retriever.getIsAddedAsFavouriteStopFlow(stopCodeFlow).test(this)
-        advanceUntilIdle()
-
-        observer.assertValues(null)
+        retriever.getIsAddedAsFavouriteStopFlow(stopCodeFlow).test {
+            assertNull(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getIsAddedAsFavouriteStopEmitsNullWhenStopCodeIsEmpty() = runTest {
         val stopCodeFlow = flowOf("")
 
-        val observer = retriever.getIsAddedAsFavouriteStopFlow(stopCodeFlow).test(this)
-        advanceUntilIdle()
-
-        observer.assertValues(null)
+        retriever.getIsAddedAsFavouriteStopFlow(stopCodeFlow).test {
+            assertNull(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getIsAddedAsFavouriteStopEmitsValuesFromFavouritesRepository() = runTest {
         val stopCodeFlow = flowOf("123456")
         whenever(favouritesRepository.isStopAddedAsFavouriteFlow("123456"))
-                .thenReturn(flowOf(false, true, false))
+            .thenReturn(flowOf(false, true, false))
 
-        val observer = retriever.getIsAddedAsFavouriteStopFlow(stopCodeFlow).test(this)
-        advanceUntilIdle()
-
-        observer.assertValues(null, false, true, false)
+        retriever.getIsAddedAsFavouriteStopFlow(stopCodeFlow).test {
+            assertNull(awaitItem())
+            assertEquals(false, awaitItem())
+            assertEquals(true, awaitItem())
+            assertEquals(false, awaitItem())
+            awaitComplete()
+        }
     }
 }
