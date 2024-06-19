@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,7 +39,8 @@ import javax.inject.Inject
  */
 internal class ServiceMapper @Inject constructor(
     private val vehicleMapper: VehicleMapper,
-    private val serviceNameFixer: ServiceNameFixer) {
+    private val serviceNameFixer: ServiceNameFixer
+) {
 
     /**
      * Given a [BusTime] object, extract the data from it required to build a [Service] object.
@@ -58,12 +59,14 @@ internal class ServiceMapper @Inject constructor(
             ?.takeIf { it.isNotEmpty() }
             ?.let { services ->
                 serviceNameFixer.correctServiceName(busTime.mnemoService)?.let { serviceName ->
-                    Service(serviceName,
+                    Service(
+                        serviceName,
                         services,
                         busTime.operatorId,
                         busTime.nameService,
                         busTime.serviceDisruption ?: false,
-                        busTime.serviceDiversion ?: false)
+                        busTime.serviceDiversion ?: false
+                    )
                 }
             }
 }

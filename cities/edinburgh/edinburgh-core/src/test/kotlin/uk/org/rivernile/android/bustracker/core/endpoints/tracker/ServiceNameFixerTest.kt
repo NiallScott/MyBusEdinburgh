@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,19 +26,16 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.junit.MockitoJUnitRunner
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 /**
  * Tests for [ServiceNameFixer].
  *
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner::class)
 class ServiceNameFixerTest {
 
     companion object {
@@ -48,7 +45,7 @@ class ServiceNameFixerTest {
 
     private lateinit var serviceNameFixer: ServiceNameFixer
 
-    @Before
+    @BeforeTest
     fun setUp() {
         serviceNameFixer = ServiceNameFixer()
     }

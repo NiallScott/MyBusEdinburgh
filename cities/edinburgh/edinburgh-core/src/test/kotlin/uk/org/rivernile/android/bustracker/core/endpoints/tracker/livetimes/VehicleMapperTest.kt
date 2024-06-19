@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,16 +26,16 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Before
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.edinburghbustrackerapi.bustimes.TimeData
 import java.util.Date
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 /**
  * Tests for [VehicleMapper].
@@ -53,7 +53,7 @@ internal class VehicleMapperTest {
 
     private lateinit var vehicleMapper: VehicleMapper
 
-    @Before
+    @BeforeTest
     fun setUp() {
         vehicleMapper = VehicleMapper(departureTimeCalculator)
     }
@@ -85,7 +85,8 @@ internal class VehicleMapperTest {
             isDelayed = false,
             isDiverted = false,
             isTerminus = false,
-            isPartRoute = false)
+            isPartRoute = false
+        )
 
         val result = vehicleMapper.mapToVehicle(timeData)
 
@@ -115,7 +116,8 @@ internal class VehicleMapperTest {
             isDelayed = false,
             isDiverted = false,
             isTerminus = false,
-            isPartRoute = false)
+            isPartRoute = false
+        )
 
         val result = vehicleMapper.mapToVehicle(timeData)
 
@@ -141,7 +143,8 @@ internal class VehicleMapperTest {
             isDelayed = false,
             isDiverted = false,
             isTerminus = false,
-            isPartRoute = false)
+            isPartRoute = false
+        )
 
         val result = vehicleMapper.mapToVehicle(timeData)
 
@@ -167,7 +170,8 @@ internal class VehicleMapperTest {
             isDelayed = true,
             isDiverted = false,
             isTerminus = false,
-            isPartRoute = false)
+            isPartRoute = false
+        )
 
         val result = vehicleMapper.mapToVehicle(timeData)
 
@@ -193,7 +197,8 @@ internal class VehicleMapperTest {
             isDelayed = false,
             isDiverted = true,
             isTerminus = false,
-            isPartRoute = false)
+            isPartRoute = false
+        )
 
         val result = vehicleMapper.mapToVehicle(timeData)
 
@@ -219,7 +224,8 @@ internal class VehicleMapperTest {
             isDelayed = false,
             isDiverted = false,
             isTerminus = true,
-            isPartRoute = false)
+            isPartRoute = false
+        )
 
         val result = vehicleMapper.mapToVehicle(timeData)
 
@@ -245,7 +251,8 @@ internal class VehicleMapperTest {
             isDelayed = false,
             isDiverted = false,
             isTerminus = false,
-            isPartRoute = true)
+            isPartRoute = true
+        )
 
         val result = vehicleMapper.mapToVehicle(timeData)
 
@@ -257,12 +264,12 @@ internal class VehicleMapperTest {
         val reliability = arrayOf(
             TimeData.RELIABILITY_ESTIMATED_TIME,
             TimeData.RELIABILITY_DELAYED,
-            TimeData.RELIABILITY_DIVERTED)
-            .joinToString("")
+            TimeData.RELIABILITY_DIVERTED
+        ).joinToString("")
         val type = arrayOf(
             TimeData.TYPE_TERMINUS_STOP,
-            TimeData.TYPE_PART_ROUTE)
-            .joinToString("")
+            TimeData.TYPE_PART_ROUTE
+        ).joinToString("")
         whenever(timeData.minutes)
             .thenReturn(5)
         whenever(timeData.nameDest)
@@ -288,7 +295,8 @@ internal class VehicleMapperTest {
             isDelayed = true,
             isDiverted = true,
             isTerminus = true,
-            isPartRoute = true)
+            isPartRoute = true
+        )
 
         val result = vehicleMapper.mapToVehicle(timeData)
 

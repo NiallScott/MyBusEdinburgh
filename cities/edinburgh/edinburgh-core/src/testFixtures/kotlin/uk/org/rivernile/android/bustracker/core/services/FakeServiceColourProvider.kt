@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,19 +24,17 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.edinburgh.di
-
-import dagger.Module
+package uk.org.rivernile.android.bustracker.core.services
 
 /**
- * This [Module] is the root module for the Edinburgh library.
+ * A fake [ServiceColourProvider] for tests.
  *
  * @author Niall Scott
  */
-@Module(
-    includes = [
-        BusTrackerModule::class,
-        UtilModule::class
-    ]
-)
-interface EdinburghCoreModule
+class FakeServiceColourProvider(
+    private val onNightServiceColour: () -> Int = { throw NotImplementedError() }
+) : ServiceColourProvider {
+
+    override val nightServiceColour: Int
+        get() = onNightServiceColour()
+}

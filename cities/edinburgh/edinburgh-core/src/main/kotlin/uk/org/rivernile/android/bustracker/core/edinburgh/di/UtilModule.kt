@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -48,17 +48,20 @@ internal interface UtilModule {
     @Suppress("unused")
     @Binds
     fun bindIsNightServiceDetector(
-        edinburghIsNightServiceDetector: EdinburghIsNightServiceDetector): IsNightServiceDetector
+        edinburghIsNightServiceDetector: EdinburghIsNightServiceDetector
+    ): IsNightServiceDetector
 
     @Suppress("unused")
     @Binds
     fun bindBuildConfiguration(
-        edinburghBuildConfiguration: EdinburghBuildConfiguration): BuildConfiguration
+        edinburghBuildConfiguration: EdinburghBuildConfiguration
+    ): BuildConfiguration
 
     @Suppress("unused")
     @Binds
     fun bindServiceColourOverride(
-        edinburghServiceColourOverride: EdinburghServiceColourOverride): ServiceColourOverride
+        edinburghServiceColourOverride: EdinburghServiceColourOverride
+    ): ServiceColourOverride
 
     companion object {
 

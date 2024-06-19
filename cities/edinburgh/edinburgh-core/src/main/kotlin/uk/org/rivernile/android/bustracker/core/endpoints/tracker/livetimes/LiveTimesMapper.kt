@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,7 +43,8 @@ import javax.inject.Inject
 internal class LiveTimesMapper @Inject constructor(
     private val errorMapper: ErrorMapper,
     private val serviceMapper: ServiceMapper,
-    private val timeUtils: TimeUtils) {
+    private val timeUtils: TimeUtils
+) {
 
     /**
      * Given a [BusTimes] response object from the tracker service, map this in to our app-specific
@@ -73,7 +74,8 @@ internal class LiveTimesMapper @Inject constructor(
                                 TempStop(
                                     stopCode,
                                     busTime.stopName,
-                                    busTime.busStopDisruption ?: false)
+                                    busTime.busStopDisruption ?: false
+                                )
                             }.apply {
                                 services.add(service)
                             }
@@ -108,7 +110,8 @@ internal class LiveTimesMapper @Inject constructor(
      */
     fun emptyLiveTimes(): LiveTimesResponse =
         LiveTimesResponse.Success(
-            emptyLiveTimes(timeUtils.currentTimeMills, false))
+            emptyLiveTimes(timeUtils.currentTimeMills, false)
+        )
 
     /**
      * Produce an instance of [LiveTimes] which does not contain any live departures. That is, its
@@ -132,7 +135,8 @@ internal class LiveTimesMapper @Inject constructor(
     private data class TempStop(
         var stopCode: String,
         var stopName: String?,
-        var isDisrupted: Boolean) {
+        var isDisrupted: Boolean
+    ) {
 
         /**
          * A [MutableList] to store services in.

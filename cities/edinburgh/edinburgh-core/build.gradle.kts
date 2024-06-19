@@ -27,6 +27,7 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.kapt)
+    `java-test-fixtures`
 }
 
 dependencies {
@@ -59,4 +60,5 @@ dependencies {
 
     // Tests
     testImplementation(project(":testutils"))
+    testImplementation(libs.kotlin.test.junit)
 }

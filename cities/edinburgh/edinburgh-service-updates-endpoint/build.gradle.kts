@@ -28,6 +28,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.kotlin.serialization)
+    `java-test-fixtures`
 }
 
 dependencies {
@@ -54,6 +55,7 @@ dependencies {
     implementation(libs.kotlin.datetime)
 
     // Test dependencies
+    testImplementation(testFixtures(project(":core:logging")))
     testImplementation(libs.coroutines.test)
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)

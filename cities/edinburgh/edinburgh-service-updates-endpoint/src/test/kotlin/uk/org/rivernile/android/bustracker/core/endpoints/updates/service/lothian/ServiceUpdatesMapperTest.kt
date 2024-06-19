@@ -27,10 +27,10 @@
 package uk.org.rivernile.android.bustracker.core.endpoints.updates.service.lothian
 
 import kotlinx.datetime.Instant
-import org.junit.Before
-import org.junit.Test
 import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdate
 import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdateType
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
@@ -46,7 +46,7 @@ class ServiceUpdatesMapperTest {
     private val createdTime = Instant.parse("2024-02-13T09:08:25+00:00")
     private val modifiedTime = Instant.parse("2024-02-14T15:24:26+00:00")
 
-    @Before
+    @BeforeTest
     fun setUp() {
         mapper = ServiceUpdatesMapper()
     }

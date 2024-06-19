@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,10 +29,6 @@ package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.SerializationException
 import okio.IOException
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -44,9 +40,11 @@ import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Live
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.edinburghbustrackerapi.ApiKeyGenerator
 import uk.org.rivernile.edinburghbustrackerapi.EdinburghBusTrackerApi
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [EdinburghTrackerEndpoint].
@@ -60,9 +58,6 @@ class EdinburghTrackerEndpointTest {
 
         private const val MOCK_API_KEY = "api_key"
     }
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var api: EdinburghBusTrackerApi
@@ -81,7 +76,7 @@ class EdinburghTrackerEndpointTest {
 
     private lateinit var endpoint: EdinburghTrackerEndpoint
 
-    @Before
+    @BeforeTest
     fun setUp() {
         endpoint = EdinburghTrackerEndpoint(
             api,
@@ -90,7 +85,8 @@ class EdinburghTrackerEndpointTest {
             errorMapper,
             responseHandler,
             connectivityRepository,
-            exceptionLogger)
+            exceptionLogger
+        )
     }
 
     @Test

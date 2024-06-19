@@ -42,6 +42,7 @@ dependencies {
     implementation(libs.kotlin.datetime)
 
     // Test dependencies
+    testImplementation(testFixtures(project(":cities:edinburgh:edinburgh-service-updates-endpoint")))
     testImplementation(libs.coroutines.test)
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)

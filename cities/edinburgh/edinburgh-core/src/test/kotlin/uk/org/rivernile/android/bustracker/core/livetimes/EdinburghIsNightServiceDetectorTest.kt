@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,10 +26,10 @@
 
 package uk.org.rivernile.android.bustracker.core.livetimes
 
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 /**
  * Tests for [EdinburghIsNightServiceDetector].
@@ -40,7 +40,7 @@ class EdinburghIsNightServiceDetectorTest {
 
     private lateinit var detector: EdinburghIsNightServiceDetector
 
-    @Before
+    @BeforeTest
     fun setUp() {
         detector = EdinburghIsNightServiceDetector()
     }

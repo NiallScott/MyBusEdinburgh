@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,9 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -40,6 +37,9 @@ import uk.org.rivernile.android.bustracker.core.endpoints.tracker.ErrorMapper
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import uk.org.rivernile.edinburghbustrackerapi.bustimes.BusTime
 import uk.org.rivernile.edinburghbustrackerapi.bustimes.BusTimes
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [LiveTimesMapper].
@@ -75,12 +75,13 @@ internal class LiveTimesMapperTest {
 
     private lateinit var liveTimesMapper: LiveTimesMapper
 
-    @Before
+    @BeforeTest
     fun setUp() {
         liveTimesMapper = LiveTimesMapper(
             errorMapper,
             serviceMapper,
-            timeUtils)
+            timeUtils
+        )
     }
 
     @Test
@@ -179,7 +180,9 @@ internal class LiveTimesMapperTest {
             LiveTimes(
                 mapOf(TEST_STOP_CODE to expectedStop),
                 TEST_TIMESTAMP,
-                true))
+                true
+            )
+        )
 
         val result = liveTimesMapper.mapToLiveTimes(busTimes)
 
@@ -200,20 +203,26 @@ internal class LiveTimesMapperTest {
         givenBusTimeIsSetUpWithValues(busTime1, TEST_STOP_CODE, TEST_STOP_NAME)
         givenBusTimeIsSetUpWithValues(busTime2, TEST_STOP_CODE, TEST_STOP_NAME)
         givenBusTimeIsSetUpWithValues(busTime3, TEST_STOP_CODE, TEST_STOP_NAME)
-        givenServiceMapperReturnsMappings(mapOf(
-            busTime1 to service1,
-            busTime2 to service2,
-            busTime3 to service3))
+        givenServiceMapperReturnsMappings(
+            mapOf(
+                busTime1 to service1,
+                busTime2 to service2,
+                busTime3 to service3
+            )
+        )
         val expectedStop = Stop(
             TEST_STOP_CODE,
             TEST_STOP_NAME,
             listOf(service1, service2, service3),
-            true)
+            true
+        )
         val expectedLiveTimes = LiveTimesResponse.Success(
             LiveTimes(
                 mapOf(TEST_STOP_CODE to expectedStop),
                 TEST_TIMESTAMP,
-                true))
+                true
+            )
+        )
 
         val result = liveTimesMapper.mapToLiveTimes(busTimes)
 
@@ -242,25 +251,31 @@ internal class LiveTimesMapperTest {
             TEST_STOP_CODE,
             TEST_STOP_NAME,
             listOf(service1),
-            true)
+            true
+        )
         val expectedStop2 = Stop(
             TEST_STOP_CODE_2,
             TEST_STOP_NAME_2,
             listOf(service2),
-            true)
+            true
+        )
         val expectedStop3 = Stop(
             TEST_STOP_CODE_3,
             null,
             listOf(service3),
-            true)
+            true
+        )
         val expectedLiveTimes = LiveTimesResponse.Success(
             LiveTimes(
                 mapOf(
                     TEST_STOP_CODE to expectedStop1,
                     TEST_STOP_CODE_2 to expectedStop2,
-                    TEST_STOP_CODE_3 to expectedStop3),
+                    TEST_STOP_CODE_3 to expectedStop3
+                ),
                 TEST_TIMESTAMP,
-                true))
+                true
+            )
+        )
 
         val result = liveTimesMapper.mapToLiveTimes(busTimes)
 
@@ -286,29 +301,37 @@ internal class LiveTimesMapperTest {
         givenBusTimeIsSetUpWithValues(busTime3, TEST_STOP_CODE_3, null)
         givenBusTimeIsSetUpWithValues(busTime4, TEST_STOP_CODE, TEST_STOP_NAME)
         givenBusTimeIsSetUpWithValues(busTime5, TEST_STOP_CODE, TEST_STOP_NAME)
-        givenServiceMapperReturnsMappings(mapOf(
-            busTime1 to service1,
-            busTime2 to null,
-            busTime3 to service3,
-            busTime4 to service4,
-            busTime5 to service5))
+        givenServiceMapperReturnsMappings(
+            mapOf(
+                busTime1 to service1,
+                busTime2 to null,
+                busTime3 to service3,
+                busTime4 to service4,
+                busTime5 to service5
+            )
+        )
         val expectedStop1 = Stop(
             TEST_STOP_CODE,
             TEST_STOP_NAME,
             listOf(service1, service4, service5),
-            true)
+            true
+        )
         val expectedStop2 = Stop(
             TEST_STOP_CODE_3,
             null,
             listOf(service3),
-            true)
+            true
+        )
         val expectedLiveTimes = LiveTimesResponse.Success(
             LiveTimes(
                 mapOf(
                     TEST_STOP_CODE to expectedStop1,
-                    TEST_STOP_CODE_3 to expectedStop2),
+                    TEST_STOP_CODE_3 to expectedStop2
+                ),
                 TEST_TIMESTAMP,
-                true))
+                true
+            )
+        )
 
         val result = liveTimesMapper.mapToLiveTimes(busTimes)
 

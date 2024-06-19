@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -54,17 +54,20 @@ internal class EdinburghTrackerEndpoint @Inject constructor(
     private val errorMapper: ErrorMapper,
     private val responseHandler: ResponseHandler,
     private val connectivityRepository: ConnectivityRepository,
-    private val exceptionLogger: ExceptionLogger): TrackerEndpoint {
+    private val exceptionLogger: ExceptionLogger
+): TrackerEndpoint {
 
     override suspend fun getLiveTimes(
         stopCode: String,
-        numberOfDepartures: Int): LiveTimesResponse {
+        numberOfDepartures: Int
+    ): LiveTimesResponse {
         return if (connectivityRepository.hasInternetConnectivity) {
             try {
                 val response = api.getBusTimes(
                     apiKeyGenerator.hashedApiKey,
                     numberOfDepartures,
-                    stopCode)
+                    stopCode
+                )
 
                 responseHandler.handleLiveTimesResponse(response)
             } catch (e: IOException) {
@@ -81,7 +84,8 @@ internal class EdinburghTrackerEndpoint @Inject constructor(
 
     override suspend fun getLiveTimes(
         stopCodes: List<String>,
-        numberOfDepartures: Int): LiveTimesResponse {
+        numberOfDepartures: Int
+    ): LiveTimesResponse {
         return if (connectivityRepository.hasInternetConnectivity) {
             try {
                 val response = api.getBusTimes(
@@ -91,7 +95,8 @@ internal class EdinburghTrackerEndpoint @Inject constructor(
                     stopCodes.getOrNull(1),
                     stopCodes.getOrNull(2),
                     stopCodes.getOrNull(3),
-                    stopCodes.getOrNull(4))
+                    stopCodes.getOrNull(4)
+                )
 
                 responseHandler.handleLiveTimesResponse(response)
             } catch (e: IOException) {

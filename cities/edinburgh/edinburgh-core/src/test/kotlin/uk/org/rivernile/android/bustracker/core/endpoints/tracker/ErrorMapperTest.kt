@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,10 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Before
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -38,6 +34,10 @@ import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Live
 import uk.org.rivernile.edinburghbustrackerapi.FaultCode
 import uk.org.rivernile.edinburghbustrackerapi.bustimes.BusTimes
 import java.net.HttpURLConnection
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 /**
  * Tests for [ErrorMapper].
@@ -52,7 +52,7 @@ class ErrorMapperTest {
 
     private lateinit var errorMapper: ErrorMapper
 
-    @Before
+    @BeforeTest
     fun setUp() {
         errorMapper = ErrorMapper()
     }
@@ -60,7 +60,7 @@ class ErrorMapperTest {
     @Test
     fun nullFaultCodeMeansNoErrorIsReturned() {
         whenever(busTimes.faultCode)
-                .thenReturn(null)
+            .thenReturn(null)
 
         val result = errorMapper.extractError(busTimes)
 
@@ -70,7 +70,7 @@ class ErrorMapperTest {
     @Test
     fun unknownFaultCodeMeansGenericErrorIsReturned() {
         whenever(busTimes.faultCode)
-                .thenReturn("unknown")
+            .thenReturn("unknown")
 
         val result = errorMapper.extractError(busTimes)
 
@@ -80,7 +80,7 @@ class ErrorMapperTest {
     @Test
     fun invalidAppKeyErrorMeansAuthenticationExceptionIsReturned() {
         whenever(busTimes.faultCode)
-                .thenReturn(FaultCode.INVALID_APP_KEY.name)
+            .thenReturn(FaultCode.INVALID_APP_KEY.name)
 
         val result = errorMapper.extractError(busTimes)
 
@@ -90,7 +90,7 @@ class ErrorMapperTest {
     @Test
     fun invalidParameterErrorMeansServerErrorExceptionIsReturned() {
         whenever(busTimes.faultCode)
-                .thenReturn(FaultCode.INVALID_PARAMETER.name)
+            .thenReturn(FaultCode.INVALID_PARAMETER.name)
 
         val result = errorMapper.extractError(busTimes)
 
@@ -100,7 +100,7 @@ class ErrorMapperTest {
     @Test
     fun processingErrorMeansServerErrorExceptionIsReturned() {
         whenever(busTimes.faultCode)
-                .thenReturn(FaultCode.PROCESSING_ERROR.name)
+            .thenReturn(FaultCode.PROCESSING_ERROR.name)
 
         val result = errorMapper.extractError(busTimes)
 
@@ -110,7 +110,7 @@ class ErrorMapperTest {
     @Test
     fun systemMaintenanceErrorMeansMaintenanceExceptionIsReturned() {
         whenever(busTimes.faultCode)
-                .thenReturn(FaultCode.SYSTEM_MAINTENANCE.name)
+            .thenReturn(FaultCode.SYSTEM_MAINTENANCE.name)
 
         val result = errorMapper.extractError(busTimes)
 
@@ -120,7 +120,7 @@ class ErrorMapperTest {
     @Test
     fun systemOverloadedErrorMeansSystemOverloadedExceptionIsReturned() {
         whenever(busTimes.faultCode)
-                .thenReturn(FaultCode.SYSTEM_OVERLOADED.name)
+            .thenReturn(FaultCode.SYSTEM_OVERLOADED.name)
 
         val result = errorMapper.extractError(busTimes)
 

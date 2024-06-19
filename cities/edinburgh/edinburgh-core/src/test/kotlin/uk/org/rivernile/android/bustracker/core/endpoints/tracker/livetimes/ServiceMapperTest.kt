@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,10 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Before
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -39,6 +35,10 @@ import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.ServiceNameFixer
 import uk.org.rivernile.edinburghbustrackerapi.bustimes.BusTime
 import uk.org.rivernile.edinburghbustrackerapi.bustimes.TimeData
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 /**
  * Tests for [ServiceMapper].
@@ -66,7 +66,7 @@ internal class ServiceMapperTest {
 
     private lateinit var serviceMapper: ServiceMapper
 
-    @Before
+    @BeforeTest
     fun setUp() {
         serviceMapper = ServiceMapper(vehicleMapper, serviceNameFixer)
     }
@@ -124,7 +124,8 @@ internal class ServiceMapperTest {
             null,
             null,
             isDisrupted = false,
-            isDiverted = false)
+            isDiverted = false
+        )
 
         val result = serviceMapper.mapToService(busTime)
 
@@ -149,7 +150,8 @@ internal class ServiceMapperTest {
             null,
             null,
             isDisrupted = false,
-            isDiverted = false)
+            isDiverted = false
+        )
 
         val result = serviceMapper.mapToService(busTime)
 
@@ -174,7 +176,8 @@ internal class ServiceMapperTest {
             null,
             null,
             isDisrupted = false,
-            isDiverted = false)
+            isDiverted = false
+        )
 
         val result = serviceMapper.mapToService(busTime)
 
@@ -197,7 +200,8 @@ internal class ServiceMapperTest {
             null,
             null,
             isDisrupted = false,
-            isDiverted = false)
+            isDiverted = false
+        )
 
         val result = serviceMapper.mapToService(busTime)
 
@@ -220,7 +224,8 @@ internal class ServiceMapperTest {
             null,
             null,
             isDisrupted = false,
-            isDiverted = false)
+            isDiverted = false
+        )
 
         val result = serviceMapper.mapToService(busTime)
 
@@ -251,7 +256,8 @@ internal class ServiceMapperTest {
             "Operator",
             "A -> B",
             isDisrupted = true,
-            isDiverted = true)
+            isDiverted = true
+        )
 
         val result = serviceMapper.mapToService(busTime)
 
@@ -276,7 +282,8 @@ internal class ServiceMapperTest {
             null,
             null,
             isDisrupted = false,
-            isDiverted = false)
+            isDiverted = false
+        )
 
         val result = serviceMapper.mapToService(busTime)
 
