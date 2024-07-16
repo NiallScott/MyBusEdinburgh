@@ -85,8 +85,9 @@ dependencies {
 
     // Test dependencies
     androidTestImplementation(project(":database:database-test-android"))
-    androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.room.test)
+    androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.kotlin.test.junit)
 
     testImplementation(libs.junit)

@@ -29,16 +29,16 @@ package uk.org.rivernile.android.bustracker.core.database.busstop
 import android.database.SQLException
 import android.database.sqlite.SQLiteDatabase
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
+import androidx.test.ext.junit.rules.DeleteFilesRule
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.IOException
+import org.junit.Rule
 import uk.org.rivernile.android.bustracker.core.database.busstop.migrations.Migration1To2
 import uk.org.rivernile.android.bustracker.core.log.FakeExceptionLogger
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -57,19 +57,10 @@ class DownloadedDatabasePreparerTest {
         private const val DB_NAME = "downloaded-database-preparer-test"
     }
 
+    @get:Rule
+    val deleteFilesRule = DeleteFilesRule()
+
     private val exceptionLogger = FakeExceptionLogger()
-
-    @BeforeTest
-    fun setUp() {
-        // This is done at the starting of the test to ensure we start with a clean slate.
-        deleteExistingDatabase()
-    }
-
-    @AfterTest
-    fun tearDown() {
-        // This is done again at the end of the test to clean up.
-        deleteExistingDatabase()
-    }
 
     @Test
     fun prepareDownloadedDatabaseReturnsFalseWhenDatabaseFileDoesNotExist() = runTest {
@@ -326,10 +317,6 @@ class DownloadedDatabasePreparerTest {
     }
 
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
-
-    private fun deleteExistingDatabase() {
-        context.deleteDatabase(DB_NAME)
-    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun TestScope.createDownloadedDatabasePreparer(): DownloadedDatabasePreparer {

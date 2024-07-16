@@ -5,7 +5,7 @@ android-sdk-min = "23"
 android-sdk-target = "34"
 android-build-tools = "34.0.0"
 
-android-gradle-plugin = "8.5.0"
+android-gradle-plugin = "8.5.1"
 coroutines = "1.8.1"
 dagger = "2.51.1"
 kotlin = "1.9.24"
@@ -16,14 +16,14 @@ retrofit = "2.11.0"
 androidx-activity = "1.9.0"
 androidx-benchmark = "1.2.4"
 androidx-compose-compiler = "1.5.14"
-androidx-fragment = "1.8.0"
+androidx-fragment = "1.8.1"
 androidx-hilt = "1.2.0"
-androidx-lifecycle = "2.8.2"
+androidx-lifecycle = "2.8.3"
 androidx-room = "2.6.1"
 androidx-work = "2.9.0"
 
 # Testing versions.
-espresso = "3.5.1"
+espresso = "3.6.1"
 mockito = "5.12.0"
 
 [libraries]
@@ -90,7 +90,7 @@ material = { module = "com.google.android.material:material", version = "1.12.0"
 material-compose = { module = "androidx.compose.material3:material3" }
 
 # Firebase
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "33.1.0" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "33.1.2" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 
 # Play Services
@@ -110,12 +110,12 @@ androidx-compose-ui-test = { module = "androidx.compose.ui:ui-test-junit4" }
 androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 androidx-fragment-testing = { module = "androidx.fragment:fragment-testing", version.ref = "androidx-fragment" }
 androidx-room-test = { module = "androidx.room:room-testing", version.ref = "androidx-room" }
-androidx-test-core = { module = "androidx.test:core-ktx", version = "1.5.0" }
+androidx-test-core = { module = "androidx.test:core-ktx", version = "1.6.1" }
 androidx-test-espresso = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso" }
 androidx-test-espresso-intents = { module = "androidx.test.espresso:espresso-intents", version.ref = "espresso" }
-androidx-test-junit = { module = "androidx.test.ext:junit", version = "1.1.5" }
-androidx-test-monitor = { module = "androidx.test:monitor", version = "1.6.1" }
-androidx-test-runner = { module = "androidx.test:runner", version = "1.5.2" }
+androidx-test-junit = { module = "androidx.test.ext:junit", version = "1.2.1" }
+androidx-test-monitor = { module = "androidx.test:monitor", version = "1.7.1" }
+androidx-test-runner = { module = "androidx.test:runner", version = "1.6.1" }
 androidx-work-test = { module = "androidx.work:work-testing", version.ref = "androidx-work" }
 coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 hilt-test = { module = "com.google.dagger:hilt-android-testing", version.ref = "dagger" }
@@ -124,7 +124,7 @@ kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version
 mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-android = { module = "org.mockito:mockito-android", version.ref = "mockito" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "5.3.1" }
-mockk-android = { module =  "io.mockk:mockk-android", version = "1.13.11" }
+mockk-android = { module =  "io.mockk:mockk-android", version = "1.13.12" }
 turbine = { module = "app.cash.turbine:turbine", version = "1.1.0" }
 
 [plugins]
@@ -133,7 +133,7 @@ android-library = { id = "com.android.library", version.ref = "android-gradle-pl
 android-test = { id = "com.android.test", version.ref = "android-gradle-plugin" }
 androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "androidx-benchmark" }
 firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.0.0" }
-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.1" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.2" }
 google-services = { id = "com.google.gms.google-services", version = "4.4.2" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

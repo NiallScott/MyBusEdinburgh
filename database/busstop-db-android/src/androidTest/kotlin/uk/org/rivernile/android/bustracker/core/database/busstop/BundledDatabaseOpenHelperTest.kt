@@ -30,11 +30,12 @@ import android.database.SQLException
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
+import androidx.test.ext.junit.rules.DeleteFilesRule
 import androidx.test.platform.app.InstrumentationRegistry
 import okio.IOException
 import okio.use
+import org.junit.Rule
 import uk.org.rivernile.android.bustracker.core.log.FakeExceptionLogger
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -54,15 +55,15 @@ class BundledDatabaseOpenHelperTest {
         private const val ASSET_PREPACKAGED_DATABASE_PATH = "busstops10.db"
     }
 
+    @get:Rule
+    val deleteFilesRule = DeleteFilesRule()
+
     private val exceptionLogger = FakeExceptionLogger()
 
     private lateinit var openHelper: BundledDatabaseOpenHelper
 
     @BeforeTest
     fun setUp() {
-        // This is done at the starting of the test to ensure we start with a clean slate.
-        deleteExistingDatabase()
-
         val dbConfiguration = SupportSQLiteOpenHelper.Configuration
             .builder(context)
             .name(DB_NAME)
@@ -90,12 +91,6 @@ class BundledDatabaseOpenHelperTest {
             databaseOpener,
             exceptionLogger
         )
-    }
-
-    @AfterTest
-    fun tearDown() {
-        // This is done again at the end of the test to clean up.
-        deleteExistingDatabase()
     }
 
     @Test
@@ -426,10 +421,6 @@ class BundledDatabaseOpenHelperTest {
         }
 
         assertTrue(exceptionLogger.loggedThrowables.isEmpty())
-    }
-
-    private fun deleteExistingDatabase() {
-        context.deleteDatabase(DB_NAME)
     }
 
     private fun SupportSQLiteDatabase.ensureExtractedDatabaseLooksSane() {

@@ -30,8 +30,8 @@ import androidx.room.Room
 import androidx.room.testing.MigrationTestHelper
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
+import androidx.test.ext.junit.rules.DeleteFilesRule
 import androidx.test.platform.app.InstrumentationRegistry
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -58,16 +58,14 @@ class SettingsDatabaseCallbackTest {
         FrameworkSQLiteOpenHelperFactory()
     )
 
+    @get:Rule
+    val deleteFilesRule = DeleteFilesRule()
+
     private lateinit var callback: SettingsDatabaseCallback
 
     @Before
     fun setUp() {
         callback = SettingsDatabaseCallback()
-    }
-
-    @After
-    fun tearDown() {
-        InstrumentationRegistry.getInstrumentation().targetContext.deleteDatabase(TEST_DB)
     }
 
     @Test
