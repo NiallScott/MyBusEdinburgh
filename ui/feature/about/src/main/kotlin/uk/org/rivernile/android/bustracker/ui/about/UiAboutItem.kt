@@ -32,7 +32,7 @@ import java.util.Date
  *
  * @author Niall Scott
  */
-sealed interface UiAboutItem {
+internal sealed interface UiAboutItem {
 
     /**
      * Is the item clickable?

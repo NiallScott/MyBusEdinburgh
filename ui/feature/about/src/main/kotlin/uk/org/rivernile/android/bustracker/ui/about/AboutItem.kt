@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.about
 
+import android.content.res.Configuration
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
@@ -222,7 +223,20 @@ private fun UiAboutItem.TwoLinesItem.captionText(dateFormat: DateFormat): String
     }
 }
 
-@Preview(name = "One line about item")
+@Preview(
+    name = "One line about item - light",
+    group = "One line about item",
+    showBackground = true,
+    backgroundColor = 0xFFFFFFFF,
+    uiMode = Configuration.UI_MODE_NIGHT_NO
+)
+@Preview(
+    name = "One line about item - dark",
+    group = "One line about item",
+    showBackground = true,
+    backgroundColor = 0xFF000000,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
 @Composable
 private fun AboutItem1LinePreview() {
     MyBusTheme {
@@ -233,7 +247,20 @@ private fun AboutItem1LinePreview() {
     }
 }
 
-@Preview(name = "Two lines about item")
+@Preview(
+    name = "Two lines about item - light",
+    group = "Two lines about item",
+    showBackground = true,
+    backgroundColor = 0xFFFFFFFF,
+    uiMode = Configuration.UI_MODE_NIGHT_NO
+)
+@Preview(
+    name = "Two lines about item - dark",
+    group = "Two lines about item",
+    showBackground = true,
+    backgroundColor = 0xFF000000,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
 @Composable
 private fun AboutItem2LinePreview() {
     MyBusTheme {

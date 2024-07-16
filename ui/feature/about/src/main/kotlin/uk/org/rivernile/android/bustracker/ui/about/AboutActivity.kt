@@ -286,20 +286,10 @@ private val UiAboutItem.contentType: Int get() {
     name = "About screen (light)",
     uiMode = Configuration.UI_MODE_NIGHT_NO
 )
-@Composable
-private fun AboutScreenLightPreview() {
-    AboutScreenPreview()
-}
-
 @Preview(
     name = "About screen (dark)",
     uiMode = Configuration.UI_MODE_NIGHT_YES
 )
-@Composable
-private fun AboutScreenDarkPreview() {
-    AboutScreenPreview()
-}
-
 @Composable
 private fun AboutScreenPreview() {
     MyBusTheme {

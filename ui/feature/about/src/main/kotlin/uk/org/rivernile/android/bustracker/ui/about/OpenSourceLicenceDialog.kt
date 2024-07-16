@@ -82,20 +82,10 @@ internal fun OpenSourceLicenceDialog(
     name = "Open Source Licences Dialog (light)",
     uiMode = Configuration.UI_MODE_NIGHT_NO
 )
-@Composable
-private fun OpenSourceLicencesDialogLightPreview() {
-    OpenSourceLicenceDialogPreview()
-}
-
 @Preview(
     name = "Open Source Licences Dialog (dark)",
     uiMode = Configuration.UI_MODE_NIGHT_YES
 )
-@Composable
-private fun OpenSourceLicencesDialogDarkPreview() {
-    OpenSourceLicenceDialogPreview()
-}
-
 @Composable
 private fun OpenSourceLicenceDialogPreview() {
     MyBusTheme {

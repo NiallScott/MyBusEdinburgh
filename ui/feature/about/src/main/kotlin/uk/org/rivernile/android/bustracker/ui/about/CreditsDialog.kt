@@ -83,20 +83,10 @@ internal fun CreditsDialog(
     name = "Credits Dialog (light)",
     uiMode = Configuration.UI_MODE_NIGHT_NO
 )
-@Composable
-private fun CreditsDialogLightPreview() {
-    CreditsDialogPreview()
-}
-
 @Preview(
     name = "Credits Dialog (dark)",
     uiMode = Configuration.UI_MODE_NIGHT_YES
 )
-@Composable
-private fun CreditsDialogDarkPreview() {
-    CreditsDialogPreview()
-}
-
 @Composable
 private fun CreditsDialogPreview() {
     MyBusTheme {

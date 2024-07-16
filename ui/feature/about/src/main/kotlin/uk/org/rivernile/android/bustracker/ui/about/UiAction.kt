@@ -31,7 +31,7 @@ package uk.org.rivernile.android.bustracker.ui.about
  *
  * @author Niall Scott
  */
-sealed interface UiAction {
+internal sealed interface UiAction {
 
     /** The privacy policy should be shown. */
     data object ShowPrivacyPolicy : UiAction
