@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -110,7 +110,12 @@ class BusTimesFragment : Fragment() {
             recyclerView.adapter = adapter
 
             swipeRefreshLayout.apply {
-                setColorSchemeColors(MaterialColors.getColor(this, R.attr.colorPrimary))
+                setColorSchemeColors(
+                    MaterialColors.getColor(
+                        this,
+                        com.google.android.material.R.attr.colorPrimary
+                    )
+                )
                 setOnRefreshListener {
                     viewModel.onSwipeToRefresh()
                 }

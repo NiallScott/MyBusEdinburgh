@@ -38,6 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
+import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 
 internal const val TEST_TAG_OPEN_SOURCE_LICENCE_DIALOG = "dialog_open_source_licence"
@@ -68,7 +69,7 @@ internal fun OpenSourceLicenceDialog(
             TextButton(
                 onClick = onDismissRequest
             ) {
-                Text(text = stringResource(id = R.string.close))
+                Text(text = stringResource(id = Rcore.string.close))
             }
         },
         modifier = Modifier

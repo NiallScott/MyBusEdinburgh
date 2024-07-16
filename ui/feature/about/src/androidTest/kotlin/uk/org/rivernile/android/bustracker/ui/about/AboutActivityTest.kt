@@ -35,6 +35,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import org.junit.Rule
+import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -67,7 +68,9 @@ class AboutActivityTest {
         }
 
         composeTestRule
-            .onNodeWithContentDescription(composeTestRule.activity.getString(R.string.navigate_up))
+            .onNodeWithContentDescription(
+                composeTestRule.activity.getString(Rcore.string.navigate_up)
+            )
             .performClick()
 
         assertEquals(1, navigateUpTracker.numberOfInvocations)
@@ -143,7 +146,7 @@ class AboutActivityTest {
         }
 
         composeTestRule
-            .onNodeWithText(composeTestRule.activity.getString(R.string.close))
+            .onNodeWithText(composeTestRule.activity.getString(Rcore.string.close))
             .performClick()
 
         assertEquals(1, onCreditsDialogDismissedTracker.numberOfInvocations)
@@ -193,7 +196,7 @@ class AboutActivityTest {
         }
 
         composeTestRule
-            .onNodeWithText(composeTestRule.activity.getString(R.string.close))
+            .onNodeWithText(composeTestRule.activity.getString(Rcore.string.close))
             .performClick()
 
         assertEquals(1, onOpenSourceLicenceDialogDismissedTracker.numberOfInvocations)

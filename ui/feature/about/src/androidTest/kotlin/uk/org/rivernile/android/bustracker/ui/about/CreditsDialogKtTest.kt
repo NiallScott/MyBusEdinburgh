@@ -31,6 +31,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import org.junit.Rule
+import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -56,7 +57,7 @@ class CreditsDialogKtTest {
         }
 
         composeTestRule
-            .onNodeWithText(composeTestRule.activity.getString(R.string.close))
+            .onNodeWithText(composeTestRule.activity.getString(Rcore.string.close))
             .performClick()
 
         assertEquals(1, dismissRequestTracker.numberOfInvocations)

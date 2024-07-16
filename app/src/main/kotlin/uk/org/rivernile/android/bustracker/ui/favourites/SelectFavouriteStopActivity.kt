@@ -79,7 +79,7 @@ class SelectFavouriteStopActivity : AppCompatActivity(),
 
         window.navigationBarColor = MaterialColors.getColor(
             viewBinding.root,
-            R.attr.colorSurfaceContainer
+            com.google.android.material.R.attr.colorSurfaceContainer
         )
 
         ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root) { view, windowInsets ->

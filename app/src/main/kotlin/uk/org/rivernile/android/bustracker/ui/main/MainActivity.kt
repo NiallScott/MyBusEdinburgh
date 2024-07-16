@@ -153,7 +153,7 @@ class MainActivity : AppCompatActivity(),
 
         window.navigationBarColor = MaterialColors.getColor(
             viewBinding.root,
-            R.attr.colorSurfaceContainer
+            com.google.android.material.R.attr.colorSurfaceContainer
         )
 
         viewBinding.apply {
@@ -202,7 +202,7 @@ class MainActivity : AppCompatActivity(),
 
         window.statusBarColor = MaterialColors.getColor(
             viewBinding.root,
-            R.attr.colorSurfaceContainer
+            com.google.android.material.R.attr.colorSurfaceContainer
         )
         viewBinding.apply {
             appBarLayout.isInvisible = true

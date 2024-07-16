@@ -68,6 +68,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -216,7 +217,7 @@ private fun AboutTopAppBar(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(id = R.string.navigate_up)
+                    contentDescription = stringResource(id = Rcore.string.navigate_up)
                 )
             }
         },
@@ -234,7 +235,9 @@ private fun AboutItemsList(
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(vertical = dimensionResource(id = R.dimen.padding_default))
+        contentPadding = PaddingValues(
+            vertical = dimensionResource(id = Rcore.dimen.padding_default)
+        )
     ) {
         items(
             items = aboutItems,

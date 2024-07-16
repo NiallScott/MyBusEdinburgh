@@ -47,6 +47,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import java.text.DateFormat
 
@@ -90,8 +91,8 @@ private fun AboutItem1Line(
     modifier: Modifier = Modifier,
     onItemClicked: (UiAboutItem) -> Unit
 ) {
-    val verticalPadding = dimensionResource(id = R.dimen.padding_default)
-    val horizontalPadding = dimensionResource(id = R.dimen.padding_double)
+    val verticalPadding = dimensionResource(id = Rcore.dimen.padding_default)
+    val horizontalPadding = dimensionResource(id = Rcore.dimen.padding_double)
 
     AboutItemTitle(
         text = stringResource(id = item.titleStringRes),
@@ -121,8 +122,8 @@ private fun AboutItem2Lines(
     modifier: Modifier = Modifier,
     onItemClicked: (UiAboutItem) -> Unit
 ) {
-    val verticalPadding = dimensionResource(id = R.dimen.padding_default)
-    val horizontalPadding = dimensionResource(id = R.dimen.padding_double)
+    val verticalPadding = dimensionResource(id = Rcore.dimen.padding_default)
+    val horizontalPadding = dimensionResource(id = Rcore.dimen.padding_double)
 
     Column(
         modifier = modifier

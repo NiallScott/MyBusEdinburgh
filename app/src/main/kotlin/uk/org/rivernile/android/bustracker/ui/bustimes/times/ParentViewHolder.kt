@@ -30,7 +30,6 @@ import android.content.res.ColorStateList
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.color.MaterialColors
-import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemBusTimesParentBinding
 
 /**
@@ -51,8 +50,14 @@ class ParentViewHolder(
     private val clickListener: OnParentClickedListener
 ) : RecyclerView.ViewHolder(viewBinding.root) {
 
-    private val defaultBackground = MaterialColors.getColor(itemView, R.attr.colorTertiary)
-    private val defaultTextColour = MaterialColors.getColor(itemView, R.attr.colorOnTertiary)
+    private val defaultBackground = MaterialColors.getColor(
+        itemView,
+        com.google.android.material.R.attr.colorTertiary
+    )
+    private val defaultTextColour = MaterialColors.getColor(
+        itemView,
+        com.google.android.material.R.attr.colorOnTertiary
+    )
 
     private var item: UiLiveTimesItem? = null
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,7 +32,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.material.color.MaterialColors
 import com.google.maps.android.ktx.model.polylineOptions
-import uk.org.rivernile.edinburghbustracker.android.R
 
 /**
  * This class manages the route lines shown on a [GoogleMap].
@@ -45,7 +44,11 @@ class RouteLineManager(
         context: Context,
         private val map: GoogleMap) {
 
-    private val defaultColour = MaterialColors.getColor(context, R.attr.colorTertiary, null)
+    private val defaultColour = MaterialColors.getColor(
+        context,
+        com.google.android.material.R.attr.colorTertiary,
+        null
+    )
 
     private var polylines: List<Polyline>? = null
 
