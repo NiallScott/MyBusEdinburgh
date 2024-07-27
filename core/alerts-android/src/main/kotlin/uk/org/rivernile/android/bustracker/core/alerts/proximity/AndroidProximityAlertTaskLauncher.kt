@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -42,12 +42,14 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 internal class LegacyAndroidProximityAlertTaskLauncher @Inject constructor(
-    private val context: Context) : ProximityAlertTaskLauncher {
+    private val context: Context
+) : ProximityAlertTaskLauncher {
 
     override fun launchProximityAlertTask() {
-        Intent(context, ProximityAlertRunnerService::class.java).let {
-            ContextCompat.startForegroundService(context, it)
-        }
+        ContextCompat.startForegroundService(
+            context,
+            context.proximityServiceStartIntent
+        )
     }
 }
 
@@ -61,15 +63,23 @@ internal class LegacyAndroidProximityAlertTaskLauncher @Inject constructor(
 @RequiresApi(Build.VERSION_CODES.S)
 internal class V31AndroidProximityAlertTaskLauncher @Inject constructor(
     private val context: Context,
-    private val exceptionLogger: ExceptionLogger) : ProximityAlertTaskLauncher {
+    private val exceptionLogger: ExceptionLogger
+) : ProximityAlertTaskLauncher {
 
     override fun launchProximityAlertTask() {
-        Intent(context, ProximityAlertRunnerService::class.java).let {
-            try {
-                ContextCompat.startForegroundService(context, it)
-            } catch (e: ServiceStartNotAllowedException) {
-                exceptionLogger.log(e)
-            }
+        try {
+            ContextCompat.startForegroundService(
+                context,
+                context.proximityServiceStartIntent
+            )
+        } catch (e: ServiceStartNotAllowedException) {
+            exceptionLogger.log(e)
         }
     }
 }
+
+/**
+ * The [Intent] used to start the [ProximityAlertRunnerService].
+ */
+private val Context.proximityServiceStartIntent get() =
+    Intent(this, ProximityAlertRunnerService::class.java)

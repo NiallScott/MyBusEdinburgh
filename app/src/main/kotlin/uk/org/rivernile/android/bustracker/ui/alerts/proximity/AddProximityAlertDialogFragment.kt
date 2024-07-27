@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -93,8 +93,14 @@ class AddProximityAlertDialogFragment : DialogFragment() {
     }
 
     private val requestPermissionsLauncher = registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions(),
-            this::handleRequestPermissionsResult)
+        ActivityResultContracts.RequestMultiplePermissions(),
+        this::handleRequestPermissionsResult
+    )
+
+    private val requestBackgroundLocationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+        this::handleBackgroundLocationPermissionResult
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,19 +110,20 @@ class AddProximityAlertDialogFragment : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.addproxalertdialog_title)
-                .setView(viewBinding.root)
-                .setPositiveButton(R.string.addproxalertdialog_button_add) { _, _ ->
-                    handleAddClicked()
-                }
-                .setNegativeButton(android.R.string.cancel, null)
-                .create()
+            .setTitle(R.string.addproxalertdialog_title)
+            .setView(viewBinding.root)
+            .setPositiveButton(R.string.addproxalertdialog_button_add) { _, _ ->
+                handleAddClicked()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .create()
     }
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?): View = viewBinding.root
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View = viewBinding.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -125,7 +132,7 @@ class AddProximityAlertDialogFragment : DialogFragment() {
         viewModel.stopDetailsLiveData.observe(viewLifecycle, this::handleStopDetailsLoaded)
         viewModel.uiStateLiveData.observe(viewLifecycle, this::handleUiStateChanged)
         viewModel.addButtonEnabledLiveData.observe(viewLifecycle,
-                this::handleAddButtonEnabledStateChanged)
+            this::handleAddButtonEnabledStateChanged)
         viewModel.showLimitationsLiveData.observe(viewLifecycle) {
             showLimitationsDialog()
         }
@@ -134,6 +141,9 @@ class AddProximityAlertDialogFragment : DialogFragment() {
         }
         viewModel.requestPermissionsLiveData.observe(viewLifecycle) {
             handleRequestPermissions()
+        }
+        viewModel.requestBackgroundLocationPermissionLiveData.observe(viewLifecycle) {
+            handleRequestBackgroundLocationPermission()
         }
         viewModel.showAppSettingsLiveData.observe(viewLifecycle) {
             showAppSettings()
@@ -161,10 +171,14 @@ class AddProximityAlertDialogFragment : DialogFragment() {
      */
     private fun updatePermissionState() {
         viewModel.onPermissionsUpdated(
-                UiPermissionsState(
-                        permissionChecker.checkCoarseLocationPermission(),
-                        permissionChecker.checkFineLocationPermission(),
-                        permissionChecker.checkPostNotificationPermission()))
+            UiPermissionsState(
+                hasCoarseLocationPermission = permissionChecker.checkCoarseLocationPermission(),
+                hasFineLocationPermission = permissionChecker.checkFineLocationPermission(),
+                hasBackgroundLocationPermission = permissionChecker
+                    .checkBackgroundLocationPermission(),
+                hasPostNotificationsPermission = permissionChecker.checkPostNotificationPermission()
+            )
+        )
     }
 
     /**
@@ -175,17 +189,37 @@ class AddProximityAlertDialogFragment : DialogFragment() {
     @SuppressLint("InlinedApi")
     private fun handleRequestPermissionsResult(result: Map<String, Boolean>) {
         val hasCoarseLocationPermission = result[Manifest.permission.ACCESS_COARSE_LOCATION]
-                ?: permissionChecker.checkCoarseLocationPermission()
+            ?: permissionChecker.checkCoarseLocationPermission()
         val hasFineLocationPermission = result[Manifest.permission.ACCESS_FINE_LOCATION]
-                ?: permissionChecker.checkFineLocationPermission()
+            ?: permissionChecker.checkFineLocationPermission()
+        val hasBackgroundLocationPermission = permissionChecker.checkBackgroundLocationPermission()
         val hasPostNotificationsPermission = result[Manifest.permission.POST_NOTIFICATIONS]
-                ?: permissionChecker.checkPostNotificationPermission()
+            ?: permissionChecker.checkPostNotificationPermission()
 
         viewModel.onPermissionsResult(
-                UiPermissionsState(
-                        hasCoarseLocationPermission,
-                        hasFineLocationPermission,
-                        hasPostNotificationsPermission))
+            UiPermissionsState(
+                hasCoarseLocationPermission = hasCoarseLocationPermission,
+                hasFineLocationPermission = hasFineLocationPermission,
+                hasBackgroundLocationPermission = hasBackgroundLocationPermission,
+                hasPostNotificationsPermission = hasPostNotificationsPermission
+            )
+        )
+    }
+
+    /**
+     * This is called when the background location permission request result is returned.
+     *
+     * @param result The permission grant result.
+     */
+    private fun handleBackgroundLocationPermissionResult(result: Boolean) {
+        viewModel.onPermissionsUpdated(
+            UiPermissionsState(
+                hasCoarseLocationPermission = permissionChecker.checkCoarseLocationPermission(),
+                hasFineLocationPermission = permissionChecker.checkFineLocationPermission(),
+                hasBackgroundLocationPermission = result,
+                hasPostNotificationsPermission = permissionChecker.checkPostNotificationPermission()
+            )
+        )
     }
 
     /**
@@ -194,9 +228,12 @@ class AddProximityAlertDialogFragment : DialogFragment() {
      * @param stopDetails The loaded stop details.
      */
     private fun handleStopDetailsLoaded(stopDetails: StopDetails?) {
-        viewBinding.txtBlurb.text = stopDetails?.let {
-            textFormattingUtils.formatBusStopNameWithStopCode(it.stopCode, it.stopName)
-        }
+        viewBinding.txtBlurb.text = getString(
+            R.string.addproxalertdialog_blurb,
+            stopDetails?.let {
+                textFormattingUtils.formatBusStopNameWithStopCode(it.stopCode, it.stopName)
+            }
+        )
     }
 
     /**
@@ -208,8 +245,8 @@ class AddProximityAlertDialogFragment : DialogFragment() {
     private fun handleUiStateChanged(state: UiState) {
         viewBinding.apply {
             when (state) {
-                UiState.PROGRESS -> viewBinding.contentView.showProgressLayout()
-                UiState.CONTENT -> viewBinding.contentView.showContentLayout()
+                UiState.PROGRESS -> contentView.showProgressLayout()
+                UiState.CONTENT -> contentView.showContentLayout()
                 UiState.ERROR_NO_LOCATION_FEATURE -> {
                     txtErrorBlurb.setText(R.string.addproxalertdialog_error_no_location_feature)
                     btnErrorResolve.visibility = View.GONE
@@ -239,6 +276,16 @@ class AddProximityAlertDialogFragment : DialogFragment() {
                     }
                     contentView.showErrorLayout()
                 }
+                UiState.ERROR_NO_BACKGROUND_LOCATION_PERMISSION -> {
+                    txtErrorBlurb.setText(
+                        R.string.addproxalertdialog_error_background_location_permission_not_granted
+                    )
+                    btnErrorResolve.apply {
+                        setText(R.string.addproxalertdialog_error_grant_permission_button)
+                        visibility = View.VISIBLE
+                    }
+                    contentView.showErrorLayout()
+                }
             }
         }
     }
@@ -250,8 +297,8 @@ class AddProximityAlertDialogFragment : DialogFragment() {
      */
     private fun handleAddButtonEnabledStateChanged(enabled: Boolean) {
         (dialog as? AlertDialog)
-                ?.getButton(DialogInterface.BUTTON_POSITIVE)
-                ?.isEnabled = enabled
+            ?.getButton(DialogInterface.BUTTON_POSITIVE)
+            ?.isEnabled = enabled
     }
 
     /**
@@ -266,7 +313,7 @@ class AddProximityAlertDialogFragment : DialogFragment() {
      */
     private fun showLimitationsDialog() {
         ProximityLimitationsDialogFragment.newInstance()
-                .show(childFragmentManager, DIALOG_PROXIMITY_LIMITATIONS)
+            .show(childFragmentManager, DIALOG_PROXIMITY_LIMITATIONS)
     }
 
     /**
@@ -279,15 +326,17 @@ class AddProximityAlertDialogFragment : DialogFragment() {
     private fun showLocationSettings() {
         try {
             Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                    .addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-                    .let(this::startActivity)
+                .addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+                .let(this::startActivity)
         } catch (e: ActivityNotFoundException) {
             exceptionLogger.log(e)
-            Toast.makeText(
+            Toast
+                .makeText(
                     requireContext(),
                     R.string.addproxalertdialog_error_no_location_settings,
-                    Toast.LENGTH_SHORT)
-                    .show()
+                    Toast.LENGTH_SHORT
+                )
+                .show()
         }
     }
 
@@ -297,14 +346,26 @@ class AddProximityAlertDialogFragment : DialogFragment() {
     private fun handleRequestPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             arrayOf(
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.POST_NOTIFICATIONS)
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.POST_NOTIFICATIONS
+            )
         } else {
             arrayOf(
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_FINE_LOCATION)
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
         }.let(requestPermissionsLauncher::launch)
+    }
+
+    /**
+     * This is called when the background location permission should be requested from the user.
+     */
+    private fun handleRequestBackgroundLocationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            requestBackgroundLocationPermissionLauncher
+                .launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        }
     }
 
     /**
@@ -319,15 +380,18 @@ class AddProximityAlertDialogFragment : DialogFragment() {
 
         try {
             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                    .setData(Uri.fromParts("package", context.packageName, null))
-                    .addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-                    .let(this::startActivity)
+                .setData(Uri.fromParts("package", context.packageName, null))
+                .addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+                .let(this::startActivity)
         } catch (e: ActivityNotFoundException) {
             exceptionLogger.log(e)
-            Toast.makeText(context,
+            Toast
+                .makeText(
+                    context,
                     R.string.addproxalertdialog_error_no_app_settings,
-                    Toast.LENGTH_SHORT)
-                    .show()
+                    Toast.LENGTH_SHORT
+                )
+                .show()
         }
     }
 

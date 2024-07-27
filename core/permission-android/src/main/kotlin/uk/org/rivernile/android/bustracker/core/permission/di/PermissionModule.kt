@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,8 +31,11 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import uk.org.rivernile.android.bustracker.core.permission.BackgroundLocationPermissionChecker
+import uk.org.rivernile.android.bustracker.core.permission.LegacyBackgroundLocationPermissionChecker
 import uk.org.rivernile.android.bustracker.core.permission.LegacyNotificationPermissionChecker
 import uk.org.rivernile.android.bustracker.core.permission.NotificationPermissionChecker
+import uk.org.rivernile.android.bustracker.core.permission.V29BackgroundLocationPermissionChecker
 import uk.org.rivernile.android.bustracker.core.permission.V33NotificationPermissionChecker
 import javax.inject.Provider
 
@@ -54,6 +57,18 @@ internal class PermissionModule {
             v33NotificationPermissionChecker.get()
         } else {
             legacyNotificationPermissionChecker.get()
+        }
+    }
+
+    @Provides
+    fun provideBackgroundLocationPermissionChecker(
+        legBackgroundLocationPermissionChecker: Provider<LegacyBackgroundLocationPermissionChecker>,
+        v29BackgroundLocationPermissionChecker: Provider<V29BackgroundLocationPermissionChecker>
+    ): BackgroundLocationPermissionChecker {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            v29BackgroundLocationPermissionChecker.get()
+        } else {
+            legBackgroundLocationPermissionChecker.get()
         }
     }
 }

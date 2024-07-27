@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,7 +35,6 @@ import androidx.core.app.NotificationCompat
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -44,6 +43,8 @@ import uk.org.rivernile.android.bustracker.core.alerts.DeeplinkIntentFactory
 import uk.org.rivernile.android.bustracker.core.alerts.R
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForServiceCoroutineScope
+import uk.org.rivernile.android.bustracker.core.permission.AndroidPermissionChecker
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 /**
@@ -60,6 +61,8 @@ class ProximityAlertRunnerService : Service() {
     }
 
     @Inject
+    lateinit var permissionChecker: AndroidPermissionChecker
+    @Inject
     lateinit var manageProximityAlertsRunner: ManageProximityAlertsRunner
     @Inject
     lateinit var deeplinkIntentFactory: DeeplinkIntentFactory
@@ -70,13 +73,18 @@ class ProximityAlertRunnerService : Service() {
     @ForDefaultDispatcher
     lateinit var defaultDispatcher: CoroutineDispatcher
 
-    private var job: Job? = null
+    private val isStarted = AtomicBoolean(false)
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (!hasPermission) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
         startForeground(FOREGROUND_NOTIFICATION_ID, foregroundNotification)
 
-        if (job == null) {
-            job = serviceCoroutineScope.launch {
+        if (isStarted.compareAndSet(false, true)) {
+            serviceCoroutineScope.launch {
                 try {
                     withContext(defaultDispatcher) {
                         manageProximityAlertsRunner.run()
@@ -95,12 +103,19 @@ class ProximityAlertRunnerService : Service() {
     override fun onDestroy() {
         super.onDestroy()
 
-        job?.cancel()
-        job = null
         serviceCoroutineScope.cancel()
     }
 
     override fun onBind(intent: Intent): IBinder? = null
+
+    /**
+     * Do we have enough permissions to meaningfully continue?
+     */
+    private val hasPermission get() =
+        (permissionChecker.checkFineLocationPermission() ||
+                permissionChecker.checkCoarseLocationPermission()) &&
+                permissionChecker.checkBackgroundLocationPermission() &&
+                permissionChecker.checkPostNotificationPermission()
 
     /**
      * Create the [Notification] which will be shown to the user while the foreground service is
@@ -109,9 +124,8 @@ class ProximityAlertRunnerService : Service() {
      * @return The [Notification] shown to the user while the foreground service is running.
      */
     private val foregroundNotification get() =
-        NotificationCompat.Builder(
-            this,
-            CHANNEL_FOREGROUND_TASKS)
+        NotificationCompat
+            .Builder(this, CHANNEL_FOREGROUND_TASKS)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setSmallIcon(R.drawable.ic_directions_bus_black)
@@ -132,17 +146,20 @@ class ProximityAlertRunnerService : Service() {
                     this,
                     FOREGROUND_NOTIFICATION_ID,
                     it,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
             }
 
     /**
      * A [NotificationCompat.Action] which allows the user to remove a current proximity alert.
      */
     private val removeNotificationAction get() =
-        NotificationCompat.Action.Builder(
-            R.drawable.ic_action_delete_notification,
-            getString(R.string.remove_all),
-            removeActionButtonPendingIntent)
+        NotificationCompat.Action
+            .Builder(
+                R.drawable.ic_action_delete_notification,
+                getString(R.string.remove_all),
+                removeActionButtonPendingIntent
+            )
             .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_DELETE)
             .build()
 
@@ -157,6 +174,7 @@ class ProximityAlertRunnerService : Service() {
                     this,
                     FOREGROUND_NOTIFICATION_ID,
                     it,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
             }
 }

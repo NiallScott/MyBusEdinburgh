@@ -40,11 +40,16 @@ import javax.inject.Inject
  * claiming the permission has not been checked.
  *
  * @param context The application [Context].
+ * @param notificationPermissionChecker Used to check the notification permission status in a
+ * compatible way.
+ * @param backgroundLocationPermissionChecker Used to check the background location permission in a
+ * compatible way.
  * @author Niall Scott
  */
 class AndroidPermissionChecker @Inject internal constructor(
     private val context: Context,
-    private val notificationPermissionChecker: NotificationPermissionChecker
+    private val notificationPermissionChecker: NotificationPermissionChecker,
+    private val backgroundLocationPermissionChecker: BackgroundLocationPermissionChecker
 ) {
 
     /**
@@ -72,6 +77,17 @@ class AndroidPermissionChecker @Inject internal constructor(
             Manifest.permission.ACCESS_COARSE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
     }
+
+    /**
+     * Do we have permission to access the device location in the background? Prior to API level 29
+     * this will always return `true`. From API level 29+ this will return whether
+     * [Manifest.permission.ACCESS_BACKGROUND_LOCATION] is granted or not.
+     *
+     * @return Always `true` prior to API level 29. From API level 29+, `true` if the
+     * [Manifest.permission.ACCESS_BACKGROUND_LOCATION] has been granted to use, otherwise `false`.
+     */
+    fun checkBackgroundLocationPermission() =
+        backgroundLocationPermissionChecker.checkBackgroundLocationPermission()
 
     /**
      * Do we have permission to post notifications? Prior to API level 33 this will always return

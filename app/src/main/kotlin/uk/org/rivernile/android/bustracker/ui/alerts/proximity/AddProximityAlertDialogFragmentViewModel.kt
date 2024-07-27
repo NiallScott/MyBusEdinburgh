@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -75,7 +75,8 @@ class AddProximityAlertDialogFragmentViewModel @Inject constructor(
     private val uiStateCalculator: UiStateCalculator,
     private val alertsRepository: AlertsRepository,
     @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
-    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
+    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
+) : ViewModel() {
 
     companion object {
 
@@ -111,7 +112,9 @@ class AddProximityAlertDialogFragmentViewModel @Inject constructor(
     private val uiStateFlow = uiStateCalculator
         .createUiStateFlow(
             permissionsTracker.permissionsStateFlow,
-            stopDetailsFlow)
+            permissionsTracker.backgroundLocationPermissionStateFlow,
+            stopDetailsFlow
+        )
         .flowOn(defaultDispatcher)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), UiState.PROGRESS)
 
@@ -146,6 +149,13 @@ class AddProximityAlertDialogFragmentViewModel @Inject constructor(
      * When this [LiveData] emits a new item, the request permission system dialog should be shown.
      */
     val requestPermissionsLiveData get() = permissionsTracker.requestPermissionsLiveData
+
+    /**
+     * When this [LiveData] emits a new item, the request background location permission system UI
+     * should be shown.
+     */
+    val requestBackgroundLocationPermissionLiveData
+        get() = permissionsTracker.requestBackgroundLocationPermissionLiveData
 
     /**
      * When this [LiveData] emits a new item, the app settings screen should be shown.
@@ -186,7 +196,9 @@ class AddProximityAlertDialogFragmentViewModel @Inject constructor(
             UiState.ERROR_LOCATION_DISABLED -> showLocationSettings.call()
             UiState.ERROR_PERMISSION_UNGRANTED -> permissionsTracker.onRequestPermissionsClicked()
             UiState.ERROR_PERMISSION_DENIED -> showAppSettings.call()
-            else -> { }
+            UiState.ERROR_NO_BACKGROUND_LOCATION_PERMISSION ->
+                permissionsTracker.onRequestBackgroundLocationPermissionClicked()
+            else -> Unit
         }
     }
 
@@ -218,14 +230,14 @@ class AddProximityAlertDialogFragmentViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun loadStopDetails(stopCode: String?) = if (stopCode?.isNotEmpty() == true) {
         busStopsRepository.getNameForStopFlow(stopCode)
-                .mapLatest<StopName?, StopDetails?> {
-                    StopDetails(stopCode, it)
-                }
-                .onStart {
-                    // Emit null as the first item to denote loading.
-                    emit(null)
-                }
-                .flowOn(defaultDispatcher)
+            .mapLatest<StopName?, StopDetails?> {
+                StopDetails(stopCode, it)
+            }
+            .onStart {
+                // Emit null as the first item to denote loading.
+                emit(null)
+            }
+            .flowOn(defaultDispatcher)
     } else {
         flowOf(null)
     }
