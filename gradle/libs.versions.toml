@@ -13,12 +13,12 @@ okhttp = "4.12.0"
 retrofit = "2.11.0"
 
 # AndroidX
-androidx-activity = "1.9.0"
+androidx-activity = "1.9.1"
 androidx-benchmark = "1.2.4"
 androidx-compose-compiler = "1.5.14"
-androidx-fragment = "1.8.1"
+androidx-fragment = "1.8.2"
 androidx-hilt = "1.2.0"
-androidx-lifecycle = "2.8.3"
+androidx-lifecycle = "2.8.4"
 androidx-room = "2.6.1"
 androidx-work = "2.9.0"
 
@@ -60,7 +60,7 @@ edinburgh-bus-tracker-api = { module = "uk.org.rivernile.edinburghbustrackerapi:
 # AndroidX
 androidx-activity = { module = "androidx.activity:activity-ktx", version.ref = "androidx-activity" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
-androidx-annotation = { module = "androidx.annotation:annotation", version = "1.8.0" }
+androidx-annotation = { module = "androidx.annotation:annotation", version = "1.8.1" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.0" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2024.06.00" }
 androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
