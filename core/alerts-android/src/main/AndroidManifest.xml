@@ -87,6 +87,10 @@
             android:name="uk.org.rivernile.android.bustracker.core.alerts.proximity.android.AndroidAreaEnteredBroadcastReceiver"
             android:exported="false" />
 
+        <receiver
+            android:name="uk.org.rivernile.android.bustracker.core.alerts.proximity.googleplay.GooglePlayAreaEnteredBroadcastReceiver"
+            android:exported="false" />
+
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
