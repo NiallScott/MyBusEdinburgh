@@ -43,7 +43,6 @@ import uk.org.rivernile.android.bustracker.core.alerts.DeeplinkIntentFactory
 import uk.org.rivernile.android.bustracker.core.alerts.R
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForServiceCoroutineScope
-import uk.org.rivernile.android.bustracker.core.permission.AndroidPermissionChecker
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
@@ -61,22 +60,22 @@ class ProximityAlertRunnerService : Service() {
     }
 
     @Inject
-    lateinit var permissionChecker: AndroidPermissionChecker
+    internal lateinit var permissionChecker: ProximityPermissionChecker
     @Inject
-    lateinit var manageProximityAlertsRunner: ManageProximityAlertsRunner
+    internal lateinit var manageProximityAlertsRunner: ManageProximityAlertsRunner
     @Inject
-    lateinit var deeplinkIntentFactory: DeeplinkIntentFactory
+    internal lateinit var deeplinkIntentFactory: DeeplinkIntentFactory
     @Inject
     @ForServiceCoroutineScope
-    lateinit var serviceCoroutineScope: CoroutineScope
+    internal lateinit var serviceCoroutineScope: CoroutineScope
     @Inject
     @ForDefaultDispatcher
-    lateinit var defaultDispatcher: CoroutineDispatcher
+    internal lateinit var defaultDispatcher: CoroutineDispatcher
 
     private val isStarted = AtomicBoolean(false)
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (!hasPermission) {
+        if (!permissionChecker.checkPermission()) {
             stopSelf()
             return START_NOT_STICKY
         }
@@ -107,15 +106,6 @@ class ProximityAlertRunnerService : Service() {
     }
 
     override fun onBind(intent: Intent): IBinder? = null
-
-    /**
-     * Do we have enough permissions to meaningfully continue?
-     */
-    private val hasPermission get() =
-        (permissionChecker.checkFineLocationPermission() ||
-                permissionChecker.checkCoarseLocationPermission()) &&
-                permissionChecker.checkBackgroundLocationPermission() &&
-                permissionChecker.checkPostNotificationPermission()
 
     /**
      * Create the [Notification] which will be shown to the user while the foreground service is

@@ -39,17 +39,22 @@ import javax.inject.Inject
  * This is the pre-Android S specific implementation of [ProximityAlertTaskLauncher].
  *
  * @param context The application [Context].
+ * @param proximityPermissionChecker Used to check that we have the relevant permissions to monitor
+ * the user's set proximity alerts.
  * @author Niall Scott
  */
 internal class LegacyAndroidProximityAlertTaskLauncher @Inject constructor(
-    private val context: Context
+    private val context: Context,
+    private val proximityPermissionChecker: ProximityPermissionChecker
 ) : ProximityAlertTaskLauncher {
 
     override fun launchProximityAlertTask() {
-        ContextCompat.startForegroundService(
-            context,
-            context.proximityServiceStartIntent
-        )
+        if (proximityPermissionChecker.checkPermission()) {
+            ContextCompat.startForegroundService(
+                context,
+                context.proximityServiceStartIntent
+            )
+        }
     }
 }
 
@@ -57,23 +62,28 @@ internal class LegacyAndroidProximityAlertTaskLauncher @Inject constructor(
  * This is the Android S+ specific implementation of [ProximityAlertTaskLauncher].
  *
  * @param context The application [Context].
+ * @param proximityPermissionChecker Used to check that we have the relevant permissions to monitor
+ * the user's set proximity alerts.
  * @param exceptionLogger Used to log handled exceptions.
  * @author Niall Scott
  */
 @RequiresApi(Build.VERSION_CODES.S)
 internal class V31AndroidProximityAlertTaskLauncher @Inject constructor(
     private val context: Context,
+    private val proximityPermissionChecker: ProximityPermissionChecker,
     private val exceptionLogger: ExceptionLogger
 ) : ProximityAlertTaskLauncher {
 
     override fun launchProximityAlertTask() {
-        try {
-            ContextCompat.startForegroundService(
-                context,
-                context.proximityServiceStartIntent
-            )
-        } catch (e: ServiceStartNotAllowedException) {
-            exceptionLogger.log(e)
+        if (proximityPermissionChecker.checkPermission()) {
+            try {
+                ContextCompat.startForegroundService(
+                    context,
+                    context.proximityServiceStartIntent
+                )
+            } catch (e: ServiceStartNotAllowedException) {
+                exceptionLogger.log(e)
+            }
         }
     }
 }

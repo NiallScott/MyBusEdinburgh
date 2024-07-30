@@ -60,15 +60,15 @@ class ArrivalAlertRunnerService : Service() {
     }
 
     @Inject
-    lateinit var timeAlertRunner: TimeAlertRunner
+    internal lateinit var timeAlertRunner: TimeAlertRunner
     @Inject
-    lateinit var deeplinkIntentFactory: DeeplinkIntentFactory
+    internal lateinit var deeplinkIntentFactory: DeeplinkIntentFactory
     @Inject
     @ForServiceCoroutineScope
-    lateinit var serviceCoroutineScope: CoroutineScope
+    internal lateinit var serviceCoroutineScope: CoroutineScope
     @Inject
     @ForDefaultDispatcher
-    lateinit var defaultDispatcher: CoroutineDispatcher
+    internal lateinit var defaultDispatcher: CoroutineDispatcher
 
     private val isStarted = AtomicBoolean(false)
 
