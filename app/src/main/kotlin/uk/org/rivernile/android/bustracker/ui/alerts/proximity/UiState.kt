@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -52,6 +52,10 @@ enum class UiState {
      * system settings.
      */
     ERROR_PERMISSION_DENIED,
+    /**
+     * We do not have background location permission.
+     */
+    ERROR_NO_BACKGROUND_LOCATION_PERMISSION,
     /**
      * Show progress while stop details are loading.
      */

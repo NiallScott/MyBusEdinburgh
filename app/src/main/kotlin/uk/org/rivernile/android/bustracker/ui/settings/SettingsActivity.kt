@@ -35,7 +35,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
-import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.ActivitySettingsBinding
 
 /**
@@ -58,7 +57,7 @@ class SettingsActivity : AppCompatActivity() {
 
         window.navigationBarColor = MaterialColors.getColor(
             viewBinding.root,
-            R.attr.colorSurfaceContainer
+            com.google.android.material.R.attr.colorSurfaceContainer
         )
 
         ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root) { view, windowInsets ->

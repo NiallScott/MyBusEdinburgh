@@ -35,7 +35,7 @@ package uk.org.rivernile.android.bustracker.ui.about
  * @property action Any action which should be performed.
  * @author Niall Scott
  */
-data class UiState(
+internal data class UiState(
     val items: List<UiAboutItem>,
     val isCreditsShown: Boolean = false,
     val isOpenSourceLicencesShown: Boolean = false,

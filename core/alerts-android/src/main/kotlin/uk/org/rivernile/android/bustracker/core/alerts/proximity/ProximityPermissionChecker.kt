@@ -24,27 +24,30 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.about
+package uk.org.rivernile.android.bustracker.core.alerts.proximity
+
+import uk.org.rivernile.android.bustracker.core.permission.AndroidPermissionChecker
+import javax.inject.Inject
 
 /**
- * This sealed interface represents possible actions which can be performed on the 'about' screen.
+ * An utility class to check we have relevant permissions for starting the proximity
+ * [android.app.Service].
  *
+ * @param androidPermissionChecker Used to check the permissions.
  * @author Niall Scott
  */
-internal sealed interface UiAction {
+internal class ProximityPermissionChecker @Inject constructor(
+    private val androidPermissionChecker: AndroidPermissionChecker
+) {
 
-    /** The privacy policy should be shown. */
-    data object ShowPrivacyPolicy : UiAction
-
-    /** The app's store listing should be shown. */
-    data object ShowStoreListing : UiAction
-
-    /** The app author's website should be shown. */
-    data object ShowAuthorWebsite : UiAction
-
-    /** The app's website should be shown. */
-    data object ShowAppWebsite : UiAction
-
-    /** The app's Twitter account should be shown. */
-    data object ShowAppTwitter : UiAction
+    /**
+     * Do we have the relevant permissions?
+     *
+     * @return `true` if we have the relevant permissions, otherwise `false`.
+     */
+    fun checkPermission() =
+        (androidPermissionChecker.checkFineLocationPermission() ||
+                androidPermissionChecker.checkCoarseLocationPermission()) &&
+                androidPermissionChecker.checkBackgroundLocationPermission() &&
+                androidPermissionChecker.checkPostNotificationPermission()
 }

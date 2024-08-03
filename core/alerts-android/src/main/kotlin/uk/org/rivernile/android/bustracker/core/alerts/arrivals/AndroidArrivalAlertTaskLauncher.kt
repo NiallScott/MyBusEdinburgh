@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -42,12 +42,14 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 internal class LegacyAndroidArrivalAlertTaskLauncher @Inject constructor(
-    private val context: Context) : ArrivalAlertTaskLauncher {
+    private val context: Context
+) : ArrivalAlertTaskLauncher {
 
     override fun launchArrivalAlertTask() {
-        Intent(context, ArrivalAlertRunnerService::class.java).let {
-            ContextCompat.startForegroundService(context, it)
-        }
+        ContextCompat.startForegroundService(
+            context,
+            context.arrivalAlertServiceStartIntent
+        )
     }
 }
 
@@ -61,15 +63,23 @@ internal class LegacyAndroidArrivalAlertTaskLauncher @Inject constructor(
 @RequiresApi(Build.VERSION_CODES.S)
 internal class V31AndroidArrivalAlertTaskLauncher @Inject constructor(
     private val context: Context,
-    private val exceptionLogger: ExceptionLogger) : ArrivalAlertTaskLauncher {
+    private val exceptionLogger: ExceptionLogger
+) : ArrivalAlertTaskLauncher {
 
     override fun launchArrivalAlertTask() {
-        Intent(context, ArrivalAlertRunnerService::class.java).let {
-            try {
-                ContextCompat.startForegroundService(context, it)
-            } catch (e: ServiceStartNotAllowedException) {
-                exceptionLogger.log(e)
-            }
+        try {
+            ContextCompat.startForegroundService(
+                context,
+                context.arrivalAlertServiceStartIntent
+            )
+        } catch (e: ServiceStartNotAllowedException) {
+            exceptionLogger.log(e)
         }
     }
 }
+
+/**
+ * The [Intent] used to start the [ArrivalAlertRunnerService].
+ */
+private val Context.arrivalAlertServiceStartIntent get() =
+    Intent(this, ArrivalAlertRunnerService::class.java)

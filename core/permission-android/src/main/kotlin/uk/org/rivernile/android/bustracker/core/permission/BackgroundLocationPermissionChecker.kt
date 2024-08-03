@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,45 +35,46 @@ import androidx.core.content.ContextCompat
 import javax.inject.Inject
 
 /**
- * This is used to check whether we have permission to post notifications or not, in a compatible
- * way.
+ * This is used to check whether we have permission to access the device location while in the
+ * background.
  *
  * @author Niall Scott
  */
-internal interface NotificationPermissionChecker {
+internal interface BackgroundLocationPermissionChecker {
 
     /**
-     * Do we have permission to post notifications?
+     * Do we have permission to obtain the device location in the background?
      *
-     * @return `true` if we have permission to post notifications, otherwise `false`.
+     * @return `true` if we have permission to obtain the device location in the background,
+     * otherwise `false`.
      */
-    fun checkPostNotificationPermission(): Boolean
+    fun checkBackgroundLocationPermission(): Boolean
 }
 
 /**
- * A backwards compatible implementation of [NotificationPermissionChecker] which always returns
- * `true` as there was no restriction on posting notifications prior to API level 33.
+ * A backwards compatible implementation of [BackgroundLocationPermissionChecker] which always
+ * returns `true` as this is always available prior to API level 29.
  */
-internal class LegacyNotificationPermissionChecker @Inject constructor()
-    : NotificationPermissionChecker {
+internal class LegacyBackgroundLocationPermissionChecker @Inject constructor()
+    : BackgroundLocationPermissionChecker {
 
-    override fun checkPostNotificationPermission() = true
+    override fun checkBackgroundLocationPermission() = true
 }
 
 /**
- * An implementation of [NotificationPermissionChecker] for API level 33+.
+ * An implementation of [BackgroundLocationPermissionChecker] for API level 29+.
  *
  * @param context The [android.app.Application] [Context].
  */
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
-internal class V33NotificationPermissionChecker @Inject constructor(
+@RequiresApi(Build.VERSION_CODES.Q)
+internal class V29BackgroundLocationPermissionChecker @Inject constructor(
     private val context: Context
-) : NotificationPermissionChecker {
+) : BackgroundLocationPermissionChecker {
 
-    override fun checkPostNotificationPermission(): Boolean {
+    override fun checkBackgroundLocationPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
             context,
-            Manifest.permission.POST_NOTIFICATIONS
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
     }
 }

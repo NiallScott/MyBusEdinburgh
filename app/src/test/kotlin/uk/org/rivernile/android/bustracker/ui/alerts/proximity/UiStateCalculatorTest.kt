@@ -66,12 +66,18 @@ class UiStateCalculatorTest {
         whenever(locationRepository.hasLocationFeature)
             .thenReturn(false)
         val permissionStateFlow = flowOf(PermissionState.GRANTED)
+        val backgroundLocationPermissionStateFlow = flowOf(PermissionState.GRANTED)
         val stopDetailsFlow = flowOf(StopDetails("123456", null))
 
-        calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test {
-            assertEquals(UiState.ERROR_NO_LOCATION_FEATURE, awaitItem())
-            awaitComplete()
-        }
+        calculator
+            .createUiStateFlow(
+                permissionStateFlow,
+                backgroundLocationPermissionStateFlow,
+                stopDetailsFlow
+            ).test {
+                assertEquals(UiState.ERROR_NO_LOCATION_FEATURE, awaitItem())
+                awaitComplete()
+            }
     }
 
     @Test
@@ -81,12 +87,18 @@ class UiStateCalculatorTest {
         whenever(locationRepository.isLocationEnabledFlow)
             .thenReturn(flowOf(true))
         val permissionStateFlow = flowOf(PermissionState.UNGRANTED)
+        val backgroundLocationPermissionStateFlow = flowOf(PermissionState.UNGRANTED)
         val stopDetailsFlow = flowOf(StopDetails("123456", null))
 
-        calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test {
-            assertEquals(UiState.ERROR_PERMISSION_UNGRANTED, awaitItem())
-            awaitComplete()
-        }
+        calculator
+            .createUiStateFlow(
+                permissionStateFlow,
+                backgroundLocationPermissionStateFlow,
+                stopDetailsFlow
+            ).test {
+                assertEquals(UiState.ERROR_PERMISSION_UNGRANTED, awaitItem())
+                awaitComplete()
+            }
     }
 
     @Test
@@ -96,12 +108,60 @@ class UiStateCalculatorTest {
         whenever(locationRepository.isLocationEnabledFlow)
             .thenReturn(flowOf(true))
         val permissionStateFlow = flowOf(PermissionState.DENIED)
+        val backgroundLocationPermissionStateFlow = flowOf(PermissionState.UNGRANTED)
         val stopDetailsFlow = flowOf(StopDetails("123456", null))
 
-        calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test {
-            assertEquals(UiState.ERROR_PERMISSION_DENIED, awaitItem())
-            awaitComplete()
-        }
+        calculator
+            .createUiStateFlow(
+                permissionStateFlow,
+                backgroundLocationPermissionStateFlow,
+                stopDetailsFlow
+            ).test {
+                assertEquals(UiState.ERROR_PERMISSION_DENIED, awaitItem())
+                awaitComplete()
+            }
+    }
+
+    @Test
+    fun createUiStateFlowEmitsPermissionDeniedWhenBgLocationPermissionDenied() = runTest {
+        whenever(locationRepository.hasLocationFeature)
+            .thenReturn(true)
+        whenever(locationRepository.isLocationEnabledFlow)
+            .thenReturn(flowOf(true))
+        val permissionStateFlow = flowOf(PermissionState.GRANTED)
+        val backgroundLocationPermissionStateFlow = flowOf(PermissionState.DENIED)
+        val stopDetailsFlow = flowOf(StopDetails("123456", null))
+
+        calculator
+            .createUiStateFlow(
+                permissionStateFlow,
+                backgroundLocationPermissionStateFlow,
+                stopDetailsFlow
+            ).test {
+                assertEquals(UiState.ERROR_PERMISSION_DENIED, awaitItem())
+                awaitComplete()
+            }
+    }
+
+    @Test
+    fun createUiStateFlowEmitsPermissionUngrantedWhenBgLocationPermissionUngranted() = runTest {
+        whenever(locationRepository.hasLocationFeature)
+            .thenReturn(true)
+        whenever(locationRepository.isLocationEnabledFlow)
+            .thenReturn(flowOf(true))
+        val permissionStateFlow = flowOf(PermissionState.GRANTED)
+        val backgroundLocationPermissionStateFlow = flowOf(PermissionState.UNGRANTED)
+        val stopDetailsFlow = flowOf(StopDetails("123456", null))
+
+        calculator
+            .createUiStateFlow(
+                permissionStateFlow,
+                backgroundLocationPermissionStateFlow,
+                stopDetailsFlow
+            ).test {
+                assertEquals(UiState.ERROR_NO_BACKGROUND_LOCATION_PERMISSION, awaitItem())
+                awaitComplete()
+            }
     }
 
     @Test
@@ -111,12 +171,18 @@ class UiStateCalculatorTest {
         whenever(locationRepository.isLocationEnabledFlow)
             .thenReturn(flowOf(true))
         val permissionStateFlow = flowOf(PermissionState.GRANTED)
+        val backgroundLocationPermissionStateFlow = flowOf(PermissionState.GRANTED)
         val stopDetailsFlow = flowOf(null)
 
-        calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test {
-            assertEquals(UiState.PROGRESS, awaitItem())
-            awaitComplete()
-        }
+        calculator
+            .createUiStateFlow(
+                permissionStateFlow,
+                backgroundLocationPermissionStateFlow,
+                stopDetailsFlow
+            ).test {
+                assertEquals(UiState.PROGRESS, awaitItem())
+                awaitComplete()
+            }
     }
 
     @Test
@@ -126,12 +192,18 @@ class UiStateCalculatorTest {
         whenever(locationRepository.isLocationEnabledFlow)
             .thenReturn(flowOf(true))
         val permissionStateFlow = flowOf(PermissionState.GRANTED)
+        val backgroundLocationPermissionStateFlow = flowOf(PermissionState.GRANTED)
         val stopDetailsFlow = flowOf(StopDetails("123456", null))
 
-        calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test {
-            assertEquals(UiState.CONTENT, awaitItem())
-            awaitComplete()
-        }
+        calculator
+            .createUiStateFlow(
+                permissionStateFlow,
+                backgroundLocationPermissionStateFlow,
+                stopDetailsFlow
+            ).test {
+                assertEquals(UiState.CONTENT, awaitItem())
+                awaitComplete()
+            }
     }
 
     @Test
@@ -139,7 +211,7 @@ class UiStateCalculatorTest {
         whenever(locationRepository.hasLocationFeature)
             .thenReturn(true)
         whenever(locationRepository.isLocationEnabledFlow)
-            .thenReturn(intervalFlowOf(0L, 300L, false, true))
+            .thenReturn(intervalFlowOf(0L, 600L, false, true))
         val permissionStateFlow = intervalFlowOf(
             0L,
             100L,
@@ -147,21 +219,35 @@ class UiStateCalculatorTest {
             PermissionState.DENIED,
             PermissionState.GRANTED
         )
+        val backgroundLocationPermissionStateFlow = flow {
+            emit(PermissionState.UNGRANTED)
+            delay(300L)
+            emit(PermissionState.DENIED)
+            delay(100L)
+            emit(PermissionState.GRANTED)
+        }
         val stopDetailsFlow = flow {
             emit(null)
-            delay(400L)
+            delay(700L)
             emit(StopDetails("123456", null))
             delay(100L)
             emit(StopDetails("123456", FakeStopName("Name", "Locality")))
         }
 
-        calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test {
-            assertEquals(UiState.ERROR_PERMISSION_UNGRANTED, awaitItem())
-            assertEquals(UiState.ERROR_PERMISSION_DENIED, awaitItem())
-            assertEquals(UiState.ERROR_LOCATION_DISABLED, awaitItem())
-            assertEquals(UiState.PROGRESS, awaitItem())
-            assertEquals(UiState.CONTENT, awaitItem())
-            awaitComplete()
-        }
+        calculator
+            .createUiStateFlow(
+                permissionStateFlow,
+                backgroundLocationPermissionStateFlow,
+                stopDetailsFlow
+            ).test {
+                assertEquals(UiState.ERROR_PERMISSION_UNGRANTED, awaitItem())
+                assertEquals(UiState.ERROR_PERMISSION_DENIED, awaitItem())
+                assertEquals(UiState.ERROR_NO_BACKGROUND_LOCATION_PERMISSION, awaitItem())
+                assertEquals(UiState.ERROR_PERMISSION_DENIED, awaitItem())
+                assertEquals(UiState.ERROR_LOCATION_DISABLED, awaitItem())
+                assertEquals(UiState.PROGRESS, awaitItem())
+                assertEquals(UiState.CONTENT, awaitItem())
+                awaitComplete()
+            }
     }
 }

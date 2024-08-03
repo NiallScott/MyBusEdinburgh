@@ -30,7 +30,6 @@ import android.content.res.ColorStateList
 import androidx.annotation.ColorInt
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.color.MaterialColors
-import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemServiceChooserServiceBinding
 
 /**
@@ -46,12 +45,18 @@ class ServiceViewHolder(
 ) : RecyclerView.ViewHolder(viewBinding.root) {
 
     private var item: UiService? = null
-    private val defaultBackground = MaterialColors.getColor(viewBinding.root, R.attr.colorTertiary)
+    private val defaultBackground = MaterialColors.getColor(
+        viewBinding.root,
+        com.google.android.material.R.attr.colorTertiary
+    )
     private val defaultTextColour = MaterialColors.getColor(
         viewBinding.root,
-        R.attr.colorOnTertiary
+        com.google.android.material.R.attr.colorOnTertiary
     )
-    private val colourOnSurface = MaterialColors.getColor(viewBinding.root, R.attr.colorOnSurface)
+    private val colourOnSurface = MaterialColors.getColor(
+        viewBinding.root,
+        com.google.android.material.R.attr.colorOnSurface
+    )
 
     init {
         viewBinding.txtServiceName.setOnClickListener {

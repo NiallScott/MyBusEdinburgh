@@ -31,6 +31,7 @@ import androidx.lifecycle.SavedStateHandle
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import javax.inject.Inject
@@ -49,6 +50,8 @@ class PermissionsTracker @Inject constructor(
     companion object {
 
         private const val STATE_REQUESTED_PERMISSIONS = "requestedPermissions"
+        private const val STATE_REQUESTED_BACKGROUND_LOCATION_PERMISSION =
+            "requestedBackgroundLocationPermission"
     }
 
     /**
@@ -71,10 +74,29 @@ class PermissionsTracker @Inject constructor(
         )
 
     /**
+     * A [kotlinx.coroutines.flow.Flow] which emits whether the background location permission is
+     * granted or not.
+     */
+    val backgroundLocationPermissionStateFlow get() = _permissionsStateFlow
+        .map { it.hasBackgroundLocationPermission }
+        .combine(
+            savedStateHandle.getStateFlow(STATE_REQUESTED_BACKGROUND_LOCATION_PERMISSION, false),
+            this::mapToBackgroundLocationPermissionsState
+        )
+
+    /**
      * A [LiveData] which emits when permissions should be requested from the user.
      */
     val requestPermissionsLiveData: LiveData<Unit> get() = requestPermissions
     private val requestPermissions = SingleLiveEvent<Unit>()
+
+    /**
+     * A [LiveData] which emits when the background location permission should be requested from
+     * the user.
+     */
+    val requestBackgroundLocationPermissionLiveData: LiveData<Unit>
+        get() = requestBackgroundLocation
+    private val requestBackgroundLocation = SingleLiveEvent<Unit>()
 
     private val _permissionsStateFlow = MutableStateFlow(UiPermissionsState())
 
@@ -85,6 +107,17 @@ class PermissionsTracker @Inject constructor(
         if (savedStateHandle.get<Boolean>(STATE_REQUESTED_PERMISSIONS) != true) {
             savedStateHandle[STATE_REQUESTED_PERMISSIONS] = true
             requestPermissions.call()
+        }
+    }
+
+    /**
+     * This is called when the user has clicked the button to request the background location
+     * permission.
+     */
+    fun onRequestBackgroundLocationPermissionClicked() {
+        if (savedStateHandle.get<Boolean>(STATE_REQUESTED_BACKGROUND_LOCATION_PERMISSION) != true) {
+            savedStateHandle[STATE_REQUESTED_BACKGROUND_LOCATION_PERMISSION] = true
+            requestBackgroundLocation.call()
         }
     }
 
@@ -104,6 +137,26 @@ class PermissionsTracker @Inject constructor(
         return when {
             uiPermissionsState.hasFineLocationPermission &&
                     uiPermissionsState.hasPostNotificationsPermission -> PermissionState.GRANTED
+            requestedPermissions != true -> PermissionState.UNGRANTED
+            else -> PermissionState.DENIED
+        }
+    }
+
+    /**
+     * Given the background location permission state, and the state of whether this has already
+     * been requested from the user in this session, map this to a [PermissionState].
+     *
+     * @param isBackgroundLocationPermissionGranted Is background location permission granted?
+     * @param requestedPermissions Whether the permission has already been requested from the user
+     * or not.
+     * @return The resulting [PermissionState].
+     */
+    private fun mapToBackgroundLocationPermissionsState(
+        isBackgroundLocationPermissionGranted: Boolean,
+        requestedPermissions: Boolean?
+    ): PermissionState {
+        return when {
+            isBackgroundLocationPermissionGranted -> PermissionState.GRANTED
             requestedPermissions != true -> PermissionState.UNGRANTED
             else -> PermissionState.DENIED
         }

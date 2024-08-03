@@ -41,6 +41,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.filters.LargeTest
 import androidx.test.filters.SdkSuppress
 import org.junit.Rule
+import uk.org.rivernile.android.bustracker.ui.about.R as Rabout
 import uk.org.rivernile.android.bustracker.ui.about.AboutActivity
 import uk.org.rivernile.android.bustracker.ui.alerts.AlertManagerFragment
 import uk.org.rivernile.android.bustracker.ui.explore.ExploreFragment
@@ -107,7 +108,7 @@ class MainActivityTest {
     fun showsAboutActivityWhenAboutMenuItemClicked() {
         launchActivity<MainActivity>().use {
             openActionBarOverflowOrOptionsMenu(ApplicationProvider.getApplicationContext())
-            onView(withText(R.string.about_title))
+            onView(withText(Rabout.string.about_title))
                 .perform(click())
         }
 

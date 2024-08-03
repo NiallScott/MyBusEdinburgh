@@ -61,6 +61,7 @@ import uk.org.rivernile.android.bustracker.ui.favourites.remove.DeleteFavouriteD
 import uk.org.rivernile.edinburghbustracker.android.BuildConfig
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.ActivityDisplayStopDataBinding
+import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import javax.inject.Inject
 import kotlin.math.abs
 
@@ -131,7 +132,7 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
 
         window.navigationBarColor = MaterialColors.getColor(
             viewBinding.root,
-            R.attr.colorSurfaceContainer
+            com.google.android.material.R.attr.colorSurfaceContainer
         )
 
         setSupportActionBar(viewBinding.toolbar)
@@ -150,7 +151,7 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
             viewPager.apply {
                 adapter = pagerAdapter
                 setPageTransformer(MarginPageTransformer(
-                        resources.getDimensionPixelSize(R.dimen.padding_default)))
+                        resources.getDimensionPixelSize(Rcore.dimen.padding_default)))
                 offscreenPageLimit = 1
             }
 

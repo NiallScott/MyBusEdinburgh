@@ -54,16 +54,20 @@ class UiStateCalculator @Inject constructor(
      *
      * @param permissionStateFlow A [Flow] which emits the latest [PermissionState] for the
      * required permissions.
+     * @param backgroundLocationPermissionStateFlow A [Flow] which emits the state of the
+     * background location permission.
      * @param stopDetailsFlow A [Flow] which emits the latest [StopDetails]. A `null` value denotes
      * that the data is loading or is not available.
      * @return A [Flow] of [UiState]s, which emits new items when relevant states change.
      */
     fun createUiStateFlow(
         permissionStateFlow: Flow<PermissionState>,
+        backgroundLocationPermissionStateFlow: Flow<PermissionState>,
         stopDetailsFlow: Flow<StopDetails?>
     ) = combine(
         locationEnabledFlow,
         permissionStateFlow,
+        backgroundLocationPermissionStateFlow,
         stopDetailsFlow,
         this::calculateUiState
     ).distinctUntilChanged()
@@ -85,17 +89,24 @@ class UiStateCalculator @Inject constructor(
      *
      * @param locationEnabled Whether location services are currently enabled on the device or not.
      * @param permissionState The current permission state.
+     * @param backgroundLocationPermissionState The current state of the background location
+     * permission.
      * @param stopDetails The current stop details.
      * @return The calculated [UiState].
      */
     private fun calculateUiState(
         locationEnabled: Boolean,
         permissionState: PermissionState,
+        backgroundLocationPermissionState: PermissionState,
         stopDetails: StopDetails?
     ) = when {
         !locationRepository.hasLocationFeature -> UiState.ERROR_NO_LOCATION_FEATURE
         permissionState == PermissionState.UNGRANTED -> UiState.ERROR_PERMISSION_UNGRANTED
-        permissionState == PermissionState.DENIED -> UiState.ERROR_PERMISSION_DENIED
+        permissionState == PermissionState.DENIED ||
+                backgroundLocationPermissionState == PermissionState.DENIED ->
+                    UiState.ERROR_PERMISSION_DENIED
+        backgroundLocationPermissionState == PermissionState.UNGRANTED ->
+            UiState.ERROR_NO_BACKGROUND_LOCATION_PERMISSION
         !locationEnabled -> UiState.ERROR_LOCATION_DISABLED
         stopDetails == null -> UiState.PROGRESS
         else -> UiState.CONTENT

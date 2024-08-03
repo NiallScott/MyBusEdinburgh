@@ -46,6 +46,8 @@ class PermissionsTrackerTest {
     companion object {
 
         private const val STATE_REQUESTED_PERMISSIONS = "requestedPermissions"
+        private const val STATE_REQUESTED_BACKGROUND_LOCATION_PERMISSION =
+            "requestedBackgroundLocationPermission"
     }
 
     @get:Rule
@@ -221,6 +223,80 @@ class PermissionsTrackerTest {
     }
 
     @Test
+    fun backgroundLocationPermissionStateFlowEmitsUngrantedWhenNotGranted() = runTest {
+        val permissionsTracker = createPermissionsTracker()
+        permissionsTracker.permissionsState = UiPermissionsState(
+            hasBackgroundLocationPermission = false
+        )
+
+        permissionsTracker.permissionsStateFlow.test {
+            assertEquals(PermissionState.UNGRANTED, awaitItem())
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun backgroundLocationPermissionStateFlowEmitsGrantedWhenGranted() = runTest {
+        val permissionsTracker = createPermissionsTracker()
+        permissionsTracker.permissionsState = UiPermissionsState(
+            hasBackgroundLocationPermission = true
+        )
+
+        permissionsTracker.backgroundLocationPermissionStateFlow.test {
+            assertEquals(PermissionState.GRANTED, awaitItem())
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun backgroundLocationPermissionStateFlowEmitsDeniedDefaultWhenAskedForPermissions() = runTest {
+        val permissionsTracker = createPermissionsTracker(
+            SavedStateHandle(
+                mapOf(STATE_REQUESTED_BACKGROUND_LOCATION_PERMISSION to true)
+            )
+        )
+
+        permissionsTracker.backgroundLocationPermissionStateFlow.test {
+            assertEquals(PermissionState.DENIED, awaitItem())
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun backgroundLocationPermissionStateFlowEmitsDeniedWhenUngrantedAndAskedAlready() = runTest {
+        val permissionsTracker = createPermissionsTracker(
+            SavedStateHandle(
+                mapOf(STATE_REQUESTED_BACKGROUND_LOCATION_PERMISSION to true)
+            )
+        )
+        permissionsTracker.permissionsState = UiPermissionsState(
+            hasBackgroundLocationPermission = false
+        )
+
+        permissionsTracker.backgroundLocationPermissionStateFlow.test {
+            assertEquals(PermissionState.DENIED, awaitItem())
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun backgroundLocationPermissionStateFlowEmitsGrantedWhenGrantedAndAskedAlready() = runTest {
+        val permissionsTracker = createPermissionsTracker(
+            SavedStateHandle(
+                mapOf(STATE_REQUESTED_BACKGROUND_LOCATION_PERMISSION to true)
+            )
+        )
+        permissionsTracker.permissionsState = UiPermissionsState(
+            hasBackgroundLocationPermission = true
+        )
+
+        permissionsTracker.backgroundLocationPermissionStateFlow.test {
+            assertEquals(PermissionState.GRANTED, awaitItem())
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
     fun onRequestPermissionsClickedRequestsPermissionsWhenPermissionsRequested() {
         val permissionsTracker = createPermissionsTracker()
 
@@ -251,6 +327,41 @@ class PermissionsTrackerTest {
 
         val observer = permissionsTracker.requestPermissionsLiveData.test()
         permissionsTracker.onRequestPermissionsClicked()
+
+        observer.assertEmpty()
+    }
+
+    @Test
+    fun onRequestBackgroundLocationPermissionsClickedRequestsPermissionsWhenPermissionsRequested() {
+        val permissionsTracker = createPermissionsTracker()
+
+        val observer = permissionsTracker.requestBackgroundLocationPermissionLiveData.test()
+        permissionsTracker.onRequestBackgroundLocationPermissionClicked()
+
+        observer.assertSize(1)
+    }
+
+    @Test
+    fun onRequestBgLocationPermissionsClickedRequestsPermissionsOnceOnlyWhenPermissionsRequested() {
+        val permissionsTracker = createPermissionsTracker()
+
+        val observer = permissionsTracker.requestBackgroundLocationPermissionLiveData.test()
+        permissionsTracker.onRequestBackgroundLocationPermissionClicked()
+        permissionsTracker.onRequestBackgroundLocationPermissionClicked()
+
+        observer.assertSize(1)
+    }
+
+    @Test
+    fun onRequestBgLocationPermissionsClickedDoesNotRequestPermissionsWhenPreviouslyRequested() {
+        val permissionsTracker = createPermissionsTracker(
+            SavedStateHandle(
+                mapOf(STATE_REQUESTED_BACKGROUND_LOCATION_PERMISSION to true)
+            )
+        )
+
+        val observer = permissionsTracker.requestBackgroundLocationPermissionLiveData.test()
+        permissionsTracker.onRequestBackgroundLocationPermissionClicked()
 
         observer.assertEmpty()
     }

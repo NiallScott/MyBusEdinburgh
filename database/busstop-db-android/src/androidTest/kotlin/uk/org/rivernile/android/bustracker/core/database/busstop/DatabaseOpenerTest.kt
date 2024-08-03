@@ -28,9 +28,10 @@ package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import android.database.sqlite.SQLiteDatabase
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
+import androidx.test.ext.junit.rules.DeleteFilesRule
 import androidx.test.platform.app.InstrumentationRegistry
 import okio.IOException
-import kotlin.test.AfterTest
+import org.junit.Rule
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -48,23 +49,17 @@ class DatabaseOpenerTest {
         private const val DB_NAME = "database-opener-test"
     }
 
+    @get:Rule
+    val deleteFilesRule = DeleteFilesRule()
+
     private lateinit var opener: DatabaseOpener
 
     @BeforeTest
     fun setUp() {
-        // This is done at the starting of the test to ensure we start with a clean slate.
-        deleteExistingDatabase()
-
         opener = DatabaseOpener(
             context,
             FrameworkSQLiteOpenHelperFactory()
         )
-    }
-
-    @AfterTest
-    fun tearDown() {
-        // This is done again at the end of the test to clean up.
-        deleteExistingDatabase()
     }
 
     @Test(expected = IOException::class)
@@ -170,8 +165,4 @@ class DatabaseOpenerTest {
     }
 
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
-
-    private fun deleteExistingDatabase() {
-        context.deleteDatabase(DB_NAME)
-    }
 }

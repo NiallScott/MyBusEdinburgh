@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,10 +32,13 @@ package uk.org.rivernile.android.bustracker.ui.alerts.proximity
  *
  * @property hasCoarseLocationPermission Do we have coarse location permission?
  * @property hasFineLocationPermission Do we have fine location permission?
+ * @property hasBackgroundLocationPermission Do we have background location permission?
  * @property hasPostNotificationsPermission Do we have the post notification permission?
  * @author Niall Scott
  */
 data class UiPermissionsState(
-        val hasCoarseLocationPermission: Boolean = false,
-        val hasFineLocationPermission: Boolean = false,
-        val hasPostNotificationsPermission: Boolean = false)
+    val hasCoarseLocationPermission: Boolean = false,
+    val hasFineLocationPermission: Boolean = false,
+    val hasBackgroundLocationPermission: Boolean = false,
+    val hasPostNotificationsPermission: Boolean = false
+)

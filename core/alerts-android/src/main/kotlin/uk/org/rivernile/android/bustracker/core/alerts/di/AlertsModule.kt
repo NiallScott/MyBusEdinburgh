@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,11 +26,17 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts.di
 
+import android.content.Context
 import android.os.Build
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.location.GeofencingClient
+import com.google.android.gms.location.LocationServices
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.alerts.AlertNotificationDispatcher
 import uk.org.rivernile.android.bustracker.core.alerts.AndroidAlertNotificationDispatcher
@@ -44,6 +50,7 @@ import uk.org.rivernile.android.bustracker.core.alerts.proximity.LegacyAndroidPr
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.V31AndroidProximityAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.android.AndroidGeofencingManager
+import uk.org.rivernile.android.bustracker.core.alerts.proximity.googleplay.GooglePlayGeofencingManager
 import javax.inject.Provider
 
 /**
@@ -60,11 +67,6 @@ internal interface AlertsModule {
     fun bindAlertNotificationDispatcher(
         androidAlertNotificationDispatcher: AndroidAlertNotificationDispatcher
     ): AlertNotificationDispatcher
-
-    @Suppress("unused")
-    @Binds
-    fun bindGeofencingManager(
-        androidGeofencingManager: AndroidGeofencingManager): GeofencingManager
 
     companion object {
 
@@ -102,5 +104,26 @@ internal interface AlertsModule {
                 legacyAndroidArrivalAlertTaskLauncher.get()
             }
         }
+
+        @Provides
+        fun provideGeofencingManager(
+            @ApplicationContext context: Context,
+            androidGeofencingManager: Provider<AndroidGeofencingManager>,
+            googlePlayGeofencingManager: Provider<GooglePlayGeofencingManager>
+        ): GeofencingManager {
+            val isGooglePlayServicesAvailable = GoogleApiAvailability
+                .getInstance()
+                .isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
+
+            return if (isGooglePlayServicesAvailable) {
+                googlePlayGeofencingManager.get()
+            } else {
+                androidGeofencingManager.get()
+            }
+        }
+
+        @Provides
+        fun provideGeofencingClient(@ApplicationContext context: Context): GeofencingClient =
+            LocationServices.getGeofencingClient(context)
     }
 }
