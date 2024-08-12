@@ -5,7 +5,7 @@ android-sdk-min = "23"
 android-sdk-target = "34"
 android-build-tools = "34.0.0"
 
-android-gradle-plugin = "8.5.1"
+android-gradle-plugin = "8.5.2"
 coroutines = "1.8.1"
 dagger = "2.52"
 kotlin = "1.9.24"
