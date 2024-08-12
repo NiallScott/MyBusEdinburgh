@@ -97,6 +97,7 @@ include(
     ":macrobenchmark:app-macrobenchmark",
     ":testutils",
     ":ui:feature:about",
+    ":ui:feature:news",
     ":ui:text-formatting",
     ":ui:ui-core",
     ":ui:widget:contentview",

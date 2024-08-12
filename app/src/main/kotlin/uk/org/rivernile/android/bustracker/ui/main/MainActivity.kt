@@ -77,9 +77,9 @@ import uk.org.rivernile.android.bustracker.ui.favourites.FavouriteStopsFragment
 import uk.org.rivernile.android.bustracker.ui.favourites.addedit.AddEditFavouriteStopDialogFragment
 import uk.org.rivernile.android.bustracker.ui.favourites.remove.DeleteFavouriteDialogFragment
 import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment
-import uk.org.rivernile.android.bustracker.ui.news.TwitterUpdatesFragment
 import uk.org.rivernile.android.bustracker.ui.HasScrollableContent
 import uk.org.rivernile.android.bustracker.ui.HasTabBar
+import uk.org.rivernile.android.bustracker.ui.news.NewsFragment
 import uk.org.rivernile.android.bustracker.ui.search.SearchFragment
 import uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity
 import uk.org.rivernile.android.bustracker.ui.turnongps.TurnOnGpsDialogFragment
@@ -451,7 +451,7 @@ class MainActivity : AppCompatActivity(),
                             ?.let(this::attach)
                             ?: add(
                                     R.id.fragmentContainer,
-                                    TwitterUpdatesFragment(),
+                                    NewsFragment(),
                                     FRAGMENT_TAG_UPDATES)
                 }
                 R.id.main_navigation_alerts -> {
