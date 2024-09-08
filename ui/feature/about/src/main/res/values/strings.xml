@@ -46,7 +46,7 @@
     <string name="creditsdialog_body">
         <![CDATA[
             <h5>Thanks to the following people and entities for making this application happen;</h5>
-
+            <br/>
             <p>
                 &#8226; Gordon Christie (EdinBus for iOS developer)<br/>
                 &#8226; The City of Edinburgh Council<br/>
@@ -54,8 +54,9 @@
                 &#8226; INEO Systrans<br/>
                 &#8226; Lothian Buses
             </p>
-
+            <br/>
             <h5>Disclaimer</h5>
+            <br/>
             <p>
                 Permission has been granted from The City of Edinburgh Council for this application
                 to tie in to their data feed. Neither the author of the application, nor The City of
