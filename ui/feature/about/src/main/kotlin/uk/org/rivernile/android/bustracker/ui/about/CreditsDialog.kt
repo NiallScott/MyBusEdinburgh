@@ -37,6 +37,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.tooling.preview.Preview
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
@@ -58,9 +60,8 @@ internal fun CreditsDialog(
             Text(text = stringResource(id = R.string.creditsdialog_title))
         },
         text = {
-            // FIXME: display the HTML properly when Compose introduces support.
             Text(
-                text = stringResource(id = R.string.creditsdialog_body),
+                text = AnnotatedString.fromHtml(stringResource(id = R.string.creditsdialog_body)),
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
             )
