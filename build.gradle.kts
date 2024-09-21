@@ -27,7 +27,8 @@
 import com.android.build.api.dsl.ManagedVirtualDevice
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.BasePlugin
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
     alias(libs.plugins.android.application) apply false
@@ -35,6 +36,7 @@ plugins {
     alias(libs.plugins.android.test) apply false
     alias(libs.plugins.androidx.baselineprofile) apply false
     alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.kotlin.compose.compiler) apply false
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.kotlin.kapt) apply false
@@ -54,9 +56,9 @@ subprojects {
         targetCompatibility = JavaVersion.VERSION_17.toString()
     }
 
-    tasks.withType<KotlinCompile>().configureEach {
-        kotlinOptions {
-            jvmTarget = JavaVersion.VERSION_17.toString()
+    tasks.withType<KotlinJvmCompile>().configureEach {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
 
@@ -90,11 +92,6 @@ subprojects {
                         ?.toString()
                         ?: "not_set"
                 }
-            }
-
-            @Suppress("UnstableApiUsage")
-            composeOptions {
-                kotlinCompilerExtensionVersion = libs.versions.androidx.compose.compiler.get()
             }
 
             testOptions {
