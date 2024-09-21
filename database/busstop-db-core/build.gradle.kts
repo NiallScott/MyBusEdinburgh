@@ -33,4 +33,6 @@ dependencies {
 
     // Kotlin
     implementation(libs.coroutines.core)
+
+    testFixturesApi(libs.coroutines.core)
 }

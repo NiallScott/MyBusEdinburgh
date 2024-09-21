@@ -42,4 +42,6 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.turbine)
+
+    testFixturesApi(libs.coroutines.core)
 }
