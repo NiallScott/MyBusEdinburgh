@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.http
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.Call
 import okhttp3.Callback
@@ -40,7 +39,6 @@ import kotlin.coroutines.resumeWithException
  * @return The [Response] from executing the call.
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 suspend fun Call.executeAsync(): Response = suspendCancellableCoroutine { continuation ->
     continuation.invokeOnCancellation {
         cancel()
@@ -52,7 +50,7 @@ suspend fun Call.executeAsync(): Response = suspendCancellableCoroutine { contin
         }
 
         override fun onResponse(call: Call, response: Response) {
-            continuation.resume(response) {
+            continuation.resume(response) { _, _, _ ->
                 call.cancel()
             }
         }
