@@ -39,7 +39,7 @@ import kotlinx.serialization.Serializable
  * @author Niall Scott
  */
 @Serializable
-internal data class JsonTweet internal constructor(
+internal data class JsonTweet(
     @SerialName("created_at") internal val createdAt: String? = null,
     @SerialName("text") internal val text: String? = null,
     @SerialName("entities") internal val entities: JsonEntities? = null,
