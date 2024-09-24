@@ -24,31 +24,33 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.updates.service.lothian
+package uk.org.rivernile.android.bustracker.ui.news.incidents
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import dagger.hilt.android.scopes.ViewModelScoped
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import javax.inject.Inject
 
 /**
- * This class contains the JSON data structure for an affected route.
+ * This class holds state for [IncidentsViewModel].
  *
- * @property name The name of the affected route.
  * @author Niall Scott
  */
-@Serializable
-internal data class JsonRouteAffected(
-    @SerialName("name") val name: String? = null
-)
+@ViewModelScoped
+internal class IncidentsViewModelState @Inject constructor() {
 
-/**
- * Map this [Collection] of [JsonRouteAffected] in to a [Set] of service names. If this yields an
- * empty [Set] then `null` will be returned.
- *
- * @return This [Collection] of [JsonRouteAffected] as a [Set] of service names or `null` if the
- * yielded [Set] is empty.
- */
-internal fun Collection<JsonRouteAffected>.toAffectedServicesOrNull(): Set<String>? {
-    return mapNotNull { it.name?.ifBlank { null } }
-        .ifEmpty { null }
-        ?.toSet()
+    /**
+     * This [Flow] emits [UiAction]s to be performed, usually in response to the user's actions.
+     */
+    val actionFlow: Flow<UiAction?> get() = _actionFlow
+    private val _actionFlow = MutableStateFlow<UiAction?>(null)
+
+    /**
+     * The current [UiAction] in progress.
+     */
+    var action: UiAction?
+        get() = _actionFlow.value
+        set(value) {
+            _actionFlow.value = value
+        }
 }

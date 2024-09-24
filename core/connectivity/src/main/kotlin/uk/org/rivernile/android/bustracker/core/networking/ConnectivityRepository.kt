@@ -38,26 +38,44 @@ import javax.inject.Singleton
 /**
  * This repository is used to access device connectivity information.
  *
+ * @author Niall Scott
+ */
+interface ConnectivityRepository {
+
+    /**
+     * Is there internet connectivity available?
+     */
+    val hasInternetConnectivity: Boolean
+
+    /**
+     * A [Flow] which emits the device internet connectivity status.
+     */
+    val hasInternetConnectivityFlow: Flow<Boolean>
+}
+
+/**
+ * This repository is used to access device connectivity information.
+ *
  * @param connectivityChecker Used to check device connectivity, and to register for events to
  * listen for connectivity changes.
  * @param applicationCoroutineScope The application [CoroutineScope].
  * @author Niall Scott
  */
 @Singleton
-class ConnectivityRepository @Inject internal constructor(
+internal class RealConnectivityRepository @Inject constructor(
     private val connectivityChecker: ConnectivityChecker,
     @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope
-) {
+) : ConnectivityRepository {
 
     /**
      * Is there internet connectivity available?
      */
-    val hasInternetConnectivity: Boolean get() = connectivityChecker.hasInternetConnectivity
+    override val hasInternetConnectivity get() = connectivityChecker.hasInternetConnectivity
 
     /**
      * A [Flow] which emits the device internet connectivity status.
      */
-    val hasInternetConnectivityFlow: Flow<Boolean> by lazy {
+    override val hasInternetConnectivityFlow by lazy {
         connectivityChecker.hasInternetConnectivityFlow
             .distinctUntilChanged()
             .shareIn(

@@ -46,7 +46,7 @@ import uk.org.rivernile.android.bustracker.ui.about.AboutActivity
 import uk.org.rivernile.android.bustracker.ui.alerts.AlertManagerFragment
 import uk.org.rivernile.android.bustracker.ui.explore.ExploreFragment
 import uk.org.rivernile.android.bustracker.ui.favourites.FavouriteStopsFragment
-import uk.org.rivernile.android.bustracker.ui.news.TwitterUpdatesFragment
+import uk.org.rivernile.android.bustracker.ui.news.NewsFragment
 import uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity
 import uk.org.rivernile.edinburghbustracker.android.R
 import kotlin.test.Test
@@ -134,7 +134,7 @@ class MainActivityTest {
     }
 
     @Test
-    fun showsTwitterUpdatesFragmentWhenUpdatesNavigationItemClicked() {
+    fun showsNewsFragmentWhenUpdatesNavigationItemClicked() {
         launchActivity<MainActivity>().use { scenario ->
             scenario.onActivity { activity ->
                 activity.supportFragmentManager.executePendingTransactions()
@@ -146,7 +146,7 @@ class MainActivityTest {
             scenario.onActivity { activity ->
                 activity.supportFragmentManager.executePendingTransactions()
 
-                assertIs<TwitterUpdatesFragment>(activity.currentFragment)
+                assertIs<NewsFragment>(activity.currentFragment)
             }
         }
     }

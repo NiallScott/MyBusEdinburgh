@@ -43,6 +43,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,9 +58,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.datetime.Instant
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.news.R
+import uk.org.rivernile.android.bustracker.ui.news.UiAffectedService
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import java.text.SimpleDateFormat
 
@@ -68,8 +72,16 @@ import java.text.SimpleDateFormat
  * @author Niall Scott
  */
 @Composable
-internal fun IncidentsScreen() {
-    IncidentsScreenContentPreview()
+internal fun IncidentsScreen(
+    viewModel: IncidentsViewModel = viewModel()
+) {
+    val uiState by viewModel.uiStateFlow.collectAsState()
+
+    IncidentsScreenWithState(
+        state = uiState,
+        onMoreDetailsClicked = viewModel::onMoreDetailsButtonClicked,
+        onActionLaunched = viewModel::onActionLaunched,
+    )
 }
 
 /**

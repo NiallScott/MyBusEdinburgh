@@ -41,7 +41,7 @@ import kotlin.test.assertTrue
  *
  * @author Niall Scott
  */
-class ConnectivityRepositoryTest {
+class RealConnectivityRepositoryTest {
 
     @Test
     fun hasInternetConnectivityReturnsFalseWhenConnectivityCheckerReturnsFalse() = runTest {
@@ -86,7 +86,7 @@ class ConnectivityRepositoryTest {
         onHasInternetConnectivity: () -> Boolean = { false },
         onHasInternetConnectivityFlow: () -> Flow<Boolean> = { emptyFlow() }
     ): ConnectivityRepository {
-        return ConnectivityRepository(
+        return RealConnectivityRepository(
             FakeConnectivityChecker(
                 onHasInternetConnectivity = onHasInternetConnectivity,
                 onHasInternetConnectivityFlow = onHasInternetConnectivityFlow

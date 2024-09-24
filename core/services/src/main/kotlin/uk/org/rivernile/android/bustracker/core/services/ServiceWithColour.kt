@@ -30,7 +30,7 @@ package uk.org.rivernile.android.bustracker.core.services
  * A tuple of a service name and optional colours.
  *
  * @property name The display name of the service.
- * @property colour The display colours of the service. This may be `null` if no colours are
+ * @property colours The display colours of the service. This may be `null` if no colours are
  * attributed.
  * @author Niall Scott
  */

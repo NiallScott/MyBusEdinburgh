@@ -27,6 +27,10 @@
 package uk.org.rivernile.android.bustracker.ui.news.incidents
 
 import kotlinx.datetime.Instant
+import uk.org.rivernile.android.bustracker.core.services.ServiceColours
+import uk.org.rivernile.android.bustracker.core.updates.IncidentServiceUpdate
+import uk.org.rivernile.android.bustracker.ui.news.UiAffectedService
+import uk.org.rivernile.android.bustracker.ui.news.toUiAffectedServicesOrNull
 
 /**
  * This represents the data for an incident which is shown on the UI.
@@ -49,3 +53,47 @@ internal data class UiIncident(
     val url: String?,
     val showMoreDetailsButton: Boolean
 )
+
+/**
+ * Given a [List] of [IncidentServiceUpdate]s, map this to a [List] of [UiIncident]s.
+ *
+ * @param coloursForServices A [Map] of service names to [ServiceColours]. May be `null` or services
+ * may be missing.
+ * @return The [List] of [IncidentServiceUpdate]s as a [List] of [UiIncident]s.
+ */
+internal fun List<IncidentServiceUpdate>.toUiIncidents(
+    coloursForServices: Map<String, ServiceColours>?,
+    serviceNamesComparator: Comparator<String>
+): List<UiIncident> {
+    return map {
+        it.toUiIncident(coloursForServices, serviceNamesComparator)
+    }
+}
+
+/**
+ * Map a [IncidentServiceUpdate] to a [UiIncident].
+ *
+ * @param coloursForServices A [Map] of service names to [ServiceColours] to populate service
+ * colours.
+ * @param serviceNamesComparator
+ */
+private fun IncidentServiceUpdate.toUiIncident(
+    coloursForServices: Map<String, ServiceColours>?,
+    serviceNamesComparator: Comparator<String>
+): UiIncident {
+    val mappedAffectedServices = toUiAffectedServicesOrNull(
+        affectedServices,
+        coloursForServices,
+        serviceNamesComparator
+    )
+
+    return UiIncident(
+        id = id,
+        lastUpdated = lastUpdated,
+        title = title,
+        summary = summary,
+        affectedServices = mappedAffectedServices,
+        url = url,
+        showMoreDetailsButton = !url.isNullOrBlank()
+    )
+}

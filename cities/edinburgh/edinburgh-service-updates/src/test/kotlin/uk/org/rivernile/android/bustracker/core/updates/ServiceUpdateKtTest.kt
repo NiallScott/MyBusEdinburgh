@@ -27,104 +27,129 @@
 package uk.org.rivernile.android.bustracker.core.updates
 
 import kotlinx.datetime.Instant
+import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdate
 import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdateType
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdate as EndpointServiceUpdate
 
 /**
- * Tests for [ServiceUpdateMapper].
+ * Tests for `ServiceUpdateMapper.kt`.
  *
  * @author Niall Scott
  */
-class ServiceUpdateMapperTest {
-
-    private lateinit var mapper: ServiceUpdateMapper
-
-    @BeforeTest
-    fun setUp() {
-        mapper = ServiceUpdateMapper()
-    }
+class ServiceUpdateKtTest {
 
     @Test
-    fun mapToServiceUpdatesReturnsNullWhenEndpointServiceUpdatesIsNull() {
-        val result = mapper.mapToServiceUpdates(null)
+    fun toIncidentsServiceUpdatesOrNullReturnsNullWhenServicesUpdatesIsEmpty() {
+        val result = emptyList<ServiceUpdate>().toIncidentsServiceUpdatesOrNull()
 
         assertNull(result)
     }
 
     @Test
-    fun mapToServiceUpdatesReturnsNullWhenEndpointServiceUpdatesIsEmpty() {
-        val result = mapper.mapToServiceUpdates(emptyList())
+    fun toIncidentsServiceUpdatesOrNullReturnsNullWithSinglePlannedServiceUpdate() {
+        val result = listOf(
+            createPlannedEndpointServiceUpdate(Instant.fromEpochMilliseconds(123L))
+        ).toIncidentsServiceUpdatesOrNull()
 
         assertNull(result)
     }
 
     @Test
-    fun mapToServiceUpdatesReturnsMappedIncidentServiceUpdate() {
+    fun toIncidentsServiceUpdatesOrNullReturnsSingleItemWithSingleIncidentServiceUpdate() {
         val time = Instant.fromEpochMilliseconds(123L)
         val expected = listOf(createIncidentServiceUpdate(time))
 
-        val result = mapper.mapToServiceUpdates(
-            listOf(
-                createIncidentEndpointServiceUpdate(time)
-            )
-        )
+        val result = listOf(
+            createIncidentEndpointServiceUpdate(time)
+        ).toIncidentsServiceUpdatesOrNull()
 
         assertEquals(expected, result)
     }
 
     @Test
-    fun mapToServiceUpdatesReturnsMappedPlannedServiceUpdate() {
+    fun toIncidentsServiceUpdatesOrNullReturnsMappedServiceUpdates() {
+        val time1 = Instant.fromEpochMilliseconds(123L)
+        val time2 = Instant.fromEpochMilliseconds(456L)
+        val expected = listOf(
+            createIncidentServiceUpdate(time1),
+            createIncidentServiceUpdate(time2)
+        )
+
+        val result = listOf(
+            createIncidentEndpointServiceUpdate(time1),
+            createPlannedEndpointServiceUpdate(Instant.fromEpochMilliseconds(789L)),
+            createIncidentEndpointServiceUpdate(time2)
+        ).toIncidentsServiceUpdatesOrNull()
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun toPlannedServiceUpdatesOrNullReturnsNullWhenServiceUpdatesIsEmpty() {
+        val result = emptyList<ServiceUpdate>().toPlannedServiceUpdatesOrNull()
+
+        assertNull(result)
+    }
+
+    @Test
+    fun toPlannedServiceUpdatesOrNullReturnsNullWithSingleIncidentServiceUpdate() {
+        val result = listOf(
+            createIncidentEndpointServiceUpdate(Instant.fromEpochMilliseconds(123L))
+        ).toPlannedServiceUpdatesOrNull()
+
+        assertNull(result)
+    }
+
+    @Test
+    fun toPlannedServiceUpdatesOrNullReturnsSingleItemWithSinglePlannedServiceUpdate() {
         val time = Instant.fromEpochMilliseconds(123L)
         val expected = listOf(createPlannedServiceUpdate(time))
 
-        val result = mapper.mapToServiceUpdates(
-            listOf(
-                createPlannedEndpointServiceUpdate(time)
-            )
-        )
+        val result = listOf(
+            createPlannedEndpointServiceUpdate(time)
+        ).toPlannedServiceUpdatesOrNull()
 
         assertEquals(expected, result)
     }
 
     @Test
-    fun mapToServiceUpdatesReturnsMappedServiceUpdates() {
-        val incidentTime = Instant.fromEpochMilliseconds(123L)
-        val plannedTime = Instant.fromEpochMilliseconds(456L)
+    fun toPlannedServiceUpdatesOrNullReturnsMappedServiceUpdates() {
+        val time1 = Instant.fromEpochMilliseconds(123L)
+        val time2 = Instant.fromEpochMilliseconds(456L)
         val expected = listOf(
-            createIncidentServiceUpdate(incidentTime),
-            createPlannedServiceUpdate(plannedTime)
+            createPlannedServiceUpdate(time1),
+            createPlannedServiceUpdate(time2)
         )
 
-        val result = mapper.mapToServiceUpdates(
-            listOf(
-                createIncidentEndpointServiceUpdate(incidentTime),
-                createPlannedEndpointServiceUpdate(plannedTime)
-            )
-        )
+        val result = listOf(
+            createPlannedEndpointServiceUpdate(time1),
+            createIncidentEndpointServiceUpdate(Instant.fromEpochMilliseconds(789L)),
+            createPlannedEndpointServiceUpdate(time2)
+        ).toPlannedServiceUpdatesOrNull()
 
         assertEquals(expected, result)
     }
 
-    private fun createIncidentEndpointServiceUpdate(lastUpdated: Instant): EndpointServiceUpdate {
-        return EndpointServiceUpdate(
+    private fun createIncidentEndpointServiceUpdate(lastUpdated: Instant): ServiceUpdate {
+        return ServiceUpdate(
             id = "incidentId",
             lastUpdated = lastUpdated,
             serviceUpdateType = ServiceUpdateType.INCIDENT,
+            title = "incident title",
             summary = "incident summary",
             affectedServices = setOf("1", "2"),
             url = "http://one"
         )
     }
 
-    private fun createPlannedEndpointServiceUpdate(lastUpdated: Instant): EndpointServiceUpdate {
-        return EndpointServiceUpdate(
+    private fun createPlannedEndpointServiceUpdate(lastUpdated: Instant): ServiceUpdate {
+        return ServiceUpdate(
             id = "plannedId",
             lastUpdated = lastUpdated,
             serviceUpdateType = ServiceUpdateType.PLANNED,
+            title = "planned title",
             summary = "planned summary",
             affectedServices = setOf("3", "4"),
             url = "http://two"
@@ -135,6 +160,7 @@ class ServiceUpdateMapperTest {
         return IncidentServiceUpdate(
             id = "incidentId",
             lastUpdated = lastUpdated,
+            title = "incident title",
             summary = "incident summary",
             affectedServices = setOf("1", "2"),
             url = "http://one"
@@ -145,6 +171,7 @@ class ServiceUpdateMapperTest {
         return PlannedServiceUpdate(
             id = "plannedId",
             lastUpdated = lastUpdated,
+            title = "planned title",
             summary = "planned summary",
             affectedServices = setOf("3", "4"),
             url = "http://two"

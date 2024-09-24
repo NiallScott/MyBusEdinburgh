@@ -39,14 +39,12 @@ import javax.inject.Inject
  *
  * @param lothianServiceUpdatesApi The Retrofit Lothian service updates API.
  * @param connectivityRepository Used to determine the connectivity state.
- * @param serviceUpdateMapper Maps received data in to our domain objects.
  * @param exceptionLogger Logs exceptions.
  * @author Niall Scott
  */
 internal class LothianServiceUpdatesEndpoint @Inject constructor(
     private val lothianServiceUpdatesApi: LothianServiceUpdatesApi,
     private val connectivityRepository: ConnectivityRepository,
-    private val serviceUpdateMapper: ServiceUpdatesMapper,
     private val exceptionLogger: ExceptionLogger
 ) : ServiceUpdatesEndpoint {
 
@@ -57,7 +55,7 @@ internal class LothianServiceUpdatesEndpoint @Inject constructor(
 
                 if (response.isSuccessful) {
                     ServiceUpdatesResponse.Success(
-                        serviceUpdateMapper.mapToServiceUpdates(response.body())
+                        response.body()?.toServiceUpdatesOrNull()
                     )
                 } else {
                     val error = "Status code = ${response.code()}; " +

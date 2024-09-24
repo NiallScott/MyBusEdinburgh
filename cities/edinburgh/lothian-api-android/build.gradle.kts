@@ -24,18 +24,40 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.news.incidents
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.hilt)
+}
 
-/**
- * Service details regarding an affected service.
- *
- * @property serviceName The display name of the service.
- * @property backgroundColour An optional background colour to use for the service.
- * @property textColour An optional text colour to use for the service.
- * @author Niall Scott
- */
-internal data class UiAffectedService(
-    val serviceName: String,
-    val backgroundColour: Int?,
-    val textColour: Int?
-)
+android {
+    namespace = "uk.org.rivernile.android.bustracker.core.edinburgh.lothianapi"
+
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+        }
+
+        debug {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
+    }
+}
+
+dependencies {
+
+    implementation(project(":cities:edinburgh:lothian-api-core"))
+
+    // Hilt (dependency injection)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+
+    // Testing dependencies
+    androidTestImplementation(libs.androidx.test.runner)
+}

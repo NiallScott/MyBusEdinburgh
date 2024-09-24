@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.updates
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdate as EndpointServiceUpdate
 import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdatesEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdatesResponse
 import javax.inject.Inject
@@ -36,42 +37,63 @@ import javax.inject.Singleton
 /**
  * This repository is used to access service updates.
  *
+ * @author Niall Scott
+ */
+interface ServiceUpdateRepository {
+
+    /**
+     * A [Flow] which emits [ServiceUpdatesResult]s for [IncidentServiceUpdate]s.
+     */
+    val incidentServiceUpdatesFlow: Flow<ServiceUpdatesResult<IncidentServiceUpdate>>
+
+    /**
+     * A [Flow] which emits [ServiceUpdatesResult]s for [PlannedServiceUpdate]s.
+     */
+    val plannedServiceUpdatesFlow: Flow<ServiceUpdatesResult<PlannedServiceUpdate>>
+}
+
+/**
+ * This is the real implementation of [ServiceUpdateRepository].
+ *
  * @param serviceUpdatesEndpoint The endpoint to receive service updates from.
- * @param serviceUpdateMapper Used to map to [ServiceUpdate] objects.
  * @author Niall Scott
  */
 @Singleton
-class ServiceUpdateRepository @Inject internal constructor(
-    private val serviceUpdatesEndpoint: ServiceUpdatesEndpoint,
-    private val serviceUpdateMapper: ServiceUpdateMapper
-) {
+internal class RealServiceUpdateRepository @Inject constructor(
+    private val serviceUpdatesEndpoint: ServiceUpdatesEndpoint
+) : ServiceUpdateRepository {
 
-    /**
-     * A [Flow] object which emits the [ServiceUpdatesResult] of loading the latest
-     * [ServiceUpdate]s.
-     *
-     * This instance will have loading events propagated to it, including the in-progress state,
-     * success state and the error states.
-     */
-    val serviceUpdatesFlow: Flow<ServiceUpdatesResult> get() = flow {
+    override val incidentServiceUpdatesFlow get() = flow {
         emit(ServiceUpdatesResult.InProgress)
-        emit(fetchServiceUpdates())
+        emit(
+            fetchServiceUpdates {
+                it?.toIncidentsServiceUpdatesOrNull()
+            }
+        )
+    }
+
+    override val plannedServiceUpdatesFlow get() = flow {
+        emit(ServiceUpdatesResult.InProgress)
+        emit(
+            fetchServiceUpdates {
+                it?.toPlannedServiceUpdatesOrNull()
+            }
+        )
     }
 
     /**
      * This suspending function fetches the latest [ServiceUpdate]s and returns the appropriate
      * [ServiceUpdatesResult] object.
      *
+     * @param mapper A function which maps the success data.
      * @return A [ServiceUpdatesResult] object encapsulating the result of the request.
      */
-    private suspend fun fetchServiceUpdates(): ServiceUpdatesResult {
+    private suspend inline fun <T : ServiceUpdate> fetchServiceUpdates(
+        mapper: (List<EndpointServiceUpdate>?) -> List<T>?
+    ): ServiceUpdatesResult<T> {
         return when (val response = serviceUpdatesEndpoint.getServiceUpdates()) {
             is ServiceUpdatesResponse.Success ->
-                ServiceUpdatesResult.Success(
-                    serviceUpdateMapper.mapToServiceUpdates(
-                        response.serviceUpdates
-                    )
-                )
+                ServiceUpdatesResult.Success(mapper(response.serviceUpdates))
             is ServiceUpdatesResponse.Error.NoConnectivity ->
                 ServiceUpdatesResult.Error.NoConnectivity
             is ServiceUpdatesResponse.Error.Io -> ServiceUpdatesResult.Error.Io(response.throwable)

@@ -26,6 +26,7 @@
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.kapt)
     `java-test-fixtures`
 }
 
@@ -33,8 +34,9 @@ dependencies {
 
     implementation(project(":core:coroutines"))
 
-    // Dependency injection
-    implementation(libs.javax.inject)
+    // Dagger 2
+    implementation(libs.dagger.core)
+    kapt(libs.dagger.compiler)
 
     // Testing dependencies
     testImplementation(project(":testutils"))

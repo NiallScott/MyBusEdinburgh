@@ -24,31 +24,32 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.updates.service.lothian
+package uk.org.rivernile.android.bustracker.core.updates.di
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import dagger.Binds
+import dagger.Module
+import uk.org.rivernile.android.bustracker.core.updates.RealServiceUpdateRepository
+import uk.org.rivernile.android.bustracker.core.updates.ServiceUpdateRepository
 
 /**
- * This class contains the JSON data structure for an affected route.
+ * This is a [Module] which provides dependencies for service updates.
  *
- * @property name The name of the affected route.
  * @author Niall Scott
  */
-@Serializable
-internal data class JsonRouteAffected(
-    @SerialName("name") val name: String? = null
+@Module(
+    includes = [
+        ServiceUpdatesModule.Bindings::class
+    ]
 )
+class ServiceUpdatesModule {
 
-/**
- * Map this [Collection] of [JsonRouteAffected] in to a [Set] of service names. If this yields an
- * empty [Set] then `null` will be returned.
- *
- * @return This [Collection] of [JsonRouteAffected] as a [Set] of service names or `null` if the
- * yielded [Set] is empty.
- */
-internal fun Collection<JsonRouteAffected>.toAffectedServicesOrNull(): Set<String>? {
-    return mapNotNull { it.name?.ifBlank { null } }
-        .ifEmpty { null }
-        ?.toSet()
+    @Module
+    internal interface Bindings {
+
+        @Suppress("unused")
+        @Binds
+        fun bindServiceUpdateRepository(
+            realServiceUpdateRepository: RealServiceUpdateRepository
+        ): ServiceUpdateRepository
+    }
 }

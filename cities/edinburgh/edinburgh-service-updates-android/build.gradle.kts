@@ -24,31 +24,42 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.updates.service.lothian
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.hilt)
+}
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+android {
+    namespace = "uk.org.rivernile.android.bustracker.core.edinburgh.serviceupdates"
 
-/**
- * This class contains the JSON data structure for an affected route.
- *
- * @property name The name of the affected route.
- * @author Niall Scott
- */
-@Serializable
-internal data class JsonRouteAffected(
-    @SerialName("name") val name: String? = null
-)
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
 
-/**
- * Map this [Collection] of [JsonRouteAffected] in to a [Set] of service names. If this yields an
- * empty [Set] then `null` will be returned.
- *
- * @return This [Collection] of [JsonRouteAffected] as a [Set] of service names or `null` if the
- * yielded [Set] is empty.
- */
-internal fun Collection<JsonRouteAffected>.toAffectedServicesOrNull(): Set<String>? {
-    return mapNotNull { it.name?.ifBlank { null } }
-        .ifEmpty { null }
-        ?.toSet()
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+        }
+
+        debug {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
+    }
+}
+
+dependencies {
+
+    api(project(":cities:edinburgh:edinburgh-service-updates"))
+    implementation(project(":cities:edinburgh:edinburgh-service-updates-endpoint"))
+    implementation(project(":cities:edinburgh:lothian-api-android"))
+
+    // Hilt (dependency injection)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+
+    // Testing dependencies
+    androidTestImplementation(libs.androidx.test.runner)
 }

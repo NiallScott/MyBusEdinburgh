@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.endpoints.updates.service.lothi
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdate
 
 /**
  * This class describes the root JSON object for obtaining service updates.
@@ -39,3 +40,16 @@ import kotlinx.serialization.Serializable
 internal data class JsonServiceUpdateEvents(
     @SerialName("events") val events: List<JsonEvent>? = null
 )
+
+/**
+ * Map this [JsonServiceUpdateEvents] to a [List] of [ServiceUpdate]s. `null` will be returned if
+ * there are no events or none of the events could be mapped to valid data.
+ *
+ * @return This [JsonServiceUpdateEvents] as a [List] of [ServiceUpdate]s. `null` will be returned
+ * if there are no events or none of the events could be mapped to valid data.
+ */
+internal fun JsonServiceUpdateEvents.toServiceUpdatesOrNull(): List<ServiceUpdate>? {
+    return events
+        ?.mapNotNull { it.toServiceUpdateOrNull() }
+        ?.ifEmpty { null }
+}

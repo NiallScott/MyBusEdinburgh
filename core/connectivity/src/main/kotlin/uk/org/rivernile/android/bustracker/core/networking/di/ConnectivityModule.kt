@@ -24,42 +24,32 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.updates.service.di
+package uk.org.rivernile.android.bustracker.core.networking.di
 
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
-import retrofit2.Retrofit
-import retrofit2.create
-import uk.org.rivernile.android.bustracker.core.endpoints.di.ForLothianApi
-import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdatesEndpoint
-import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.lothian.LothianServiceUpdatesApi
-import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.lothian.LothianServiceUpdatesEndpoint
+import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
+import uk.org.rivernile.android.bustracker.core.networking.RealConnectivityRepository
 
 /**
- * This [Module] provides dependencies for service updates.
+ * A [Module] for connectivity dependencies.
  *
  * @author Niall Scott
  */
 @Module(
     includes = [
-        ServiceUpdatesModule.Bindings::class
+        ConnectivityModule.Bindings::class
     ]
 )
-class ServiceUpdatesModule {
-
-    @Provides
-    internal fun provideLothianServiceUpdatesApi(
-        @ForLothianApi retrofit: Retrofit
-    ): LothianServiceUpdatesApi = retrofit.create()
+class ConnectivityModule {
 
     @Module
     internal interface Bindings {
 
         @Suppress("unused")
         @Binds
-        fun bindServiceUpdatesEndpoint(
-            lothianServiceUpdatesEndpoint: LothianServiceUpdatesEndpoint
-        ): ServiceUpdatesEndpoint
+        fun bindConnectivityRepository(
+            realConnectivityRepository: RealConnectivityRepository
+        ): ConnectivityRepository
     }
 }

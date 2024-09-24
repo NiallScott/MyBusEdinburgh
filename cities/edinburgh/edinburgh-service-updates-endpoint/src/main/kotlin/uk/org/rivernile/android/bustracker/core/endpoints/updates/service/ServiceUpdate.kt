@@ -34,6 +34,7 @@ import kotlinx.datetime.Instant
  * @property id The unique ID of the update.
  * @property lastUpdated The time that this update was last updated at.
  * @property serviceUpdateType The type of this service update.
+ * @property title Text which forms the title of service update.
  * @property summary Text which summarises the service update.
  * @property affectedServices A [Set] of services this affects. `null` is equivalent to empty.
  * @property url An optional URL which provides a web link for this disruption.
@@ -43,6 +44,7 @@ data class ServiceUpdate(
     val id: String,
     val lastUpdated: Instant,
     val serviceUpdateType: ServiceUpdateType,
+    val title: String,
     val summary: String,
     val affectedServices: Set<String>?,
     val url: String?

@@ -27,6 +27,8 @@
 package uk.org.rivernile.android.bustracker.core.updates
 
 import kotlinx.datetime.Instant
+import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdate as EndpointServiceUpdate
+import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdateType
 
 /**
  * This interface defines a service update. Please see the sub-types for specific types of service
@@ -40,6 +42,8 @@ sealed interface ServiceUpdate {
     val id: String
     /** The time the update was last updated. */
     val lastUpdated: Instant
+    /** A title for the update */
+    val title: String
     /** A summary for the update. */
     val summary: String
     /** The affected services, if there are any. */
@@ -53,6 +57,7 @@ sealed interface ServiceUpdate {
  *
  * @property id The ID of the service update.
  * @property lastUpdated The time the update was last updated.
+ * @property title A title for the update.
  * @property summary A summary for the update.
  * @property affectedServices The affected services, if there are any.
  * @property url A URL which describes the update in more detail.
@@ -60,6 +65,7 @@ sealed interface ServiceUpdate {
 data class IncidentServiceUpdate(
     override val id: String,
     override val lastUpdated: Instant,
+    override val title: String,
     override val summary: String,
     override val affectedServices: Set<String>?,
     override val url: String?,
@@ -70,6 +76,7 @@ data class IncidentServiceUpdate(
  *
  * @property id The ID of the service update.
  * @property lastUpdated The time the update was last updated.
+ * @property title A title for the update.
  * @property summary A summary for the update.
  * @property affectedServices The affected services, if there are any.
  * @property url A URL which describes the update in more detail.
@@ -77,7 +84,78 @@ data class IncidentServiceUpdate(
 data class PlannedServiceUpdate(
     override val id: String,
     override val lastUpdated: Instant,
+    override val title: String,
     override val summary: String,
     override val affectedServices: Set<String>?,
     override val url: String?,
 ) : ServiceUpdate
+
+/**
+ * Map items with the [EndpointServiceUpdate.serviceUpdateType] of [ServiceUpdateType.INCIDENT] to
+ * [IncidentServiceUpdate] items. If there are no resulting items, `null` will be returned.
+ *
+ * @return The mapped [List], or `null` if this is empty, or there are no
+ * [ServiceUpdateType.INCIDENT] items in the input [List].
+ */
+internal fun List<EndpointServiceUpdate>.toIncidentsServiceUpdatesOrNull():
+        List<IncidentServiceUpdate>? {
+    return mapNotNull(EndpointServiceUpdate::toIncidentServiceUpdateOrNull)
+        .ifEmpty { null }
+}
+
+/**
+ * Map items with the [EndpointServiceUpdate.serviceUpdateType] of [ServiceUpdateType.PLANNED] to
+ * [PlannedServiceUpdate] items. If there are no resulting items, `null` will be returned.
+ *
+ * @return The mapped [List], or `null` if this is empty, or there are no
+ * [ServiceUpdateType.PLANNED] items in the input [List].
+ */
+internal fun List<EndpointServiceUpdate>.toPlannedServiceUpdatesOrNull():
+        List<PlannedServiceUpdate>? {
+    return mapNotNull(EndpointServiceUpdate::toPlannedServiceUpdateOrNull)
+        .ifEmpty { null }
+}
+
+/**
+ * Given an [EndpointServiceUpdate], map this to a [PlannedServiceUpdate] if
+ * [EndpointServiceUpdate.serviceUpdateType] is [ServiceUpdateType.INCIDENT], or `null` if this is
+ * another type.
+ *
+ * @return This [EndpointServiceUpdate] as a [PlannedServiceUpdate], or `null` if the
+ * [EndpointServiceUpdate.serviceUpdateType] is not [ServiceUpdateType.INCIDENT].
+ */
+private fun EndpointServiceUpdate.toIncidentServiceUpdateOrNull(): IncidentServiceUpdate? {
+    return takeIf { it.serviceUpdateType == ServiceUpdateType.INCIDENT }
+        ?.let {
+            IncidentServiceUpdate(
+                id = it.id,
+                lastUpdated = it.lastUpdated,
+                title = it.title,
+                summary = it.summary,
+                affectedServices = it.affectedServices,
+                url = it.url
+            )
+        }
+}
+
+/**
+ * Given an [EndpointServiceUpdate], map this to a [PlannedServiceUpdate] if
+ * [EndpointServiceUpdate.serviceUpdateType] is [ServiceUpdateType.PLANNED], or `null` if this is
+ * another type.
+ *
+ * @return This [EndpointServiceUpdate] as a [PlannedServiceUpdate], or `null` if the
+ * [EndpointServiceUpdate.serviceUpdateType] is not [ServiceUpdateType.PLANNED].
+ */
+private fun EndpointServiceUpdate.toPlannedServiceUpdateOrNull(): PlannedServiceUpdate? {
+    return takeIf { it.serviceUpdateType == ServiceUpdateType.PLANNED }
+        ?.let {
+            PlannedServiceUpdate(
+                id = it.id,
+                lastUpdated = it.lastUpdated,
+                title = it.title,
+                summary = it.summary,
+                affectedServices = it.affectedServices,
+                url = it.url
+            )
+        }
+}

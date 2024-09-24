@@ -24,31 +24,16 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.updates.service.lothian
+package uk.org.rivernile.android.bustracker.core.networking
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import kotlinx.coroutines.flow.Flow
 
-/**
- * This class contains the JSON data structure for an affected route.
- *
- * @property name The name of the affected route.
- * @author Niall Scott
- */
-@Serializable
-internal data class JsonRouteAffected(
-    @SerialName("name") val name: String? = null
-)
+class FakeConnectivityRepository(
+    private val onHasInternetConnectivity: () -> Boolean = { throw NotImplementedError() },
+    private val onHasInternetConnectivityFlow: () -> Flow<Boolean> = { throw NotImplementedError() }
+) : ConnectivityRepository {
 
-/**
- * Map this [Collection] of [JsonRouteAffected] in to a [Set] of service names. If this yields an
- * empty [Set] then `null` will be returned.
- *
- * @return This [Collection] of [JsonRouteAffected] as a [Set] of service names or `null` if the
- * yielded [Set] is empty.
- */
-internal fun Collection<JsonRouteAffected>.toAffectedServicesOrNull(): Set<String>? {
-    return mapNotNull { it.name?.ifBlank { null } }
-        .ifEmpty { null }
-        ?.toSet()
+    override val hasInternetConnectivity get() = onHasInternetConnectivity()
+
+    override val hasInternetConnectivityFlow get() = onHasInternetConnectivityFlow()
 }

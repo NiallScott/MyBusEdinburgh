@@ -29,6 +29,8 @@ package uk.org.rivernile.android.bustracker.core.endpoints.updates.service.lothi
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdate
+import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdateType
 
 /**
  * This class defines the structure for an event JSON object.
@@ -49,7 +51,48 @@ internal data class JsonEvent(
     @SerialName("created") val createdTime: Instant? = null,
     @SerialName("last_updated") val lastUpdatedTime: Instant? = null,
     @SerialName("severity") val severity: String? = null,
-    @SerialName("description") val descriptions: Map<String, String>? = null,
+    @SerialName("title") val titles: Map<String, String?>? = null,
+    @SerialName("description") val descriptions: Map<String, String?>? = null,
     @SerialName("routes_affected") val routesAffected: List<JsonRouteAffected>? = null,
     @SerialName("url") val url: String? = null
 )
+
+/**
+ * Map this [JsonEvent] to a [ServiceUpdate]. This will return `null` if the mapping failed, e.g. if
+ * required data is missing.
+ *
+ * @return This [JsonEvent] mapped to a [ServiceUpdate], or `null` if this could not be mapped.
+ */
+internal fun JsonEvent.toServiceUpdateOrNull(): ServiceUpdate? {
+    val id = id?.ifBlank { null } ?: return null
+    val lastUpdated = lastUpdatedTime ?: createdTime ?: return null
+    val serviceUpdateType = severity?.toServiceUpdateTypeOrNull() ?: return null
+    val title = titles?.get("en")?.ifBlank { null } ?: return null
+    val summary = descriptions?.get("en")?.ifBlank { null } ?: return null
+
+    return ServiceUpdate(
+        id = id,
+        lastUpdated = lastUpdated,
+        serviceUpdateType = serviceUpdateType,
+        title = title,
+        summary = summary,
+        affectedServices = routesAffected?.toAffectedServicesOrNull(),
+        url = url?.ifBlank { null }
+    )
+}
+
+private const val SEVERITY_INCIDENT = "incident"
+private const val SEVERITY_PLANNED = "planned"
+
+/**
+ * Map a severity [String] to a [ServiceUpdateType]. `null` will be returned when there is no match.
+ *
+ * @return The severity [String] mapped to a [ServiceUpdateType], or `null` if no mapping exists.
+ */
+private fun String.toServiceUpdateTypeOrNull(): ServiceUpdateType? {
+    return when (lowercase()) {
+        SEVERITY_INCIDENT -> ServiceUpdateType.INCIDENT
+        SEVERITY_PLANNED -> ServiceUpdateType.PLANNED
+        else -> null
+    }
+}

@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Instant
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.news.R
+import uk.org.rivernile.android.bustracker.ui.news.UiAffectedService
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import java.text.DateFormat
 import java.util.Date

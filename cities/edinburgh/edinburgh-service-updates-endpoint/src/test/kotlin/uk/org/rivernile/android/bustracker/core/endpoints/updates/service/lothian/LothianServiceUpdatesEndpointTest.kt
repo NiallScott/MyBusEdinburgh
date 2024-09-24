@@ -31,10 +31,6 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.SerializationException
 import okhttp3.ResponseBody.Companion.toResponseBody
 import okio.IOException
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.whenever
 import retrofit2.Response
 import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdate
 import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdateType
@@ -42,6 +38,7 @@ import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.Servic
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.log.FakeExceptionLogger
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
+import uk.org.rivernile.android.bustracker.core.networking.FakeConnectivityRepository
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -52,18 +49,15 @@ import kotlin.test.assertSame
  *
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner::class)
 class LothianServiceUpdatesEndpointTest {
-
-    @Mock
-    private lateinit var connectivityRepository: ConnectivityRepository
-    @Mock
-    private lateinit var serviceUpdatesMapper: ServiceUpdatesMapper
 
     @Test
     fun getServiceUpdatesWithNoConnectivityReturnsNoConnectivity() = runTest {
-        givenHasInternetConnectivity(false)
-        val endpoint = createLothianServiceUpdatesEndpoint()
+        val endpoint = createLothianServiceUpdatesEndpoint(
+            connectivityRepository = FakeConnectivityRepository(
+                onHasInternetConnectivity = { false }
+            )
+        )
 
         val result = endpoint.getServiceUpdates()
 
@@ -72,10 +66,10 @@ class LothianServiceUpdatesEndpointTest {
 
     @Test
     fun getServiceUpdatesReturnsServerErrorWhenSerializationExceptionIsThrown() = runTest {
-        givenHasInternetConnectivity(true)
         val exception = SerializationException()
         val exceptionLogger = FakeExceptionLogger()
         val endpoint = createLothianServiceUpdatesEndpoint(
+            connectivityRepository = connectivityRepositoryHasConnectivity,
             lothianServiceUpdatesApi = FakeLothianServiceUpdatesApi(
                 onGetServiceUpdates = { throw exception }
             ),
@@ -91,10 +85,10 @@ class LothianServiceUpdatesEndpointTest {
 
     @Test
     fun getServiceUpdatesReturnsIoErrorWhenIOExceptionIsThrown() = runTest {
-        givenHasInternetConnectivity(true)
         val exception = IOException()
         val exceptionLogger = FakeExceptionLogger()
         val endpoint = createLothianServiceUpdatesEndpoint(
+            connectivityRepository = connectivityRepositoryHasConnectivity,
             lothianServiceUpdatesApi = FakeLothianServiceUpdatesApi(
                 onGetServiceUpdates = { throw exception }
             ),
@@ -110,9 +104,9 @@ class LothianServiceUpdatesEndpointTest {
 
     @Test
     fun getServiceUpdatesReturnsServerErrorWhenServerReturnsNonSuccessCode() = runTest {
-        givenHasInternetConnectivity(true)
         val exceptionLogger = FakeExceptionLogger()
         val endpoint = createLothianServiceUpdatesEndpoint(
+            connectivityRepository = connectivityRepositoryHasConnectivity,
             lothianServiceUpdatesApi = FakeLothianServiceUpdatesApi(
                 onGetServiceUpdates = {
                     Response.error(400, "Unauthorized".toResponseBody())
@@ -130,9 +124,23 @@ class LothianServiceUpdatesEndpointTest {
 
     @Test
     fun getServiceUpdatesReturnsSuccessWhenServerReturnsSuccessCode() = runTest {
-        givenHasInternetConnectivity(true)
-        val responseBody = JsonServiceUpdateEvents()
+        val responseBody = JsonServiceUpdateEvents(
+            events = listOf(
+                JsonEvent(
+                    id = "id",
+                    lastUpdatedTime = Instant.fromEpochMilliseconds(123L),
+                    severity = "incident",
+                    titles = mapOf("en" to "Title"),
+                    descriptions = mapOf("en" to "Description"),
+                    routesAffected = listOf(
+                        JsonRouteAffected(name = "1")
+                    ),
+                    url = "https://some/url"
+                )
+            )
+        )
         val endpoint = createLothianServiceUpdatesEndpoint(
+            connectivityRepository = connectivityRepositoryHasConnectivity,
             lothianServiceUpdatesApi = FakeLothianServiceUpdatesApi(
                 onGetServiceUpdates = {
                     Response.success(responseBody)
@@ -144,32 +152,30 @@ class LothianServiceUpdatesEndpointTest {
                 id = "id",
                 lastUpdated = Instant.fromEpochMilliseconds(123L),
                 serviceUpdateType = ServiceUpdateType.INCIDENT,
+                title = "Title",
                 summary = "Description",
                 affectedServices = setOf("1"),
                 url = "https://some/url"
             )
         )
-        whenever(serviceUpdatesMapper.mapToServiceUpdates(responseBody))
-            .thenReturn(serviceUpdates)
 
         val result = endpoint.getServiceUpdates()
 
         assertEquals(ServiceUpdatesResponse.Success(serviceUpdates), result)
     }
 
-    private fun givenHasInternetConnectivity(hasInternetConnectivity: Boolean) {
-        whenever(connectivityRepository.hasInternetConnectivity)
-            .thenReturn(hasInternetConnectivity)
-    }
+    private val connectivityRepositoryHasConnectivity get() = FakeConnectivityRepository(
+        onHasInternetConnectivity = { true }
+    )
 
     private fun createLothianServiceUpdatesEndpoint(
         lothianServiceUpdatesApi: LothianServiceUpdatesApi = FakeLothianServiceUpdatesApi(),
+        connectivityRepository: ConnectivityRepository = FakeConnectivityRepository(),
         exceptionLogger: ExceptionLogger = FakeExceptionLogger()
     ): LothianServiceUpdatesEndpoint {
         return LothianServiceUpdatesEndpoint(
             lothianServiceUpdatesApi = lothianServiceUpdatesApi,
             connectivityRepository = connectivityRepository,
-            serviceUpdateMapper = serviceUpdatesMapper,
             exceptionLogger = exceptionLogger
         )
     }

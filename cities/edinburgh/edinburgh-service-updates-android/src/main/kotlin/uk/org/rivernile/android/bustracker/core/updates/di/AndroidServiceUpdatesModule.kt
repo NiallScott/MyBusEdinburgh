@@ -24,31 +24,24 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.updates.service.lothian
+package uk.org.rivernile.android.bustracker.core.updates.di
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.di.ServiceUpdatesEndpointModule
 
 /**
- * This class contains the JSON data structure for an affected route.
+ * This module provides dependencies for the Edinburgh service updates feature.
  *
- * @property name The name of the affected route.
  * @author Niall Scott
  */
-@Serializable
-internal data class JsonRouteAffected(
-    @SerialName("name") val name: String? = null
+@InstallIn(SingletonComponent::class)
+@Module(
+    includes = [
+        ServiceUpdatesEndpointModule::class,
+        ServiceUpdatesModule::class
+    ]
 )
-
-/**
- * Map this [Collection] of [JsonRouteAffected] in to a [Set] of service names. If this yields an
- * empty [Set] then `null` will be returned.
- *
- * @return This [Collection] of [JsonRouteAffected] as a [Set] of service names or `null` if the
- * yielded [Set] is empty.
- */
-internal fun Collection<JsonRouteAffected>.toAffectedServicesOrNull(): Set<String>? {
-    return mapNotNull { it.name?.ifBlank { null } }
-        .ifEmpty { null }
-        ?.toSet()
-}
+@Suppress("unused")
+interface AndroidServiceUpdatesModule

@@ -65,6 +65,10 @@ android {
 
 dependencies {
 
+    "edinburghImplementation"(project(":core:alphanumcomparator"))
+    implementation(project(":core:coroutines-android"))
+    implementation(project(":core:services-android"))
+    "edinburghImplementation"(project(":cities:edinburgh:edinburgh-service-updates-android"))
     implementation(project(":ui:ui-core"))
 
     // Hilt (dependency injection)

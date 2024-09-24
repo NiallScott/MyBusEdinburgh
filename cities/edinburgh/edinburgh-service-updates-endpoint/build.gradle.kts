@@ -55,10 +55,9 @@ dependencies {
     implementation(libs.kotlin.datetime)
 
     // Test dependencies
+    testImplementation(testFixtures(project(":core:connectivity")))
     testImplementation(testFixtures(project(":core:logging")))
     testImplementation(libs.coroutines.test)
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)
-    testImplementation(libs.mockito)
-    testImplementation(libs.mockito.kotlin)
 }

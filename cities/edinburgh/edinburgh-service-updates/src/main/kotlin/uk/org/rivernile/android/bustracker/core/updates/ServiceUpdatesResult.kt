@@ -31,26 +31,26 @@ package uk.org.rivernile.android.bustracker.core.updates
  *
  * @author Niall Scott
  */
-sealed interface ServiceUpdatesResult {
+sealed interface ServiceUpdatesResult<out T : ServiceUpdate> {
 
     /**
      * The request is in progress.
      */
-    data object InProgress : ServiceUpdatesResult
+    data object InProgress : ServiceUpdatesResult<Nothing>
 
     /**
      * The result is successful.
      *
      * @property serviceUpdates The service update data.
      */
-    data class Success(
-        val serviceUpdates: List<ServiceUpdate>?
-    ) : ServiceUpdatesResult
+    data class Success<out T : ServiceUpdate>(
+        val serviceUpdates: List<T>?
+    ) : ServiceUpdatesResult<T>
 
     /**
      * This interface describes errors which can arise from getting service updates.
      */
-    sealed interface Error : ServiceUpdatesResult {
+    sealed interface Error : ServiceUpdatesResult<Nothing> {
 
         /**
          * The result is not successful due to no connectivity.
