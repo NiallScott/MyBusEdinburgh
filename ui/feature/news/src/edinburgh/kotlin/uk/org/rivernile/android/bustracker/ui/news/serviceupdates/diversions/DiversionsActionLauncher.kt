@@ -24,51 +24,19 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.updates
+package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions
 
 /**
- * This sealed interface encapsulates the result types when obtaining service updates.
+ * Launches actions for the 'diversions' screen.
  *
  * @author Niall Scott
  */
-sealed interface ServiceUpdatesResult {
+internal interface DiversionsActionLauncher {
 
     /**
-     * The request is in progress.
-     */
-    data object InProgress : ServiceUpdatesResult
-
-    /**
-     * The result is successful.
+     * Launch a URL in the system web browser.
      *
-     * @property serviceUpdates The service update data.
+     * @param url The URL to be launched.
      */
-    data class Success(
-        val serviceUpdates: List<ServiceUpdate>?
-    ) : ServiceUpdatesResult
-
-    /**
-     * This interface describes errors which can arise from getting service updates.
-     */
-    sealed interface Error : ServiceUpdatesResult {
-
-        /**
-         * The result is not successful due to no connectivity.
-         */
-        data object NoConnectivity : Error
-
-        /**
-         * The result is not successful due to an IO error.
-         *
-         * @property throwable The [Throwable] which caused this error.
-         */
-        data class Io(
-            val throwable: Throwable
-        ) : Error
-
-        /**
-         * The result is not successful because of a server error.
-         */
-        data object Server : Error
-    }
+    fun launchUrl(url: String)
 }

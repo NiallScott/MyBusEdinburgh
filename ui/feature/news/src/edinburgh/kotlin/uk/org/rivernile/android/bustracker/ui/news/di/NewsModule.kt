@@ -24,50 +24,35 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose.compiler)
-}
+package uk.org.rivernile.android.bustracker.ui.news.di
 
-android {
-    namespace = "uk.org.rivernile.android.bustracker.ui.core"
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.FragmentComponent
+import uk.org.rivernile.android.bustracker.ui.news.AndroidNewsActionLauncher
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.DiversionsActionLauncher
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.IncidentsActionLauncher
 
-    flavorDimensions += "city"
+/**
+ * A [Module] which provides dependencies for
+ * [uk.org.rivernile.android.bustracker.ui.news.NewsFragment].
+ *
+ * @author Niall Scott
+ */
+@InstallIn(FragmentComponent::class)
+@Module
+internal interface NewsModule {
 
-    productFlavors {
-        create("edinburgh") {
-            dimension = "city"
-        }
-    }
+    @Suppress("unused")
+    @Binds
+    fun bindDiversionsActionLauncher(
+        androidNewsActionLauncher: AndroidNewsActionLauncher
+    ): DiversionsActionLauncher
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-
-        debug {
-            enableUnitTestCoverage = true
-            enableAndroidTestCoverage = true
-        }
-    }
-
-    buildFeatures {
-        compose = true
-    }
-}
-
-kotlin {
-    explicitApi()
-}
-
-dependencies {
-
-    implementation(libs.androidx.core)
-
-    // Compose
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    implementation(libs.material.compose)
+    @Suppress("unused")
+    @Binds
+    fun bindIncidentsActionLauncher(
+        androidNewsActionLauncher: AndroidNewsActionLauncher
+    ): IncidentsActionLauncher
 }

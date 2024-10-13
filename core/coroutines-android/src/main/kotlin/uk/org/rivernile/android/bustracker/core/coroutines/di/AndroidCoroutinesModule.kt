@@ -27,13 +27,8 @@
 package uk.org.rivernile.android.bustracker.core.coroutines.di
 
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 
 /**
  * This module provides dependencies for Android Coroutines.
@@ -42,21 +37,4 @@ import kotlinx.coroutines.SupervisorJob
  */
 @InstallIn(SingletonComponent::class)
 @Module(includes = [ CoroutinesModule::class ])
-internal class AndroidCoroutinesModule {
-
-    @Provides
-    @ForServiceCoroutineScope
-    fun provideServiceCoroutineScope(
-        @ForMainDispatcher mainCoroutineDispatcher: CoroutineDispatcher
-    ): CoroutineScope {
-        return CoroutineScope(mainCoroutineDispatcher + Job())
-    }
-
-    @Provides
-    @ForViewModelCoroutineScope
-    fun provideViewModelCoroutineScope(
-        @ForMainDispatcher mainCoroutineDispatcher: CoroutineDispatcher
-    ): CoroutineScope {
-        return CoroutineScope(mainCoroutineDispatcher + SupervisorJob())
-    }
-}
+internal interface AndroidCoroutinesModule

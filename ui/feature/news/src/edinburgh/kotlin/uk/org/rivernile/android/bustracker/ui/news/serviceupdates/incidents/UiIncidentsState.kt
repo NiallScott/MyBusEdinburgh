@@ -24,22 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.news.incidents
+package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents
+
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiContent
 
 /**
- * This sealed interface represents possible actions which can be performed on the 'incidents'
- * screen.
+ * This represents the [UiIncidentsState] of the incidents screen.
  *
+ * @property content The current [UiContent] to be shown to the user.
+ * @property action A [UiIncidentAction] which should be performed.
  * @author Niall Scott
  */
-internal sealed interface UiAction {
-
-    /**
-     * A URL should be shown.
-     *
-     * @property url The URL to be shown.
-     */
-    data class ShowUrl(
-        val url: String
-    ) : UiAction
-}
+internal data class UiIncidentsState(
+    val content: UiContent<UiIncident> = UiContent.InProgress,
+    val action: UiIncidentAction? = null
+)

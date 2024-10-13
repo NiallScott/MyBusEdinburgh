@@ -24,33 +24,32 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.news.incidents
+package uk.org.rivernile.android.bustracker.core.coroutines.di
 
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.scopes.ViewModelScoped
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 
 /**
- * This class holds state for [IncidentsViewModel].
+ * This module provides dependencies for ViewModel Coroutines.
  *
  * @author Niall Scott
  */
-@ViewModelScoped
-internal class IncidentsViewModelState @Inject constructor() {
+@InstallIn(ViewModelComponent::class)
+@Module
+internal class ViewModelCoroutinesModule {
 
-    /**
-     * This [Flow] emits [UiAction]s to be performed, usually in response to the user's actions.
-     */
-    val actionFlow: Flow<UiAction?> get() = _actionFlow
-    private val _actionFlow = MutableStateFlow<UiAction?>(null)
-
-    /**
-     * The current [UiAction] in progress.
-     */
-    var action: UiAction?
-        get() = _actionFlow.value
-        set(value) {
-            _actionFlow.value = value
-        }
+    @Provides
+    @ViewModelScoped
+    @ForViewModelCoroutineScope
+    fun provideViewModelCoroutineScope(
+        @ForMainDispatcher mainCoroutineDispatcher: CoroutineDispatcher
+    ): CoroutineScope {
+        return CoroutineScope(mainCoroutineDispatcher + SupervisorJob())
+    }
 }

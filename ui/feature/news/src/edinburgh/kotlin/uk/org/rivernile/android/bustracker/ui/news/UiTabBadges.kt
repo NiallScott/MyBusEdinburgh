@@ -24,50 +24,16 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose.compiler)
-}
+package uk.org.rivernile.android.bustracker.ui.news
 
-android {
-    namespace = "uk.org.rivernile.android.bustracker.ui.core"
-
-    flavorDimensions += "city"
-
-    productFlavors {
-        create("edinburgh") {
-            dimension = "city"
-        }
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-
-        debug {
-            enableUnitTestCoverage = true
-            enableAndroidTestCoverage = true
-        }
-    }
-
-    buildFeatures {
-        compose = true
-    }
-}
-
-kotlin {
-    explicitApi()
-}
-
-dependencies {
-
-    implementation(libs.androidx.core)
-
-    // Compose
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    implementation(libs.material.compose)
-}
+/**
+ * This class holds the count value to show for the tab item badges.
+ *
+ * @property incidentsCount The number of incidents to show on the badge.
+ * @property diversionsCount The number of diversions to show on the badge.
+ * @author Niall Scott
+ */
+internal data class UiTabBadges(
+    val incidentsCount: Int? = null,
+    val diversionsCount: Int? = null
+)

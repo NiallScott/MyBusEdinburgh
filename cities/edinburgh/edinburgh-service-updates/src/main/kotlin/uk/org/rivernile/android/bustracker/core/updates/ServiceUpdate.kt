@@ -91,71 +91,49 @@ data class PlannedServiceUpdate(
 ) : ServiceUpdate
 
 /**
- * Map items with the [EndpointServiceUpdate.serviceUpdateType] of [ServiceUpdateType.INCIDENT] to
- * [IncidentServiceUpdate] items. If there are no resulting items, `null` will be returned.
+ * Given a [List] of [EndpointServiceUpdate]s, map this to a [List] of [ServiceUpdate]s. If the
+ * [List] is empty, `null` will be returned instead.
  *
- * @return The mapped [List], or `null` if this is empty, or there are no
- * [ServiceUpdateType.INCIDENT] items in the input [List].
+ * @return The [List] of [EndpointServiceUpdate]s as a [List] of [ServiceUpdate], or `null` if
+ * empty.
  */
-internal fun List<EndpointServiceUpdate>.toIncidentsServiceUpdatesOrNull():
-        List<IncidentServiceUpdate>? {
-    return mapNotNull(EndpointServiceUpdate::toIncidentServiceUpdateOrNull)
-        .ifEmpty { null }
-}
-
-/**
- * Map items with the [EndpointServiceUpdate.serviceUpdateType] of [ServiceUpdateType.PLANNED] to
- * [PlannedServiceUpdate] items. If there are no resulting items, `null` will be returned.
- *
- * @return The mapped [List], or `null` if this is empty, or there are no
- * [ServiceUpdateType.PLANNED] items in the input [List].
- */
-internal fun List<EndpointServiceUpdate>.toPlannedServiceUpdatesOrNull():
-        List<PlannedServiceUpdate>? {
-    return mapNotNull(EndpointServiceUpdate::toPlannedServiceUpdateOrNull)
-        .ifEmpty { null }
-}
-
-/**
- * Given an [EndpointServiceUpdate], map this to a [PlannedServiceUpdate] if
- * [EndpointServiceUpdate.serviceUpdateType] is [ServiceUpdateType.INCIDENT], or `null` if this is
- * another type.
- *
- * @return This [EndpointServiceUpdate] as a [PlannedServiceUpdate], or `null` if the
- * [EndpointServiceUpdate.serviceUpdateType] is not [ServiceUpdateType.INCIDENT].
- */
-private fun EndpointServiceUpdate.toIncidentServiceUpdateOrNull(): IncidentServiceUpdate? {
-    return takeIf { it.serviceUpdateType == ServiceUpdateType.INCIDENT }
-        ?.let {
-            IncidentServiceUpdate(
-                id = it.id,
-                lastUpdated = it.lastUpdated,
-                title = it.title,
-                summary = it.summary,
-                affectedServices = it.affectedServices,
-                url = it.url
-            )
+internal fun Collection<EndpointServiceUpdate>.toServiceUpdatesOrNull(): List<ServiceUpdate>? {
+    return map {
+        when (it.serviceUpdateType) {
+            ServiceUpdateType.INCIDENT -> it.toIncidentServiceUpdate()
+            ServiceUpdateType.PLANNED -> it.toPlannedServiceUpdate()
         }
+    }.ifEmpty { null }
 }
 
 /**
- * Given an [EndpointServiceUpdate], map this to a [PlannedServiceUpdate] if
- * [EndpointServiceUpdate.serviceUpdateType] is [ServiceUpdateType.PLANNED], or `null` if this is
- * another type.
+ * Given an [EndpointServiceUpdate], map this to an [IncidentServiceUpdate].
  *
- * @return This [EndpointServiceUpdate] as a [PlannedServiceUpdate], or `null` if the
- * [EndpointServiceUpdate.serviceUpdateType] is not [ServiceUpdateType.PLANNED].
+ * @return This [EndpointServiceUpdate] as a [IncidentServiceUpdate].
  */
-private fun EndpointServiceUpdate.toPlannedServiceUpdateOrNull(): PlannedServiceUpdate? {
-    return takeIf { it.serviceUpdateType == ServiceUpdateType.PLANNED }
-        ?.let {
-            PlannedServiceUpdate(
-                id = it.id,
-                lastUpdated = it.lastUpdated,
-                title = it.title,
-                summary = it.summary,
-                affectedServices = it.affectedServices,
-                url = it.url
-            )
-        }
+private fun EndpointServiceUpdate.toIncidentServiceUpdate(): IncidentServiceUpdate {
+    return IncidentServiceUpdate(
+        id = id,
+        lastUpdated = lastUpdated,
+        title = title,
+        summary = summary,
+        affectedServices = affectedServices,
+        url = url
+    )
+}
+
+/**
+ * Given an [EndpointServiceUpdate], map this to a [PlannedServiceUpdate].
+ *
+ * @return This [EndpointServiceUpdate] as a [PlannedServiceUpdate].
+ */
+private fun EndpointServiceUpdate.toPlannedServiceUpdate(): PlannedServiceUpdate {
+    return PlannedServiceUpdate(
+        id = id,
+        lastUpdated = lastUpdated,
+        title = title,
+        summary = summary,
+        affectedServices = affectedServices,
+        url = url
+    )
 }

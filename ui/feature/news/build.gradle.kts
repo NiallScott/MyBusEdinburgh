@@ -67,6 +67,7 @@ dependencies {
 
     "edinburghImplementation"(project(":core:alphanumcomparator"))
     implementation(project(":core:coroutines-android"))
+    implementation(project(":core:logging"))
     implementation(project(":core:services-android"))
     "edinburghImplementation"(project(":cities:edinburgh:edinburgh-service-updates-android"))
     implementation(project(":ui:ui-core"))
@@ -76,6 +77,7 @@ dependencies {
     kapt(libs.hilt.compiler)
 
     // AndroidX
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core)
     implementation(libs.androidx.fragment.compose)
     implementation(libs.androidx.viewmodel.compose)

@@ -24,50 +24,14 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose.compiler)
-}
+package uk.org.rivernile.android.bustracker.ui.news
 
-android {
-    namespace = "uk.org.rivernile.android.bustracker.ui.core"
-
-    flavorDimensions += "city"
-
-    productFlavors {
-        create("edinburgh") {
-            dimension = "city"
-        }
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-
-        debug {
-            enableUnitTestCoverage = true
-            enableAndroidTestCoverage = true
-        }
-    }
-
-    buildFeatures {
-        compose = true
-    }
-}
-
-kotlin {
-    explicitApi()
-}
-
-dependencies {
-
-    implementation(libs.androidx.core)
-
-    // Compose
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    implementation(libs.material.compose)
-}
+/**
+ * This class holds the action buttons for the News screen.
+ *
+ * @property refresh The Refresh action button.
+ * @author Niall Scott
+ */
+internal data class UiActionButtons(
+    val refresh: UiActionButton.Refresh
+)

@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.news.incidents
+package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
@@ -32,27 +32,26 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Instant
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
-import uk.org.rivernile.android.bustracker.ui.news.R
 import uk.org.rivernile.android.bustracker.ui.news.UiAffectedService
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ItemAffectedServices
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ItemLastUpdated
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ItemMoreDetailsButton
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ItemSummary
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ItemTitle
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import java.text.DateFormat
-import java.util.Date
 
 /**
- * A [Composable] which renders an incident item.
+ * A [Composable] which renders a diversion item.
  *
  * @param item The item to be rendered.
  * @param dateFormat A [DateFormat] instance to format the display of dates/times.
@@ -61,8 +60,8 @@ import java.util.Date
  * @author Niall Scott
  */
 @Composable
-internal fun IncidentItem(
-    item: UiIncident,
+internal fun DiversionItem(
+    item: UiDiversion,
     dateFormat: DateFormat,
     modifier: Modifier = Modifier,
     onMoreDetailsClicked: () -> Unit
@@ -76,31 +75,31 @@ internal fun IncidentItem(
                 dimensionResource(id = Rcore.dimen.padding_default)
             )
         ) {
-            IncidentItemTitle(
+            ItemTitle(
                 title = item.title,
                 modifier = Modifier.fillMaxWidth()
             )
 
-            IncidentItemSummary(
+            ItemSummary(
                 summary = item.summary,
                 modifier = Modifier.fillMaxWidth()
             )
 
-            IncidentItemLastUpdated(
+            ItemLastUpdated(
                 lastUpdated = item.lastUpdated,
                 dateFormat = dateFormat,
                 modifier = Modifier.fillMaxWidth()
             )
 
             item.affectedServices?.ifEmpty { null }?.let {
-                IncidentItemAffectedServices(
+                ItemAffectedServices(
                     affectedServices = it,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
 
             if (item.showMoreDetailsButton) {
-                IncidentItemMoreDetailsButton(
+                ItemMoreDetailsButton(
                     onClick = onMoreDetailsClicked
                 )
             }
@@ -108,94 +107,27 @@ internal fun IncidentItem(
     }
 }
 
-@Composable
-private fun IncidentItemTitle(
-    title: String,
-    modifier: Modifier = Modifier
-) {
-    Text(
-        text = title,
-        modifier = modifier,
-        style = MaterialTheme.typography.titleLarge
-    )
-}
-
-@Composable
-private fun IncidentItemSummary(
-    summary: String,
-    modifier: Modifier = Modifier
-) {
-    Text(
-        text = summary,
-        modifier = modifier,
-        style = MaterialTheme.typography.bodyLarge
-    )
-}
-
-@Composable
-private fun IncidentItemLastUpdated(
-    lastUpdated: Instant,
-    dateFormat: DateFormat,
-    modifier: Modifier = Modifier
-) {
-    Text(
-        text = stringResource(
-            R.string.incident_item_last_updated,
-            dateFormat.format(Date(lastUpdated.toEpochMilliseconds()))
-        ),
-        modifier = modifier,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        style = MaterialTheme.typography.labelSmall
-    )
-}
-
-@Composable
-private fun IncidentItemAffectedServices(
-    affectedServices: List<UiAffectedService>,
-    modifier: Modifier = Modifier
-) {
-    Text(
-        text = affectedServices.joinToString { it.serviceName },
-        modifier = modifier,
-        style = MaterialTheme.typography.bodyMedium
-    )
-}
-
-@Composable
-private fun IncidentItemMoreDetailsButton(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    TextButton(
-        onClick = onClick,
-        modifier = modifier,
-        content = {
-            Text(text = stringResource(id = R.string.incident_item_btn_more_details))
-        }
-    )
-}
-
 @Preview(
-    name = "Incident item (light)",
+    name = "Diversion item (light)",
     showBackground = true,
     backgroundColor = 0xFFFFFFFF,
     uiMode = Configuration.UI_MODE_NIGHT_NO
 )
 @Preview(
-    name = "Incident item (dark)",
+    name = "Diversion item (dark)",
     showBackground = true,
     backgroundColor = 0xFF000000,
     uiMode = Configuration.UI_MODE_NIGHT_YES
 )
 @Composable
-private fun IncidentItemPreview() {
+private fun DiversionItemPreview() {
     MyBusTheme {
-        IncidentItem(
-            item = UiIncident(
+        DiversionItem(
+            item = UiDiversion(
                 id = "abc123",
                 lastUpdated = Instant.fromEpochMilliseconds(1719063420000L),
                 title = "Princes Street",
-                summary = "Due to traffic congestion buses are being delayed on Princes Street.",
+                summary = "Due to road works buses are being diverted from Princes Street.",
                 affectedServices = listOf(
                     UiAffectedService(
                         "1",

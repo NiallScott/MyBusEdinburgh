@@ -24,51 +24,30 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.updates
+package uk.org.rivernile.android.bustracker.ui.news
 
 /**
- * This sealed interface encapsulates the result types when obtaining service updates.
+ * An action button is one which is placed in toolbar. This describes an action button which is
+ * displayed for News.
  *
  * @author Niall Scott
  */
-sealed interface ServiceUpdatesResult {
+internal sealed interface UiActionButton {
 
     /**
-     * The request is in progress.
+     * Is the button enabled?
      */
-    data object InProgress : ServiceUpdatesResult
+    val isEnabled: Boolean
 
     /**
-     * The result is successful.
+     * The Refresh action button.
      *
-     * @property serviceUpdates The service update data.
+     * @property isEnabled Is the button enabled?
+     * @property isRefreshing Is the content currently refreshing and thus the action button's
+     * presentation should be modified accordingly?
      */
-    data class Success(
-        val serviceUpdates: List<ServiceUpdate>?
-    ) : ServiceUpdatesResult
-
-    /**
-     * This interface describes errors which can arise from getting service updates.
-     */
-    sealed interface Error : ServiceUpdatesResult {
-
-        /**
-         * The result is not successful due to no connectivity.
-         */
-        data object NoConnectivity : Error
-
-        /**
-         * The result is not successful due to an IO error.
-         *
-         * @property throwable The [Throwable] which caused this error.
-         */
-        data class Io(
-            val throwable: Throwable
-        ) : Error
-
-        /**
-         * The result is not successful because of a server error.
-         */
-        data object Server : Error
-    }
+    data class Refresh(
+        override val isEnabled: Boolean,
+        val isRefreshing: Boolean
+    ) : UiActionButton
 }

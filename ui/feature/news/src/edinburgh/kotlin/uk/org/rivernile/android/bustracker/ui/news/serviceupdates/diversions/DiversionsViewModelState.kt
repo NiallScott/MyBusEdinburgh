@@ -24,51 +24,34 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.updates
+package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions
+
+import dagger.hilt.android.scopes.ViewModelScoped
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import javax.inject.Inject
 
 /**
- * This sealed interface encapsulates the result types when obtaining service updates.
+ * This class holds ViewModel state for diversions.
  *
  * @author Niall Scott
  */
-sealed interface ServiceUpdatesResult {
+@ViewModelScoped
+internal class DiversionsViewModelState @Inject constructor() {
 
     /**
-     * The request is in progress.
+     * This [Flow] emits [UiDiversionAction]s to be performed, usually in response to the user's
+     * actions.
      */
-    data object InProgress : ServiceUpdatesResult
+    val actionFlow: Flow<UiDiversionAction?> get() = _actionFlow
+    private val _actionFlow = MutableStateFlow<UiDiversionAction?>(null)
 
     /**
-     * The result is successful.
-     *
-     * @property serviceUpdates The service update data.
+     * The current [UiDiversionAction] in progress.
      */
-    data class Success(
-        val serviceUpdates: List<ServiceUpdate>?
-    ) : ServiceUpdatesResult
-
-    /**
-     * This interface describes errors which can arise from getting service updates.
-     */
-    sealed interface Error : ServiceUpdatesResult {
-
-        /**
-         * The result is not successful due to no connectivity.
-         */
-        data object NoConnectivity : Error
-
-        /**
-         * The result is not successful due to an IO error.
-         *
-         * @property throwable The [Throwable] which caused this error.
-         */
-        data class Io(
-            val throwable: Throwable
-        ) : Error
-
-        /**
-         * The result is not successful because of a server error.
-         */
-        data object Server : Error
-    }
+    var action: UiDiversionAction?
+        get() = _actionFlow.value
+        set(value) {
+            _actionFlow.value = value
+        }
 }

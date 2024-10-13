@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.core.updates
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdate as EndpointServiceUpdate
 import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdatesEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdatesResponse
 import javax.inject.Inject
@@ -42,14 +41,9 @@ import javax.inject.Singleton
 interface ServiceUpdateRepository {
 
     /**
-     * A [Flow] which emits [ServiceUpdatesResult]s for [IncidentServiceUpdate]s.
+     * A [Flow] which emits [ServiceUpdatesResult]s for all service update types.
      */
-    val incidentServiceUpdatesFlow: Flow<ServiceUpdatesResult<IncidentServiceUpdate>>
-
-    /**
-     * A [Flow] which emits [ServiceUpdatesResult]s for [PlannedServiceUpdate]s.
-     */
-    val plannedServiceUpdatesFlow: Flow<ServiceUpdatesResult<PlannedServiceUpdate>>
+    val serviceUpdatesFlow: Flow<ServiceUpdatesResult>
 }
 
 /**
@@ -63,41 +57,18 @@ internal class RealServiceUpdateRepository @Inject constructor(
     private val serviceUpdatesEndpoint: ServiceUpdatesEndpoint
 ) : ServiceUpdateRepository {
 
-    override val incidentServiceUpdatesFlow get() = flow {
+    override val serviceUpdatesFlow get() = flow {
         emit(ServiceUpdatesResult.InProgress)
-        emit(
-            fetchServiceUpdates {
-                it?.toIncidentsServiceUpdatesOrNull()
-            }
-        )
-    }
 
-    override val plannedServiceUpdatesFlow get() = flow {
-        emit(ServiceUpdatesResult.InProgress)
-        emit(
-            fetchServiceUpdates {
-                it?.toPlannedServiceUpdatesOrNull()
-            }
-        )
-    }
-
-    /**
-     * This suspending function fetches the latest [ServiceUpdate]s and returns the appropriate
-     * [ServiceUpdatesResult] object.
-     *
-     * @param mapper A function which maps the success data.
-     * @return A [ServiceUpdatesResult] object encapsulating the result of the request.
-     */
-    private suspend inline fun <T : ServiceUpdate> fetchServiceUpdates(
-        mapper: (List<EndpointServiceUpdate>?) -> List<T>?
-    ): ServiceUpdatesResult<T> {
-        return when (val response = serviceUpdatesEndpoint.getServiceUpdates()) {
+        val result = when (val response = serviceUpdatesEndpoint.getServiceUpdates()) {
             is ServiceUpdatesResponse.Success ->
-                ServiceUpdatesResult.Success(mapper(response.serviceUpdates))
+                ServiceUpdatesResult.Success(response.serviceUpdates?.toServiceUpdatesOrNull())
             is ServiceUpdatesResponse.Error.NoConnectivity ->
                 ServiceUpdatesResult.Error.NoConnectivity
             is ServiceUpdatesResponse.Error.Io -> ServiceUpdatesResult.Error.Io(response.throwable)
             is ServiceUpdatesResponse.Error.ServerError -> ServiceUpdatesResult.Error.Server
         }
+
+        emit(result)
     }
 }

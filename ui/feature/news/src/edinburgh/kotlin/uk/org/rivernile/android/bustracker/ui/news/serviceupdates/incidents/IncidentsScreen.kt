@@ -24,133 +24,55 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.news.incidents
+package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents
 
 import android.content.res.Configuration
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.datetime.Instant
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
-import uk.org.rivernile.android.bustracker.ui.news.R
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ServiceUpdatesScreen
 import uk.org.rivernile.android.bustracker.ui.news.UiAffectedService
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiContent
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiError
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import java.text.SimpleDateFormat
 
 /**
- * A [Composable] which renders the root of the incidents screen.
- *
- * @author Niall Scott
- */
-@Composable
-internal fun IncidentsScreen(
-    viewModel: IncidentsViewModel = viewModel()
-) {
-    val uiState by viewModel.uiStateFlow.collectAsState()
-
-    IncidentsScreenWithState(
-        state = uiState,
-        onMoreDetailsClicked = viewModel::onMoreDetailsButtonClicked,
-        onActionLaunched = viewModel::onActionLaunched,
-    )
-}
-
-/**
  * A [Composable] which renders the root of the incidents screen with state passed in.
  *
- * @param state The current [UiState] to render.
+ * @param state The current [UiIncidentsState] to render.
+ * @param onRefresh A lambda which is executed when the content should be refreshed.
  * @param onMoreDetailsClicked A lambda which is executed when the 'More details' button is clicked.
  * @param onActionLaunched A lambda which is executed when an action has been launched.
  * @author Niall Scott
  */
 @Composable
-internal fun IncidentsScreenWithState(
-    state: UiState,
+internal fun IncidentsScreen(
+    state: UiIncidentsState,
+    onRefresh: () -> Unit,
     onMoreDetailsClicked: (UiIncident) -> Unit,
     onActionLaunched: () -> Unit
 ) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        when (val content = state.content) {
-            is UiContent.InProgress -> IncidentEmptyProgress()
-            is UiContent.Success -> IncidentItemsList(
-                items = content.items,
-                onMoreDetailsClicked = onMoreDetailsClicked
-            )
-            is UiContent.Error -> IncidentError(error = content)
-        }
-    }
-
-    state.action?.let {
-        LaunchAction(
-            action = it,
-            onActionLaunched = onActionLaunched
-        )
-    }
-}
-
-@Composable
-private fun IncidentEmptyProgress(
-    modifier: Modifier = Modifier
-) {
-    CircularProgressIndicator(
-        modifier = modifier
-    )
-}
-
-@Composable
-private fun IncidentItemsList(
-    items: List<UiIncident>,
-    onMoreDetailsClicked: (UiIncident) -> Unit
-) {
-    val nestedScrollInterop = rememberNestedScrollInteropConnection()
-    val dateFormat = remember { SimpleDateFormat.getDateTimeInstance() }
+    val configuration = LocalConfiguration.current
+    val dateFormat = remember(configuration) { SimpleDateFormat.getDateTimeInstance() }
     val doublePadding = dimensionResource(id = Rcore.dimen.padding_double)
 
-    LazyColumn(
-        modifier = Modifier
-            .nestedScroll(nestedScrollInterop)
-            .fillMaxSize(),
-        contentPadding = PaddingValues(top = 12.dp, bottom = 44.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        items(
-            items = items,
-            key = { it.id }
-        ) { item ->
+    ServiceUpdatesScreen(
+        content = state.content,
+        onRefresh = onRefresh,
+        itemContent = { item ->
             IncidentItem(
                 item = item,
                 dateFormat = dateFormat,
@@ -160,63 +82,30 @@ private fun IncidentItemsList(
                 onMoreDetailsClicked = { onMoreDetailsClicked(item) }
             )
         }
+    )
+
+    state.action?.let {
+        LaunchAction(
+            action = it,
+            onActionLaunched = onActionLaunched
+        )
     }
 }
 
-@Composable
-private fun IncidentError(error: UiContent.Error) {
-    @StringRes val titleRes: Int
-    @DrawableRes val iconRes: Int
-
-    when (error) {
-        is UiContent.Error.NoConnectivity -> {
-            titleRes = R.string.incident_error_noconnectivity
-            iconRes = R.drawable.ic_error_cloud_off
-        }
-        is UiContent.Error.Empty -> {
-            titleRes = R.string.incident_error_empty
-            iconRes = R.drawable.ic_error_newspaper
-        }
-        is UiContent.Error.Io -> {
-            titleRes = R.string.incident_error_io
-            iconRes = R.drawable.ic_error_generic
-        }
-        is UiContent.Error.Server -> {
-            titleRes = R.string.incident_error_server
-            iconRes = R.drawable.ic_error_generic
-        }
-    }
-
-    Column(
-        modifier = Modifier.padding(dimensionResource(id = Rcore.dimen.padding_double)),
-        verticalArrangement = Arrangement.spacedBy(
-            dimensionResource(id = Rcore.dimen.padding_default)
-        ),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            painter = painterResource(id = iconRes),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary
-        )
-
-        Text(
-            text = stringResource(id = titleRes),
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.bodyLarge
-        )
-    }
+internal val LocalIncidentsActionLauncher = staticCompositionLocalOf<IncidentsActionLauncher> {
+    error("LocalIncidentsActionLauncher has not been set with a value.")
 }
 
 @Composable
 private fun LaunchAction(
-    action: UiAction,
+    action: UiIncidentAction,
     onActionLaunched: () -> Unit
 ) {
+    val actionLauncher = LocalIncidentsActionLauncher.current
+
     LaunchedEffect(action) {
         when (action) {
-            is UiAction.ShowUrl -> { }
+            is UiIncidentAction.ShowUrl -> actionLauncher.launchUrl(action.url)
         }
 
         onActionLaunched()
@@ -318,10 +207,15 @@ private fun IncidentsScreenContentPreview() {
     )
 
     MyBusTheme {
-        IncidentsScreenWithState(
-            state = UiState(
-                content = UiContent.Success(incidents)
+        IncidentsScreen(
+            state = UiIncidentsState(
+                content = UiContent.Populated(
+                    isRefreshing = false,
+                    items = incidents,
+                    error = null
+                )
             ),
+            onRefresh = { },
             onMoreDetailsClicked = { },
             onActionLaunched = { }
         )
@@ -345,37 +239,11 @@ private fun IncidentsScreenContentPreview() {
 @Composable
 private fun IncidentsScreenProgressPreview() {
     MyBusTheme {
-        IncidentsScreenWithState(
-            state = UiState(
+        IncidentsScreen(
+            state = UiIncidentsState(
                 content = UiContent.InProgress
             ),
-            onMoreDetailsClicked = { },
-            onActionLaunched = { }
-        )
-    }
-}
-
-@Preview(
-    name = "Incidents screen - error - no connectivity - light",
-    group = "Incidents screen - error - no connectivity",
-    showBackground = true,
-    backgroundColor = 0xFFFFFFFF,
-    uiMode = Configuration.UI_MODE_NIGHT_NO
-)
-@Preview(
-    name = "Incidents screen - error - no connectivity - dark",
-    group = "Incidents screen - error - no connectivity",
-    showBackground = true,
-    backgroundColor = 0xFF000000,
-    uiMode = Configuration.UI_MODE_NIGHT_YES
-)
-@Composable
-private fun IncidentsScreenNoConnectivityErrorPreview() {
-    MyBusTheme {
-        IncidentsScreenWithState(
-            state = UiState(
-                content = UiContent.Error.NoConnectivity
-            ),
+            onRefresh = { },
             onMoreDetailsClicked = { },
             onActionLaunched = { }
         )
@@ -399,64 +267,14 @@ private fun IncidentsScreenNoConnectivityErrorPreview() {
 @Composable
 private fun IncidentsScreenEmptyErrorPreview() {
     MyBusTheme {
-        IncidentsScreenWithState(
-            state = UiState(
-                content = UiContent.Error.Empty
+        IncidentsScreen(
+            state = UiIncidentsState(
+                content = UiContent.Error(
+                    isRefreshing = false,
+                    error = UiError.EMPTY
+                )
             ),
-            onMoreDetailsClicked = { },
-            onActionLaunched = { }
-        )
-    }
-}
-
-@Preview(
-    name = "Incidents screen - error - IO - light",
-    group = "Incidents screen - error - IO",
-    showBackground = true,
-    backgroundColor = 0xFFFFFFFF,
-    uiMode = Configuration.UI_MODE_NIGHT_NO
-)
-@Preview(
-    name = "Incidents screen - error - IO - dark",
-    group = "Incidents screen - error - IO",
-    showBackground = true,
-    backgroundColor = 0xFF000000,
-    uiMode = Configuration.UI_MODE_NIGHT_YES
-)
-@Composable
-private fun IncidentsScreenIoErrorPreview() {
-    MyBusTheme {
-        IncidentsScreenWithState(
-            state = UiState(
-                content = UiContent.Error.Io
-            ),
-            onMoreDetailsClicked = { },
-            onActionLaunched = { }
-        )
-    }
-}
-
-@Preview(
-    name = "Incidents screen - error - server - light",
-    group = "Incidents screen - error - server",
-    showBackground = true,
-    backgroundColor = 0xFFFFFFFF,
-    uiMode = Configuration.UI_MODE_NIGHT_NO
-)
-@Preview(
-    name = "Incidents screen - error - server - dark",
-    group = "Incidents screen - error - server",
-    showBackground = true,
-    backgroundColor = 0xFF000000,
-    uiMode = Configuration.UI_MODE_NIGHT_YES
-)
-@Composable
-private fun IncidentsScreenServerErrorPreview() {
-    MyBusTheme {
-        IncidentsScreenWithState(
-            state = UiState(
-                content = UiContent.Error.Server
-            ),
+            onRefresh = { },
             onMoreDetailsClicked = { },
             onActionLaunched = { }
         )

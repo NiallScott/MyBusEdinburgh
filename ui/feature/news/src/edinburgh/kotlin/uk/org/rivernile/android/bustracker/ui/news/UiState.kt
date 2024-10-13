@@ -24,50 +24,28 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose.compiler)
-}
+package uk.org.rivernile.android.bustracker.ui.news
 
-android {
-    namespace = "uk.org.rivernile.android.bustracker.ui.core"
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.UiDiversionsState
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIncidentsState
 
-    flavorDimensions += "city"
-
-    productFlavors {
-        create("edinburgh") {
-            dimension = "city"
-        }
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-
-        debug {
-            enableUnitTestCoverage = true
-            enableAndroidTestCoverage = true
-        }
-    }
-
-    buildFeatures {
-        compose = true
-    }
-}
-
-kotlin {
-    explicitApi()
-}
-
-dependencies {
-
-    implementation(libs.androidx.core)
-
-    // Compose
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    implementation(libs.material.compose)
-}
+/**
+ * This class represents the overall state of the UI for the News screen.
+ *
+ * @property incidentsState This represents the state of the incidents screen.
+ * @property diversionsState This represents the state of the diversions screen.
+ * @property actionButtons This represents the state of the action buttons.
+ * @property tabBadges This represents the state of the tab badges.
+ * @author Niall Scott
+ */
+internal data class UiState(
+    val incidentsState: UiIncidentsState = UiIncidentsState(),
+    val diversionsState: UiDiversionsState = UiDiversionsState(),
+    val actionButtons: UiActionButtons = UiActionButtons(
+        refresh = UiActionButton.Refresh(
+            isEnabled = false,
+            isRefreshing = true
+        )
+    ),
+    val tabBadges: UiTabBadges = UiTabBadges()
+)

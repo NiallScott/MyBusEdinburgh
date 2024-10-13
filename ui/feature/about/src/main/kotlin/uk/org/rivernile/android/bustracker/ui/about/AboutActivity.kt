@@ -61,6 +61,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -231,7 +232,8 @@ private fun AboutItemsList(
     modifier: Modifier = Modifier,
     onItemClicked: (UiAboutItem) -> Unit
 ) {
-    val dateFormat = remember { SimpleDateFormat.getDateTimeInstance() }
+    val configuration = LocalConfiguration.current
+    val dateFormat = remember(configuration) { SimpleDateFormat.getDateTimeInstance() }
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),

@@ -26,47 +26,50 @@
 
 package uk.org.rivernile.android.bustracker.ui.news
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.ViewGroup
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.fragment.app.Fragment
-import androidx.fragment.compose.content
-import dagger.hilt.android.AndroidEntryPoint
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import dagger.hilt.android.qualifiers.ActivityContext
+import dagger.hilt.android.scopes.FragmentScoped
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.DiversionsActionLauncher
-import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.LocalDiversionsActionLauncher
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.IncidentsActionLauncher
-import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.LocalIncidentsActionLauncher
-import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import javax.inject.Inject
 
 /**
- * A [Fragment] which displays news items within the updates, for example travel updates or news
- * about the app.
+ * An implementation which launches actions for the News collection of screens.
  *
+ * @param context The local [android.app.Activity] [Context].
+ * @param exceptionLogger Used to log exceptions which occur while trying to launch actions.
  * @author Niall Scott
  */
-@AndroidEntryPoint
-class NewsFragment : Fragment() {
+@FragmentScoped
+internal class AndroidNewsActionLauncher @Inject constructor(
+    @ActivityContext private val context: Context,
+    private val exceptionLogger: ExceptionLogger
+): DiversionsActionLauncher, IncidentsActionLauncher {
 
-    @Inject
-    internal lateinit var diversionsActionLauncher: DiversionsActionLauncher
+    override fun launchUrl(url: String) {
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse(url)
+        }
 
-    @Inject
-    internal lateinit var incidentsActionLauncher: IncidentsActionLauncher
+        launchIntent(intent)
+    }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ) = content {
-        CompositionLocalProvider(
-            LocalDiversionsActionLauncher provides diversionsActionLauncher,
-            LocalIncidentsActionLauncher provides incidentsActionLauncher
-        ) {
-            MyBusTheme {
-                NewsScreen()
-            }
+    /**
+     * Launch a given [intent]. If no handling [android.app.Activity] can be found, this will be
+     * caught and the exception logger will be informed.
+     *
+     * @param intent The [Intent] to launch.
+     */
+    private fun launchIntent(intent: Intent) {
+        try {
+            context.startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            exceptionLogger.log(e)
+            // Fail silently.
         }
     }
 }

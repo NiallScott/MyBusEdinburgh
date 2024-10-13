@@ -24,52 +24,54 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.news.incidents
+package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
+
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIncident
 
 /**
  * This sealed interface represents the different possible types of content which can be displayed.
  *
+ * @param T The type of [UiServiceUpdate] to be displayed.
  * @author Niall Scott
  */
-internal sealed interface UiContent {
+internal sealed interface UiContent<out T : UiServiceUpdate> {
+
+    /**
+     * Is the content current refreshing?
+     */
+    val isRefreshing: Boolean
 
     /**
      * Show the 'in progress' layout.
      */
-    data object InProgress : UiContent
+    data object InProgress : UiContent<Nothing> {
+
+        override val isRefreshing get() = true
+    }
 
     /**
      * Show a happy-path content layout, which is a [List] of [UiIncident] items.
      *
+     * @param T The type of [UiServiceUpdate] to be displayed.
+     * @property isRefreshing Is the content currently refreshing?
      * @property items The [List] of [UiIncident] items to show.
+     * @property error An optional error to show if there's old content to show but an error
+     * occurred on this reload attempt.
      */
-    data class Success(
-        val items: List<UiIncident>
-    ) : UiContent
+    data class Populated<out T : UiServiceUpdate>(
+        override val isRefreshing: Boolean,
+        val items: List<T>,
+        val error: UiError?
+    ) : UiContent<T>
 
     /**
-     * This sealed interface represents the different possible error types.
+     * Show an error layout, based on the given [error].
+     *
+     * @property isRefreshing Is the content current refreshing?
+     * @property error The type of error which occurred.
      */
-    sealed interface Error : UiContent {
-
-        /**
-         * The error has been caused due to lack of internet connectivity.
-         */
-        data object NoConnectivity : Error
-
-        /**
-         * The error has been caused due to the endpoint returning empty data.
-         */
-        data object Empty : Error
-
-        /**
-         * The error has been caused by an IO error while trying to load the data.
-         */
-        data object Io : Error
-
-        /**
-         * The error has been caused by an error on the server-side while trying to load the data.
-         */
-        data object Server : Error
-    }
+    data class Error(
+        override val isRefreshing: Boolean,
+        val error: UiError
+    ) : UiContent<Nothing>
 }

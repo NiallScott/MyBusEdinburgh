@@ -24,51 +24,17 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.updates
+package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
 /**
- * This sealed interface encapsulates the result types when obtaining service updates.
+ * This represents a Service Update which can be displayed on the UI.
  *
  * @author Niall Scott
  */
-sealed interface ServiceUpdatesResult {
+internal interface UiServiceUpdate {
 
     /**
-     * The request is in progress.
+     * The ID of this Service Update.
      */
-    data object InProgress : ServiceUpdatesResult
-
-    /**
-     * The result is successful.
-     *
-     * @property serviceUpdates The service update data.
-     */
-    data class Success(
-        val serviceUpdates: List<ServiceUpdate>?
-    ) : ServiceUpdatesResult
-
-    /**
-     * This interface describes errors which can arise from getting service updates.
-     */
-    sealed interface Error : ServiceUpdatesResult {
-
-        /**
-         * The result is not successful due to no connectivity.
-         */
-        data object NoConnectivity : Error
-
-        /**
-         * The result is not successful due to an IO error.
-         *
-         * @property throwable The [Throwable] which caused this error.
-         */
-        data class Io(
-            val throwable: Throwable
-        ) : Error
-
-        /**
-         * The result is not successful because of a server error.
-         */
-        data object Server : Error
-    }
+    val id: String
 }

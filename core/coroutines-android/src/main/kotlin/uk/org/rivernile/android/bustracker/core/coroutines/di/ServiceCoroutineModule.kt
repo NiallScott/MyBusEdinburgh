@@ -24,17 +24,32 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.news.diversions
+package uk.org.rivernile.android.bustracker.core.coroutines.di
 
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ServiceComponent
+import dagger.hilt.android.scopes.ServiceScoped
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 
 /**
- * A [Composable] which renders the root of the diversions screen.
+ * This module provides dependencies for Service Coroutines.
  *
  * @author Niall Scott
  */
-@Composable
-internal fun DiversionsScreen() {
-    Text(text = "DiversionsScreen")
+@InstallIn(ServiceComponent::class)
+@Module
+internal class ServiceCoroutineModule {
+
+    @Provides
+    @ServiceScoped
+    @ForServiceCoroutineScope
+    fun provideServiceCoroutineScope(
+        @ForMainDispatcher mainCoroutineDispatcher: CoroutineDispatcher
+    ): CoroutineScope {
+        return CoroutineScope(mainCoroutineDispatcher + Job())
+    }
 }

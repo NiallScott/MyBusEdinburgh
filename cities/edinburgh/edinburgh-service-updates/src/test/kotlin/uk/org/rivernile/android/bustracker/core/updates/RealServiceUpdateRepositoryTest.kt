@@ -42,7 +42,7 @@ import kotlin.test.assertEquals
 class RealServiceUpdateRepositoryTest {
 
     @Test
-    fun incidentServiceUpdatesFlowEmitsServerErrorWhenEndpointsReturnsServerError() = runTest {
+    fun serviceUpdatesFlowEmitsServerErrorWhenEndpointsReturnsServerError() = runTest {
         val repository = createServiceUpdateRepository(
             serviceUpdatesEndpoint = FakeServiceUpdatesEndpoint(
                 onGetServiceUpdates = {
@@ -51,7 +51,7 @@ class RealServiceUpdateRepositoryTest {
             )
         )
 
-        repository.incidentServiceUpdatesFlow.test {
+        repository.serviceUpdatesFlow.test {
             assertEquals(ServiceUpdatesResult.InProgress, awaitItem())
             assertEquals(ServiceUpdatesResult.Error.Server, awaitItem())
             awaitComplete()
@@ -59,7 +59,7 @@ class RealServiceUpdateRepositoryTest {
     }
 
     @Test
-    fun incidentServiceUpdatesFlowEmitsServerErrorWhenEndpointsReturnsIoError() = runTest {
+    fun serviceUpdatesFlowEmitsServerErrorWhenEndpointsReturnsIoError() = runTest {
         val exception = RuntimeException()
         val repository = createServiceUpdateRepository(
             serviceUpdatesEndpoint = FakeServiceUpdatesEndpoint(
@@ -69,7 +69,7 @@ class RealServiceUpdateRepositoryTest {
             )
         )
 
-        repository.incidentServiceUpdatesFlow.test {
+        repository.serviceUpdatesFlow.test {
             assertEquals(ServiceUpdatesResult.InProgress, awaitItem())
             assertEquals(ServiceUpdatesResult.Error.Io(exception), awaitItem())
             awaitComplete()
@@ -77,7 +77,7 @@ class RealServiceUpdateRepositoryTest {
     }
 
     @Test
-    fun incidentServiceUpdatesFlowEmitsServerErrorWhenEndpointsReturnsNoConnectivity() = runTest {
+    fun serviceUpdatesFlowEmitsServerErrorWhenEndpointsReturnsNoConnectivity() = runTest {
         val repository = createServiceUpdateRepository(
             serviceUpdatesEndpoint = FakeServiceUpdatesEndpoint(
                 onGetServiceUpdates = {
@@ -86,7 +86,7 @@ class RealServiceUpdateRepositoryTest {
             )
         )
 
-        repository.incidentServiceUpdatesFlow.test {
+        repository.serviceUpdatesFlow.test {
             assertEquals(ServiceUpdatesResult.InProgress, awaitItem())
             assertEquals(ServiceUpdatesResult.Error.NoConnectivity, awaitItem())
             awaitComplete()
@@ -94,7 +94,7 @@ class RealServiceUpdateRepositoryTest {
     }
 
     @Test
-    fun incidentServiceUpdatesFlowEmitsSuccessWhenEndpointReturnsSuccess() = runTest {
+    fun serviceUpdatesFlowEmitsSuccessWhenEndpointReturnsSuccess() = runTest {
         val repository = createServiceUpdateRepository(
             serviceUpdatesEndpoint = FakeServiceUpdatesEndpoint(
                 onGetServiceUpdates = {
@@ -103,76 +103,7 @@ class RealServiceUpdateRepositoryTest {
             )
         )
 
-        repository.incidentServiceUpdatesFlow.test {
-            assertEquals(ServiceUpdatesResult.InProgress, awaitItem())
-            assertEquals(ServiceUpdatesResult.Success(null), awaitItem())
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun plannedServiceUpdatesFlowEmitsServerErrorWhenEndpointsReturnsServerError() = runTest {
-        val repository = createServiceUpdateRepository(
-            serviceUpdatesEndpoint = FakeServiceUpdatesEndpoint(
-                onGetServiceUpdates = {
-                    ServiceUpdatesResponse.Error.ServerError()
-                }
-            )
-        )
-
-        repository.plannedServiceUpdatesFlow.test {
-            assertEquals(ServiceUpdatesResult.InProgress, awaitItem())
-            assertEquals(ServiceUpdatesResult.Error.Server, awaitItem())
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun plannedServiceUpdatesFlowEmitsServerErrorWhenEndpointsReturnsIoError() = runTest {
-        val exception = RuntimeException()
-        val repository = createServiceUpdateRepository(
-            serviceUpdatesEndpoint = FakeServiceUpdatesEndpoint(
-                onGetServiceUpdates = {
-                    ServiceUpdatesResponse.Error.Io(exception)
-                }
-            )
-        )
-
-        repository.plannedServiceUpdatesFlow.test {
-            assertEquals(ServiceUpdatesResult.InProgress, awaitItem())
-            assertEquals(ServiceUpdatesResult.Error.Io(exception), awaitItem())
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun plannedServiceUpdatesFlowEmitsServerErrorWhenEndpointsReturnsNoConnectivity() = runTest {
-        val repository = createServiceUpdateRepository(
-            serviceUpdatesEndpoint = FakeServiceUpdatesEndpoint(
-                onGetServiceUpdates = {
-                    ServiceUpdatesResponse.Error.NoConnectivity
-                }
-            )
-        )
-
-        repository.plannedServiceUpdatesFlow.test {
-            assertEquals(ServiceUpdatesResult.InProgress, awaitItem())
-            assertEquals(ServiceUpdatesResult.Error.NoConnectivity, awaitItem())
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun plannedServiceUpdatesFlowEmitsSuccessWhenEndpointReturnsSuccess() = runTest {
-        val repository = createServiceUpdateRepository(
-            serviceUpdatesEndpoint = FakeServiceUpdatesEndpoint(
-                onGetServiceUpdates = {
-                    ServiceUpdatesResponse.Success(null)
-                }
-            )
-        )
-
-        repository.plannedServiceUpdatesFlow.test {
+        repository.serviceUpdatesFlow.test {
             assertEquals(ServiceUpdatesResult.InProgress, awaitItem())
             assertEquals(ServiceUpdatesResult.Success(null), awaitItem())
             awaitComplete()

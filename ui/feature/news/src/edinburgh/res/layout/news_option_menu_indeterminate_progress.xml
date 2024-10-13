@@ -1,5 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,19 +23,15 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
- *
- */
+*/ -->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/action_button_min_size"
+    android:layout_height="@dimen/action_button_min_size">
 
-package uk.org.rivernile.android.bustracker.ui.news.incidents
-
-/**
- * This represents the [UiState] of the incidents screen.
- *
- * @property content The current [UiContent] to be shown to the user.
- * @property action A [UiAction] which should be performed.
- * @author Niall Scott
- */
-internal data class UiState(
-    val content: UiContent,
-    val action: UiAction? = null
-)
+    <ProgressBar
+        style="?indeterminateProgressStyle"
+        android:layout_width="@dimen/indeterminate_progress_size"
+        android:layout_height="@dimen/indeterminate_progress_size"
+        android:layout_gravity="center" />
+</FrameLayout>

@@ -24,51 +24,22 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.updates
+package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents
 
 /**
- * This sealed interface encapsulates the result types when obtaining service updates.
+ * This sealed interface represents possible actions which can be performed on the 'incidents'
+ * screen.
  *
  * @author Niall Scott
  */
-sealed interface ServiceUpdatesResult {
+internal sealed interface UiIncidentAction {
 
     /**
-     * The request is in progress.
-     */
-    data object InProgress : ServiceUpdatesResult
-
-    /**
-     * The result is successful.
+     * A URL should be shown.
      *
-     * @property serviceUpdates The service update data.
+     * @property url The URL to be shown.
      */
-    data class Success(
-        val serviceUpdates: List<ServiceUpdate>?
-    ) : ServiceUpdatesResult
-
-    /**
-     * This interface describes errors which can arise from getting service updates.
-     */
-    sealed interface Error : ServiceUpdatesResult {
-
-        /**
-         * The result is not successful due to no connectivity.
-         */
-        data object NoConnectivity : Error
-
-        /**
-         * The result is not successful due to an IO error.
-         *
-         * @property throwable The [Throwable] which caused this error.
-         */
-        data class Io(
-            val throwable: Throwable
-        ) : Error
-
-        /**
-         * The result is not successful because of a server error.
-         */
-        data object Server : Error
-    }
+    data class ShowUrl(
+        val url: String
+    ) : UiIncidentAction
 }

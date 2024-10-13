@@ -24,70 +24,79 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.news.incidents
+package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions
 
 import kotlinx.datetime.Instant
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
-import uk.org.rivernile.android.bustracker.core.updates.IncidentServiceUpdate
+import uk.org.rivernile.android.bustracker.core.updates.PlannedServiceUpdate
+import uk.org.rivernile.android.bustracker.core.updates.ServiceUpdate
 import uk.org.rivernile.android.bustracker.ui.news.UiAffectedService
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiServiceUpdate
 import uk.org.rivernile.android.bustracker.ui.news.toUiAffectedServicesOrNull
 
 /**
- * This represents the data for an incident which is shown on the UI.
+ * This represents the data for a diversion which is shown on the UI.
  *
- * @property id The ID of the incident.
- * @property lastUpdated The [Instant] that this incident was last updated at.
- * @property title A short title for the incident.
- * @property summary A summary describing the incident.
+ * @property id The ID of the diversion.
+ * @property lastUpdated The [Instant] that this diversion was last updated at.
+ * @property title A short title for the diversion.
+ * @property summary A summary describing the diversion.
  * @property affectedServices A listing of [UiAffectedService]s, if any.
- * @property url An optional URL to the incident on the web.
+ * @property url An optional URL to the diversion on the web.
  * @property showMoreDetailsButton Whether the 'Show more details' button should be shown.
  * @author Niall Scott
  */
-internal data class UiIncident(
-    val id: String,
+internal data class UiDiversion(
+    override val id: String,
     val lastUpdated: Instant,
     val title: String,
     val summary: String,
     val affectedServices: List<UiAffectedService>?,
     val url: String?,
     val showMoreDetailsButton: Boolean
-)
+) : UiServiceUpdate
 
 /**
- * Given a [List] of [IncidentServiceUpdate]s, map this to a [List] of [UiIncident]s.
+ * Given a [List] of [ServiceUpdate]s, map this to a [List] of [UiDiversion]s if it contains any
+ * [PlannedServiceUpdate]s. If there are no [PlannedServiceUpdate]s then `null` will be returned.
  *
  * @param coloursForServices A [Map] of service names to [ServiceColours]. May be `null` or services
  * may be missing.
- * @return The [List] of [IncidentServiceUpdate]s as a [List] of [UiIncident]s.
+ * @param serviceNamesComparator A [Comparator] used to sort the service names.
+ * @return The [List] of [PlannedServiceUpdate]s as a [List] of [UiDiversion]s.
  */
-internal fun List<IncidentServiceUpdate>.toUiIncidents(
+internal fun List<ServiceUpdate>.toUiDiversionsOrNull(
     coloursForServices: Map<String, ServiceColours>?,
     serviceNamesComparator: Comparator<String>
-): List<UiIncident> {
-    return map {
-        it.toUiIncident(coloursForServices, serviceNamesComparator)
-    }
+): List<UiDiversion>? {
+    return mapNotNull {
+        if (it is PlannedServiceUpdate) {
+            it.toUiDiversion(coloursForServices, serviceNamesComparator)
+        } else {
+            null
+        }
+    }.ifEmpty { null }
 }
 
 /**
- * Map a [IncidentServiceUpdate] to a [UiIncident].
+ * Map a [PlannedServiceUpdate] to a [UiDiversion].
  *
  * @param coloursForServices A [Map] of service names to [ServiceColours] to populate service
  * colours.
- * @param serviceNamesComparator
+ * @param serviceNamesComparator A [Comparator] used to sort the affected service names.
+ * @return The given [PlannedServiceUpdate] as a [UiDiversion].
  */
-private fun IncidentServiceUpdate.toUiIncident(
+private fun PlannedServiceUpdate.toUiDiversion(
     coloursForServices: Map<String, ServiceColours>?,
     serviceNamesComparator: Comparator<String>
-): UiIncident {
+): UiDiversion {
     val mappedAffectedServices = toUiAffectedServicesOrNull(
         affectedServices,
         coloursForServices,
         serviceNamesComparator
     )
 
-    return UiIncident(
+    return UiDiversion(
         id = id,
         lastUpdated = lastUpdated,
         title = title,

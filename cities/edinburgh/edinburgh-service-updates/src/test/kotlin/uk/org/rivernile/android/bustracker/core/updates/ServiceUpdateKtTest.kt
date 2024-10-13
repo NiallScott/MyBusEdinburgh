@@ -41,93 +41,49 @@ import kotlin.test.assertNull
 class ServiceUpdateKtTest {
 
     @Test
-    fun toIncidentsServiceUpdatesOrNullReturnsNullWhenServicesUpdatesIsEmpty() {
-        val result = emptyList<ServiceUpdate>().toIncidentsServiceUpdatesOrNull()
+    fun toServiceUpdatesOrNullReturnsNullWhenServiceUpdatesIsEmpty() {
+        val result = emptyList<ServiceUpdate>().toServiceUpdatesOrNull()
 
         assertNull(result)
     }
 
     @Test
-    fun toIncidentsServiceUpdatesOrNullReturnsNullWithSinglePlannedServiceUpdate() {
-        val result = listOf(
-            createPlannedEndpointServiceUpdate(Instant.fromEpochMilliseconds(123L))
-        ).toIncidentsServiceUpdatesOrNull()
-
-        assertNull(result)
-    }
-
-    @Test
-    fun toIncidentsServiceUpdatesOrNullReturnsSingleItemWithSingleIncidentServiceUpdate() {
+    fun toServiceUpdatesOrNullReturnsSingleIncidentServiceUpdate() {
         val time = Instant.fromEpochMilliseconds(123L)
         val expected = listOf(createIncidentServiceUpdate(time))
 
         val result = listOf(
             createIncidentEndpointServiceUpdate(time)
-        ).toIncidentsServiceUpdatesOrNull()
+        ).toServiceUpdatesOrNull()
 
         assertEquals(expected, result)
     }
 
     @Test
-    fun toIncidentsServiceUpdatesOrNullReturnsMappedServiceUpdates() {
-        val time1 = Instant.fromEpochMilliseconds(123L)
-        val time2 = Instant.fromEpochMilliseconds(456L)
-        val expected = listOf(
-            createIncidentServiceUpdate(time1),
-            createIncidentServiceUpdate(time2)
-        )
-
-        val result = listOf(
-            createIncidentEndpointServiceUpdate(time1),
-            createPlannedEndpointServiceUpdate(Instant.fromEpochMilliseconds(789L)),
-            createIncidentEndpointServiceUpdate(time2)
-        ).toIncidentsServiceUpdatesOrNull()
-
-        assertEquals(expected, result)
-    }
-
-    @Test
-    fun toPlannedServiceUpdatesOrNullReturnsNullWhenServiceUpdatesIsEmpty() {
-        val result = emptyList<ServiceUpdate>().toPlannedServiceUpdatesOrNull()
-
-        assertNull(result)
-    }
-
-    @Test
-    fun toPlannedServiceUpdatesOrNullReturnsNullWithSingleIncidentServiceUpdate() {
-        val result = listOf(
-            createIncidentEndpointServiceUpdate(Instant.fromEpochMilliseconds(123L))
-        ).toPlannedServiceUpdatesOrNull()
-
-        assertNull(result)
-    }
-
-    @Test
-    fun toPlannedServiceUpdatesOrNullReturnsSingleItemWithSinglePlannedServiceUpdate() {
+    fun toServiceUpdatesOrNullReturnsSinglePlannedServiceUpdate() {
         val time = Instant.fromEpochMilliseconds(123L)
         val expected = listOf(createPlannedServiceUpdate(time))
 
-        val result = listOf(
+        val resul = listOf(
             createPlannedEndpointServiceUpdate(time)
-        ).toPlannedServiceUpdatesOrNull()
+        ).toServiceUpdatesOrNull()
 
-        assertEquals(expected, result)
+        assertEquals(expected, resul)
     }
 
     @Test
-    fun toPlannedServiceUpdatesOrNullReturnsMappedServiceUpdates() {
-        val time1 = Instant.fromEpochMilliseconds(123L)
-        val time2 = Instant.fromEpochMilliseconds(456L)
+    fun toServiceUpdatesOrNullReturnsMappedServiceUpdates() {
+        val incidentTime = Instant.fromEpochMilliseconds(123L)
+        val plannedTime = Instant.fromEpochMilliseconds(456L)
         val expected = listOf(
-            createPlannedServiceUpdate(time1),
-            createPlannedServiceUpdate(time2)
+            createIncidentServiceUpdate(incidentTime),
+            createPlannedServiceUpdate(plannedTime)
         )
 
         val result = listOf(
-            createPlannedEndpointServiceUpdate(time1),
-            createIncidentEndpointServiceUpdate(Instant.fromEpochMilliseconds(789L)),
-            createPlannedEndpointServiceUpdate(time2)
-        ).toPlannedServiceUpdatesOrNull()
+            createIncidentEndpointServiceUpdate(incidentTime),
+            createPlannedEndpointServiceUpdate(plannedTime)
+        ).toServiceUpdatesOrNull()
 
         assertEquals(expected, result)
     }

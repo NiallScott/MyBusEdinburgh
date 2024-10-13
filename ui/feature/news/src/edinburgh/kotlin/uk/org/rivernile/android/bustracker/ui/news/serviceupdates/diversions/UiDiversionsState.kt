@@ -24,50 +24,18 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose.compiler)
-}
+package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions
 
-android {
-    namespace = "uk.org.rivernile.android.bustracker.ui.core"
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiContent
 
-    flavorDimensions += "city"
-
-    productFlavors {
-        create("edinburgh") {
-            dimension = "city"
-        }
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-
-        debug {
-            enableUnitTestCoverage = true
-            enableAndroidTestCoverage = true
-        }
-    }
-
-    buildFeatures {
-        compose = true
-    }
-}
-
-kotlin {
-    explicitApi()
-}
-
-dependencies {
-
-    implementation(libs.androidx.core)
-
-    // Compose
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    implementation(libs.material.compose)
-}
+/**
+ * This represents the [UiDiversionsState] of the diversions screen.
+ *
+ * @property content The current [UiContent] to be shown to the user.
+ * @property action A [UiDiversionAction] which should be performed.
+ * @author Niall Scott
+ */
+internal data class UiDiversionsState(
+    val content: UiContent<UiDiversion> = UiContent.InProgress,
+    val action: UiDiversionAction? = null
+)

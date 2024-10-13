@@ -24,50 +24,37 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose.compiler)
+package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
+
+import uk.org.rivernile.android.bustracker.core.updates.ServiceUpdatesResult
+
+/**
+ * This enum defines types of errors to be displayed to the user which occur while trying to load
+ * the content.
+ *
+ * @author Niall Scott
+ */
+internal enum class UiError {
+
+    /** The content could not be loaded due to lack of connectivity. */
+    NO_CONNECTIVITY,
+    /** The content was loaded but it was empty. */
+    EMPTY,
+    /** The content could not be loaded due to an IO error. */
+    IO,
+    /** The content could not be loaded due to a server error. */
+    SERVER
 }
 
-android {
-    namespace = "uk.org.rivernile.android.bustracker.ui.core"
-
-    flavorDimensions += "city"
-
-    productFlavors {
-        create("edinburgh") {
-            dimension = "city"
-        }
+/**
+ * Map a [ServiceUpdatesResult.Error] to an [UiError].
+ *
+ * @return This [ServiceUpdatesResult.Error] mapped to an [UiError].
+ */
+internal fun ServiceUpdatesResult.Error.toUiError(): UiError {
+    return when (this) {
+        is ServiceUpdatesResult.Error.NoConnectivity -> UiError.NO_CONNECTIVITY
+        is ServiceUpdatesResult.Error.Io -> UiError.IO
+        is ServiceUpdatesResult.Error.Server -> UiError.SERVER
     }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-
-        debug {
-            enableUnitTestCoverage = true
-            enableAndroidTestCoverage = true
-        }
-    }
-
-    buildFeatures {
-        compose = true
-    }
-}
-
-kotlin {
-    explicitApi()
-}
-
-dependencies {
-
-    implementation(libs.androidx.core)
-
-    // Compose
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    implementation(libs.material.compose)
 }

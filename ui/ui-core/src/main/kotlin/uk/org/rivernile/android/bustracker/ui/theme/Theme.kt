@@ -41,7 +41,7 @@ import androidx.compose.runtime.Composable
  * @param content The [Composable] content within this theme.
  */
 @Composable
-fun MyBusTheme(
+public fun MyBusTheme(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
