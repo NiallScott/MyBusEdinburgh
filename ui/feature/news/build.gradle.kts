@@ -93,9 +93,11 @@ dependencies {
     implementation(libs.kotlin.datetime)
 
     // Test dependencies
+    androidTestImplementation(testFixtures(project(":core:logging")))
     androidTestImplementation(libs.androidx.compose.ui.test)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.espresso.intents)
     androidTestImplementation(libs.kotlin.test.junit)
 
     testImplementation(libs.coroutines.test)

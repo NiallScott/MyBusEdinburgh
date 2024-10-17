@@ -102,7 +102,7 @@ private fun IncidentServiceUpdate.toUiIncident(
         title = title,
         summary = summary,
         affectedServices = mappedAffectedServices,
-        url = url,
+        url = url?.takeIf { it.isNotBlank() },
         showMoreDetailsButton = !url.isNullOrBlank()
     )
 }

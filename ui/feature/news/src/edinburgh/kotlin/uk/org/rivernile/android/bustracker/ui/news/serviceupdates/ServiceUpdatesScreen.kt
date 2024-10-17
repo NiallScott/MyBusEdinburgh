@@ -37,6 +37,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -74,6 +76,8 @@ internal fun <T : UiServiceUpdate> ServiceUpdatesScreen(
     onRefresh: () -> Unit,
     itemContent: @Composable LazyItemScope.(item: T) -> Unit
 ) {
+    val nestedScrollInterop = rememberNestedScrollInteropConnection()
+
     PullToRefreshBox(
         isRefreshing = content.isRefreshing,
         onRefresh = onRefresh,
@@ -84,9 +88,17 @@ internal fun <T : UiServiceUpdate> ServiceUpdatesScreen(
             is UiContent.InProgress -> EmptyProgress()
             is UiContent.Populated -> ItemsList(
                 items = content.items,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .nestedScroll(nestedScrollInterop),
                 itemContent = itemContent
             )
-            is UiContent.Error -> Error(error = content.error)
+            is UiContent.Error -> Error(
+                error = content.error,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .nestedScroll(nestedScrollInterop)
+            )
         }
     }
 }
@@ -106,12 +118,8 @@ private fun <T : UiServiceUpdate> ItemsList(
     modifier: Modifier = Modifier,
     itemContent: @Composable LazyItemScope.(item: T) -> Unit
 ) {
-    val nestedScrollInterop = rememberNestedScrollInteropConnection()
-
     LazyColumn(
-        modifier = modifier
-            .nestedScroll(nestedScrollInterop)
-            .fillMaxSize(),
+        modifier = modifier,
         contentPadding = PaddingValues(top = 12.dp, bottom = 44.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -153,9 +161,12 @@ private fun Error(
     }
 
     Column(
-        modifier = modifier.padding(dimensionResource(id = Rcore.dimen.padding_double)),
+        modifier = modifier
+            .padding(dimensionResource(id = Rcore.dimen.padding_double))
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(
-            dimensionResource(id = Rcore.dimen.padding_default)
+            space = dimensionResource(id = Rcore.dimen.padding_default),
+            alignment = Alignment.CenterVertically
         ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
