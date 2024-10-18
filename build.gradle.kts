@@ -62,6 +62,10 @@ subprojects {
         }
     }
 
+    tasks.withType<Test>().configureEach {
+        maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
+    }
+
     plugins.withType<BasePlugin>().configureEach {
         extensions.configure<BaseExtension> {
             compileSdkVersion(libs.versions.android.sdk.compile.get().toInt())
