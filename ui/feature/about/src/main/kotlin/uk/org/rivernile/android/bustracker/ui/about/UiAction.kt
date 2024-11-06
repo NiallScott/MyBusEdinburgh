@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.about
 
+import androidx.compose.runtime.Immutable
+
 /**
  * This sealed interface represents possible actions which can be performed on the 'about' screen.
  *
@@ -34,17 +36,22 @@ package uk.org.rivernile.android.bustracker.ui.about
 internal sealed interface UiAction {
 
     /** The privacy policy should be shown. */
+    @Immutable
     data object ShowPrivacyPolicy : UiAction
 
     /** The app's store listing should be shown. */
+    @Immutable
     data object ShowStoreListing : UiAction
 
     /** The app author's website should be shown. */
+    @Immutable
     data object ShowAuthorWebsite : UiAction
 
     /** The app's website should be shown. */
+    @Immutable
     data object ShowAppWebsite : UiAction
 
     /** The app's Twitter account should be shown. */
+    @Immutable
     data object ShowAppTwitter : UiAction
 }
