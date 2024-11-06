@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.about
 
+import androidx.compose.runtime.Immutable
+
 /**
  * This class represents a snapshot of the [UiState].
  *
@@ -35,6 +37,7 @@ package uk.org.rivernile.android.bustracker.ui.about
  * @property action Any action which should be performed.
  * @author Niall Scott
  */
+@Immutable
 internal data class UiState(
     val items: List<UiAboutItem>,
     val isCreditsShown: Boolean = false,

@@ -5,7 +5,7 @@ android-sdk-min = "23"
 android-sdk-target = "34"
 android-build-tools = "34.0.0"
 
-android-gradle-plugin = "8.7.1"
+android-gradle-plugin = "8.7.2"
 coroutines = "1.9.0"
 dagger = "2.52"
 kotlin = "2.0.20"
@@ -15,9 +15,9 @@ retrofit = "2.11.0"
 # AndroidX
 androidx-activity = "1.9.3"
 androidx-benchmark = "1.3.3"
-androidx-fragment = "1.8.4"
+androidx-fragment = "1.8.5"
 androidx-hilt = "1.2.0"
-androidx-lifecycle = "2.8.6"
+androidx-lifecycle = "2.8.7"
 androidx-room = "2.6.1"
 androidx-work = "2.9.1"
 
@@ -59,12 +59,12 @@ edinburgh-bus-tracker-api = { module = "uk.org.rivernile.edinburghbustrackerapi:
 # AndroidX
 androidx-activity = { module = "androidx.activity:activity-ktx", version.ref = "androidx-activity" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
-androidx-annotation = { module = "androidx.annotation:annotation", version = "1.9.0" }
+androidx-annotation = { module = "androidx.annotation:annotation", version = "1.9.1" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.0" }
-androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2024.10.00" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2024.10.01" }
 androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
-androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.1.4" }
+androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.2.0" }
 androidx-core = { module = "androidx.core:core-ktx", version = "1.13.1" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version = "1.1.1" }
 androidx-fragment = { module = "androidx.fragment:fragment-ktx", version.ref = "androidx-fragment" }
@@ -90,7 +90,7 @@ material = { module = "com.google.android.material:material", version = "1.12.0"
 material-compose = { module = "androidx.compose.material3:material3" }
 
 # Firebase
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "33.4.0" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "33.5.1" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 
 # Play Services
