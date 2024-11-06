@@ -26,13 +26,14 @@
 
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions
 
+import androidx.compose.runtime.Immutable
 import kotlinx.datetime.Instant
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.updates.PlannedServiceUpdate
 import uk.org.rivernile.android.bustracker.core.updates.ServiceUpdate
-import uk.org.rivernile.android.bustracker.ui.news.UiAffectedService
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiServiceUpdate
-import uk.org.rivernile.android.bustracker.ui.news.toUiAffectedServicesOrNull
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.toUiServiceNamesOrNull
+import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 
 /**
  * This represents the data for a diversion which is shown on the UI.
@@ -41,17 +42,18 @@ import uk.org.rivernile.android.bustracker.ui.news.toUiAffectedServicesOrNull
  * @property lastUpdated The [Instant] that this diversion was last updated at.
  * @property title A short title for the diversion.
  * @property summary A summary describing the diversion.
- * @property affectedServices A listing of [UiAffectedService]s, if any.
+ * @property affectedServices A listing of affected services, if any.
  * @property url An optional URL to the diversion on the web.
  * @property showMoreDetailsButton Whether the 'Show more details' button should be shown.
  * @author Niall Scott
  */
+@Immutable
 internal data class UiDiversion(
     override val id: String,
     val lastUpdated: Instant,
     val title: String,
     val summary: String,
-    val affectedServices: List<UiAffectedService>?,
+    val affectedServices: List<UiServiceName>?,
     val url: String?,
     val showMoreDetailsButton: Boolean
 ) : UiServiceUpdate
@@ -90,7 +92,7 @@ private fun PlannedServiceUpdate.toUiDiversion(
     coloursForServices: Map<String, ServiceColours>?,
     serviceNamesComparator: Comparator<String>
 ): UiDiversion {
-    val mappedAffectedServices = toUiAffectedServicesOrNull(
+    val mappedAffectedServices = toUiServiceNamesOrNull(
         affectedServices,
         coloursForServices,
         serviceNamesComparator

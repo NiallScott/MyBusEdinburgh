@@ -43,9 +43,10 @@ import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Instant
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ServiceUpdatesScreen
-import uk.org.rivernile.android.bustracker.ui.news.UiAffectedService
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiContent
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiError
+import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
+import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import java.text.SimpleDateFormat
 
@@ -135,20 +136,26 @@ private fun IncidentsScreenContentPreview() {
             title = "Princes Street",
             summary = "Due to traffic congestion buses are being delayed on Princes Street.",
             affectedServices = listOf(
-                UiAffectedService(
-                    "1",
-                    Color.Blue.toArgb(),
-                    Color.White.toArgb()
+                UiServiceName(
+                    serviceName = "1",
+                    colours = UiServiceColours(
+                        backgroundColour = Color.Blue.toArgb(),
+                        textColour = Color.White.toArgb()
+                    )
                 ),
-                UiAffectedService(
-                    "26",
-                    Color.Red.toArgb(),
-                    Color.White.toArgb()
+                UiServiceName(
+                    serviceName = "26",
+                    colours = UiServiceColours(
+                        backgroundColour = Color.Red.toArgb(),
+                        textColour = Color.White.toArgb()
+                    )
                 ),
-                UiAffectedService(
-                    "44",
-                    Color.Yellow.toArgb(),
-                    Color.Black.toArgb()
+                UiServiceName(
+                    serviceName = "44",
+                    colours = UiServiceColours(
+                        backgroundColour = Color.Yellow.toArgb(),
+                        textColour = Color.Black.toArgb()
+                    )
                 )
             ),
             url = "https://some.url",
@@ -160,20 +167,26 @@ private fun IncidentsScreenContentPreview() {
             title = "Princes Street",
             summary = "Due to traffic congestion buses are being delayed on Princes Street.",
             affectedServices = listOf(
-                UiAffectedService(
-                    "1",
-                    Color.Blue.toArgb(),
-                    Color.White.toArgb()
+                UiServiceName(
+                    serviceName = "1",
+                    colours = UiServiceColours(
+                        backgroundColour = Color.Blue.toArgb(),
+                        textColour = Color.White.toArgb()
+                    )
                 ),
-                UiAffectedService(
-                    "26",
-                    Color.Red.toArgb(),
-                    Color.White.toArgb()
+                UiServiceName(
+                    serviceName = "26",
+                    colours = UiServiceColours(
+                        backgroundColour = Color.Red.toArgb(),
+                        textColour = Color.White.toArgb()
+                    )
                 ),
-                UiAffectedService(
-                    "44",
-                    Color.Yellow.toArgb(),
-                    Color.Black.toArgb()
+                UiServiceName(
+                    serviceName = "44",
+                    colours = UiServiceColours(
+                        backgroundColour = Color.Yellow.toArgb(),
+                        textColour = Color.Black.toArgb()
+                    )
                 )
             ),
             url = "https://some.url",
@@ -185,20 +198,26 @@ private fun IncidentsScreenContentPreview() {
             title = "Princes Street",
             summary = "Due to traffic congestion buses are being delayed on Princes Street.",
             affectedServices = listOf(
-                UiAffectedService(
-                    "1",
-                    Color.Blue.toArgb(),
-                    Color.White.toArgb()
+                UiServiceName(
+                    serviceName = "1",
+                    colours = UiServiceColours(
+                        backgroundColour = Color.Blue.toArgb(),
+                        textColour = Color.White.toArgb()
+                    )
                 ),
-                UiAffectedService(
-                    "26",
-                    Color.Red.toArgb(),
-                    Color.White.toArgb()
+                UiServiceName(
+                    serviceName = "26",
+                    colours = UiServiceColours(
+                        backgroundColour = Color.Red.toArgb(),
+                        textColour = Color.White.toArgb()
+                    )
                 ),
-                UiAffectedService(
-                    "44",
-                    Color.Yellow.toArgb(),
-                    Color.Black.toArgb()
+                UiServiceName(
+                    serviceName = "44",
+                    colours = UiServiceColours(
+                        backgroundColour = Color.Yellow.toArgb(),
+                        textColour = Color.Black.toArgb()
+                    )
                 )
             ),
             url = "https://some.url",

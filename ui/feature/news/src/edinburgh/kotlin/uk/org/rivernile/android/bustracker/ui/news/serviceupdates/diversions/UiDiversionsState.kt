@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions
 
+import androidx.compose.runtime.Immutable
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiContent
 
 /**
@@ -35,6 +36,7 @@ import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiContent
  * @property action A [UiDiversionAction] which should be performed.
  * @author Niall Scott
  */
+@Immutable
 internal data class UiDiversionsState(
     val content: UiContent<UiDiversion> = UiContent.InProgress,
     val action: UiDiversionAction? = null

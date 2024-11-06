@@ -24,19 +24,42 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.news
+package uk.org.rivernile.android.bustracker.ui.theme
 
-import androidx.compose.runtime.Immutable
+import androidx.activity.ComponentActivity
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import org.junit.Rule
+import uk.org.rivernile.android.bustracker.ui.text.LocalServiceColours
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
- * This class holds the count value to show for the tab item badges.
+ * Tests for `Theme.kt`.
  *
- * @property incidentsCount The number of incidents to show on the badge.
- * @property diversionsCount The number of diversions to show on the badge.
  * @author Niall Scott
  */
-@Immutable
-internal data class UiTabBadges(
-    val incidentsCount: Int? = null,
-    val diversionsCount: Int? = null
-)
+class ThemeKtTest {
+
+    @get:Rule
+    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+
+    @Test
+    fun myBusThemeUsesCorrectDefaultServiceColours() {
+        composeTestRule.setContent {
+            MyBusTheme {
+                val serviceColours = LocalServiceColours.current
+
+                assertEquals(
+                    MaterialTheme.colorScheme.tertiary.toArgb(),
+                    serviceColours.backgroundColour
+                )
+                assertEquals(
+                    MaterialTheme.colorScheme.onTertiary.toArgb(),
+                    serviceColours.textColour
+                )
+            }
+        }
+    }
+}

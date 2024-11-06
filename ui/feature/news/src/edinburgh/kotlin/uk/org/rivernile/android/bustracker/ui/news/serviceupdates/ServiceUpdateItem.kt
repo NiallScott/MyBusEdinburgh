@@ -26,15 +26,22 @@
 
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import kotlinx.datetime.Instant
+import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.news.R
-import uk.org.rivernile.android.bustracker.ui.news.UiAffectedService
+import uk.org.rivernile.android.bustracker.ui.text.SmallDecoratedServiceNamesListingText
+import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import java.text.DateFormat
 import java.util.Date
 
@@ -101,19 +108,31 @@ internal fun ItemLastUpdated(
 /**
  * A Service Update item affected services listing.
  *
- * @param affectedServices An ordered [List] of [UiAffectedService]s.
+ * @param affectedServices An ordered [List] of [UiServiceName]s.
  * @param modifier The [Modifier] to be applied to the affected services listing.
  */
 @Composable
 internal fun ItemAffectedServices(
-    affectedServices: List<UiAffectedService>,
+    affectedServices: List<UiServiceName>,
     modifier: Modifier = Modifier
 ) {
-    Text(
-        text = affectedServices.joinToString { it.serviceName },
+    Column(
         modifier = modifier,
-        style = MaterialTheme.typography.bodyMedium
-    )
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(Rcore.dimen.padding_double))
+    ) {
+        Text(
+            text = stringResource(R.string.serviceupdates_item_heading_affected_services),
+            modifier = Modifier.fillMaxWidth(),
+            style = MaterialTheme.typography.titleSmall
+        )
+
+        SmallDecoratedServiceNamesListingText(
+            services = affectedServices,
+            modifier = Modifier.fillMaxWidth(),
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
 }
 
 /**

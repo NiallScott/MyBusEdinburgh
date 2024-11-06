@@ -32,6 +32,10 @@ import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.graphics.toArgb
+import uk.org.rivernile.android.bustracker.ui.text.LocalServiceColours
+import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 
 /**
  * The base theme to be used on the MyBus* apps.
@@ -51,11 +55,18 @@ public fun MyBusTheme(
         lightScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography(),
-        content = content
-    )
+    CompositionLocalProvider(
+        LocalServiceColours provides UiServiceColours(
+            backgroundColour = colorScheme.tertiary.toArgb(),
+            textColour = colorScheme.onTertiary.toArgb()
+        )
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography(),
+            content = content
+        )
+    }
 }
 
 private val lightScheme = lightColorScheme(

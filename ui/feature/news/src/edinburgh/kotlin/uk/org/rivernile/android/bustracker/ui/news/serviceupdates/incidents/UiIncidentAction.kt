@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents
 
+import androidx.compose.runtime.Immutable
+
 /**
  * This sealed interface represents possible actions which can be performed on the 'incidents'
  * screen.
@@ -39,6 +41,7 @@ internal sealed interface UiIncidentAction {
      *
      * @property url The URL to be shown.
      */
+    @Immutable
     data class ShowUrl(
         val url: String
     ) : UiIncidentAction

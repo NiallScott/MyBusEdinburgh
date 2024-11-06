@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.news
 
+import androidx.compose.runtime.Immutable
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.UiDiversionsState
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIncidentsState
 
@@ -38,6 +39,7 @@ import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIn
  * @property tabBadges This represents the state of the tab badges.
  * @author Niall Scott
  */
+@Immutable
 internal data class UiState(
     val incidentsState: UiIncidentsState = UiIncidentsState(),
     val diversionsState: UiDiversionsState = UiDiversionsState(),

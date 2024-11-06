@@ -27,11 +27,12 @@
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents
 
 import android.content.res.Configuration
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,12 +42,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Instant
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
-import uk.org.rivernile.android.bustracker.ui.news.UiAffectedService
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ItemAffectedServices
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ItemLastUpdated
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ItemMoreDetailsButton
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ItemSummary
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ItemTitle
+import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
+import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import java.text.DateFormat
 
@@ -66,22 +68,16 @@ internal fun IncidentItem(
     modifier: Modifier = Modifier,
     onMoreDetailsClicked: () -> Unit
 ) {
-    Card(
+    ElevatedCard(
         modifier = modifier
     ) {
+        val doublePadding = dimensionResource(Rcore.dimen.padding_double)
+
         Column(
-            modifier = Modifier.padding(dimensionResource(id = Rcore.dimen.padding_double)),
-            verticalArrangement = Arrangement.spacedBy(
-                dimensionResource(id = Rcore.dimen.padding_default)
-            )
+            modifier = Modifier.padding(doublePadding)
         ) {
             ItemTitle(
                 title = item.title,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            ItemSummary(
-                summary = item.summary,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -91,7 +87,16 @@ internal fun IncidentItem(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            Spacer(modifier = Modifier.height(doublePadding))
+
+            ItemSummary(
+                summary = item.summary,
+                modifier = Modifier.fillMaxWidth()
+            )
+
             item.affectedServices?.ifEmpty { null }?.let {
+                Spacer(modifier = Modifier.height(doublePadding))
+
                 ItemAffectedServices(
                     affectedServices = it,
                     modifier = Modifier.fillMaxWidth()
@@ -99,7 +104,9 @@ internal fun IncidentItem(
             }
 
             if (item.showMoreDetailsButton) {
-               ItemMoreDetailsButton(
+                Spacer(modifier = Modifier.height(doublePadding))
+
+                ItemMoreDetailsButton(
                     onClick = onMoreDetailsClicked
                 )
             }
@@ -108,13 +115,15 @@ internal fun IncidentItem(
 }
 
 @Preview(
-    name = "Incident item (light)",
+    name = "Incident item - full - light",
+    group = "Incident item - full",
     showBackground = true,
     backgroundColor = 0xFFFFFFFF,
     uiMode = Configuration.UI_MODE_NIGHT_NO
 )
 @Preview(
-    name = "Incident item (dark)",
+    name = "Incident item - full - dark",
+    group = "Incident item - full",
     showBackground = true,
     backgroundColor = 0xFF000000,
     uiMode = Configuration.UI_MODE_NIGHT_YES
@@ -129,24 +138,98 @@ private fun IncidentItemPreview() {
                 title = "Princes Street",
                 summary = "Due to traffic congestion buses are being delayed on Princes Street.",
                 affectedServices = listOf(
-                    UiAffectedService(
-                        "1",
-                        Color.Blue.toArgb(),
-                        Color.White.toArgb()
+                    UiServiceName(
+                        serviceName = "1",
+                        colours = UiServiceColours(
+                            backgroundColour = Color.Blue.toArgb(),
+                            textColour = Color.White.toArgb()
+                        )
                     ),
-                    UiAffectedService(
-                        "26",
-                        Color.Red.toArgb(),
-                        Color.White.toArgb()
+                    UiServiceName(
+                        serviceName = "26",
+                        colours = UiServiceColours(
+                            backgroundColour = Color.Red.toArgb(),
+                            textColour = Color.White.toArgb()
+                        )
                     ),
-                    UiAffectedService(
-                        "44",
-                        Color.Yellow.toArgb(),
-                        Color.Black.toArgb()
+                    UiServiceName(
+                        serviceName = "44",
+                        colours = UiServiceColours(
+                            backgroundColour = Color.Yellow.toArgb(),
+                            textColour = Color.Black.toArgb()
+                        )
                     )
                 ),
                 url = "https://some.url",
                 showMoreDetailsButton = true
+            ),
+            dateFormat = DateFormat.getDateTimeInstance(),
+            modifier = Modifier.padding(16.dp),
+            onMoreDetailsClicked = { }
+        )
+    }
+}
+
+@Preview(
+    name = "Incident item - no services - light",
+    group = "Incident item - no services",
+    showBackground = true,
+    backgroundColor = 0xFFFFFFFF,
+    uiMode = Configuration.UI_MODE_NIGHT_NO
+)
+@Preview(
+    name = "Incident item - no services - dark",
+    group = "Incident item - no services",
+    showBackground = true,
+    backgroundColor = 0xFF000000,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+private fun IncidentItemNoServicesPreview() {
+    MyBusTheme {
+        IncidentItem(
+            item = UiIncident(
+                id = "abc123",
+                lastUpdated = Instant.fromEpochMilliseconds(1719063420000L),
+                title = "Princes Street",
+                summary = "Due to traffic congestion buses are being delayed on Princes Street.",
+                affectedServices = null,
+                url = "https://some.url",
+                showMoreDetailsButton = true
+            ),
+            dateFormat = DateFormat.getDateTimeInstance(),
+            modifier = Modifier.padding(16.dp),
+            onMoreDetailsClicked = { }
+        )
+    }
+}
+
+@Preview(
+    name = "Incident item - no More Details button - light",
+    group = "Incident item - no More Details button",
+    showBackground = true,
+    backgroundColor = 0xFFFFFFFF,
+    uiMode = Configuration.UI_MODE_NIGHT_NO
+)
+@Preview(
+    name = "Incident item - no More Details button - dark",
+    group = "Incident item - no More Details button",
+    showBackground = true,
+    backgroundColor = 0xFF000000,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+private fun IncidentItemNoMoreDetailsButtonPreview() {
+    MyBusTheme {
+        IncidentItem(
+            item = UiIncident(
+                id = "abc123",
+                lastUpdated = Instant.fromEpochMilliseconds(1719063420000L),
+                title = "Princes Street",
+                summary = "Due to traffic congestion buses are being delayed on Princes Street.",
+                affectedServices = null,
+                url = "https://some.url",
+                showMoreDetailsButton = false
             ),
             dateFormat = DateFormat.getDateTimeInstance(),
             modifier = Modifier.padding(16.dp),

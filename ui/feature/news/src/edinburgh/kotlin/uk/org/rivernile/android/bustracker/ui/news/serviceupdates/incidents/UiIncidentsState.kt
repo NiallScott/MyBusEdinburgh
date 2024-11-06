@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents
 
+import androidx.compose.runtime.Immutable
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiContent
 
 /**
@@ -35,6 +36,7 @@ import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiContent
  * @property action A [UiIncidentAction] which should be performed.
  * @author Niall Scott
  */
+@Immutable
 internal data class UiIncidentsState(
     val content: UiContent<UiIncident> = UiContent.InProgress,
     val action: UiIncidentAction? = null

@@ -26,12 +26,15 @@
 
 package uk.org.rivernile.android.bustracker.ui.news
 
+import androidx.compose.runtime.Immutable
+
 /**
  * This class holds the action buttons for the News screen.
  *
  * @property refresh The Refresh action button.
  * @author Niall Scott
  */
+@Immutable
 internal data class UiActionButtons(
     val refresh: UiActionButton.Refresh
 )

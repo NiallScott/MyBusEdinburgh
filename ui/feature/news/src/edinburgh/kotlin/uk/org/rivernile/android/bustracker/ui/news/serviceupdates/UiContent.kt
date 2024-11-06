@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
+import androidx.compose.runtime.Immutable
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIncident
 
 /**
@@ -44,6 +45,7 @@ internal sealed interface UiContent<out T : UiServiceUpdate> {
     /**
      * Show the 'in progress' layout.
      */
+    @Immutable
     data object InProgress : UiContent<Nothing> {
 
         override val isRefreshing get() = true
@@ -58,6 +60,7 @@ internal sealed interface UiContent<out T : UiServiceUpdate> {
      * @property error An optional error to show if there's old content to show but an error
      * occurred on this reload attempt.
      */
+    @Immutable
     data class Populated<out T : UiServiceUpdate>(
         override val isRefreshing: Boolean,
         val items: List<T>,
@@ -70,6 +73,7 @@ internal sealed interface UiContent<out T : UiServiceUpdate> {
      * @property isRefreshing Is the content current refreshing?
      * @property error The type of error which occurred.
      */
+    @Immutable
     data class Error(
         override val isRefreshing: Boolean,
         val error: UiError

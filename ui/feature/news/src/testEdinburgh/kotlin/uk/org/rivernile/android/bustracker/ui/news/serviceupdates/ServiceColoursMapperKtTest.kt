@@ -24,23 +24,25 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.news
+package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
+import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
+import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 /**
- * Tests for `UiAffectedService.kt`.
+ * Tests for `ServiceColoursMapper.kt`.
  *
  * @author Niall Scott
  */
-class UiAffectedServiceKtTest {
+class ServiceColoursMapperKtTest {
 
     @Test
-    fun toUiAffectedServicesOrNullReturnsNullWhenServiceNamesIsNull() {
-        val result = toUiAffectedServicesOrNull(
+    fun toUiServiceNamesOrNullReturnsNullWhenServiceNamesIsNull() {
+        val result = toUiServiceNamesOrNull(
             serviceNames = null,
             serviceColours = null,
             serviceNamesComparator = naturalOrder()
@@ -50,8 +52,8 @@ class UiAffectedServiceKtTest {
     }
 
     @Test
-    fun toUiAffectedServicesOrNullReturnsNullWhenServicesCollectionIsEmpty() {
-        val result = toUiAffectedServicesOrNull(
+    fun toUiServiceNamesOrNullReturnsNullWhenServicesCollectionIsEmpty() {
+        val result = toUiServiceNamesOrNull(
             serviceNames = emptySet(),
             serviceColours = null,
             serviceNamesComparator = naturalOrder()
@@ -61,16 +63,15 @@ class UiAffectedServiceKtTest {
     }
 
     @Test
-    fun toUiAffectedServicesOrNullReturnsServiceWithoutColourWhenServiceColoursIsNull() {
+    fun toUiServiceNamesOrNullReturnsServiceWithoutColourWhenServiceColoursIsNull() {
         val expected = listOf(
-            UiAffectedService(
+            UiServiceName(
                 serviceName = "1",
-                backgroundColour = null,
-                textColour = null
+                colours = null
             )
         )
 
-        val result = toUiAffectedServicesOrNull(
+        val result = toUiServiceNamesOrNull(
             serviceNames = setOf("1"),
             serviceColours = null,
             serviceNamesComparator = naturalOrder()
@@ -80,16 +81,15 @@ class UiAffectedServiceKtTest {
     }
 
     @Test
-    fun toUiAffectedServicesOrNullReturnsServiceWithoutColourWhenServiceColoursIsEmpty() {
+    fun toUiServiceNamesOrNullReturnsServiceWithoutColourWhenServiceColoursIsEmpty() {
         val expected = listOf(
-            UiAffectedService(
+            UiServiceName(
                 serviceName = "1",
-                backgroundColour = null,
-                textColour = null
+                colours = null
             )
         )
 
-        val result = toUiAffectedServicesOrNull(
+        val result = toUiServiceNamesOrNull(
             serviceNames = setOf("1"),
             serviceColours = emptyMap(),
             serviceNamesComparator = naturalOrder()
@@ -99,16 +99,15 @@ class UiAffectedServiceKtTest {
     }
 
     @Test
-    fun toUiAffectedServicesOrNullReturnsServiceWithoutColourWhenServiceColourNotKnown() {
+    fun toUiServiceNamesOrNullReturnsServiceWithoutColourWhenServiceColourNotKnown() {
         val expected = listOf(
-            UiAffectedService(
+            UiServiceName(
                 serviceName = "1",
-                backgroundColour = null,
-                textColour = null
+                colours = null
             )
         )
 
-        val result = toUiAffectedServicesOrNull(
+        val result = toUiServiceNamesOrNull(
             serviceNames = setOf("1"),
             serviceColours = mapOf(
                 "2" to ServiceColours(
@@ -123,16 +122,18 @@ class UiAffectedServiceKtTest {
     }
 
     @Test
-    fun toUiAffectedServicesOrNullReturnsServiceWithColourWhenServiceColourKnown() {
+    fun toUiServiceNamesOrNullReturnsServiceWithColourWhenServiceColourKnown() {
         val expected = listOf(
-            UiAffectedService(
+            UiServiceName(
                 serviceName = "1",
-                backgroundColour = 0x00111111,
-                textColour = 0x00222222
+                colours = UiServiceColours(
+                    backgroundColour = 0x00111111,
+                    textColour = 0x00222222
+                )
             )
         )
 
-        val result = toUiAffectedServicesOrNull(
+        val result = toUiServiceNamesOrNull(
             serviceNames = setOf("1"),
             serviceColours = mapOf(
                 "1" to ServiceColours(
@@ -147,26 +148,29 @@ class UiAffectedServiceKtTest {
     }
 
     @Test
-    fun toUiAffectedServicesOrNullReturnsExpectedValuesWithRepresentativeExample() {
+    fun toUiServiceNamesOrNullReturnsExpectedValuesWithRepresentativeExample() {
         val expected = listOf(
-            UiAffectedService(
+            UiServiceName(
                 serviceName = "1",
-                backgroundColour = 0x00111111,
-                textColour = 0x00222222
+                colours = UiServiceColours(
+                    backgroundColour = 0x00111111,
+                    textColour = 0x00222222
+                )
             ),
-            UiAffectedService(
+            UiServiceName(
                 serviceName = "2",
-                backgroundColour = null,
-                textColour = null
+                colours = null
             ),
-            UiAffectedService(
+            UiServiceName(
                 serviceName = "3",
-                backgroundColour = 0x00333333,
-                textColour = 0x00444444
+                colours = UiServiceColours(
+                    backgroundColour = 0x00333333,
+                    textColour = 0x00444444
+                )
             )
         )
 
-        val result = toUiAffectedServicesOrNull(
+        val result = toUiServiceNamesOrNull(
             serviceNames = setOf("2", "1", "3"),
             serviceColours = mapOf(
                 "1" to ServiceColours(

@@ -31,7 +31,8 @@ import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.updates.IncidentServiceUpdate
 import uk.org.rivernile.android.bustracker.core.updates.PlannedServiceUpdate
 import uk.org.rivernile.android.bustracker.core.updates.ServiceUpdate
-import uk.org.rivernile.android.bustracker.ui.news.UiAffectedService
+import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
+import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -163,20 +164,23 @@ class UiDiversionKtTest {
             title = "Title",
             summary = "Summary",
             affectedServices = listOf(
-                UiAffectedService(
+                UiServiceName(
                     serviceName = "1",
-                    backgroundColour = 1,
-                    textColour = 2
+                    colours = UiServiceColours(
+                        backgroundColour = 1,
+                        textColour = 2
+                    )
                 ),
-                UiAffectedService(
+                UiServiceName(
                     serviceName = "2",
-                    backgroundColour = null,
-                    textColour = null
+                    colours = null
                 ),
-                UiAffectedService(
+                UiServiceName(
                     serviceName = "3",
-                    backgroundColour = 3,
-                    textColour = 4
+                    colours = UiServiceColours(
+                        backgroundColour = 3,
+                        textColour = 4
+                    )
                 )
             ),
             url = url,

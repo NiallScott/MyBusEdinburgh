@@ -24,68 +24,56 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.news
+package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
+import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
+import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 
 /**
- * Service details regarding an affected service.
- *
- * @property serviceName The display name of the service.
- * @property backgroundColour An optional background colour to use for the service.
- * @property textColour An optional text colour to use for the service.
- * @author Niall Scott
- */
-internal data class UiAffectedService(
-    val serviceName: String,
-    val backgroundColour: Int?,
-    val textColour: Int?
-)
-
-/**
- * Map a given [Collection] of [String] service names to a [List] of [UiAffectedService]s.
+ * Map a given [Collection] of [String] service names to a [List] of [UiServiceName]s.
  *
  * @param serviceNames A [Collection] containing the service names of affected services.
  * @param serviceColours A [Map] of [ServiceColours] used to populate the colours for the services.
  * May be `null` if not available.
  * @param serviceNamesComparator A [Comparator] used to sort the services by name.
- * @return The given [serviceNames] mapped to a [List] of [UiAffectedService]s, in the order defined
+ * @return The given [serviceNames] mapped to a [List] of [UiServiceName]s, in the order defined
  * by [serviceNamesComparator], with colours provided by [serviceColours].
  */
-internal fun toUiAffectedServicesOrNull(
+internal fun toUiServiceNamesOrNull(
     serviceNames: Collection<String>?,
     serviceColours: Map<String, ServiceColours>?,
     serviceNamesComparator: Comparator<String>
-): List<UiAffectedService>? {
+): List<UiServiceName>? {
     return serviceNames
         ?.ifEmpty { null }
         ?.sortedWith(serviceNamesComparator)
         ?.map {
-            toUiAffectedService(it, serviceColours?.get(it))
+            toUiServiceName(it, serviceColours?.get(it))
         }
 }
 
 /**
- * Map a given [serviceName] and [serviceColours] to a [UiAffectedService].
+ * Map a given [serviceName] and [serviceColours] to a [UiServiceName].
  *
  * @param serviceName The name of the service.
  * @param serviceColours The colours pertaining to this service. May be `null` if there are no
  * known colours for this service.
- * @return The service as a [UiAffectedService].
+ * @return The service as a [UiServiceName].
  */
-private fun toUiAffectedService(
+private fun toUiServiceName(
     serviceName: String,
     serviceColours: ServiceColours?
-): UiAffectedService {
+): UiServiceName {
     return serviceColours?.let {
-        UiAffectedService(
+        UiServiceName(
             serviceName = serviceName,
-            backgroundColour = it.primaryColour,
-            textColour = it.colourOnPrimary
+            colours = UiServiceColours(
+                backgroundColour = it.primaryColour,
+                textColour = it.colourOnPrimary
+            )
         )
-    } ?: UiAffectedService(
-        serviceName = serviceName,
-        backgroundColour = null,
-        textColour = null
+    } ?: UiServiceName(
+        serviceName = serviceName
     )
 }
