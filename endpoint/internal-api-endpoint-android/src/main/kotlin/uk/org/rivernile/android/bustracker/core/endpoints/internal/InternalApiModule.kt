@@ -30,7 +30,6 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ApiModule
-import uk.org.rivernile.android.bustracker.core.endpoints.twitter.di.TwitterModule
 
 /**
  * This [Module] provides dependencies for the internal API.
@@ -40,8 +39,7 @@ import uk.org.rivernile.android.bustracker.core.endpoints.twitter.di.TwitterModu
 @InstallIn(SingletonComponent::class)
 @Module(
     includes = [
-        ApiModule::class,
-        TwitterModule::class
+        ApiModule::class
     ]
 )
 internal interface InternalApiModule

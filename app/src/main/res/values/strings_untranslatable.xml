@@ -59,11 +59,4 @@
     ********************************
     -->
     <string name="bustimes_estimated_time" translatable="false">*%s</string> <!-- %s = time bus is due, e.g. "5" or "13:11" -->
-
-    <!--
-    ****************
-    * TweetAdapter *
-    ****************
-    -->
-    <string name="tweetadapter_info_format" translatable="false">%1$s - %2$s</string> <!-- %1$s = display name. %2$s = date and time String. No need to translate this String. -->
 </resources>

@@ -28,12 +28,10 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.kotlin.serialization)
-    `java-test-fixtures`
 }
 
 dependencies {
 
-    implementation(project(":core:connectivity"))
     implementation(project(":core:coroutines"))
     implementation(project(":core:http-core"))
     implementation(project(":core:logging"))

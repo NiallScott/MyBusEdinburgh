@@ -56,7 +56,7 @@ internal class JsonApiEndpoint @Inject constructor(
 ) : ApiEndpoint {
 
     override suspend fun getDatabaseVersion(
-            socketFactory: SocketFactory?
+        socketFactory: SocketFactory?
     ): DatabaseVersionResponse {
         return try {
             val response = apiServiceFactory.getApiInstance(socketFactory)

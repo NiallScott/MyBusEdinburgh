@@ -301,17 +301,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="stopdetails_stop_distance_permission_required">Distance unknown (location permission required)</string>
     <string name="stopdetails_stop_distance_location_off">Distance unknown (location off)</string>
     <string name="stopdetails_no_services">No known services for this stop</string>
-
-    <!--
-    **************************************
-    * Strings for TwitterUpdatesFragment *
-    **************************************
-    -->
-    <string name="twitterupdates_err_no_connectivity">No internet connectivity</string>
-    <string name="twitterupdates_err_nodata">There are currently no items to display</string>
-    <string name="twitterupdates_err_connection">There was a connectivity issue while trying to load the data</string>
-    <string name="twitterupdates_err_server">There was a server issue while trying to load the data</string>
-    <string name="twitterupdates_err_no_activity_for_click">Failed to open</string>
     
     <!--
     **********************
@@ -553,11 +542,4 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     ***********************************
     -->
     <string name="search_menu_scan">Scan QR code</string>
-
-    <!--
-    *******************************************
-    * Strings for TwitterUpdatesFragment menu *
-    *******************************************
-    -->
-    <string name="twitterupdates_menu_refresh">Refresh</string>
 </resources>

@@ -29,10 +29,6 @@
 
     <dimen name="error_bottom_margin">32dp</dimen>
 
-    <!-- Dimensions for news. -->
-    <dimen name="news_avatar_size">40dp</dimen>
-    <dimen name="news_divider_inset_start">72dp</dimen>
-
     <!-- Dimens for alert manager. -->
     <dimen name="map_range_ring_stroke">1dp</dimen>
 
