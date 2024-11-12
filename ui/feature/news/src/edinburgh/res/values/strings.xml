@@ -39,5 +39,5 @@
     <string name="serviceupdates_item_btn_more_details">More details</string>
 
     <!-- Incident strings -->
-    <string name="incident_item_last_updated">Last updated %s</string>
+    <string name="serviceupdates_item_last_updated">Last updated %s</string>
 </resources>

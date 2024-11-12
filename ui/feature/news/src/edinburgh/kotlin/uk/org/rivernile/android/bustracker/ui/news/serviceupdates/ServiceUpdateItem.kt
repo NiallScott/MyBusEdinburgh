@@ -36,6 +36,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
 import kotlinx.datetime.Instant
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
@@ -44,6 +46,12 @@ import uk.org.rivernile.android.bustracker.ui.text.SmallDecoratedServiceNamesLis
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import java.text.DateFormat
 import java.util.Date
+
+internal const val TEST_TAG_ITEM_TITLE = "item-title"
+internal const val TEST_TAG_ITEM_SUMMARY = "item-summary"
+internal const val TEST_TAG_ITEM_LAST_UPDATED = "item-last-updated"
+internal const val TEST_TAG_ITEM_BUTTON_MORE_DETAILS = "item-button-more-details"
+internal const val TEST_TAG_ITEM_AFFECTED_SERVICES = "item-affected-services"
 
 /**
  * A Service Update item title.
@@ -58,7 +66,10 @@ internal fun ItemTitle(
 ) {
     Text(
         text = title,
-        modifier = modifier,
+        modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_ITEM_TITLE
+            },
         style = MaterialTheme.typography.titleLarge
     )
 }
@@ -76,7 +87,10 @@ internal fun ItemSummary(
 ) {
     Text(
         text = summary,
-        modifier = modifier,
+        modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_ITEM_SUMMARY
+            },
         style = MaterialTheme.typography.bodyLarge
     )
 }
@@ -96,10 +110,13 @@ internal fun ItemLastUpdated(
 ) {
     Text(
         text = stringResource(
-            R.string.incident_item_last_updated,
+            R.string.serviceupdates_item_last_updated,
             dateFormat.format(Date(lastUpdated.toEpochMilliseconds()))
         ),
-        modifier = modifier,
+        modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_ITEM_LAST_UPDATED
+            },
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         style = MaterialTheme.typography.labelSmall
     )
@@ -117,7 +134,10 @@ internal fun ItemAffectedServices(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_ITEM_AFFECTED_SERVICES
+            },
         verticalArrangement = Arrangement.spacedBy(dimensionResource(Rcore.dimen.padding_double))
     ) {
         Text(
@@ -148,7 +168,10 @@ internal fun ItemMoreDetailsButton(
 ) {
     TextButton(
         onClick = onClick,
-        modifier = modifier,
+        modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_ITEM_BUTTON_MORE_DETAILS
+            },
         content = {
             Text(text = stringResource(id = R.string.serviceupdates_item_btn_more_details))
         }
