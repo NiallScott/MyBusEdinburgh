@@ -56,6 +56,7 @@ kotlin {
 
 dependencies {
 
+    implementation(project(":core:coroutines-android"))
     api(project(":core:time"))
 
     // Hilt (dependency injection)

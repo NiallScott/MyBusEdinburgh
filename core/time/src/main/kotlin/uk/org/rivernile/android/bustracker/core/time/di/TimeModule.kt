@@ -28,6 +28,8 @@ package uk.org.rivernile.android.bustracker.core.time.di
 
 import dagger.Binds
 import dagger.Module
+import uk.org.rivernile.android.bustracker.core.time.ElapsedTimeCalculator
+import uk.org.rivernile.android.bustracker.core.time.RealElapsedTimeCalculator
 import uk.org.rivernile.android.bustracker.core.time.RealTimeUtils
 import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 
@@ -45,6 +47,12 @@ public class TimeModule {
 
     @Module
     internal interface Bindings {
+
+        @Suppress("unused")
+        @Binds
+        fun bindElapsedTimeCalculator(
+            realElapsedTimeCalculator: RealElapsedTimeCalculator
+        ): ElapsedTimeCalculator
 
         @Suppress("unused")
         @Binds

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -51,6 +51,7 @@ import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoro
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
+import uk.org.rivernile.android.bustracker.core.time.ElapsedTimeCalculator
 import uk.org.rivernile.android.bustracker.utils.Event
 import javax.inject.Inject
 
@@ -61,7 +62,7 @@ import javax.inject.Inject
  * @param expandedServicesTracker This implementation tracks the expanded/collapse state of the
  * services, for the purpose of showing the user services in the style of an expandable list.
  * @param liveTimesLoader Used to load live times.
- * @param lastRefreshTimeCalculator This is used to calculate the amount of time since the last
+ * @param elapsedTimeCalculator This is used to calculate the amount of time since the last
  * refresh on a continual basis for the purpose of showing this to the user.
  * @param refreshController This is used to control refreshing data.
  * @param preferenceRepository This contains the user's preferences.
@@ -76,7 +77,7 @@ class BusTimesFragmentViewModel @Inject constructor(
     arguments: Arguments,
     private val expandedServicesTracker: ExpandedServicesTracker,
     private val liveTimesLoader: LiveTimesLoader,
-    private val lastRefreshTimeCalculator: LastRefreshTimeCalculator,
+    private val elapsedTimeCalculator: ElapsedTimeCalculator,
     private val refreshController: RefreshController,
     private val preferenceRepository: PreferenceRepository,
     connectivityRepository: ConnectivityRepository,
@@ -293,9 +294,9 @@ class BusTimesFragmentViewModel @Inject constructor(
      * a continual basis. This emits distinct values.
      */
     val lastRefreshLiveData = lastSuccess.switchMap {
-        lastRefreshTimeCalculator.getLastRefreshTimeFlow(it.receiveTime)
-                .distinctUntilChanged()
-                .asLiveData(viewModelScope.coroutineContext + defaultDispatcher)
+        elapsedTimeCalculator.getElapsedTimeMinutesFlow(it.receiveTime)
+            .distinctUntilChanged()
+            .asLiveData(viewModelScope.coroutineContext + defaultDispatcher)
     }
 
     /**
