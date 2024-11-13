@@ -85,6 +85,7 @@ include(
     ":core:servicepoints",
     ":core:servicestops",
     ":core:time",
+    ":core:time-android",
     ":core:work-android",
     ":database:busstop-db-android",
     ":database:busstop-db-core",

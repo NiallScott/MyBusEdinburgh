@@ -27,7 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.livetimes
 
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
-import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
+import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 import javax.inject.Inject
 
 /**

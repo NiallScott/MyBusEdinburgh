@@ -39,7 +39,7 @@ import uk.org.rivernile.android.bustracker.core.database.settings.alerts.AlertEn
 import uk.org.rivernile.android.bustracker.core.database.settings.alerts.AlertsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.alerts.ArrivalAlertEntity
 import uk.org.rivernile.android.bustracker.core.database.settings.alerts.ProximityAlertEntity
-import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
+import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 import javax.inject.Inject
 import javax.inject.Singleton
 

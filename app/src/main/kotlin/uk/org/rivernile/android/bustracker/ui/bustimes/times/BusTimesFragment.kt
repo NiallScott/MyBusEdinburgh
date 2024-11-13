@@ -42,6 +42,7 @@ import androidx.lifecycle.Lifecycle
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.core.time.ElapsedTimeMinutes
 import uk.org.rivernile.android.bustracker.utils.Event
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentBusTimesBinding
@@ -275,12 +276,12 @@ class BusTimesFragment : Fragment() {
      *
      * @param lastRefresh The last refresh time data.
      */
-    private fun handleLastRefreshUpdated(lastRefresh: LastRefreshTime) {
+    private fun handleLastRefreshUpdated(lastRefresh: ElapsedTimeMinutes) {
         when (lastRefresh) {
-            is LastRefreshTime.Never -> getString(R.string.times_never)
-            is LastRefreshTime.MoreThanOneHour -> getString(R.string.times_greaterthanhour)
-            is LastRefreshTime.Now -> getString(R.string.times_lessthanoneminago)
-            is LastRefreshTime.Minutes -> {
+            is ElapsedTimeMinutes.None -> getString(R.string.times_never)
+            is ElapsedTimeMinutes.MoreThanOneHour -> getString(R.string.times_greaterthanhour)
+            is ElapsedTimeMinutes.Now -> getString(R.string.times_lessthanoneminago)
+            is ElapsedTimeMinutes.Minutes -> {
                 val minutes = lastRefresh.minutes
                 resources.getQuantityString(R.plurals.times_minsago, minutes, minutes)
             }

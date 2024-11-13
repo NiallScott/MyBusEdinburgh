@@ -151,7 +151,7 @@ dependencies {
     implementation(project(":core:services-android"))
     implementation(project(":core:servicepoints"))
     implementation(project(":core:servicestops"))
-    implementation(project(":core:time"))
+    implementation(project(":core:time-android"))
     implementation(project(":database:busstop-db-android"))
     implementation(project(":endpoint:tracker-endpoint"))
     implementation(project(":endpoint:internal-api-endpoint"))
@@ -205,6 +205,7 @@ dependencies {
     androidTestImplementation(libs.androidx.test.espresso.intents)
     androidTestImplementation(libs.kotlin.test.junit)
 
+    testImplementation(testFixtures(project(":core:time")))
     testImplementation(testFixtures(project(":database:busstop-db-core")))
     testImplementation(project(":testutils"))
     testImplementation(libs.androidx.arch.core.test)

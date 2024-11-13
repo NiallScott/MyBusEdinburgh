@@ -27,7 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.ErrorMapper
-import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
+import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 import uk.org.rivernile.edinburghbustrackerapi.bustimes.BusTimes
 import javax.inject.Inject
 

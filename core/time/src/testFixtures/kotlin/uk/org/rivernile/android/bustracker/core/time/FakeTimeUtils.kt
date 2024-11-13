@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,34 +24,16 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.bustimes.times
+package uk.org.rivernile.android.bustracker.core.time
 
 /**
- * This class enumerates the different types of display of last refresh time.
+ * A fake [TimeUtils] used in testing.
  *
  * @author Niall Scott
  */
-sealed interface LastRefreshTime {
+class FakeTimeUtils(
+    private val onGetCurrentTimeMillis: () -> Long = { throw NotImplementedError() }
+) : TimeUtils {
 
-    /**
-     * There is not a last refresh time.
-     */
-    data object Never : LastRefreshTime
-
-    /**
-     * The last refresh occurred within the last minute.
-     */
-    data object Now : LastRefreshTime
-
-    /**
-     * The last refresh occurred within these number of minutes.
-     *
-     * @property minutes The number of minutes since the last refresh.
-     */
-    data class Minutes(val minutes: Int) : LastRefreshTime
-
-    /**
-     * The last refresh occurred more than one hour ago.
-     */
-    data object MoreThanOneHour : LastRefreshTime
+    override val currentTimeMills get() = onGetCurrentTimeMillis()
 }

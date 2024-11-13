@@ -28,7 +28,7 @@ package uk.org.rivernile.android.bustracker.core.alerts.proximity
 
 import uk.org.rivernile.android.bustracker.core.alerts.ProximityAlert
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
+import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 import javax.inject.Inject
 
 /**

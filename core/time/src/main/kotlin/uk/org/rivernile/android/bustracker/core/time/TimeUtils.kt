@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,29 +24,28 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.kapt)
-    `java-test-fixtures`
+package uk.org.rivernile.android.bustracker.core.time
+
+import javax.inject.Inject
+
+/**
+ * This class is a proxy through to framework time methods to allow easy mocking of time in unit
+ * tests.
+ *
+ * @author Niall Scott
+ */
+public interface TimeUtils {
+
+    /**
+     * The current wall time in milliseconds since the UNIX epoch.
+     */
+    public val currentTimeMills: Long
 }
 
-kotlin {
-    explicitApi()
-}
+/**
+ * This is the real implementation of [TimeUtils].
+ */
+internal class RealTimeUtils @Inject constructor() : TimeUtils {
 
-dependencies {
-
-    implementation(project(":core:coroutines"))
-
-    // Dagger 2
-    implementation(libs.dagger.core)
-    kapt(libs.dagger.compiler)
-
-    // Testing dependencies
-    testImplementation(libs.coroutines.test)
-    testImplementation(libs.junit)
-    testImplementation(libs.kotlin.test.junit)
-    testImplementation(libs.turbine)
-
-    testFixturesImplementation(project(":core:coroutines"))
+    override val currentTimeMills get() = System.currentTimeMillis()
 }

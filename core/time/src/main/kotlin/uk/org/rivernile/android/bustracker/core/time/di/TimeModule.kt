@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,29 +24,38 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.kapt)
-    `java-test-fixtures`
-}
+package uk.org.rivernile.android.bustracker.core.time.di
 
-kotlin {
-    explicitApi()
-}
+import dagger.Binds
+import dagger.Module
+import uk.org.rivernile.android.bustracker.core.time.ElapsedTimeCalculator
+import uk.org.rivernile.android.bustracker.core.time.RealElapsedTimeCalculator
+import uk.org.rivernile.android.bustracker.core.time.RealTimeUtils
+import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 
-dependencies {
+/**
+ * A module providing dependencies related to time.
+ *
+ * @author Niall Scott
+ */
+@Module(
+    includes = [
+        TimeModule.Bindings::class
+    ]
+)
+public class TimeModule {
 
-    implementation(project(":core:coroutines"))
+    @Module
+    internal interface Bindings {
 
-    // Dagger 2
-    implementation(libs.dagger.core)
-    kapt(libs.dagger.compiler)
+        @Suppress("unused")
+        @Binds
+        fun bindElapsedTimeCalculator(
+            realElapsedTimeCalculator: RealElapsedTimeCalculator
+        ): ElapsedTimeCalculator
 
-    // Testing dependencies
-    testImplementation(libs.coroutines.test)
-    testImplementation(libs.junit)
-    testImplementation(libs.kotlin.test.junit)
-    testImplementation(libs.turbine)
-
-    testFixturesImplementation(project(":core:coroutines"))
+        @Suppress("unused")
+        @Binds
+        fun bindTimeUtils(realTimeUtils: RealTimeUtils): TimeUtils
+    }
 }

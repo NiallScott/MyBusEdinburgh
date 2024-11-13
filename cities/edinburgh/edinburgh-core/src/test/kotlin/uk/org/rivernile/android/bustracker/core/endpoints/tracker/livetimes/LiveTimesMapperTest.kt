@@ -34,7 +34,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.ErrorMapper
-import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
+import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 import uk.org.rivernile.edinburghbustrackerapi.bustimes.BusTime
 import uk.org.rivernile.edinburghbustrackerapi.bustimes.BusTimes
 import kotlin.test.BeforeTest

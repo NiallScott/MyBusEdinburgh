@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,23 +24,45 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.utils
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.hilt)
+}
 
-import javax.inject.Inject
-import javax.inject.Singleton
+android {
+    namespace = "uk.org.rivernile.android.bustracker.core.time"
 
-/**
- * This class is a proxy through to framework time methods to allow easy mocking of time in unit
- * tests.
- *
- * @author Niall Scott
- */
-@Singleton
-class TimeUtils @Inject constructor() {
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
 
-    /**
-     * The current wall time in milliseconds with the UNIX epoch. This merely proxies through to
-     * [System.currentTimeMillis].
-     */
-    val currentTimeMills get() = System.currentTimeMillis()
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+        }
+
+        debug {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
+    }
+}
+
+kotlin {
+    explicitApi()
+}
+
+dependencies {
+
+    implementation(project(":core:coroutines-android"))
+    api(project(":core:time"))
+
+    // Hilt (dependency injection)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+
+    // Testing dependencies
+    androidTestImplementation(libs.androidx.test.runner)
 }
