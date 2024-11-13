@@ -45,6 +45,7 @@ import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ServiceUpdatesScreen
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiContent
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiError
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiMoreDetails
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
@@ -158,8 +159,7 @@ private fun DiversionsScreenContentPreview() {
                     )
                 )
             ),
-            url = "https://some.url",
-            showMoreDetailsButton = true
+            moreDetails = UiMoreDetails(url = "https://some.url")
         ),
         UiDiversion(
             id = "2",
@@ -189,8 +189,7 @@ private fun DiversionsScreenContentPreview() {
                     )
                 )
             ),
-            url = "https://some.url",
-            showMoreDetailsButton = false
+            moreDetails = null
         ),
         UiDiversion(
             id = "3",
@@ -220,8 +219,7 @@ private fun DiversionsScreenContentPreview() {
                     )
                 )
             ),
-            url = "https://some.url",
-            showMoreDetailsButton = true
+            moreDetails = UiMoreDetails(url = "https://some.url")
         )
     )
 

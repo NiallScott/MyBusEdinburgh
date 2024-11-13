@@ -31,6 +31,7 @@ import kotlinx.datetime.Instant
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.updates.IncidentServiceUpdate
 import uk.org.rivernile.android.bustracker.core.updates.ServiceUpdate
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiMoreDetails
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiServiceUpdate
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.toUiServiceNamesOrNull
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
@@ -43,8 +44,7 @@ import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
  * @property title A short title for the incident.
  * @property summary A summary describing the incident.
  * @property affectedServices A listing of affected services, if any.
- * @property url An optional URL to the incident on the web.
- * @property showMoreDetailsButton Whether the 'Show more details' button should be shown.
+ * @property moreDetails How to find more details regarding this incident, if available.
  * @author Niall Scott
  */
 @Immutable
@@ -54,8 +54,7 @@ internal data class UiIncident(
     val title: String,
     val summary: String,
     val affectedServices: List<UiServiceName>?,
-    val url: String?,
-    val showMoreDetailsButton: Boolean
+    val moreDetails: UiMoreDetails?
 ) : UiServiceUpdate
 
 /**
@@ -104,7 +103,6 @@ private fun IncidentServiceUpdate.toUiIncident(
         title = title,
         summary = summary,
         affectedServices = mappedAffectedServices,
-        url = url?.takeIf { it.isNotBlank() },
-        showMoreDetailsButton = !url.isNullOrBlank()
+        moreDetails = url?.takeIf { it.isNotBlank() }?.let(::UiMoreDetails)
     )
 }

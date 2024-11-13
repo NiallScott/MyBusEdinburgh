@@ -41,6 +41,7 @@ import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.TEST_TAG_ITEM_
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.TEST_TAG_ITEM_LAST_UPDATED
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.TEST_TAG_ITEM_SUMMARY
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.TEST_TAG_ITEM_TITLE
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiMoreDetails
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import java.text.SimpleDateFormat
@@ -73,8 +74,7 @@ class IncidentItemKtTest {
                         title = "Item title",
                         summary = "Item summary",
                         affectedServices = null,
-                        url = null,
-                        showMoreDetailsButton = false
+                        moreDetails = null
                     ),
                     dateFormat = dateFormat,
                     onMoreDetailsClicked = { }
@@ -103,8 +103,7 @@ class IncidentItemKtTest {
                         title = "Item title",
                         summary = "Item summary",
                         affectedServices = null,
-                        url = "https://google.com",
-                        showMoreDetailsButton = true
+                        moreDetails = UiMoreDetails(url = "https://google.com")
                     ),
                     dateFormat = dateFormat,
                     onMoreDetailsClicked = buttonClickedTracker
@@ -135,8 +134,7 @@ class IncidentItemKtTest {
                         affectedServices = listOf(
                             UiServiceName(serviceName = "1")
                         ),
-                        url = null,
-                        showMoreDetailsButton = false
+                        moreDetails = null
                     ),
                     dateFormat = dateFormat,
                     onMoreDetailsClicked = { }
@@ -167,8 +165,7 @@ class IncidentItemKtTest {
                         affectedServices = listOf(
                             UiServiceName(serviceName = "1")
                         ),
-                        url = "https://google.com",
-                        showMoreDetailsButton = true
+                        moreDetails = UiMoreDetails(url = "https://google.com")
                     ),
                     dateFormat = dateFormat,
                     onMoreDetailsClicked = buttonClickedTracker

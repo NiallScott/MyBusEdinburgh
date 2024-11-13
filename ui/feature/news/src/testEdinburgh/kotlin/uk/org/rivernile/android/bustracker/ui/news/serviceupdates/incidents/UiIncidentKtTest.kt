@@ -31,6 +31,7 @@ import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.updates.IncidentServiceUpdate
 import uk.org.rivernile.android.bustracker.core.updates.PlannedServiceUpdate
 import uk.org.rivernile.android.bustracker.core.updates.ServiceUpdate
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiMoreDetails
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import kotlin.test.Test
@@ -78,8 +79,7 @@ class UiIncidentKtTest {
     fun toIncidentsOrNullReturnsListWithItemWhenItemIsIncident() {
         val expected = listOf(
             createUiIncident(
-                url = "https://google.com",
-                showMoreDetailsButton = true
+                moreDetails = UiMoreDetails(url = "https://google.com")
             )
         )
 
@@ -100,8 +100,7 @@ class UiIncidentKtTest {
     fun toIncidentsOrNullReturnsListWithItemWhenItemIsIncidentAndUrlIsNull() {
         val expected = listOf(
             createUiIncident(
-                url = null,
-                showMoreDetailsButton = false
+                moreDetails = null
             )
         )
 
@@ -122,8 +121,7 @@ class UiIncidentKtTest {
     fun toIncidentsOrNullReturnsListWithItemWhenItemIsIncidentAndUrlIsEmpty() {
         val expected = listOf(
             createUiIncident(
-                url = null,
-                showMoreDetailsButton = false
+                moreDetails = null
             )
         )
 
@@ -155,8 +153,7 @@ class UiIncidentKtTest {
     }
 
     private fun createUiIncident(
-        url: String?,
-        showMoreDetailsButton: Boolean
+        moreDetails: UiMoreDetails?
     ): UiIncident {
         return UiIncident(
             id = "id",
@@ -183,8 +180,7 @@ class UiIncidentKtTest {
                     )
                 )
             ),
-            url = url,
-            showMoreDetailsButton = showMoreDetailsButton
+            moreDetails = moreDetails
         )
     }
 

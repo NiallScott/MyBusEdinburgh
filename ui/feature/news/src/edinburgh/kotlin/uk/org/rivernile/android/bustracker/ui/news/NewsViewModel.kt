@@ -94,8 +94,8 @@ internal class NewsViewModel @Inject constructor(
      * @param item The incident item on which the "More details" item was clicked.
      */
     fun onIncidentMoreDetailsClicked(item: UiIncident) {
-        item.url?.ifBlank { null }?.let {
-            incidentsViewModelState.action = UiIncidentAction.ShowUrl(it)
+        item.moreDetails?.let {
+            incidentsViewModelState.action = UiIncidentAction.ShowUrl(it.url)
         }
     }
 
@@ -105,8 +105,8 @@ internal class NewsViewModel @Inject constructor(
      * @param item The diversion item on which the "More details" item was clicked.
      */
     fun onDiversionMoreDetailsClicked(item: UiDiversion) {
-        item.url?.ifBlank { null }?.let {
-            diversionsViewModelState.action = UiDiversionAction.ShowUrl(it)
+        item.moreDetails?.let {
+            diversionsViewModelState.action = UiDiversionAction.ShowUrl(it.url)
         }
     }
 

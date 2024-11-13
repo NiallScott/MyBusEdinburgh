@@ -47,6 +47,7 @@ import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ItemLastUpdate
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ItemMoreDetailsButton
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ItemSummary
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ItemTitle
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiMoreDetails
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
@@ -103,7 +104,7 @@ internal fun DiversionItem(
                 )
             }
 
-            if (item.showMoreDetailsButton) {
+            if (item.moreDetails != null) {
                 Spacer(modifier = Modifier.height(doublePadding))
 
                 ItemMoreDetailsButton(
@@ -160,8 +161,7 @@ private fun DiversionItemPreview() {
                         )
                     )
                 ),
-                url = "https://some.url",
-                showMoreDetailsButton = true
+                moreDetails = UiMoreDetails(url = "https://some.url")
             ),
             dateFormat = DateFormat.getDateTimeInstance(),
             modifier = Modifier.padding(16.dp),
@@ -194,8 +194,7 @@ private fun DiversionItemNoServicesPreview() {
                 title = "Princes Street",
                 summary = "Due to road works buses are being diverted from Princes Street.",
                 affectedServices = null,
-                url = "https://some.url",
-                showMoreDetailsButton = true
+                moreDetails = UiMoreDetails(url = "https://some.url")
             ),
             dateFormat = DateFormat.getDateTimeInstance(),
             modifier = Modifier.padding(16.dp),
@@ -228,8 +227,7 @@ private fun DiversionItemNoMoreDetailsButtonPreview() {
                 title = "Princes Street",
                 summary = "Due to road works buses are being diverted from Princes Street.",
                 affectedServices = null,
-                url = "https://some.url",
-                showMoreDetailsButton = false
+                moreDetails = null
             ),
             dateFormat = DateFormat.getDateTimeInstance(),
             modifier = Modifier.padding(16.dp),

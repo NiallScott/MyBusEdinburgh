@@ -31,6 +31,7 @@ import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.updates.IncidentServiceUpdate
 import uk.org.rivernile.android.bustracker.core.updates.PlannedServiceUpdate
 import uk.org.rivernile.android.bustracker.core.updates.ServiceUpdate
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiMoreDetails
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import kotlin.test.Test
@@ -78,8 +79,7 @@ class UiDiversionKtTest {
     fun toDiversionsOrNullReturnsListWithItemWhenItemIsPlanned() {
         val expected = listOf(
             createUiDiversion(
-                url = "https://google.com",
-                showMoreDetailsButton = true
+                moreDetails = UiMoreDetails(url = "https://google.com")
             )
         )
 
@@ -100,8 +100,7 @@ class UiDiversionKtTest {
     fun toDiversionsOrNullReturnsListWithItemWhenItemIsPlannedAndUrlIsNull() {
         val expected = listOf(
             createUiDiversion(
-                url = null,
-                showMoreDetailsButton = false
+                moreDetails = null
             )
         )
 
@@ -122,8 +121,7 @@ class UiDiversionKtTest {
     fun toDiversionsOrNullReturnsListWithItemWhenItemIsPlannedAndUrlIsEmpty() {
         val expected = listOf(
             createUiDiversion(
-                url = null,
-                showMoreDetailsButton = false
+                moreDetails = null
             )
         )
 
@@ -155,8 +153,7 @@ class UiDiversionKtTest {
     }
 
     private fun createUiDiversion(
-        url: String?,
-        showMoreDetailsButton: Boolean
+        moreDetails: UiMoreDetails?
     ): UiDiversion {
         return UiDiversion(
             id = "id",
@@ -183,8 +180,7 @@ class UiDiversionKtTest {
                     )
                 )
             ),
-            url = url,
-            showMoreDetailsButton = showMoreDetailsButton
+            moreDetails = moreDetails
         )
     }
 
