@@ -151,7 +151,7 @@ dependencies {
     implementation(project(":core:services-android"))
     implementation(project(":core:servicepoints"))
     implementation(project(":core:servicestops"))
-    implementation(project(":core:time"))
+    implementation(project(":core:time-android"))
     implementation(project(":core:twitter"))
     implementation(project(":database:busstop-db-android"))
     implementation(project(":endpoint:tracker-endpoint"))

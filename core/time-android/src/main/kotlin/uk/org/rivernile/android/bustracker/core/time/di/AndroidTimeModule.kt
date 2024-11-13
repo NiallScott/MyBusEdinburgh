@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,18 +24,21 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.kapt)
-}
+package uk.org.rivernile.android.bustracker.core.time.di
 
-kotlin {
-    explicitApi()
-}
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 
-dependencies {
-
-    // Dagger 2
-    implementation(libs.dagger.core)
-    kapt(libs.dagger.compiler)
-}
+/**
+ * The Android-specific Hilt module for time.
+ *
+ * @author Niall Scott
+ */
+@InstallIn(SingletonComponent::class)
+@Module(
+    includes = [
+        TimeModule::class
+    ]
+)
+internal interface AndroidTimeModule

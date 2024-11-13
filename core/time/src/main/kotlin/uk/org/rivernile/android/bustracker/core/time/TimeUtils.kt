@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.core.time
 
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * This class is a proxy through to framework time methods to allow easy mocking of time in unit
@@ -35,12 +34,18 @@ import javax.inject.Singleton
  *
  * @author Niall Scott
  */
-@Singleton
-class TimeUtils @Inject constructor() {
+public interface TimeUtils {
 
     /**
-     * The current wall time in milliseconds with the UNIX epoch. This merely proxies through to
-     * [System.currentTimeMillis].
+     * The current wall time in milliseconds since the UNIX epoch.
      */
-    val currentTimeMills get() = System.currentTimeMillis()
+    public val currentTimeMills: Long
+}
+
+/**
+ * This is the real implementation of [TimeUtils].
+ */
+internal class RealTimeUtils @Inject constructor() : TimeUtils {
+
+    override val currentTimeMills get() = System.currentTimeMillis()
 }

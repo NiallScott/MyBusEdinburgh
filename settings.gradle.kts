@@ -80,6 +80,7 @@ include(
     ":core:servicepoints",
     ":core:servicestops",
     ":core:time",
+    ":core:time-android",
     ":core:twitter",
     ":core:work-android",
     ":database:busstop-db-android",

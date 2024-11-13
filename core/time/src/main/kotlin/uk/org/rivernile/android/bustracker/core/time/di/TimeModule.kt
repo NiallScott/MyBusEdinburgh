@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,18 +24,30 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.kapt)
-}
+package uk.org.rivernile.android.bustracker.core.time.di
 
-kotlin {
-    explicitApi()
-}
+import dagger.Binds
+import dagger.Module
+import uk.org.rivernile.android.bustracker.core.time.RealTimeUtils
+import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 
-dependencies {
+/**
+ * A module providing dependencies related to time.
+ *
+ * @author Niall Scott
+ */
+@Module(
+    includes = [
+        TimeModule.Bindings::class
+    ]
+)
+public class TimeModule {
 
-    // Dagger 2
-    implementation(libs.dagger.core)
-    kapt(libs.dagger.compiler)
+    @Module
+    internal interface Bindings {
+
+        @Suppress("unused")
+        @Binds
+        fun bindTimeUtils(realTimeUtils: RealTimeUtils): TimeUtils
+    }
 }
