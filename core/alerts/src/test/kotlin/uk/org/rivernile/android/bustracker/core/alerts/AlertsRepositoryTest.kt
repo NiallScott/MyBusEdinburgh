@@ -41,7 +41,7 @@ import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertT
 import uk.org.rivernile.android.bustracker.core.database.settings.alerts.AlertsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.alerts.ArrivalAlertEntity
 import uk.org.rivernile.android.bustracker.core.database.settings.alerts.ProximityAlertEntity
-import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
+import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import kotlin.test.BeforeTest
 import kotlin.test.Test

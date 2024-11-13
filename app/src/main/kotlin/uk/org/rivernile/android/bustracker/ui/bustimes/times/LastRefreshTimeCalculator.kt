@@ -31,7 +31,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
-import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
+import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 import javax.inject.Inject
 import kotlin.coroutines.coroutineContext
 

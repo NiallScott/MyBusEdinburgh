@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,7 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.ErrorMapper
-import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
+import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 import uk.org.rivernile.edinburghbustrackerapi.bustimes.BusTimes
 import javax.inject.Inject
 
@@ -43,7 +43,8 @@ import javax.inject.Inject
 internal class LiveTimesMapper @Inject constructor(
     private val errorMapper: ErrorMapper,
     private val serviceMapper: ServiceMapper,
-    private val timeUtils: TimeUtils) {
+    private val timeUtils: TimeUtils
+) {
 
     /**
      * Given a [BusTimes] response object from the tracker service, map this in to our app-specific

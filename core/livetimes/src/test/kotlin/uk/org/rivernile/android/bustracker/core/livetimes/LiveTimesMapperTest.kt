@@ -33,7 +33,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
-import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
+import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 import java.net.UnknownHostException
 import kotlin.test.BeforeTest
 import kotlin.test.Test

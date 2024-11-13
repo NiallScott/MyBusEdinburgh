@@ -34,7 +34,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
+import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

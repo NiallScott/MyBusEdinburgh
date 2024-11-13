@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -48,7 +48,7 @@ import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatch
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
 import uk.org.rivernile.android.bustracker.core.twitter.LatestTweetsResult
 import uk.org.rivernile.android.bustracker.core.twitter.TwitterRepository
-import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
+import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 import uk.org.rivernile.android.bustracker.utils.Event
 import javax.inject.Inject
 
