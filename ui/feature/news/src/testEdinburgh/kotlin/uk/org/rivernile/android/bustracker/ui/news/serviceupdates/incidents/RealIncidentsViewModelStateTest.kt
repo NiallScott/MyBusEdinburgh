@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,11 +33,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 /**
- * Tests for [IncidentsViewModelState].
+ * Tests for [RealIncidentsViewModelState].
  *
  * @author Niall Scott
  */
-class IncidentsViewModelStateTest {
+class RealIncidentsViewModelStateTest {
 
     @Test
     fun actionFlowEmitsNullByDefault() = runTest {
@@ -64,7 +64,7 @@ class IncidentsViewModelStateTest {
         }
     }
 
-    private fun createState(): IncidentsViewModelState {
-        return IncidentsViewModelState()
+    private fun createState(): RealIncidentsViewModelState {
+        return RealIncidentsViewModelState()
     }
 }

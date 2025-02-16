@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2024 Niall 'Rivernile' Scott
+  ~ Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
   ~
   ~ This software is provided 'as-is', without any express or implied
   ~ warranty.  In no event will the authors or contributors be held liable for
@@ -37,6 +37,15 @@
     <string name="serviceupdates_error_server">There was a server issue while trying to load incidents</string>
     <string name="serviceupdates_item_heading_affected_services">Affected services</string>
     <string name="serviceupdates_item_btn_more_details">More details</string>
+    <string name="serviceupdates_last_updated">Last updated %s</string> <!-- %s = last updated text, e.g. "5 minutes ago." -->
+    <string name="serviceupdates_last_updated_never">never</string>
+    <string name="serviceupdates_last_updated_now">now</string>
+    <string name="serviceupdates_last_updated_greaterthanhour">more than 1 hour ago</string>
+    <plurals name="serviceupdates_last_updated_minsago">
+        <item quantity="one">1 minute ago</item>
+        <item quantity="other">%d minutes ago</item> <!-- %d = number of minutes. -->
+    </plurals>
+    <string name="serviceupdates_no_connectivity_content_description">No internet connectivity</string>
 
     <!-- Incident strings -->
     <string name="serviceupdates_item_last_updated">Last updated %s</string>

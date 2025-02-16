@@ -26,30 +26,20 @@
 
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
-import androidx.compose.runtime.Immutable
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIncident
 
 /**
- * This sealed interface represents the different possible types of content which can be displayed.
+ * This sealed interface represents the different presentation states for service updates.
  *
  * @param T The type of [UiServiceUpdate] to be displayed.
  * @author Niall Scott
  */
-internal sealed interface UiContent<out T : UiServiceUpdate> {
-
-    /**
-     * Is the content current refreshing?
-     */
-    val isRefreshing: Boolean
+internal sealed interface ServiceUpdatesDisplay<out T : UiServiceUpdate> {
 
     /**
      * Show the 'in progress' layout.
      */
-    @Immutable
-    data object InProgress : UiContent<Nothing> {
-
-        override val isRefreshing get() = true
-    }
+    data object InProgress : ServiceUpdatesDisplay<Nothing>
 
     /**
      * Show a happy-path content layout, which is a [List] of [UiIncident] items.
@@ -58,47 +48,23 @@ internal sealed interface UiContent<out T : UiServiceUpdate> {
      * @property isRefreshing Is the content currently refreshing?
      * @property items The [List] of [UiIncident] items to show.
      * @property error An optional error to show if there's old content to show but an error
+     * occurred on the latest load.
+     * @property loadTimeMillis The time the populated data was loaded at.
      * occurred on this reload attempt.
-     * @property hasInternetConnectivity Does the device have internet connectivity?
-     * @property lastRefreshTime The last refresh time to display to the user.
      */
-    @Immutable
     data class Populated<out T : UiServiceUpdate>(
-        override val isRefreshing: Boolean,
+        val isRefreshing: Boolean,
         val items: List<T>,
         val error: UiError?,
-        val hasInternetConnectivity: Boolean,
-        val lastRefreshTime: UiLastRefreshed
-    ) : UiContent<T>
+        val loadTimeMillis: Long
+    ) : ServiceUpdatesDisplay<T>
 
     /**
      * Show an error layout, based on the given [error].
      *
      * @property error The type of error which occurred.
      */
-    @Immutable
     data class Error(
         val error: UiError
-    ) : UiContent<Nothing> {
-
-        override val isRefreshing get() = false
-    }
+    ) : ServiceUpdatesDisplay<Nothing>
 }
-
-internal fun toUiContentInProgress() = UiContent.InProgress
-
-internal fun <T : UiServiceUpdate> ServiceUpdatesDisplay.Populated<T>.toUiContentPopulated(
-    hasInternetConnectivity: Boolean,
-    lastRefreshTime: UiLastRefreshed
-) = UiContent.Populated(
-    isRefreshing = isRefreshing,
-    items = items,
-    error = error,
-    hasInternetConnectivity = hasInternetConnectivity,
-    lastRefreshTime = lastRefreshTime
-)
-
-internal fun ServiceUpdatesDisplay.Error.toUiContentError() =
-    UiContent.Error(
-        error = error
-    )

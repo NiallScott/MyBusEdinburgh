@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,6 +45,7 @@ import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ServiceUpdatesScreen
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiContent
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiError
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiLastRefreshed
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiMoreDetails
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
@@ -229,7 +230,9 @@ private fun DiversionsScreenContentPreview() {
                 content = UiContent.Populated(
                     isRefreshing = false,
                     items = diversions,
-                    error = null
+                    error = null,
+                    hasInternetConnectivity = true,
+                    lastRefreshTime = UiLastRefreshed.Minutes(minutes = 5)
                 )
             ),
             onRefresh = { },
@@ -287,7 +290,6 @@ private fun DiversionsScreenEmptyErrorPreview() {
         DiversionsScreen(
             state = UiDiversionsState(
                 content = UiContent.Error(
-                    isRefreshing = false,
                     error = UiError.EMPTY
                 )
             ),

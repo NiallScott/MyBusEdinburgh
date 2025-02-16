@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,6 +37,7 @@ dependencies {
     implementation(project(":core:connectivity"))
     implementation(project(":core:coroutines"))
     implementation(project(":core:logging"))
+    implementation(project(":core:time"))
 
     // Dagger 2
     implementation(libs.dagger.core)
@@ -57,6 +58,7 @@ dependencies {
     // Test dependencies
     testImplementation(testFixtures(project(":core:connectivity")))
     testImplementation(testFixtures(project(":core:logging")))
+    testImplementation(testFixtures(project(":core:time")))
     testImplementation(libs.coroutines.test)
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)

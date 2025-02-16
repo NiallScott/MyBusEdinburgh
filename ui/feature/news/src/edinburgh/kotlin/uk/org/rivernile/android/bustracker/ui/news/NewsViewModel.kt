@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -42,8 +42,8 @@ import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIn
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIncidentAction
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIncidentsState
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiContent
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiContentFetcher
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiServiceUpdate
-import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiServiceUpdatesFetcher
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.DiversionsViewModelState
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.UiDiversion
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.UiDiversionAction
@@ -55,7 +55,7 @@ import javax.inject.Inject
  *
  * @param incidentsViewModelState Used to hold state for incidents.
  * @param diversionsViewModelState Used to hold state for diversions.
- * @param serviceUpdatesFetcher Used to fetch Service Updates data.
+ * @param contentFetcher Used to fetch the content.
  * @param defaultCoroutineDispatcher The default [CoroutineDispatcher] to run coroutines on.
  * @param viewModelCoroutineScope The [CoroutineScope] to launch coroutines on.
  * @author Niall Scott
@@ -64,10 +64,10 @@ import javax.inject.Inject
 internal class NewsViewModel @Inject constructor(
     private val incidentsViewModelState: IncidentsViewModelState,
     private val diversionsViewModelState: DiversionsViewModelState,
-    private val serviceUpdatesFetcher: UiServiceUpdatesFetcher,
+    private val contentFetcher: UiContentFetcher,
     @ForDefaultDispatcher defaultCoroutineDispatcher: CoroutineDispatcher,
     @ForViewModelCoroutineScope viewModelCoroutineScope: CoroutineScope
-) : ViewModel(viewModelCoroutineScope, serviceUpdatesFetcher) {
+) : ViewModel(viewModelCoroutineScope, contentFetcher) {
 
     /**
      * A [kotlinx.coroutines.flow.Flow] which emits the latest [UiState].
@@ -85,7 +85,7 @@ internal class NewsViewModel @Inject constructor(
      * Reload data from their data sources.
      */
     fun onRefresh() {
-        serviceUpdatesFetcher.refresh()
+        contentFetcher.refresh()
     }
 
     /**
@@ -124,11 +124,11 @@ internal class NewsViewModel @Inject constructor(
         diversionsViewModelState.action = null
     }
 
-    private val uiIncidentsState get() = serviceUpdatesFetcher
+    private val uiIncidentsState get() = contentFetcher
         .incidentsContentFlow
         .combine(incidentsViewModelState.actionFlow, ::UiIncidentsState)
 
-    private val uiDiversionsState get() = serviceUpdatesFetcher
+    private val uiDiversionsState get() = contentFetcher
         .diversionsContentFlow
         .combine(diversionsViewModelState.actionFlow, ::UiDiversionsState)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,27 +29,35 @@ package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 /**
- * This class holds ViewModel state for incidents.
+ * This holds ViewModel state for incidents.
  *
  * @author Niall Scott
  */
-@ViewModelScoped
-internal class IncidentsViewModelState @Inject constructor() {
+internal interface IncidentsViewModelState {
 
     /**
      * This [Flow] emits [UiIncidentAction]s to be performed, usually in response to the user's
      * actions.
      */
-    val actionFlow: Flow<UiIncidentAction?> get() = _actionFlow
-    private val _actionFlow = MutableStateFlow<UiIncidentAction?>(null)
+    val actionFlow: Flow<UiIncidentAction?>
 
     /**
      * The current [UiIncidentAction] in progress.
      */
     var action: UiIncidentAction?
+}
+
+@ViewModelScoped
+internal class RealIncidentsViewModelState @Inject constructor() : IncidentsViewModelState {
+
+    override val actionFlow: Flow<UiIncidentAction?> get() = _actionFlow.asStateFlow()
+    private val _actionFlow = MutableStateFlow<UiIncidentAction?>(null)
+
+    override var action: UiIncidentAction?
         get() = _actionFlow.value
         set(value) {
             _actionFlow.value = value

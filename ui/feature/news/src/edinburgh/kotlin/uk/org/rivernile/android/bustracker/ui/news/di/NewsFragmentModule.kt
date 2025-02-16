@@ -24,42 +24,35 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions
+package uk.org.rivernile.android.bustracker.ui.news.di
 
-import dagger.hilt.android.scopes.ViewModelScoped
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import javax.inject.Inject
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.FragmentComponent
+import uk.org.rivernile.android.bustracker.ui.news.AndroidNewsActionLauncher
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.DiversionsActionLauncher
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.IncidentsActionLauncher
 
 /**
- * This holds ViewModel state for diversions.
+ * A [Module] which provides dependencies for
+ * [uk.org.rivernile.android.bustracker.ui.news.NewsFragment].
  *
  * @author Niall Scott
  */
-internal interface DiversionsViewModelState {
+@InstallIn(FragmentComponent::class)
+@Module
+internal interface NewsFragmentModule {
 
-    /**
-     * This [Flow] emits [UiDiversionAction]s to be performed, usually in response to the user's
-     * actions.
-     */
-    val actionFlow: Flow<UiDiversionAction?>
+    @Suppress("unused")
+    @Binds
+    fun bindDiversionsActionLauncher(
+        androidNewsActionLauncher: AndroidNewsActionLauncher
+    ): DiversionsActionLauncher
 
-    /**
-     * The current [UiDiversionAction] in progress.
-     */
-    var action: UiDiversionAction?
-}
-
-@ViewModelScoped
-internal class RealDiversionsViewModelState @Inject constructor() : DiversionsViewModelState {
-
-    override val actionFlow: Flow<UiDiversionAction?> get() = _actionFlow.asStateFlow()
-    private val _actionFlow = MutableStateFlow<UiDiversionAction?>(null)
-
-    override var action: UiDiversionAction?
-        get() = _actionFlow.value
-        set(value) {
-            _actionFlow.value = value
-        }
+    @Suppress("unused")
+    @Binds
+    fun bindIncidentsActionLauncher(
+        androidNewsActionLauncher: AndroidNewsActionLauncher
+    ): IncidentsActionLauncher
 }

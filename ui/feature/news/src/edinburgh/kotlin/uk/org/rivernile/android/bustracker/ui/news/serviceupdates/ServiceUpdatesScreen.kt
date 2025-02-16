@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,11 +29,17 @@ package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 import android.content.res.Configuration
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
@@ -52,8 +58,10 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import uk.org.rivernile.android.bustracker.ui.news.R
@@ -86,8 +94,8 @@ internal fun <T : UiServiceUpdate> ServiceUpdatesScreen(
     ) {
         when (content) {
             is UiContent.InProgress -> EmptyProgress()
-            is UiContent.Populated -> ItemsList(
-                items = content.items,
+            is UiContent.Populated -> PopulatedContent(
+                content = content,
                 modifier = Modifier
                     .fillMaxSize()
                     .nestedScroll(nestedScrollInterop),
@@ -104,12 +112,75 @@ internal fun <T : UiServiceUpdate> ServiceUpdatesScreen(
 }
 
 @Composable
+private fun <T : UiServiceUpdate> PopulatedContent(
+    content: UiContent.Populated<T>,
+    modifier: Modifier = Modifier,
+    itemContent: @Composable LazyItemScope.(item: T) -> Unit
+) {
+    Column(
+        modifier = modifier
+    ) {
+        ContentHeaderBar(
+            lastRefreshed = content.lastRefreshTime,
+            hasInternetConnectivity = content.hasInternetConnectivity,
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 48.dp)
+        )
+
+        ItemsList(
+            items = content.items,
+            modifier = Modifier.fillMaxSize(),
+            itemContent = itemContent
+        )
+    }
+}
+
+@Composable
 private fun EmptyProgress(
     modifier: Modifier = Modifier
 ) {
     CircularProgressIndicator(
         modifier = modifier
     )
+}
+
+@Composable
+private fun ContentHeaderBar(
+    lastRefreshed: UiLastRefreshed,
+    hasInternetConnectivity: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val paddingDefault = dimensionResource(id = Rcore.dimen.padding_default)
+    val paddingDouble = dimensionResource(id = Rcore.dimen.padding_double)
+
+    Row(
+        modifier = modifier
+            .background(color = MaterialTheme.colorScheme.inverseSurface)
+            .padding(
+                top = paddingDefault,
+                bottom = paddingDefault,
+                start = paddingDouble,
+                end = paddingDouble
+            ),
+        horizontalArrangement = Arrangement.spacedBy(paddingDouble),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ContentHeaderBarLastRefreshedText(
+            lastRefreshed = lastRefreshed,
+            modifier = Modifier.weight(1f)
+        )
+
+        if (hasInternetConnectivity) {
+            Spacer(
+                modifier = Modifier.size(24.dp)
+            )
+        } else {
+            ContentHeaderBarNoInternetConnectivityIcon(
+                modifier = Modifier.size(24.dp)
+            )
+        }
+    }
 }
 
 @Composable
@@ -170,19 +241,88 @@ private fun Error(
         ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(
-            painter = painterResource(id = iconRes),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary
+        ErrorIcon(
+            iconRes = iconRes
         )
 
-        Text(
+        ErrorText(
             text = stringResource(id = titleRes),
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.bodyLarge
         )
     }
+}
+
+@Composable
+private fun ContentHeaderBarLastRefreshedText(
+    lastRefreshed: UiLastRefreshed,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = getLastRefreshedString(lastRefreshed),
+        modifier = modifier,
+        color = MaterialTheme.colorScheme.inverseOnSurface,
+        overflow = TextOverflow.Ellipsis,
+        maxLines = 1,
+        style = MaterialTheme.typography.bodyMedium
+    )
+}
+
+@Composable
+private fun ContentHeaderBarNoInternetConnectivityIcon(
+    modifier: Modifier = Modifier
+) {
+    Icon(
+        painter = painterResource(id = R.drawable.ic_error_cloud_off),
+        contentDescription = stringResource(
+            id = R.string.serviceupdates_no_connectivity_content_description
+        ),
+        modifier = modifier,
+        tint = MaterialTheme.colorScheme.inverseOnSurface
+    )
+}
+
+@Composable
+private fun ErrorIcon(
+    @DrawableRes iconRes: Int,
+    modifier: Modifier = Modifier
+) {
+    Icon(
+        painter = painterResource(id = iconRes),
+        contentDescription = null,
+        modifier = modifier,
+        tint = MaterialTheme.colorScheme.primary
+    )
+}
+
+@Composable
+private fun ErrorText(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = text,
+        modifier = modifier,
+        textAlign = TextAlign.Center,
+        color = MaterialTheme.colorScheme.onSurface,
+        overflow = TextOverflow.Ellipsis,
+        style = MaterialTheme.typography.bodyLarge
+    )
+}
+
+@Composable
+private fun getLastRefreshedString(lastRefreshed: UiLastRefreshed): String {
+    val timeComponent = when (lastRefreshed) {
+        is UiLastRefreshed.Never -> stringResource(R.string.serviceupdates_last_updated_never)
+        is UiLastRefreshed.Now -> stringResource(R.string.serviceupdates_last_updated_now)
+        is UiLastRefreshed.Minutes -> pluralStringResource(
+            R.plurals.serviceupdates_last_updated_minsago,
+            lastRefreshed.minutes,
+            lastRefreshed.minutes
+        )
+        is UiLastRefreshed.MoreThanOneHour ->
+            stringResource(R.string.serviceupdates_last_updated_greaterthanhour)
+    }
+
+    return stringResource(R.string.serviceupdates_last_updated, timeComponent)
 }
 
 @Preview(
@@ -204,6 +344,31 @@ private fun EmptyProgressPreview() {
     MyBusTheme {
         EmptyProgress()
     }
+}
+
+@Preview(
+    name = "Service Updates - content header bar - light",
+    group = "Service Updates - content header bar",
+    showBackground = true,
+    backgroundColor = 0xFFFFFFFF,
+    uiMode = Configuration.UI_MODE_NIGHT_NO
+)
+@Preview(
+    name = "Service Updates - content header bar - dark",
+    group = "Service Updates - content header bar",
+    showBackground = true,
+    backgroundColor = 0xFF000000,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+private fun ContentHeaderBarPreview() {
+    ContentHeaderBar(
+        lastRefreshed = UiLastRefreshed.Minutes(minutes = 5),
+        hasInternetConnectivity = false,
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+    )
 }
 
 @Preview(

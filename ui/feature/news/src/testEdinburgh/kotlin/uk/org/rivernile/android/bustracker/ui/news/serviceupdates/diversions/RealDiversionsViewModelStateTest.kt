@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,11 +33,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 /**
- * Tests for [DiversionsViewModelState].
+ * Tests for [RealDiversionsViewModelState].
  *
  * @author Niall Scott
  */
-class DiversionsViewModelStateTest {
+class RealDiversionsViewModelStateTest {
 
     @Test
     fun actionFlowEmitsNullByDefault() = runTest {
@@ -64,7 +64,7 @@ class DiversionsViewModelStateTest {
         }
     }
 
-    private fun createState(): DiversionsViewModelState {
-        return DiversionsViewModelState()
+    private fun createState(): RealDiversionsViewModelState {
+        return RealDiversionsViewModelState()
     }
 }

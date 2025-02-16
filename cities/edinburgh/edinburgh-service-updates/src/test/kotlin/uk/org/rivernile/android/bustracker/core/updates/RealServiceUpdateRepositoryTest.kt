@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -98,14 +98,23 @@ class RealServiceUpdateRepositoryTest {
         val repository = createServiceUpdateRepository(
             serviceUpdatesEndpoint = FakeServiceUpdatesEndpoint(
                 onGetServiceUpdates = {
-                    ServiceUpdatesResponse.Success(null)
+                    ServiceUpdatesResponse.Success(
+                        serviceUpdates = null,
+                        loadTimeMillis = 123L
+                    )
                 }
             )
         )
 
         repository.serviceUpdatesFlow.test {
             assertEquals(ServiceUpdatesResult.InProgress, awaitItem())
-            assertEquals(ServiceUpdatesResult.Success(null), awaitItem())
+            assertEquals(
+                ServiceUpdatesResult.Success(
+                    serviceUpdates = null,
+                    loadTimeMillis = 123L
+                ),
+                awaitItem()
+            )
             awaitComplete()
         }
     }

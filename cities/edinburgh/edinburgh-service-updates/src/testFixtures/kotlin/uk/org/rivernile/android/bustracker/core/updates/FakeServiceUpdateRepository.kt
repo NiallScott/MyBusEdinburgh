@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,42 +24,20 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions
+package uk.org.rivernile.android.bustracker.core.updates
 
-import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import javax.inject.Inject
 
 /**
- * This holds ViewModel state for diversions.
+ * A fake [ServiceUpdateRepository] for testing.
  *
  * @author Niall Scott
  */
-internal interface DiversionsViewModelState {
+class FakeServiceUpdateRepository(
+    private val onServiceUpdatesFlow: () -> Flow<ServiceUpdatesResult> =
+        { throw NotImplementedError() }
+) : ServiceUpdateRepository {
 
-    /**
-     * This [Flow] emits [UiDiversionAction]s to be performed, usually in response to the user's
-     * actions.
-     */
-    val actionFlow: Flow<UiDiversionAction?>
-
-    /**
-     * The current [UiDiversionAction] in progress.
-     */
-    var action: UiDiversionAction?
-}
-
-@ViewModelScoped
-internal class RealDiversionsViewModelState @Inject constructor() : DiversionsViewModelState {
-
-    override val actionFlow: Flow<UiDiversionAction?> get() = _actionFlow.asStateFlow()
-    private val _actionFlow = MutableStateFlow<UiDiversionAction?>(null)
-
-    override var action: UiDiversionAction?
-        get() = _actionFlow.value
-        set(value) {
-            _actionFlow.value = value
-        }
+    override val serviceUpdatesFlow: Flow<ServiceUpdatesResult>
+        get() = onServiceUpdatesFlow()
 }

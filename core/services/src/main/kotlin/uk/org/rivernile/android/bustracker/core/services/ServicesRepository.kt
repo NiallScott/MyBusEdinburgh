@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,19 +36,8 @@ import javax.inject.Inject
 
 /**
  * This repository is used to access services data.
- *
- * @param serviceDao The DAO to access the services data store.
- * @param serviceColourOverride An implementation which may override the loaded service colours with
- * a hard-wired implementation. The actual implementation will most likely be defined per product
- * flavour.
- * @param serviceColoursGenerator An implementation which generates colours for a service.
- * @author Niall Scott
  */
-class ServicesRepository @Inject internal constructor(
-    private val serviceDao: ServiceDao,
-    private val serviceColourOverride: ServiceColourOverride?,
-    private val serviceColoursGenerator: ServiceColoursGenerator
-) {
+interface ServicesRepository {
 
     /**
      * Get a [Flow] which returns a [Map] of service names to [ServiceColours] for the service, and
@@ -58,7 +47,60 @@ class ServicesRepository @Inject internal constructor(
      * services will be returned.
      * @return The [Flow] which emits the service-colour mapping.
      */
-    fun getColoursForServicesFlow(services: Set<String>?): Flow<Map<String, ServiceColours>?> {
+    fun getColoursForServicesFlow(
+        services: Set<String>? = null
+    ): Flow<Map<String, ServiceColours>?>
+
+    /**
+     * Get a [Flow] which emits a [List] of [ServiceDetails] for services which stop at the given
+     * [stopCode]. This [List] will return items already sorted.
+     *
+     * @param stopCode The stop code to get a [List] of [ServiceDetails] for.
+     * @return A [Flow] which emits the service details, or emits `null` when no services could be
+     * found or some other error occurred obtaining the services.
+     */
+    fun getServiceDetailsFlow(stopCode: String): Flow<List<ServiceDetails>?>
+
+    /**
+     * A [Flow] which emits ordered [List]s of [ServiceWithColour] for all known services.
+     */
+    val allServiceNamesWithColourFlow: Flow<List<ServiceWithColour>?>
+
+    /**
+     * Get a [Flow] which emits ordered [List]s of [ServiceWithColour] for services which stop at
+     * the given [stopCode].
+     *
+     * @param stopCode The stop code to get services for.
+     * @return A [Flow] which emits ordered [List]s of [ServiceWithColour] for services which stop
+     * at the given [stopCode].
+     */
+    fun getServiceNamesWithColourFlow(stopCode: String): Flow<List<ServiceWithColour>?>
+
+    /**
+     * This [Flow] emits whether there are known services.
+     */
+    val hasServicesFlow: Flow<Boolean>
+}
+
+/**
+ * This repository is used to access services data.
+ *
+ * @param serviceDao The DAO to access the services data store.
+ * @param serviceColourOverride An implementation which may override the loaded service colours with
+ * a hard-wired implementation. The actual implementation will most likely be defined per product
+ * flavour.
+ * @param serviceColoursGenerator An implementation which generates colours for a service.
+ * @author Niall Scott
+ */
+internal class RealServicesRepository @Inject constructor(
+    private val serviceDao: ServiceDao,
+    private val serviceColourOverride: ServiceColourOverride?,
+    private val serviceColoursGenerator: ServiceColoursGenerator
+) : ServicesRepository {
+
+    override fun getColoursForServicesFlow(
+        services: Set<String>?
+    ): Flow<Map<String, ServiceColours>?> {
         val initialResults = services
             ?.ifEmpty { null }
             ?.associateWith<String, Int?> { null }
@@ -74,43 +116,21 @@ class ServicesRepository @Inject internal constructor(
             }
     }
 
-    /**
-     * Get a [Flow] which emits a [List] of [ServiceDetails] for services which stop at the given
-     * [stopCode]. This [List] will return items already sorted.
-     *
-     * @param stopCode The stop code to get a [List] of [ServiceDetails] for.
-     * @return A [Flow] which emits the service details, or emits `null` when no services could be
-     * found or some other error occurred obtaining the services.
-     */
-    fun getServiceDetailsFlow(stopCode: String): Flow<List<ServiceDetails>?> {
+    override fun getServiceDetailsFlow(stopCode: String): Flow<List<ServiceDetails>?> {
         return serviceDao.getServiceDetailsFlow(stopCode)
             .map(this::mapToServiceDetailsList)
     }
 
-    /**
-     * A [Flow] which emits ordered [List]s of [ServiceWithColour] for all known services.
-     */
-    val allServiceNamesWithColourFlow: Flow<List<ServiceWithColour>?> get() =
+    override val allServiceNamesWithColourFlow: Flow<List<ServiceWithColour>?> get() =
         serviceDao.allServiceNamesWithColourFlow
             .map(this::mapToServicesWithColour)
 
-    /**
-     * Get a [Flow] which emits ordered [List]s of [ServiceWithColour] for services which stop at
-     * the given [stopCode].
-     *
-     * @param stopCode The stop code to get services for.
-     * @return A [Flow] which emits ordered [List]s of [ServiceWithColour] for services which stop
-     * at the given [stopCode].
-     */
-    fun getServiceNamesWithColourFlow(stopCode: String): Flow<List<ServiceWithColour>?> {
+    override fun getServiceNamesWithColourFlow(stopCode: String): Flow<List<ServiceWithColour>?> {
         return serviceDao.getServiceNamesWithColourFlow(stopCode)
             .map(this::mapToServicesWithColour)
     }
 
-    /**
-     * This [Flow] emits whether there are known services.
-     */
-    val hasServicesFlow: Flow<Boolean> get() =
+    override val hasServicesFlow: Flow<Boolean> get() =
         serviceDao.serviceCountFlow
             .map { count ->
                 count?.let { it > 0 } ?: false

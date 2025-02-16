@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,6 +39,8 @@ import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.log.FakeExceptionLogger
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
 import uk.org.rivernile.android.bustracker.core.networking.FakeConnectivityRepository
+import uk.org.rivernile.android.bustracker.core.time.FakeTimeUtils
+import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -145,6 +147,9 @@ class LothianServiceUpdatesEndpointTest {
                 onGetServiceUpdates = {
                     Response.success(responseBody)
                 }
+            ),
+            timeUtils = FakeTimeUtils(
+                onGetCurrentTimeMillis = { 123L }
             )
         )
         val serviceUpdates = listOf(
@@ -161,7 +166,13 @@ class LothianServiceUpdatesEndpointTest {
 
         val result = endpoint.getServiceUpdates()
 
-        assertEquals(ServiceUpdatesResponse.Success(serviceUpdates), result)
+        assertEquals(
+            ServiceUpdatesResponse.Success(
+                serviceUpdates = serviceUpdates,
+                loadTimeMillis = 123L
+            ),
+            result
+        )
     }
 
     private val connectivityRepositoryHasConnectivity get() = FakeConnectivityRepository(
@@ -171,11 +182,13 @@ class LothianServiceUpdatesEndpointTest {
     private fun createLothianServiceUpdatesEndpoint(
         lothianServiceUpdatesApi: LothianServiceUpdatesApi = FakeLothianServiceUpdatesApi(),
         connectivityRepository: ConnectivityRepository = FakeConnectivityRepository(),
+        timeUtils: TimeUtils = FakeTimeUtils(),
         exceptionLogger: ExceptionLogger = FakeExceptionLogger()
     ): LothianServiceUpdatesEndpoint {
         return LothianServiceUpdatesEndpoint(
             lothianServiceUpdatesApi = lothianServiceUpdatesApi,
             connectivityRepository = connectivityRepository,
+            timeUtils = timeUtils,
             exceptionLogger = exceptionLogger
         )
     }

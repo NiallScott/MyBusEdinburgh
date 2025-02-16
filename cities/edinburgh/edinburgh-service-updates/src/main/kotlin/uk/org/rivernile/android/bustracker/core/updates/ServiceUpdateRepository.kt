@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -62,7 +62,10 @@ internal class RealServiceUpdateRepository @Inject constructor(
 
         val result = when (val response = serviceUpdatesEndpoint.getServiceUpdates()) {
             is ServiceUpdatesResponse.Success ->
-                ServiceUpdatesResult.Success(response.serviceUpdates?.toServiceUpdatesOrNull())
+                ServiceUpdatesResult.Success(
+                    serviceUpdates = response.serviceUpdates?.toServiceUpdatesOrNull(),
+                    loadTimeMillis = response.loadTimeMillis
+                )
             is ServiceUpdatesResponse.Error.NoConnectivity ->
                 ServiceUpdatesResult.Error.NoConnectivity
             is ServiceUpdatesResponse.Error.Io -> ServiceUpdatesResult.Error.Io(response.throwable)

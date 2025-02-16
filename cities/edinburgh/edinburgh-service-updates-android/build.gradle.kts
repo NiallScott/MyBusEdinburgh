@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -55,6 +55,7 @@ dependencies {
     api(project(":cities:edinburgh:edinburgh-service-updates"))
     implementation(project(":cities:edinburgh:edinburgh-service-updates-endpoint"))
     implementation(project(":cities:edinburgh:lothian-api-android"))
+    implementation(project(":core:time-android"))
 
     // Hilt (dependency injection)
     implementation(libs.hilt.android)

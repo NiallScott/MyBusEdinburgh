@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,28 +24,32 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.kapt)
-    `java-test-fixtures`
-}
+package uk.org.rivernile.android.bustracker.core.services.di
 
-dependencies {
+import dagger.Binds
+import dagger.Module
+import uk.org.rivernile.android.bustracker.core.services.RealServicesRepository
+import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 
-    implementation(project(":core:coroutines"))
-    implementation(project(":database:busstop-db-core"))
+/**
+ * A Dagger [Module] for services.
+ *
+ * @author Niall Scott
+ */
+@Module(
+    includes = [
+        ServicesModule.Bindings::class
+    ]
+)
+class ServicesModule {
 
-    // Dagger 2
-    implementation(libs.dagger.core)
-    kapt(libs.dagger.compiler)
+    @Module
+    internal interface Bindings {
 
-    // Testing dependencies
-    testImplementation(testFixtures(project(":database:busstop-db-core")))
-    testImplementation(project(":testutils"))
-    testImplementation(libs.junit)
-    testImplementation(libs.coroutines.test)
-    testImplementation(libs.kotlin.test.junit)
-    testImplementation(libs.turbine)
-
-    testFixturesApi(libs.coroutines.core)
+        @Suppress("unused")
+        @Binds
+        fun bindServiceRepository(
+            realServicesRepository: RealServicesRepository
+        ): ServicesRepository
+    }
 }

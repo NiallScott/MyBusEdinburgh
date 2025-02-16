@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,6 +32,7 @@ import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.Servic
 import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdatesResponse
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
+import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 import javax.inject.Inject
 
 /**
@@ -39,12 +40,14 @@ import javax.inject.Inject
  *
  * @param lothianServiceUpdatesApi The Retrofit Lothian service updates API.
  * @param connectivityRepository Used to determine the connectivity state.
+ * @param timeUtils Used to get the current UNIX epoch time.
  * @param exceptionLogger Logs exceptions.
  * @author Niall Scott
  */
 internal class LothianServiceUpdatesEndpoint @Inject constructor(
     private val lothianServiceUpdatesApi: LothianServiceUpdatesApi,
     private val connectivityRepository: ConnectivityRepository,
+    private val timeUtils: TimeUtils,
     private val exceptionLogger: ExceptionLogger
 ) : ServiceUpdatesEndpoint {
 
@@ -55,7 +58,8 @@ internal class LothianServiceUpdatesEndpoint @Inject constructor(
 
                 if (response.isSuccessful) {
                     ServiceUpdatesResponse.Success(
-                        response.body()?.toServiceUpdatesOrNull()
+                        serviceUpdates = response.body()?.toServiceUpdatesOrNull(),
+                        loadTimeMillis = timeUtils.currentTimeMills
                     )
                 } else {
                     val error = "Status code = ${response.code()}; " +

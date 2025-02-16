@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,7 +45,7 @@ import kotlin.test.assertTrue
  *
  * @author Niall Scott
  */
-class ServicesRepositoryTest {
+class RealServicesRepositoryTest {
 
     @Test
     fun getColoursForServicesFlowWithNullOverrideAndNullServices() = runTest {
@@ -624,7 +624,7 @@ class ServicesRepositoryTest {
         serviceDao: ServiceDao = FakeServiceDao(),
         serviceColourOverride: ((String, Int?) -> Int?)? = { _, _ -> null },
         serviceColoursGenerator: (Int?) -> ServiceColours? = { null }
-    ): ServicesRepository {
+    ): RealServicesRepository {
         val serviceColourOverrideCallback = serviceColourOverride?.let {
             object : ServiceColourOverride {
                 override fun overrideServiceColour(serviceName: String, currentColour: Int?) =
@@ -632,7 +632,7 @@ class ServicesRepositoryTest {
             }
         }
 
-        return ServicesRepository(
+        return RealServicesRepository(
             serviceDao,
             serviceColourOverrideCallback,
             object : ServiceColoursGenerator {

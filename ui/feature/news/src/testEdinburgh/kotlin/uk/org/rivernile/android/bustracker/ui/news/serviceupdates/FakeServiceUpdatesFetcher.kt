@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,35 +24,31 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.news.di
+package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.FragmentComponent
-import uk.org.rivernile.android.bustracker.ui.news.AndroidNewsActionLauncher
-import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.DiversionsActionLauncher
-import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.IncidentsActionLauncher
+import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.updates.ServiceUpdatesResult
 
 /**
- * A [Module] which provides dependencies for
- * [uk.org.rivernile.android.bustracker.ui.news.NewsFragment].
+ * A fake [ServiceUpdatesFetcher] for testing.
  *
  * @author Niall Scott
  */
-@InstallIn(FragmentComponent::class)
-@Module
-internal interface NewsModule {
+internal class FakeServiceUpdatesFetcher(
+    private val onServiceUpdatesFlow: () -> Flow<ServiceUpdatesResult> =
+        { throw NotImplementedError() },
+    private val onRefresh: () -> Unit = { throw NotImplementedError() },
+    private val onClose: () -> Unit = { throw NotImplementedError() }
+) : ServiceUpdatesFetcher {
 
-    @Suppress("unused")
-    @Binds
-    fun bindDiversionsActionLauncher(
-        androidNewsActionLauncher: AndroidNewsActionLauncher
-    ): DiversionsActionLauncher
+    override val serviceUpdatesFlow: Flow<ServiceUpdatesResult>
+        get() = onServiceUpdatesFlow()
 
-    @Suppress("unused")
-    @Binds
-    fun bindIncidentsActionLauncher(
-        androidNewsActionLauncher: AndroidNewsActionLauncher
-    ): IncidentsActionLauncher
+    override fun refresh() {
+        onRefresh()
+    }
+
+    override fun close() {
+        onClose()
+    }
 }

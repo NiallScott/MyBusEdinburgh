@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,9 +39,12 @@ sealed interface ServiceUpdatesResponse {
      *
      * @property serviceUpdates The [ServiceUpdate]s [List]ing. This can be `null` or empty if there
      * are no updates.
+     * @property loadTimeMillis The time this data was loaded at, in milliseconds since the UNIX
+     * epoch.
      */
     data class Success(
-        val serviceUpdates: List<ServiceUpdate>?
+        val serviceUpdates: List<ServiceUpdate>?,
+        val loadTimeMillis: Long
     ) : ServiceUpdatesResponse
 
     /**
