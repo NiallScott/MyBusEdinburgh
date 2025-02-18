@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -68,7 +68,7 @@ class CircleTransform @Inject constructor() : Transformation {
         }
 
         val radius = size / 2f
-        val bitmap = Bitmap.createBitmap(size, size, source.config)
+        val bitmap = Bitmap.createBitmap(size, size, source.config!!)
         Canvas(bitmap).drawCircle(radius, radius, radius, paint)
         squaredBitmap.recycle()
 
