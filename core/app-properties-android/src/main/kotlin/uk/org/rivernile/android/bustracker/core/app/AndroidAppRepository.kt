@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,13 +46,15 @@ import javax.inject.Singleton
 internal class AndroidAppRepository @Inject constructor(
     private val context: Context,
     private val packageManager: PackageManager,
-    private val exceptionLogger: ExceptionLogger) : AppRepository {
+    private val exceptionLogger: ExceptionLogger
+) : AppRepository {
 
     override val appVersion get() = try {
         packageManager.getPackageInfoCompat(context.packageName, 0).let {
             AppVersion(
-                it.versionName,
-                PackageInfoCompat.getLongVersionCode(it))
+                versionName = it.versionName,
+                versionCode = PackageInfoCompat.getLongVersionCode(it)
+            )
         }
     } catch (e: PackageManager.NameNotFoundException) {
         exceptionLogger.log(e)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -203,7 +203,7 @@ private fun UiAboutItem.TwoLinesItem.captionText(dateFormat: DateFormat): String
     return when (this) {
         is UiAboutItem.TwoLinesItem.AppVersion -> stringResource(
             id = R.string.about_version_format,
-            versionName,
+            versionName ?: "null",
             versionCode
         )
         is UiAboutItem.TwoLinesItem.Author -> stringResource(id = R.string.app_author)
