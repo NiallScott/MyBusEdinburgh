@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,17 +36,15 @@ import java.io.File
  * @author Niall Scott
  */
 class FakeBusStopDatabaseRepository(
+    private val onReplaceDatabase: (File) -> Boolean = { throw NotImplementedError() },
     private val onDatabaseMetadataFlow:
-        () -> Flow<DatabaseMetadata?> = { throw NotImplementedError() }
+        () -> Flow<DatabaseMetadata?> = { throw NotImplementedError() },
+    private val onGetTopologyVersionId: () -> String? = { throw NotImplementedError() }
 ) : BusStopDatabaseRepository {
 
-    override suspend fun replaceDatabase(newDatabase: File): Boolean {
-        throw NotImplementedError()
-    }
+    override suspend fun replaceDatabase(newDatabase: File) = onReplaceDatabase(newDatabase)
 
     override val databaseMetadataFlow get() = onDatabaseMetadataFlow()
 
-    override suspend fun getTopologyVersionId(): String? {
-        throw NotImplementedError()
-    }
+    override suspend fun getTopologyVersionId() = onGetTopologyVersionId()
 }

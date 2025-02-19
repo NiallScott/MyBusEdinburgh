@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,24 +41,9 @@ import javax.inject.Inject
 import javax.net.SocketFactory
 
 /**
- * This class updates the database with a new version which has been downloaded from the API server.
- *
- * @param temporaryFileCreator Utilities for creating temporary fies.
- * @param fileDownloader An implementation for downloading files to a path.
- * @param fileConsistencyChecker An implementation for checking the consistency of files.
- * @param databaseRepository The repository which represents this database.
- * @param exceptionLogger Used to log exceptions.
- * @param ioDispatcher The IO [CoroutineDispatcher].
- * @author Niall Scott
+ * This updates the database with a new version which has been downloaded from the API server.
  */
-class DatabaseUpdater @Inject internal constructor(
-    private val temporaryFileCreator: TemporaryFileCreator,
-    private val fileDownloader: FileDownloader,
-    private val fileConsistencyChecker: FileConsistencyChecker,
-    private val databaseRepository: BusStopDatabaseRepository,
-    private val exceptionLogger: ExceptionLogger,
-    @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher
-) {
+internal interface DatabaseUpdater {
 
     /**
      * Given a [DatabaseVersion] descriptor object, which supplies the database URL and expected
@@ -69,6 +54,21 @@ class DatabaseUpdater @Inject internal constructor(
     suspend fun updateDatabase(
         databaseVersion: DatabaseVersion,
         socketFactory: SocketFactory? = null
+    ): Boolean
+}
+
+internal class RealDatabaseUpdater @Inject constructor(
+    private val temporaryFileCreator: TemporaryFileCreator,
+    private val fileDownloader: FileDownloader,
+    private val fileConsistencyChecker: FileConsistencyChecker,
+    private val databaseRepository: BusStopDatabaseRepository,
+    private val exceptionLogger: ExceptionLogger,
+    @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher
+) : DatabaseUpdater {
+
+    override suspend fun updateDatabase(
+        databaseVersion: DatabaseVersion,
+        socketFactory: SocketFactory?
     ): Boolean {
         val downloadFile = try {
             temporaryFileCreator.createTemporaryFile("mybus-database-download")

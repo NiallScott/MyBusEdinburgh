@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -55,7 +55,8 @@ private const val WORK_UUID = "4f4f5891-73ee-4ddf-8b8c-9fc28873dd12" // Randomly
 internal class UpdateBusStopDatabaseWorkScheduler @Inject constructor(
     private val context: Context,
     private val workManager: WorkManager,
-    private val preferenceRepository: PreferenceRepository) {
+    private val preferenceRepository: PreferenceRepository
+) {
 
     private val workUuid = UUID.fromString(WORK_UUID)
 
@@ -71,7 +72,8 @@ internal class UpdateBusStopDatabaseWorkScheduler @Inject constructor(
                     workManager.enqueueUniquePeriodicWork(
                         WORKER_NAME,
                         ExistingPeriodicWorkPolicy.KEEP,
-                        value)
+                        value
+                    )
                 } else {
                     workManager.updateWork(value)
                 }

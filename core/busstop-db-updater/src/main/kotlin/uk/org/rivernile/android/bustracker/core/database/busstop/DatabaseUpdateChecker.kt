@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,20 +32,11 @@ import javax.inject.Inject
 import javax.net.SocketFactory
 
 /**
- * This class will check for stop database updates and if an update is available, attempt the
- * update.
+ * This will check for stop database updates and if an update is available, attempt the update.
  *
- * @param apiEndpoint The endpoint to get the database metadata from, which describes the latest
- * database.
- * @param databaseRepository Used to access information about the bus stop database.
- * @param databaseUpdater The implementation to download and update the database.
  * @author Niall Scott
  */
-class DatabaseUpdateChecker @Inject internal constructor(
-    private val apiEndpoint: ApiEndpoint,
-    private val databaseRepository: BusStopDatabaseRepository,
-    private val databaseUpdater: DatabaseUpdater
-) {
+public interface DatabaseUpdateChecker {
 
     /**
      * Check for any new database updates, and if an update is available, update the database.
@@ -54,7 +45,16 @@ class DatabaseUpdateChecker @Inject internal constructor(
      * sockets to network interfaces.
      * @return `true` if the check/update was successful, otherwise `false`.
      */
-    suspend fun checkForDatabaseUpdates(socketFactory: SocketFactory? = null): Boolean {
+    public suspend fun checkForDatabaseUpdates(socketFactory: SocketFactory? = null): Boolean
+}
+
+internal class RealDatabaseUpdateChecker @Inject constructor(
+    private val apiEndpoint: ApiEndpoint,
+    private val databaseRepository: BusStopDatabaseRepository,
+    private val databaseUpdater: DatabaseUpdater
+) : DatabaseUpdateChecker {
+
+    override suspend fun checkForDatabaseUpdates(socketFactory: SocketFactory?): Boolean {
         val versionResponse = apiEndpoint.getDatabaseVersion(socketFactory)
 
         val databaseVersion = if (versionResponse is DatabaseVersionResponse.Success) {

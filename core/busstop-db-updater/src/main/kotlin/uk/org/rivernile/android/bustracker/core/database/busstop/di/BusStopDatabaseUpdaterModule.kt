@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,35 +24,38 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.utils
+package uk.org.rivernile.android.bustracker.core.database.busstop.di
 
-import android.content.Context
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
-import okio.IOException
-import uk.org.rivernile.android.bustracker.core.coroutines.di.ForIoDispatcher
-import java.io.File
-import javax.inject.Inject
+import dagger.Binds
+import dagger.Module
+import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateChecker
+import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdater
+import uk.org.rivernile.android.bustracker.core.database.busstop.RealDatabaseUpdateChecker
+import uk.org.rivernile.android.bustracker.core.database.busstop.RealDatabaseUpdater
 
 /**
- * This class is an Android specific implementation of [TemporaryFileCreator].
+ * A [Module] for providing bus stop database updater dependencies.
  *
- * @param context The application [Context].
- * @param ioDispatcher The IO [CoroutineDispatcher].
  * @author Niall Scott
  */
-internal class AndroidTemporaryFileCreator @Inject constructor(
-    private val context: Context,
-    @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher
-) : TemporaryFileCreator {
+@Module(
+    includes = [
+        BusStopDatabaseUpdaterModule.Bindings::class
+    ]
+)
+public class BusStopDatabaseUpdaterModule {
 
-    @Throws(IOException::class)
-    override suspend fun createTemporaryFile(prefix: String): File {
-        return withContext(ioDispatcher) {
-            @Suppress("BlockingMethodInNonBlockingContext")
-            File.createTempFile(prefix, ".tmp", context.cacheDir).also {
-                it.deleteOnExit()
-            }
-        }
+    @Module
+    internal interface Bindings {
+
+        @Suppress("unused")
+        @Binds
+        fun bindDatabaseUpdateChecker(
+            realDatabaseUpdateChecker: RealDatabaseUpdateChecker
+        ): DatabaseUpdateChecker
+
+        @Suppress("unused")
+        @Binds
+        fun bindDatabaseUpdater(realDatabaseUpdater: RealDatabaseUpdater): DatabaseUpdater
     }
 }

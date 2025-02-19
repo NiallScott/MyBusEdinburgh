@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,7 +34,7 @@ import java.io.File
  *
  * @author Niall Scott
  */
-interface TemporaryFileCreator {
+public interface TemporaryFileCreator {
 
     /**
      * Create a temporary [File] where database updates should be performed. This [File] will have
@@ -45,5 +45,5 @@ interface TemporaryFileCreator {
      * @throws IOException When the temporary file could not be created.
      */
     @Throws(IOException::class)
-    suspend fun createTemporaryFile(prefix: String): File
+    public suspend fun createTemporaryFile(prefix: String): File
 }

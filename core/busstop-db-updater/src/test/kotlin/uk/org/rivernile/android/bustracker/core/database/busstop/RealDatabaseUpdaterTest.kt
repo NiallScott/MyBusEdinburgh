@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,12 +43,15 @@ import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
 import uk.org.rivernile.android.bustracker.core.http.FileDownloadResponse
 import uk.org.rivernile.android.bustracker.core.http.FileDownloader
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
+import uk.org.rivernile.android.bustracker.core.log.FakeExceptionLogger
 import uk.org.rivernile.android.bustracker.core.utils.FileConsistencyChecker
 import uk.org.rivernile.android.bustracker.core.utils.TemporaryFileCreator
 import java.io.File
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.test.fail
 
 /**
  * Tests for [DatabaseUpdater].
@@ -56,7 +59,7 @@ import kotlin.test.assertTrue
  * @author Niall Scott
  */
 @RunWith(MockitoJUnitRunner::class)
-class DatabaseUpdaterTest {
+class RealDatabaseUpdaterTest {
 
     companion object {
 
@@ -69,10 +72,6 @@ class DatabaseUpdaterTest {
     private lateinit var fileDownloader: FileDownloader
     @Mock
     private lateinit var fileConsistencyChecker: FileConsistencyChecker
-    @Mock
-    private lateinit var databaseRepository: BusStopDatabaseRepository
-    @Mock
-    private lateinit var exceptionLogger: ExceptionLogger
 
     @Mock
     private lateinit var downloadFile: File
@@ -81,7 +80,11 @@ class DatabaseUpdaterTest {
 
     @Test
     fun returnsFalseWhenTheTemporaryFileCouldNotBeCreated() = runTest {
-        val updater = createDatabaseUpdater()
+        val updater = createDatabaseUpdater(
+            databaseRepository = FakeBusStopDatabaseRepository(
+                onReplaceDatabase = { fail("Database should not be replaced.") }
+            )
+        )
         whenever(temporaryFileCreator.createTemporaryFile(TEMP_FILE_PREFIX))
             .thenThrow(IOException::class.java)
 
@@ -90,13 +93,15 @@ class DatabaseUpdaterTest {
         assertFalse(result)
         verify(fileDownloader, never())
             .downloadFile(any(), any(), anyOrNull())
-        verify(databaseRepository, never())
-            .replaceDatabase(any())
     }
 
     @Test
     fun returnsFalseAndDeletesDownloadFileWhenDownloadFails() = runTest {
-        val updater = createDatabaseUpdater()
+        val updater = createDatabaseUpdater(
+            databaseRepository = FakeBusStopDatabaseRepository(
+                onReplaceDatabase = { fail("Database should not be replaced.") }
+            )
+        )
         givenCreatesTemporaryFile()
         whenever(fileDownloader.downloadFile(any(), any(), anyOrNull()))
             .thenReturn(FileDownloadResponse.Error.ServerError)
@@ -108,13 +113,17 @@ class DatabaseUpdaterTest {
             .downloadFile(any(), any(), anyOrNull())
         verify(downloadFile)
             .delete()
-        verify(databaseRepository, never())
-            .replaceDatabase(any())
     }
 
     @Test
     fun returnsFalseAndDeletesDownloadFileWhenFileConsistencyFailsToReadFile() = runTest {
-        val updater = createDatabaseUpdater()
+        val logger = FakeExceptionLogger()
+        val updater = createDatabaseUpdater(
+            databaseRepository = FakeBusStopDatabaseRepository(
+                onReplaceDatabase = { fail("Database should not be replaced.") }
+            ),
+            exceptionLogger = logger
+        )
         givenCreatesTemporaryFile()
         whenever(fileDownloader.downloadFile(any(), any(), anyOrNull()))
             .thenReturn(FileDownloadResponse.Success)
@@ -129,15 +138,16 @@ class DatabaseUpdaterTest {
             .checkFileMatchesHash(downloadFile, "xyz789")
         verify(downloadFile)
             .delete()
-        verify(databaseRepository, never())
-            .replaceDatabase(any())
-        verify(exceptionLogger)
-            .log(exception)
+        assertEquals(listOf(exception), logger.loggedThrowables)
     }
 
     @Test
     fun returnsFalseAndDeletesDownloadWhenFileConsistencyDoesNotPass() = runTest {
-        val updater = createDatabaseUpdater()
+        val updater = createDatabaseUpdater(
+            databaseRepository = FakeBusStopDatabaseRepository(
+                onReplaceDatabase = { fail("Database should not be replaced.") }
+            )
+        )
         givenCreatesTemporaryFile()
         whenever(fileDownloader.downloadFile(any(), any(), anyOrNull()))
             .thenReturn(FileDownloadResponse.Success)
@@ -151,20 +161,23 @@ class DatabaseUpdaterTest {
             .checkFileMatchesHash(downloadFile, "xyz789")
         verify(downloadFile)
             .delete()
-        verify(databaseRepository, never())
-            .replaceDatabase(any())
     }
 
     @Test
     fun returnsFalseAndDeletesDownloadFileWhenReplaceDatabaseReturnsFalse() = runTest {
-        val updater = createDatabaseUpdater()
+        val updater = createDatabaseUpdater(
+            databaseRepository = FakeBusStopDatabaseRepository(
+                onReplaceDatabase = { file ->
+                    assertEquals(downloadFile, file)
+                    false
+                }
+            )
+        )
         givenCreatesTemporaryFile()
         whenever(fileDownloader.downloadFile(any(), any(), anyOrNull()))
             .thenReturn(FileDownloadResponse.Success)
         whenever(fileConsistencyChecker.checkFileMatchesHash(downloadFile, "xyz789"))
             .thenReturn(true)
-        whenever(databaseRepository.replaceDatabase(downloadFile))
-            .thenReturn(false)
 
         val result = updater.updateDatabase(databaseVersion, null)
 
@@ -177,13 +190,18 @@ class DatabaseUpdaterTest {
 
     @Test
     fun returnsTrueAndReplacesDatabaseWhenDownloadIsSuccessfulAndFileConsistencyPasses() = runTest {
-        val updater = createDatabaseUpdater()
+        val updater = createDatabaseUpdater(
+            databaseRepository = FakeBusStopDatabaseRepository(
+                onReplaceDatabase = { file ->
+                    assertEquals(downloadFile, file)
+                    true
+                }
+            )
+        )
         givenCreatesTemporaryFile()
         whenever(fileDownloader.downloadFile(any(), any(), anyOrNull()))
             .thenReturn(FileDownloadResponse.Success)
         whenever(fileConsistencyChecker.checkFileMatchesHash(downloadFile, "xyz789"))
-            .thenReturn(true)
-        whenever(databaseRepository.replaceDatabase(downloadFile))
             .thenReturn(true)
 
         val result = updater.updateDatabase(databaseVersion, null)
@@ -199,8 +217,11 @@ class DatabaseUpdaterTest {
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun TestScope.createDatabaseUpdater(): DatabaseUpdater {
-        return DatabaseUpdater(
+    private fun TestScope.createDatabaseUpdater(
+        exceptionLogger: ExceptionLogger = FakeExceptionLogger(),
+        databaseRepository: BusStopDatabaseRepository = FakeBusStopDatabaseRepository()
+    ): DatabaseUpdater {
+        return RealDatabaseUpdater(
             temporaryFileCreator,
             fileDownloader,
             fileConsistencyChecker,
