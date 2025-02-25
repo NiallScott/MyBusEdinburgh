@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,12 @@
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.kapt)
+    `java-test-fixtures`
+}
+
+kotlin {
+    explicitApi()
 }
 
 dependencies {
@@ -37,14 +43,21 @@ dependencies {
     implementation(project(":database:settings-db-core"))
     implementation(project(":endpoint:tracker-endpoint"))
 
-    implementation(libs.javax.inject)
+    // Dagger 2
+    implementation(libs.dagger.core)
+    kapt(libs.dagger.compiler)
 
     // Testing dependencies
+    testImplementation(testFixtures(project(":core:busstops")))
+    testImplementation(testFixtures(project(":core:time")))
+    testImplementation(testFixtures(project(":database:busstop-db-core")))
+    testImplementation(testFixtures(project(":database:settings-db-core")))
+    testImplementation(testFixtures(project(":endpoint:tracker-endpoint")))
     testImplementation(project(":testutils"))
     testImplementation(libs.coroutines.test)
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)
-    testImplementation(libs.mockito)
-    testImplementation(libs.mockito.kotlin)
     testImplementation(libs.turbine)
+
+    testFixturesImplementation(project(":core:coroutines"))
 }

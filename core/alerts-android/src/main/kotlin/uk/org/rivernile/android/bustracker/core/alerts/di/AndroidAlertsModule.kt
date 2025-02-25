@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -59,8 +59,12 @@ import javax.inject.Provider
  * @author Niall Scott
  */
 @InstallIn(SingletonComponent::class)
-@Module
-internal interface AlertsModule {
+@Module(
+    includes = [
+        AlertsModule::class
+    ]
+)
+internal interface AndroidAlertsModule {
 
     @Suppress("unused")
     @Binds

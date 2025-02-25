@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,12 @@
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.kapt)
+    `java-test-fixtures`
+}
+
+kotlin {
+    explicitApi()
 }
 
 dependencies {
@@ -33,15 +39,18 @@ dependencies {
     implementation(project(":core:coroutines"))
     implementation(project(":database:busstop-db-core"))
 
-    // Dependency injection
-    implementation(libs.javax.inject)
+    // Dagger 2
+    implementation(libs.dagger.core)
+    kapt(libs.dagger.compiler)
 
     // Testing dependencies
+    testImplementation(testFixtures(project(":database:busstop-db-core")))
     testImplementation(project(":testutils"))
     testImplementation(libs.coroutines.test)
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)
-    testImplementation(libs.mockito)
-    testImplementation(libs.mockito.kotlin)
     testImplementation(libs.turbine)
+
+    testFixturesImplementation(project(":core:coroutines"))
+    testFixturesImplementation(project(":database:busstop-db-core"))
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,18 +29,13 @@ package uk.org.rivernile.android.bustracker.core.alerts.proximity
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Ignore
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.verify
-import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import uk.org.rivernile.android.bustracker.core.alerts.FakeAlertsRepository
+import kotlin.test.Ignore
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [RemoveProximityAlertBroadcastReceiver].
@@ -49,36 +44,28 @@ import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
  */
 @Ignore("Until I figure out how to do BroadcastReceiver testing.")
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(MockitoJUnitRunner::class)
 class RemoveProximityAlertBroadcastReceiverTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
-
-    @Mock
-    private lateinit var alertsRepository: AlertsRepository
-
-    private lateinit var receiver: RemoveProximityAlertBroadcastReceiver
-
-    @Before
-    fun setUp() {
-        receiver = RemoveProximityAlertBroadcastReceiver().also {
-            it.alertsRepository = alertsRepository
-            it.applicationCoroutineScope = coroutineRule.scope
-            it.defaultDispatcher = coroutineRule.testDispatcher
-        }
-    }
 
     @Test
     fun invokingBroadcastReceiverRemovesProximityAlert() = runTest {
+        var invocationCount = 0
+        val receiver = RemoveProximityAlertBroadcastReceiver().apply {
+            alertsRepository = FakeAlertsRepository(
+                onRemoveAllProximityAlerts = { invocationCount++ }
+            )
+            applicationCoroutineScope = backgroundScope
+            defaultDispatcher = UnconfinedTestDispatcher(testScheduler)
+        }
+
         receiver.onReceive(ApplicationProvider.getApplicationContext(), createIntent())
         advanceUntilIdle()
 
-        verify(alertsRepository)
-                .removeAllProximityAlerts()
+        assertEquals(1, invocationCount)
     }
 
     private fun createIntent() =
-            Intent(ApplicationProvider.getApplicationContext(),
-                    RemoveProximityAlertBroadcastReceiver::class.java)
+        Intent(
+            ApplicationProvider.getApplicationContext(),
+            RemoveProximityAlertBroadcastReceiver::class.java
+        )
 }

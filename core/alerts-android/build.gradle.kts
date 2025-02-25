@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -54,7 +54,7 @@ android {
 dependencies {
 
     api(project(":core:alerts"))
-    implementation(project(":core:busstops"))
+    implementation(project(":core:busstops-android"))
     implementation(project(":core:coroutines-android"))
     implementation(project(":core:logging"))
     implementation(project(":core:permission-android"))
@@ -76,9 +76,9 @@ dependencies {
     implementation(libs.play.services.location)
 
     // Test dependencies
-    androidTestImplementation(project(":testutils"))
+    androidTestImplementation(testFixtures(project(":core:alerts")))
     androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.coroutines.test)
     androidTestImplementation(libs.kotlin.test.junit)
     androidTestImplementation(libs.hilt.test)
-    androidTestImplementation(libs.mockito.android)
 }

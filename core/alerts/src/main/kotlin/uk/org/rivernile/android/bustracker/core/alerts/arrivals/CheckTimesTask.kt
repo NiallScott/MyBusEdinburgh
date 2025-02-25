@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,10 +37,10 @@ import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Stop
 import javax.inject.Inject
 
 /**
- * This class performs the task of obtaining all known [ArrivalAlert]s from the [AlertsRepository]
- * and then obtaining live departure times for each stop. Each successfully loaded stop is then
- * checked to see if any matching services are within the time trigger. Each matching stop will
- * generate a notification with [AlertNotificationDispatcher].
+ * This performs the task of obtaining all known [ArrivalAlert]s from the [AlertsRepository] and
+ * then obtaining live departure times for each stop. Each successfully loaded stop is then checked
+ * to see if any matching services are within the time trigger. Each matching stop will generate a
+ * notification with [AlertNotificationDispatcher].
  *
  * This class can handle multiple current [ArrivalAlert]s.
  *
@@ -48,23 +48,24 @@ import javax.inject.Inject
  * ignored. This is because there is no appropriate error handler, and we'd be expected to be called
  * again in a short while anyway.
  *
- * @param alertsRepository The [AlertsRepository].
- * @param trackerEndpoint A reference to the [TrackerEndpoint].
- * @param alertNotificationDispatcher An implementation used to dispatch notifications of arrival
- * alerts.
  * @author Niall Scott
  */
-internal class CheckTimesTask @Inject constructor(
-    private val alertsRepository: AlertsRepository,
-    private val trackerEndpoint: TrackerEndpoint,
-    private val alertNotificationDispatcher: AlertNotificationDispatcher
-) {
+internal interface CheckTimesTask {
 
     /**
      * Perform a check of the arrival times for all known [ArrivalAlert]s to see if any arrivals
      * match the constraints of each [ArrivalAlert].
      */
-    suspend fun checkTimes() {
+    suspend fun checkTimes()
+}
+
+internal class RealCheckTimesTask @Inject constructor(
+    private val alertsRepository: AlertsRepository,
+    private val trackerEndpoint: TrackerEndpoint,
+    private val alertNotificationDispatcher: AlertNotificationDispatcher
+) : CheckTimesTask {
+
+    override suspend fun checkTimes() {
         alertsRepository.getAllArrivalAlertStopCodes()
             ?.takeIf(Set<String>::isNotEmpty)
             ?.let {

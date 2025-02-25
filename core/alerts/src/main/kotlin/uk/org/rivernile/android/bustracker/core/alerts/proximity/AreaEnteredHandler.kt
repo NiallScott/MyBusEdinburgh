@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,25 +31,32 @@ import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import javax.inject.Inject
 
 /**
- * This class contains the business logic for handling a proximity are being entered.
+ * This contains the business logic for handling a proximity are being entered.
  *
- * @param alertsRepository The alerts repository.
- * @param geofencingManager The geofencing implementation used.
- * @param notificationDispatcher Used to dispatch the notification to the user.
  * @author Niall Scott
  */
-class AreaEnteredHandler @Inject internal constructor(
-    private val alertsRepository: AlertsRepository,
-    private val geofencingManager: GeofencingManager,
-    private val notificationDispatcher: AlertNotificationDispatcher
-) {
+public interface AreaEnteredHandler {
 
     /**
      * Handle the area being entered.
      *
      * @param alertId The ID of the alert which triggered this method being called.
      */
-    suspend fun handleAreaEntered(alertId: Int) {
+    public suspend fun handleAreaEntered(alertId: Int)
+}
+
+internal class RealAreaEnteredHandler @Inject constructor(
+    private val alertsRepository: AlertsRepository,
+    private val geofencingManager: GeofencingManager,
+    private val notificationDispatcher: AlertNotificationDispatcher
+) : AreaEnteredHandler {
+
+    /**
+     * Handle the area being entered.
+     *
+     * @param alertId The ID of the alert which triggered this method being called.
+     */
+    override suspend fun handleAreaEntered(alertId: Int) {
         alertsRepository.getProximityAlert(alertId)
             ?.let {
                 notificationDispatcher.dispatchProximityAlertNotification(it)

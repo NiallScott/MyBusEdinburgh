@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,19 +32,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.any
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoInteractions
-import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
+import uk.org.rivernile.android.bustracker.core.alerts.FakeAlertsRepository
 import uk.org.rivernile.android.bustracker.core.alerts.ProximityAlert
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
-import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import kotlin.test.fail
 
 /**
  * Tests for [ManageProximityAlertsRunner].
@@ -52,48 +47,42 @@ import kotlin.test.Test
  * @author Niall Scott
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(MockitoJUnitRunner::class)
 class ManageProximityAlertsRunnerTest {
-
-    @Mock
-    private lateinit var alertsRepository: AlertsRepository
-    @Mock
-    private lateinit var proximityAlertTracker: ProximityAlertTracker
-
-    private lateinit var runner: ManageProximityAlertsRunner
-
-    @BeforeTest
-    fun setUp() {
-        runner = ManageProximityAlertsRunner(
-            alertsRepository,
-            proximityAlertTracker
-        )
-    }
 
     @Test
     fun runnerIsStoppedIfStartedWithNullProximityAlerts() = runTest {
-        whenever(alertsRepository.allProximityAlertsFlow)
-            .thenReturn(flowOf(null))
+        val runner = createManageProximityAlertsRunner(
+            alertsRepository = FakeAlertsRepository(
+                onAllProximityAlertsFlow = { flowOf(null) }
+            ),
+            proximityAlertTracker = FakeProximityAlertTracker(
+                onTrackProximityAlert = { fail("Not expecting to track any proximity alerts") },
+                onRemoveProximityAlert = { fail("Not expecting to remove any proximity alerts") }
+            )
+        )
 
         launch {
             runner.run()
         }
         advanceUntilIdle()
-
-        verifyNoInteractions(proximityAlertTracker)
     }
 
     @Test
     fun runnerIsStoppedIfStartedWithEmptyProximityAlerts() = runTest {
-        whenever(alertsRepository.allProximityAlertsFlow)
-            .thenReturn(flowOf(emptyList()))
+        val runner = createManageProximityAlertsRunner(
+            alertsRepository = FakeAlertsRepository(
+                onAllProximityAlertsFlow = { flowOf(emptyList()) }
+            ),
+            proximityAlertTracker = FakeProximityAlertTracker(
+                onTrackProximityAlert = { fail("Not expecting to track any proximity alerts") },
+                onRemoveProximityAlert = { fail("Not expecting to remove any proximity alerts") }
+            )
+        )
 
         launch {
             runner.run()
         }
         advanceUntilIdle()
-
-        verifyNoInteractions(proximityAlertTracker)
     }
 
     @Test
@@ -102,22 +91,28 @@ class ManageProximityAlertsRunnerTest {
         val alert2 = ProximityAlert(2, 102L, "100002", 20)
         val alert3 = ProximityAlert(3, 103L, "100003", 30)
         val alerts = listOf(alert1, alert2, alert3)
-        whenever(alertsRepository.allProximityAlertsFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, alerts, null))
+        val trackProximityAlertTracker = TrackProximityAlertTracker()
+        val removedProximityAlertTracker = RemoveProximityAlertTracker()
+        val runner = createManageProximityAlertsRunner(
+            alertsRepository = FakeAlertsRepository(
+                onAllProximityAlertsFlow = { intervalFlowOf(0L, 10L, alerts, null) }
+            ),
+            proximityAlertTracker = FakeProximityAlertTracker(
+                onTrackProximityAlert = trackProximityAlertTracker,
+                onRemoveProximityAlert = removedProximityAlertTracker
+            )
+        )
 
         val job = launch {
             runner.run()
         }
         advanceTimeBy(1L)
 
-        verify(proximityAlertTracker)
-            .trackProximityAlert(alert1)
-        verify(proximityAlertTracker)
-            .trackProximityAlert(alert2)
-        verify(proximityAlertTracker)
-            .trackProximityAlert(alert3)
-        verify(proximityAlertTracker, never())
-            .removeProximityAlert(any())
+        assertEquals(
+            listOf(alert1, alert2, alert3),
+            trackProximityAlertTracker.proximityAlerts
+        )
+        assertTrue(removedProximityAlertTracker.removedIds.isEmpty())
         job.cancel()
     }
 
@@ -127,20 +122,23 @@ class ManageProximityAlertsRunnerTest {
         val alert2 = ProximityAlert(2, 102L, "100002", 20)
         val alert3 = ProximityAlert(3, 103L, "100003", 30)
         val alerts = listOf(alert1, alert2, alert3)
-        whenever(alertsRepository.allProximityAlertsFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, alerts, null, null))
+        val removedProximityAlertTracker = RemoveProximityAlertTracker()
+        val runner = createManageProximityAlertsRunner(
+            alertsRepository = FakeAlertsRepository(
+                onAllProximityAlertsFlow = { intervalFlowOf(0L, 10L, alerts, null, null) }
+            ),
+            proximityAlertTracker = FakeProximityAlertTracker(
+                onTrackProximityAlert = { },
+                onRemoveProximityAlert = removedProximityAlertTracker
+            )
+        )
 
         val job = launch {
             runner.run()
         }
         advanceTimeBy(15L)
 
-        verify(proximityAlertTracker)
-            .removeProximityAlert(1)
-        verify(proximityAlertTracker)
-            .removeProximityAlert(2)
-        verify(proximityAlertTracker)
-            .removeProximityAlert(3)
+        assertEquals(listOf(1, 2, 3), removedProximityAlertTracker.removedIds)
         job.cancel()
     }
 
@@ -151,20 +149,23 @@ class ManageProximityAlertsRunnerTest {
         val alert3 = ProximityAlert(3, 103L, "100003", 30)
         val alerts1 = listOf(alert1, alert2, alert3)
         val alerts2 = listOf(alert1, alert3)
-        whenever(alertsRepository.allProximityAlertsFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, alerts1, alerts2, null))
+        val removedProximityAlertTracker = RemoveProximityAlertTracker()
+        val runner = createManageProximityAlertsRunner(
+            alertsRepository = FakeAlertsRepository(
+                onAllProximityAlertsFlow = { intervalFlowOf(0L, 10L, alerts1, alerts2, null) }
+            ),
+            proximityAlertTracker = FakeProximityAlertTracker(
+                onTrackProximityAlert = { },
+                onRemoveProximityAlert = removedProximityAlertTracker
+            )
+        )
 
         val job = launch {
             runner.run()
         }
         advanceTimeBy(15L)
 
-        verify(proximityAlertTracker, never())
-            .removeProximityAlert(1)
-        verify(proximityAlertTracker)
-            .removeProximityAlert(2)
-        verify(proximityAlertTracker, never())
-            .removeProximityAlert(3)
+        assertEquals(listOf(2), removedProximityAlertTracker.removedIds)
         job.cancel()
     }
 
@@ -175,22 +176,25 @@ class ManageProximityAlertsRunnerTest {
         val alert3 = ProximityAlert(3, 103L, "100003", 30)
         val alerts1 = listOf(alert1, alert2)
         val alerts2 = listOf(alert1, alert2, alert3)
-        whenever(alertsRepository.allProximityAlertsFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, alerts1, alerts2, null))
+        val trackProximityAlertTracker = TrackProximityAlertTracker()
+        val removedProximityAlertTracker = RemoveProximityAlertTracker()
+        val runner = createManageProximityAlertsRunner(
+            alertsRepository = FakeAlertsRepository(
+                onAllProximityAlertsFlow = { intervalFlowOf(0L, 10L, alerts1, alerts2, null) }
+            ),
+            proximityAlertTracker = FakeProximityAlertTracker(
+                onTrackProximityAlert = trackProximityAlertTracker,
+                onRemoveProximityAlert = removedProximityAlertTracker
+            )
+        )
 
         val job = launch {
             runner.run()
         }
         advanceTimeBy(15L)
 
-        verify(proximityAlertTracker)
-            .trackProximityAlert(alert1)
-        verify(proximityAlertTracker)
-            .trackProximityAlert(alert2)
-        verify(proximityAlertTracker)
-            .trackProximityAlert(alert3)
-        verify(proximityAlertTracker, never())
-            .removeProximityAlert(any())
+        assertEquals(listOf(alert1, alert2, alert3), trackProximityAlertTracker.proximityAlerts)
+        assertTrue(removedProximityAlertTracker.removedIds.isEmpty())
         job.cancel()
     }
 
@@ -200,8 +204,16 @@ class ManageProximityAlertsRunnerTest {
         val alert2 = ProximityAlert(2, 102L, "100002", 20)
         val alert3 = ProximityAlert(3, 103L, "100003", 30)
         val alerts = listOf(alert1, alert2, alert3)
-        whenever(alertsRepository.allProximityAlertsFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, alerts, null))
+        val removedProximityAlertTracker = RemoveProximityAlertTracker()
+        val runner = createManageProximityAlertsRunner(
+            alertsRepository = FakeAlertsRepository(
+                onAllProximityAlertsFlow = { intervalFlowOf(0L, 10L, alerts, null) }
+            ),
+            proximityAlertTracker = FakeProximityAlertTracker(
+                onTrackProximityAlert = { },
+                onRemoveProximityAlert = removedProximityAlertTracker
+            )
+        )
 
         val job = launch {
             runner.run()
@@ -210,12 +222,7 @@ class ManageProximityAlertsRunnerTest {
         job.cancel()
         advanceUntilIdle()
 
-        verify(proximityAlertTracker)
-            .removeProximityAlert(1)
-        verify(proximityAlertTracker)
-            .removeProximityAlert(2)
-        verify(proximityAlertTracker)
-            .removeProximityAlert(3)
+        assertEquals(listOf(1, 2, 3), removedProximityAlertTracker.removedIds)
     }
 
     @Test
@@ -224,8 +231,16 @@ class ManageProximityAlertsRunnerTest {
         val alert2 = ProximityAlert(2, 102L, "100002", 20)
         val alert3 = ProximityAlert(3, 103L, "100003", 30)
         val alerts = listOf(alert1, alert2, alert3)
-        whenever(alertsRepository.allProximityAlertsFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, alerts))
+        val removedProximityAlertTracker = RemoveProximityAlertTracker()
+        val runner = createManageProximityAlertsRunner(
+            alertsRepository = FakeAlertsRepository(
+                onAllProximityAlertsFlow = { intervalFlowOf(0L, 10L, alerts) }
+            ),
+            proximityAlertTracker = FakeProximityAlertTracker(
+                onTrackProximityAlert = { },
+                onRemoveProximityAlert = removedProximityAlertTracker
+            )
+        )
 
         val job = launch {
             runner.run()
@@ -233,11 +248,36 @@ class ManageProximityAlertsRunnerTest {
         advanceUntilIdle()
         job.cancel()
 
-        verify(proximityAlertTracker)
-            .removeProximityAlert(1)
-        verify(proximityAlertTracker)
-            .removeProximityAlert(2)
-        verify(proximityAlertTracker)
-            .removeProximityAlert(3)
+        assertEquals(listOf(1, 2, 3), removedProximityAlertTracker.removedIds)
+    }
+
+    private fun createManageProximityAlertsRunner(
+        alertsRepository: AlertsRepository = FakeAlertsRepository(),
+        proximityAlertTracker: ProximityAlertTracker = FakeProximityAlertTracker()
+    ): ManageProximityAlertsRunner {
+        return ManageProximityAlertsRunner(
+            alertsRepository,
+            proximityAlertTracker
+        )
+    }
+
+    private class TrackProximityAlertTracker : (ProximityAlert) -> Unit {
+
+        val proximityAlerts get() = _proximityAlerts.toList()
+        private val _proximityAlerts = mutableListOf<ProximityAlert>()
+
+        override fun invoke(p1: ProximityAlert) {
+            _proximityAlerts += p1
+        }
+    }
+
+    private class RemoveProximityAlertTracker : (Int) -> Unit {
+
+        val removedIds get() = _removedIds.toList()
+        private val _removedIds = mutableListOf<Int>()
+
+        override fun invoke(p1: Int) {
+            _removedIds += p1
+        }
     }
 }

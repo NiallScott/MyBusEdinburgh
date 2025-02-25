@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,14 +29,10 @@ package uk.org.rivernile.android.bustracker.core.alerts
 import android.content.Context
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
-import org.junit.Before
-import org.junit.Ignore
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
+import kotlin.test.Ignore
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.fail
 
 /**
  * Tests for [DeviceBootBroadcastReceiver].
@@ -44,51 +40,47 @@ import org.mockito.kotlin.verify
  * @author Niall Scott
  */
 @Ignore("Until I figure out how to do BroadcastReceiver testing.")
-@RunWith(MockitoJUnitRunner::class)
 class DeviceBootBroadcastReceiverTest {
-
-    @Mock
-    private lateinit var alertsRepository: AlertsRepository
-
-    private lateinit var receiver: DeviceBootBroadcastReceiver
-
-    @Before
-    fun setUp() {
-        receiver = DeviceBootBroadcastReceiver().also {
-            it.alertsRepository = alertsRepository
-        }
-    }
 
     @Test
     fun invokingBroadcastReceiverWithNoActionDoesNotEnsureAlertTasksRunning() {
+        val receiver = DeviceBootBroadcastReceiver().apply {
+            alertsRepository = FakeAlertsRepository(
+                onEnsureTasksRunning = { fail("Not expecting to ensure the tasks are running.") }
+            )
+        }
         val context = ApplicationProvider.getApplicationContext<Context>()
         val intent = Intent(context, DeviceBootBroadcastReceiver::class.java)
 
         receiver.onReceive(context, intent)
-
-        verify(alertsRepository, never())
-            .ensureTasksRunning()
     }
 
     @Test
     fun invokingBroadcastReceiverWithWrongActionDoesNotEnsureAlertTasksRunning() {
+        val receiver = DeviceBootBroadcastReceiver().apply {
+            alertsRepository = FakeAlertsRepository(
+                onEnsureTasksRunning = { fail("Not expecting to ensure the tasks are running.") }
+            )
+        }
         val context = ApplicationProvider.getApplicationContext<Context>()
         val intent = Intent("wrong.action")
 
         receiver.onReceive(context, intent)
-
-        verify(alertsRepository, never())
-            .ensureTasksRunning()
     }
 
     @Test
     fun invokingBroadcastReceiverWithBootCompletedActionEnsuresAlertTasksRunning() {
+        var invocationCounter = 0
+        val receiver = DeviceBootBroadcastReceiver().apply {
+            alertsRepository = FakeAlertsRepository(
+                onEnsureTasksRunning = { invocationCounter++ }
+            )
+        }
         val context = ApplicationProvider.getApplicationContext<Context>()
         val intent = Intent(Intent.ACTION_BOOT_COMPLETED)
 
         receiver.onReceive(context, intent)
 
-        verify(alertsRepository)
-            .ensureTasksRunning()
+        assertEquals(1, invocationCounter)
     }
 }

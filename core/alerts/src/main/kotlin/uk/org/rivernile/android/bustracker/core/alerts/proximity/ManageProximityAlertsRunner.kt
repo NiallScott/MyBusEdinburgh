@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,7 +40,7 @@ import javax.inject.Inject
  * @param proximityAlertTracker Proximity alerts to begin or stop tracking are managed through this.
  * @author Niall Scott
  */
-class ManageProximityAlertsRunner @Inject internal constructor(
+public class ManageProximityAlertsRunner @Inject internal constructor(
     private val alertsRepository: AlertsRepository,
     private val proximityAlertTracker: ProximityAlertTracker
 ) {
@@ -50,7 +50,7 @@ class ManageProximityAlertsRunner @Inject internal constructor(
      * and propagates out starting and stopping of proximity alerts. If the number of proximity
      * alerts is less than 1, a [CancellationException] will be thrown.
      */
-    suspend fun run() {
+    public suspend fun run() {
         alertsRepository
             .allProximityAlertsFlow
             .manageProximityAlerts()
