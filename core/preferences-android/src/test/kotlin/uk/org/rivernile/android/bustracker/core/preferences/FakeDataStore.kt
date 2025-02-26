@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,22 +24,22 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.config
+package uk.org.rivernile.android.bustracker.core.preferences
+
+import androidx.datastore.core.DataStore
+import kotlinx.coroutines.flow.Flow
 
 /**
- * This interface defines configuration properties which are provided at build time.
+ * A fake [DataStore] for testing.
  *
  * @author Niall Scott
  */
-public interface BuildConfiguration {
+class FakeDataStore<T>(
+    private val onData: () -> Flow<T> = { throw NotImplementedError() },
+    private val onUpdateData: (suspend (t: T) -> T) -> T = { throw NotImplementedError() }
+) : DataStore<T> {
 
-    /**
-     * The nearest stops latitude span.
-     */
-    public val nearestStopsLatitudeSpan: Double
+    override val data get() = onData()
 
-    /**
-     * The nearest stops longitude span.
-     */
-    public val nearestStopsLongitudeSpan: Double
+    override suspend fun updateData(transform: suspend (t: T) -> T) = onUpdateData(transform)
 }

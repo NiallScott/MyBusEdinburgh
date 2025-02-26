@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,45 +26,17 @@
 
 package uk.org.rivernile.android.bustracker.core.config
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
-
 /**
- * Tests for [ConfigRepository].
+ * A fake [BuildConfiguration] for testing.
  *
  * @author Niall Scott
  */
-class ConfigRepositoryTest {
+class FakeBuildConfiguration(
+    private val onNearestStopsLatitudeSpan: () -> Double = { throw NotImplementedError() },
+    private val onNearestStopsLongitudeSpan: () -> Double = { throw NotImplementedError() }
+) : BuildConfiguration {
 
-    @Test
-    fun nearestStopsLatitudeSpanReturnsValueOfNearestStopsLatitudeSpan() {
-        val repository = createConfigRepository(
-            buildConfiguration = FakeBuildConfiguration(
-                onNearestStopsLatitudeSpan = { 1.1 }
-            )
-        )
+    override val nearestStopsLatitudeSpan get() = onNearestStopsLatitudeSpan()
 
-        val result = repository.nearestStopsLatitudeSpan
-
-        assertEquals(1.1, result, 0.00001)
-    }
-
-    @Test
-    fun nearestStopsLongitudeSpanReturnsValueOfNearestStopsLongitudeSpan() {
-        val repository = createConfigRepository(
-            buildConfiguration = FakeBuildConfiguration(
-                onNearestStopsLongitudeSpan = { 2.2 }
-            )
-        )
-
-        val result = repository.nearestStopsLongitudeSpan
-
-        assertEquals(2.2, result, 0.00001)
-    }
-
-    private fun createConfigRepository(
-        buildConfiguration: BuildConfiguration = FakeBuildConfiguration()
-    ): ConfigRepository {
-        return ConfigRepository(buildConfiguration)
-    }
+    override val nearestStopsLongitudeSpan get() = onNearestStopsLongitudeSpan()
 }

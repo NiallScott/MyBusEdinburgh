@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,22 +24,26 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.config
+package uk.org.rivernile.android.bustracker.core.preferences
+
+import androidx.datastore.preferences.core.MutablePreferences
+import androidx.datastore.preferences.core.Preferences
+import kotlinx.coroutines.flow.Flow
 
 /**
- * This interface defines configuration properties which are provided at build time.
+ * A fake [PreferenceDataStoreSource] for testing.
  *
  * @author Niall Scott
  */
-public interface BuildConfiguration {
+class FakePreferenceDataStoreSource(
+    private val onPreferencesFlow: () -> Flow<Preferences> = { throw NotImplementedError() },
+    private val onEdit: (suspend (MutablePreferences) -> Unit) -> Unit =
+        { throw NotImplementedError() }
+) : PreferenceDataStoreSource {
 
-    /**
-     * The nearest stops latitude span.
-     */
-    public val nearestStopsLatitudeSpan: Double
+    override val preferencesFlow get() = onPreferencesFlow()
 
-    /**
-     * The nearest stops longitude span.
-     */
-    public val nearestStopsLongitudeSpan: Double
+    override suspend fun edit(transform: suspend (MutablePreferences) -> Unit) {
+        onEdit(transform)
+    }
 }

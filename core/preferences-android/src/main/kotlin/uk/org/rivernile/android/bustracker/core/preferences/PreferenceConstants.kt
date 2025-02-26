@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,14 +27,15 @@
 package uk.org.rivernile.android.bustracker.core.preferences
 
 internal const val PREF_BUS_STOP_DATABASE_WIFI_ONLY = "pref_bus_stop_database_wifi_only"
-const val PREF_APP_THEME = "pref_theme"
+public const val PREF_APP_THEME: String = "pref_theme"
 internal const val PREF_ALERT_SOUND = "pref_alertsound_state"
 internal const val PREF_ALERT_VIBRATE = "pref_alertvibrate_state"
 internal const val PREF_ALERT_LED = "pref_alertled_state"
 internal const val PREF_AUTO_REFRESH = "pref_autorefresh_state"
 internal const val PREF_SHOW_NIGHT_BUSES = "pref_nightservices_state"
 internal const val PREF_SERVICE_SORTING = "pref_servicessorting_state"
-const val PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE = "pref_numberOfShownDeparturesPerService"
+public const val PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE: String =
+    "pref_numberOfShownDeparturesPerService"
 internal const val PREF_ZOOM_BUTTONS = "pref_map_zoom_buttons_state"
 internal const val PREF_DISABLE_GPS_PROMPT = "neareststops_gps_prompt_disable"
 internal const val PREF_MAP_LAST_LATITUDE = "pref_map_last_latitude"
