@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,62 +32,75 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 
-private const val STATE_IS_CREDITS_SHOWN = "isCreditsShown"
-private const val STATE_IS_OPEN_SOURCE_LICENCES_SHOWN = "isOpenSourceLicencesShown"
-
 /**
- * This class manages the state for [AboutViewModel].
+ * This manages the state for [AboutViewModel].
  *
- * @param savedStateHandle Used to save instance state for later restoration.
  * @author Niall Scott
  */
-@ViewModelScoped
-internal class AboutViewModelState @Inject constructor(
-    private val savedStateHandle: SavedStateHandle
-) {
+internal interface AboutViewModelState {
 
     /**
      * A [Flow] which emits whether the credits are shown or not.
      */
-    val isCreditsShownFlow: Flow<Boolean> =
-        savedStateHandle.getStateFlow(STATE_IS_CREDITS_SHOWN, false)
+    val isCreditsShownFlow: Flow<Boolean>
 
     /**
      * A [Flow] which emits whether the open source licences are shown or not.
      */
-    val isOpenSourceLicencesShownFlow: Flow<Boolean> = savedStateHandle.getStateFlow(
-        STATE_IS_OPEN_SOURCE_LICENCES_SHOWN,
-        false
-    )
+    val isOpenSourceLicencesShownFlow: Flow<Boolean>
 
     /**
      * A [Flow] which emits the current [UiAction].
      */
-    val actionFlow: Flow<UiAction?> get() = _actionFlow
-    private val _actionFlow = MutableStateFlow<UiAction?>(null)
+    val actionFlow: Flow<UiAction?>
 
     /**
      * A property which gets/sets whether the credits are shown.
      */
     var isCreditsShown: Boolean
-        get() = savedStateHandle[STATE_IS_CREDITS_SHOWN] ?: false
-        set(value) {
-            savedStateHandle[STATE_IS_CREDITS_SHOWN] = value
-        }
 
     /**
      * A property which gets/sets whether the open source licences are shown.
      */
     var isOpenSourceLicencesShown: Boolean
-        get() = savedStateHandle[STATE_IS_OPEN_SOURCE_LICENCES_SHOWN] ?: false
-        set(value) {
-            savedStateHandle[STATE_IS_OPEN_SOURCE_LICENCES_SHOWN] = value
-        }
 
     /**
      * A property which gets/sets the [UiAction] to be performed.
      */
     var action: UiAction?
+}
+
+private const val STATE_IS_CREDITS_SHOWN = "isCreditsShown"
+private const val STATE_IS_OPEN_SOURCE_LICENCES_SHOWN = "isOpenSourceLicencesShown"
+
+@ViewModelScoped
+internal class RealAboutViewModelState @Inject constructor(
+    private val savedStateHandle: SavedStateHandle
+) : AboutViewModelState {
+
+    override val isCreditsShownFlow = savedStateHandle.getStateFlow(STATE_IS_CREDITS_SHOWN, false)
+
+    override val isOpenSourceLicencesShownFlow = savedStateHandle.getStateFlow(
+        STATE_IS_OPEN_SOURCE_LICENCES_SHOWN,
+        false
+    )
+
+    override val actionFlow get() = _actionFlow
+    private val _actionFlow = MutableStateFlow<UiAction?>(null)
+
+    override var isCreditsShown
+        get() = savedStateHandle[STATE_IS_CREDITS_SHOWN] ?: false
+        set(value) {
+            savedStateHandle[STATE_IS_CREDITS_SHOWN] = value
+        }
+
+    override var isOpenSourceLicencesShown
+        get() = savedStateHandle[STATE_IS_OPEN_SOURCE_LICENCES_SHOWN] ?: false
+        set(value) {
+            savedStateHandle[STATE_IS_OPEN_SOURCE_LICENCES_SHOWN] = value
+        }
+
+    override var action
         get() = _actionFlow.value
         set(value) {
             _actionFlow.value = value

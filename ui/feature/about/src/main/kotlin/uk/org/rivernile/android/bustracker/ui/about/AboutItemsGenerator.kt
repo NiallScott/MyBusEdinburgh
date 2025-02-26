@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.ui.about
 
 import dagger.hilt.android.scopes.ViewModelScoped
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -37,23 +38,16 @@ import java.util.Date
 import javax.inject.Inject
 
 /**
- * This class generates [UiAboutItem]s to show in the UI.
+ * This generates [UiAboutItem]s to show in the UI.
  *
- * @param appRepository Used to get app version details.
- * @param busStopDatabaseRepository Used to get database version details.
  * @author Niall Scott
  */
-@ViewModelScoped
-internal class AboutItemsGenerator @Inject constructor(
-    private val appRepository: AppRepository,
-    private val busStopDatabaseRepository: BusStopDatabaseRepository
-) {
+internal interface AboutItemsGenerator {
 
     /**
      * A [kotlinx.coroutines.flow.Flow] which emits the 'about' items to show.
      */
-    val aboutItemsFlow get() = databaseMetadataFlow
-        .map(this::createAboutItems)
+    val aboutItemsFlow: Flow<List<UiAboutItem>>
 
     /**
      * Create the [List] of [UiAboutItem]s.
@@ -61,7 +55,19 @@ internal class AboutItemsGenerator @Inject constructor(
      * @param databaseMetadata The database metadata.
      * @return The [List] of [UiAboutItem]s.
      */
-    fun createAboutItems(databaseMetadata: DatabaseMetadata? = null) =
+    fun createAboutItems(databaseMetadata: DatabaseMetadata? = null): List<UiAboutItem>
+}
+
+@ViewModelScoped
+internal class RealAboutItemsGenerator @Inject constructor(
+    private val appRepository: AppRepository,
+    private val busStopDatabaseRepository: BusStopDatabaseRepository
+) : AboutItemsGenerator {
+
+    override val aboutItemsFlow get() = databaseMetadataFlow
+        .map(this::createAboutItems)
+
+    override fun createAboutItems(databaseMetadata: DatabaseMetadata?) =
         listOf(
             UiAboutItem.TwoLinesItem.AppVersion(
                 appVersion.versionName,

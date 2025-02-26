@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -44,11 +44,11 @@ private const val EXPECTED_VERSION_NAME = "1.2.3"
 private const val EXPECTED_VERSION_CODE = 4L
 
 /**
- * Tests for [AboutItemsGenerator].
+ * Tests for [RealAboutItemsGenerator].
  *
  * @author Niall Scott
  */
-class AboutItemsGeneratorTest {
+class RealAboutItemsGeneratorTest {
 
     @Test
     fun createAboutItemsReturnsItemsButMissingDatabaseInfoWhenNoDatabaseInfo() {
@@ -123,8 +123,8 @@ class AboutItemsGeneratorTest {
 
     private fun createAboutItemsGenerator(
         onDatabaseMetadataFlow: () -> Flow<DatabaseMetadata?> = { emptyFlow() }
-    ): AboutItemsGenerator {
-        return AboutItemsGenerator(
+    ): RealAboutItemsGenerator {
+        return RealAboutItemsGenerator(
             appRepository = FakeAppRepository(
                 onAppVersion = {
                     AppVersion(

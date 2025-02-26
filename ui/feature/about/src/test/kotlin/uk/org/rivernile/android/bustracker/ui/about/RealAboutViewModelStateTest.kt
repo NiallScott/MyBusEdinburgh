@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,11 +39,11 @@ private const val STATE_IS_CREDITS_SHOWN = "isCreditsShown"
 private const val STATE_IS_OPEN_SOURCE_LICENCES_SHOWN = "isOpenSourceLicencesShown"
 
 /**
- * Tests for [AboutViewModelState].
+ * Tests for [RealAboutViewModelState].
  *
  * @author Niall Scott
  */
-class AboutViewModelStateTest {
+class RealAboutViewModelStateTest {
 
     @Test
     fun isCreditsShownFlowEmitsFalseByDefault() = runTest {
@@ -156,7 +156,7 @@ class AboutViewModelStateTest {
 
     private fun createState(
         savedStateHandle: SavedStateHandle = SavedStateHandle()
-    ): AboutViewModelState {
-        return AboutViewModelState(savedStateHandle)
+    ): RealAboutViewModelState {
+        return RealAboutViewModelState(savedStateHandle)
     }
 }
