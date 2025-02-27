@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,10 +31,10 @@ package uk.org.rivernile.android.bustracker.core.alerts.proximity
  *
  * @author Niall Scott
  */
-interface ProximityAlertTaskLauncher {
+public interface ProximityAlertTaskLauncher {
 
     /**
      * Launch the task to check if proximity alert criteria has been met.
      */
-    fun launchProximityAlertTask()
+    public fun launchProximityAlertTask()
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,13 +40,9 @@ import javax.inject.Singleton
 /**
  * This repository is used to access bus stop data.
  *
- * @param stopDao The DAO to access the bus stop data store.
  * @author Niall Scott
  */
-@Singleton
-class BusStopsRepository @Inject internal constructor(
-    private val stopDao: StopDao
-) {
+public interface BusStopsRepository {
 
     /**
      * Get a [Flow] which returns [StopName] for the given `stopCode`. If the stop name is updated
@@ -55,8 +51,7 @@ class BusStopsRepository @Inject internal constructor(
      * @param stopCode The stop code to get details for.
      * @return The [Flow] which emits the [StopName] for the given stop code.
      */
-    fun getNameForStopFlow(stopCode: String): Flow<StopName?> =
-        stopDao.getNameForStopFlow(stopCode)
+    public fun getNameForStopFlow(stopCode: String): Flow<StopName?>
 
     /**
      * Get a [Flow] which returns [StopDetails] for the given `stopCode`. If stop details are
@@ -65,8 +60,7 @@ class BusStopsRepository @Inject internal constructor(
      * @param stopCode The stop code to get details for.
      * @return The [Flow] which emits [StopDetails] for the given stop code.
      */
-    fun getBusStopDetailsFlow(stopCode: String): Flow<StopDetails?> =
-        stopDao.getStopDetailsFlow(stopCode)
+    public fun getBusStopDetailsFlow(stopCode: String): Flow<StopDetails?>
 
     /**
      * Get a [Flow] which returns [StopDetails] for the given `stopCodes`. If stop details are
@@ -75,8 +69,7 @@ class BusStopsRepository @Inject internal constructor(
      * @param stopCodes The stop codes to get details for.
      * @return The [Flow] which emits [StopDetails] for the given stop codes.
      */
-    fun getBusStopDetailsFlow(stopCodes: Set<String>): Flow<Map<String, StopDetails>?> =
-        stopDao.getStopDetailsFlow(stopCodes)
+    public fun getBusStopDetailsFlow(stopCodes: Set<String>): Flow<Map<String, StopDetails>?>
 
     /**
      * Return a [Flow] which emits [List]s of [StopDetailsWithServices] objects for stops which
@@ -88,25 +81,13 @@ class BusStopsRepository @Inject internal constructor(
      * @param maxLongitude The maximum longitude of stops.
      * @param serviceFilter The listing of services to filter by.
      */
-    fun getStopDetailsWithinSpanFlow(
+    public fun getStopDetailsWithinSpanFlow(
         minLatitude: Double,
         minLongitude: Double,
         maxLatitude: Double,
         maxLongitude: Double,
         serviceFilter: Set<String>?
-    ): Flow<List<StopDetailsWithServices>?> =
-        serviceFilter?.ifEmpty { null }?.let {
-            stopDao.getStopDetailsWithinSpanFlow(
-                minLatitude,
-                minLongitude,
-                maxLatitude,
-                maxLongitude,
-                it)
-        } ?: stopDao.getStopDetailsWithinSpanFlow(
-            minLatitude,
-            minLongitude,
-            maxLatitude,
-            maxLongitude)
+    ): Flow<List<StopDetailsWithServices>?>
 
     /**
      * Return a [Flow] which emits a [List] of [StopDetails], which only contains items which
@@ -116,8 +97,9 @@ class BusStopsRepository @Inject internal constructor(
      * @return A [Flow] which emits [List]s pf [StopDetails] which satisfy the supplied
      * [serviceFilter].
      */
-    fun getStopDetailsWithServiceFilterFlow(serviceFilter: Set<String>?): Flow<List<StopDetails>?> =
-        stopDao.getStopDetailsWithServiceFilterFlow(serviceFilter)
+    public fun getStopDetailsWithServiceFilterFlow(
+        serviceFilter: Set<String>?
+    ): Flow<List<StopDetails>?>
 
     /**
      * Return a [Flow] which emits [List]s of [StopSearchResult] objects for stops which match the
@@ -127,8 +109,7 @@ class BusStopsRepository @Inject internal constructor(
      * @return A [Flow] which emits [List]s of [StopSearchResult] objects for stops which match the
      * given search term.
      */
-    fun getStopSearchResultsFlow(searchTerm: String): Flow<List<StopSearchResult>?> =
-        stopDao.getStopSearchResultsFlow(searchTerm)
+    public fun getStopSearchResultsFlow(searchTerm: String): Flow<List<StopSearchResult>?>
 
     /**
      * Get a [StopLocation] for a given [stopCode].
@@ -137,8 +118,7 @@ class BusStopsRepository @Inject internal constructor(
      * @return The [StopLocation] for the given stop code, or `null` if there is no location for
      * this stop.
      */
-    suspend fun getStopLocation(stopCode: String): StopLocation? =
-        stopDao.getLocationForStopFlow(stopCode).first()
+    public suspend fun getStopLocation(stopCode: String): StopLocation?
 
     /**
      * Get the [StopName] for the given [stopCode].
@@ -146,6 +126,51 @@ class BusStopsRepository @Inject internal constructor(
      * @param stopCode The stop code to get the name for.
      * @return The [StopName] for the stop, or `null` if it's not available.
      */
-    suspend fun getNameForStop(stopCode: String): StopName? =
+    public suspend fun getNameForStop(stopCode: String): StopName?
+}
+
+@Singleton
+internal class RealBusStopsRepository @Inject constructor(
+    private val stopDao: StopDao
+) : BusStopsRepository {
+
+    override fun getNameForStopFlow(stopCode: String) = stopDao.getNameForStopFlow(stopCode)
+
+    override fun getBusStopDetailsFlow(stopCode: String) = stopDao.getStopDetailsFlow(stopCode)
+
+    override fun getBusStopDetailsFlow(stopCodes: Set<String>) =
+        stopDao.getStopDetailsFlow(stopCodes)
+
+    override fun getStopDetailsWithinSpanFlow(
+        minLatitude: Double,
+        minLongitude: Double,
+        maxLatitude: Double,
+        maxLongitude: Double,
+        serviceFilter: Set<String>?
+    ) = serviceFilter?.ifEmpty { null }?.let {
+        stopDao.getStopDetailsWithinSpanFlow(
+            minLatitude,
+            minLongitude,
+            maxLatitude,
+            maxLongitude,
+            it
+        )
+    } ?: stopDao.getStopDetailsWithinSpanFlow(
+        minLatitude,
+        minLongitude,
+        maxLatitude,
+        maxLongitude
+    )
+
+    override fun getStopDetailsWithServiceFilterFlow(serviceFilter: Set<String>?) =
+        stopDao.getStopDetailsWithServiceFilterFlow(serviceFilter)
+
+    override fun getStopSearchResultsFlow(searchTerm: String) =
+        stopDao.getStopSearchResultsFlow(searchTerm)
+
+    override suspend fun getStopLocation(stopCode: String) =
+        stopDao.getLocationForStopFlow(stopCode).first()
+
+    override suspend fun getNameForStop(stopCode: String) =
         stopDao.getNameForStopFlow(stopCode).first()
 }

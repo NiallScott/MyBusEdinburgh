@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,28 +31,42 @@ import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import java.io.IOException
 import javax.inject.Inject
 
 /**
- * This class is used as the base and common way to access the preferences [DataStore].
+ * This is used as the base and common way to access the preferences [DataStore].
  *
- * @param dataStore The actual [DataStore].
- * @param exceptionLogger Used to log handled exceptions.
  * @author Niall Scott
  */
-class PreferenceDataStoreSource @Inject internal constructor(
-    private val dataStore: DataStore<Preferences>,
-    private val exceptionLogger: ExceptionLogger
-) {
+public interface PreferenceDataStoreSource {
 
     /**
      * This [kotlinx.coroutines.flow.Flow] should be used as the base to consume preferences. It
      * handles error states so that downstream doesn't have to.
      */
-    val preferencesFlow get() = dataStore
+    public val preferencesFlow: Flow<Preferences>
+
+    /**
+     * This method safely edits the preferences, by handling error conditions. If an error is
+     * encountered, it is silently logged and otherwise ignored as there is no handling path for
+     * the user.
+     *
+     * @param transform A lambda which is executed when the preferences are edited and passed in a
+     * [MutablePreferences] instance.
+     */
+    public suspend fun edit(transform: suspend (MutablePreferences) -> Unit)
+}
+
+internal class RealPreferenceDataStoreSource @Inject constructor(
+    private val dataStore: DataStore<Preferences>,
+    private val exceptionLogger: ExceptionLogger
+) : PreferenceDataStoreSource {
+
+    override val preferencesFlow get() = dataStore
         .data
         .catch { exception ->
             exceptionLogger.log(exception)
@@ -64,15 +78,7 @@ class PreferenceDataStoreSource @Inject internal constructor(
             }
         }
 
-    /**
-     * This method safely edits the preferences, by handling error conditions. If an error is
-     * encountered, it is silently logged and otherwise ignored as there is no handling path for
-     * the user.
-     *
-     * @param transform A lambda which is executed when the preferences are edited and passed in a
-     * [MutablePreferences] instance.
-     */
-    suspend fun edit(transform: suspend (MutablePreferences) -> Unit) {
+    override suspend fun edit(transform: suspend (MutablePreferences) -> Unit) {
         try {
             dataStore.edit(transform)
         } catch (e: IOException) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,12 +45,12 @@ import kotlin.coroutines.coroutineContext
  * @param alertsRepository The repository to access the currently set arrival alerts.
  * @author Niall Scott
  */
-class TimeAlertRunner @Inject internal constructor(
+public class TimeAlertRunner @Inject internal constructor(
     private val checkTimesTask: CheckTimesTask,
     private val alertsRepository: AlertsRepository
 ) {
 
-    companion object {
+    private companion object {
 
         private const val CHECK_TIMES_INTERVAL_MILLIS = 60000L
     }
@@ -60,7 +60,7 @@ class TimeAlertRunner @Inject internal constructor(
      * going unless and until the number of arrival alerts is less than 1. If the number of arrival
      * alerts is less than 1, a [CancellationException] will be thrown.
      */
-    suspend fun run() {
+    public suspend fun run() {
         alertsRepository
             .arrivalAlertCountFlow
             .runTimesCheck()

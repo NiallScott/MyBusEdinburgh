@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,7 +43,8 @@ import javax.inject.Inject
  */
 internal class AndroidTemporaryFileCreator @Inject constructor(
     private val context: Context,
-    @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) : TemporaryFileCreator {
+    @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher
+) : TemporaryFileCreator {
 
     @Throws(IOException::class)
     override suspend fun createTemporaryFile(prefix: String): File {

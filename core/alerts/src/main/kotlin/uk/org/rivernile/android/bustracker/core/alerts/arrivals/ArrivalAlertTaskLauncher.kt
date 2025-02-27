@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,10 +31,10 @@ package uk.org.rivernile.android.bustracker.core.alerts.arrivals
  *
  * @author Niall Scott
  */
-interface ArrivalAlertTaskLauncher {
+public interface ArrivalAlertTaskLauncher {
 
     /**
      * Launch the task to check if arrival alert criteria has been met.
      */
-    fun launchArrivalAlertTask()
+    public fun launchArrivalAlertTask()
 }

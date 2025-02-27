@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,7 +33,7 @@ import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Serv
  *
  * @author Niall Scott
  */
-interface AlertNotificationDispatcher {
+public interface AlertNotificationDispatcher {
 
     /**
      * Dispatch a new time alert notification to show to the user.
@@ -41,7 +41,7 @@ interface AlertNotificationDispatcher {
      * @param arrivalAlert The [ArrivalAlert] that caused the notification.
      * @param qualifyingServices What services caused the notification to be fired.
      */
-    suspend fun dispatchTimeAlertNotification(
+    public suspend fun dispatchTimeAlertNotification(
         arrivalAlert: ArrivalAlert,
         qualifyingServices: List<Service>
     )
@@ -51,5 +51,5 @@ interface AlertNotificationDispatcher {
      *
      * @param proximityAlert The [ProximityAlert] that caused the notification.
      */
-    suspend fun dispatchProximityAlertNotification(proximityAlert: ProximityAlert)
+    public suspend fun dispatchProximityAlertNotification(proximityAlert: ProximityAlert)
 }

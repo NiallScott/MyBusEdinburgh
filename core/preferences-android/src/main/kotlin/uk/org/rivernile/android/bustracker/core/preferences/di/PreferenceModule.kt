@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -57,6 +57,8 @@ import uk.org.rivernile.android.bustracker.core.preferences.PREF_SERVICE_SORTING
 import uk.org.rivernile.android.bustracker.core.preferences.PREF_SHOW_NIGHT_BUSES
 import uk.org.rivernile.android.bustracker.core.preferences.PREF_ZOOM_BUTTONS
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceDataStorage
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceDataStoreSource
+import uk.org.rivernile.android.bustracker.core.preferences.RealPreferenceDataStoreSource
 import javax.inject.Singleton
 
 /**
@@ -124,5 +126,11 @@ internal class PreferenceModule {
         fun bindPreferenceDataStorage(
             androidPreferenceDataStorage: AndroidPreferenceDataStorage
         ): PreferenceDataStorage
+
+        @Suppress("unused")
+        @Binds
+        fun bindPreferenceDataStoreSource(
+            realPreferenceDataStoreSource: RealPreferenceDataStoreSource
+        ): PreferenceDataStoreSource
     }
 }

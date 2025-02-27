@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,7 +36,6 @@ android {
 
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles += file("proguard-consumer-rules.pro")
     }
 
     buildTypes {
@@ -56,6 +55,10 @@ android {
                 "META-INF/*.md")
         }
     }
+}
+
+kotlin {
+    explicitApi()
 }
 
 dependencies {
@@ -80,10 +83,10 @@ dependencies {
     implementation(libs.okio)
 
     // Test dependencies
+    androidTestImplementation(testFixtures(project(":core:busstop-db-updater")))
     androidTestImplementation(libs.kotlin.test.junit)
     androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.work.test)
     androidTestImplementation(libs.coroutines.test)
-    androidTestImplementation(libs.mockk.android)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,7 @@ package uk.org.rivernile.android.bustracker.core.alerts.proximity
  *
  * @author Niall Scott
  */
-interface GeofencingManager {
+public interface GeofencingManager {
 
     /**
      * Add a new geofence to be tracked by the implementation.
@@ -42,12 +42,18 @@ interface GeofencingManager {
      * @param radius How large the geofence should be, as a radius, in meters.
      * @param duration How long, in milliseconds, the geofence should track for.
      */
-    fun addGeofence(id: Int, latitude: Double, longitude: Double, radius: Float, duration: Long)
+    public fun addGeofence(
+        id: Int,
+        latitude: Double,
+        longitude: Double,
+        radius: Float,
+        duration: Long
+    )
 
     /**
      * Remove a previously set geofence.
      *
      * @param id The ID of the geofence to remove.
      */
-    fun removeGeofence(id: Int)
+    public fun removeGeofence(id: Int)
 }

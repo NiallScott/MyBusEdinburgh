@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,11 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.config
 
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.whenever
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -39,23 +34,15 @@ import kotlin.test.assertEquals
  *
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner::class)
 class ConfigRepositoryTest {
-
-    @Mock
-    private lateinit var buildConfiguration: BuildConfiguration
-
-    private lateinit var repository: ConfigRepository
-
-    @BeforeTest
-    fun setUp() {
-        repository = ConfigRepository(buildConfiguration)
-    }
 
     @Test
     fun nearestStopsLatitudeSpanReturnsValueOfNearestStopsLatitudeSpan() {
-        whenever(buildConfiguration.nearestStopsLatitudeSpan)
-                .thenReturn(1.1)
+        val repository = createConfigRepository(
+            buildConfiguration = FakeBuildConfiguration(
+                onNearestStopsLatitudeSpan = { 1.1 }
+            )
+        )
 
         val result = repository.nearestStopsLatitudeSpan
 
@@ -64,11 +51,20 @@ class ConfigRepositoryTest {
 
     @Test
     fun nearestStopsLongitudeSpanReturnsValueOfNearestStopsLongitudeSpan() {
-        whenever(buildConfiguration.nearestStopsLongitudeSpan)
-                .thenReturn(2.2)
+        val repository = createConfigRepository(
+            buildConfiguration = FakeBuildConfiguration(
+                onNearestStopsLongitudeSpan = { 2.2 }
+            )
+        )
 
         val result = repository.nearestStopsLongitudeSpan
 
         assertEquals(2.2, result, 0.00001)
+    }
+
+    private fun createConfigRepository(
+        buildConfiguration: BuildConfiguration = FakeBuildConfiguration()
+    ): ConfigRepository {
+        return ConfigRepository(buildConfiguration)
     }
 }

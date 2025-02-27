@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,28 +34,34 @@ import javax.inject.Inject
 /**
  * This deals with the tracking and untracking of proximity alerts.
  *
- * @param busStopsRepository Used to access the bus stop data.
- * @param geofencingManager Used to set and remove geofences.
- * @param timeUtils Used to obtain timestamps.
  * @author Niall Scott
  */
-internal class ProximityAlertTracker @Inject constructor(
-    private val busStopsRepository: BusStopsRepository,
-    private val geofencingManager: GeofencingManager,
-    private val timeUtils: TimeUtils
-) {
-
-    companion object {
-
-        private const val MAX_DURATION_MILLIS = 3600000L
-    }
+internal interface ProximityAlertTracker {
 
     /**
      * Given a newly detected [ProximityAlert], track it by adding it to the [GeofencingManager].
      *
      * @param alert The alert to track.
      */
-    suspend fun trackProximityAlert(alert: ProximityAlert) {
+    suspend fun trackProximityAlert(alert: ProximityAlert)
+
+    /**
+     * Remove a proximity alert.
+     *
+     * @param id The ID of the parameter.
+     */
+    fun removeProximityAlert(id: Int)
+}
+
+private const val MAX_DURATION_MILLIS = 3600000L
+
+internal class RealProximityAlertTracker @Inject constructor(
+    private val busStopsRepository: BusStopsRepository,
+    private val geofencingManager: GeofencingManager,
+    private val timeUtils: TimeUtils
+) : ProximityAlertTracker {
+
+    override suspend fun trackProximityAlert(alert: ProximityAlert) {
         busStopsRepository.getStopLocation(alert.stopCode)
             ?.let {
                 val duration = alert.timeAdded + MAX_DURATION_MILLIS - timeUtils.currentTimeMills
@@ -72,12 +78,7 @@ internal class ProximityAlertTracker @Inject constructor(
             }
     }
 
-    /**
-     * Remove a proximity alert.
-     *
-     * @param id The ID of the parameter.
-     */
-    fun removeProximityAlert(id: Int) {
+    override fun removeProximityAlert(id: Int) {
         geofencingManager.removeGeofence(id)
     }
 }

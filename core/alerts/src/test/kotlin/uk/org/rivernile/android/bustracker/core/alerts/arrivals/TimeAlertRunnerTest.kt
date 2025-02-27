@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,17 +33,12 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.never
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
-import kotlin.test.BeforeTest
+import uk.org.rivernile.android.bustracker.core.alerts.FakeAlertsRepository
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.test.fail
 
 /**
  * Tests for [TimeAlertRunner].
@@ -51,28 +46,18 @@ import kotlin.test.assertTrue
  * @author Niall Scott
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(MockitoJUnitRunner::class)
 class TimeAlertRunnerTest {
-
-    @Mock
-    private lateinit var checkTimesTask: CheckTimesTask
-    @Mock
-    private lateinit var alertsRepository: AlertsRepository
-
-    private lateinit var runner: TimeAlertRunner
-
-    @BeforeTest
-    fun setUp() {
-        runner = TimeAlertRunner(
-            checkTimesTask,
-            alertsRepository
-        )
-    }
 
     @Test
     fun runWithZeroArrivalAlertsOnStartThrowsImmediateCancellationException() = runTest {
-        whenever(alertsRepository.arrivalAlertCountFlow)
-            .thenReturn(flowOf(0))
+        val runner = createTimeAlertRunner(
+            checkTimesTask = FakeCheckTimesTask(
+                onCheckTimes = { fail("Not expecting to check times.") }
+            ),
+            alertsRepository = FakeAlertsRepository(
+                onArrivalAlertCountFlow = { flowOf(0) }
+            )
+        )
 
         val job = launch {
             runner.run()
@@ -82,14 +67,19 @@ class TimeAlertRunnerTest {
         // As the launched Coroutine is self-cancelling when there are no arrival alerts, and we did
         // not cancel it in this test, we're expecting the Job to be in a cancelled state.
         assertTrue(job.isCancelled)
-        verify(checkTimesTask, never())
-            .checkTimes()
     }
 
     @Test
     fun runWithOneArrivalAlertOnStartCausesCheckTimesTaskToRun() = runTest {
-        whenever(alertsRepository.arrivalAlertCountFlow)
-            .thenReturn(flowOf(1))
+        val invocationCounter = InvocationCounter()
+        val runner = createTimeAlertRunner(
+            checkTimesTask = FakeCheckTimesTask(
+                onCheckTimes = invocationCounter
+            ),
+            alertsRepository = FakeAlertsRepository(
+                onArrivalAlertCountFlow = { flowOf(1) }
+            )
+        )
 
         val job = launch {
             runner.run()
@@ -97,8 +87,7 @@ class TimeAlertRunnerTest {
         advanceTimeBy(1L)
         job.cancel()
 
-        verify(checkTimesTask)
-            .checkTimes()
+        assertEquals(1, invocationCounter.invocationCount)
     }
 
     @Test
@@ -114,8 +103,15 @@ class TimeAlertRunnerTest {
             delay(30000L)
             emit(0)
         }
-        whenever(alertsRepository.arrivalAlertCountFlow)
-            .thenReturn(flow)
+        val invocationCounter = InvocationCounter()
+        val runner = createTimeAlertRunner(
+            checkTimesTask = FakeCheckTimesTask(
+                onCheckTimes = invocationCounter
+            ),
+            alertsRepository = FakeAlertsRepository(
+                onArrivalAlertCountFlow = { flow }
+            )
+        )
 
         val job = launch {
             runner.run()
@@ -126,7 +122,26 @@ class TimeAlertRunnerTest {
         job.join()
 
         assertTrue(job.isCancelled)
-        verify(checkTimesTask, times(2))
-            .checkTimes()
+        assertEquals(2, invocationCounter.invocationCount)
+    }
+
+    private fun createTimeAlertRunner(
+        checkTimesTask: CheckTimesTask = FakeCheckTimesTask(),
+        alertsRepository: AlertsRepository = FakeAlertsRepository()
+    ): TimeAlertRunner {
+        return TimeAlertRunner(
+            checkTimesTask,
+            alertsRepository
+        )
+    }
+
+    private class InvocationCounter : () -> Unit {
+
+        var invocationCount = 0
+            private set
+
+        override fun invoke() {
+            invocationCount++
+        }
     }
 }

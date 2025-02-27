@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -135,7 +135,7 @@ dependencies {
 
     "edinburghImplementation"(project(":cities:edinburgh:edinburgh-android"))
     implementation(project(":core:alerts-android"))
-    implementation(project(":core:busstops"))
+    implementation(project(":core:busstops-android"))
     implementation(project(":core:config"))
     implementation(project(":core:connectivity-android"))
     implementation(project(":core:coroutines-android"))
@@ -212,6 +212,8 @@ dependencies {
     testImplementation(libs.coroutines.test)
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.mockito)
+    testImplementation(libs.mockito.kotlin)
     testImplementation(libs.turbine)
 
     baselineProfile(project(":macrobenchmark:app-baselineprofile"))

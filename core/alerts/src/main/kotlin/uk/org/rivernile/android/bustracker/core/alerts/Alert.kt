@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,22 +31,22 @@ package uk.org.rivernile.android.bustracker.core.alerts
  *
  * @author Niall Scott
  */
-sealed interface Alert {
+public sealed interface Alert {
 
     /**
      * The ID of this alert.
      */
-    val id: Int
+    public val id: Int
 
     /**
      * The UNIX timestamp, in milliseconds, that the alert was created at.
      */
-    val timeAdded: Long
+    public val timeAdded: Long
 
     /**
      * What stop code does the alert concern?
      */
-    val stopCode: String
+    public val stopCode: String
 }
 
 /**
@@ -60,7 +60,7 @@ sealed interface Alert {
  * named stop at this value or less.
  * @author Niall Scott
  */
-data class ArrivalAlert(
+public data class ArrivalAlert(
     override val id: Int,
     override val timeAdded: Long,
     override val stopCode: String,
@@ -78,7 +78,7 @@ data class ArrivalAlert(
  * is the radius of the proximity area.
  * @author Niall Scott
  */
-data class ProximityAlert(
+public data class ProximityAlert(
     override val id: Int,
     override val timeAdded: Long,
     override val stopCode: String,

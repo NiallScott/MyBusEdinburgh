@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,15 +31,15 @@ package uk.org.rivernile.android.bustracker.core.config
  *
  * @author Niall Scott
  */
-interface BuildConfiguration {
+public interface BuildConfiguration {
 
     /**
      * The nearest stops latitude span.
      */
-    val nearestStopsLatitudeSpan: Double
+    public val nearestStopsLatitudeSpan: Double
 
     /**
      * The nearest stops longitude span.
      */
-    val nearestStopsLongitudeSpan: Double
+    public val nearestStopsLongitudeSpan: Double
 }

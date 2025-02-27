@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.preferences
 
-import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
@@ -40,20 +39,13 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
+import uk.org.rivernile.android.bustracker.core.log.FakeExceptionLogger
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 /**
@@ -62,7 +54,6 @@ import kotlin.test.assertTrue
  * @author Niall Scott
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(MockitoJUnitRunner::class)
 class AndroidPreferenceDataStorageTest {
 
     companion object {
@@ -86,21 +77,6 @@ class AndroidPreferenceDataStorageTest {
         private const val APP_THEME_DARK = "dark"
     }
 
-    @Mock
-    private lateinit var dataStoreSource: PreferenceDataStoreSource
-    @Mock
-    private lateinit var exceptionLogger: ExceptionLogger
-
-    private lateinit var dataStorage: AndroidPreferenceDataStorage
-
-    @BeforeTest
-    fun setUp() {
-        dataStorage = AndroidPreferenceDataStorage(
-            dataStoreSource,
-            exceptionLogger
-        )
-    }
-
     @Test
     fun isDatabaseUpdateWifiOnlyFlowEmitsValues() = runTest {
         val key = booleanPreferencesKey(PREF_BUS_STOP_DATABASE_WIFI_ONLY)
@@ -113,8 +89,11 @@ class AndroidPreferenceDataStorageTest {
             preferencesOf(key to true),
             preferencesOf(key to false)
         )
-        whenever(dataStoreSource.preferencesFlow)
-            .thenReturn(flow)
+        val dataStorage = createAndroidPreferenceDataStorage(
+            dataStoreSource = FakePreferenceDataStoreSource(
+                onPreferencesFlow = { flow }
+            )
+        )
 
         dataStorage.isDatabaseUpdateWifiOnlyFlow.test {
             assertEquals(DEFAULT_WIFI_ONLY, awaitItem())
@@ -138,8 +117,11 @@ class AndroidPreferenceDataStorageTest {
             preferencesOf(key to APP_THEME_DARK),
             preferencesOf()
         )
-        whenever(dataStoreSource.preferencesFlow)
-            .thenReturn(flow)
+        val dataStorage = createAndroidPreferenceDataStorage(
+            dataStoreSource = FakePreferenceDataStoreSource(
+                onPreferencesFlow = { flow }
+            )
+        )
 
         dataStorage.appThemeFlow.test {
             assertEquals(AppTheme.SYSTEM_DEFAULT, awaitItem())
@@ -180,8 +162,11 @@ class AndroidPreferenceDataStorageTest {
                 keyAlertLed to true
             )
         )
-        whenever(dataStoreSource.preferencesFlow)
-            .thenReturn(flow)
+        val dataStorage = createAndroidPreferenceDataStorage(
+            dataStoreSource = FakePreferenceDataStoreSource(
+                onPreferencesFlow = { flow }
+            )
+        )
 
         dataStorage.alertNotificationPreferencesFlow.test {
             assertEquals(
@@ -224,8 +209,11 @@ class AndroidPreferenceDataStorageTest {
             preferencesOf(key to true),
             preferencesOf(key to false)
         )
-        whenever(dataStoreSource.preferencesFlow)
-            .thenReturn(flow)
+        val dataStorage = createAndroidPreferenceDataStorage(
+            dataStoreSource = FakePreferenceDataStoreSource(
+                onPreferencesFlow = { flow }
+            )
+        )
 
         dataStorage.isLiveTimesAutoRefreshEnabledFlow.test {
             assertEquals(DEFAULT_AUTO_REFRESH, awaitItem())
@@ -246,8 +234,11 @@ class AndroidPreferenceDataStorageTest {
             preferencesOf(key to false),
             preferencesOf(key to false),
             preferencesOf(key to true))
-        whenever(dataStoreSource.preferencesFlow)
-            .thenReturn(flow)
+        val dataStorage = createAndroidPreferenceDataStorage(
+            dataStoreSource = FakePreferenceDataStoreSource(
+                onPreferencesFlow = { flow }
+            )
+        )
 
         dataStorage.isLiveTimesShowNightServicesEnabledFlow.test {
             assertEquals(DEFAULT_SHOW_NIGHT_BUSES, awaitItem())
@@ -269,8 +260,11 @@ class AndroidPreferenceDataStorageTest {
             preferencesOf(key to true),
             preferencesOf(key to false)
         )
-        whenever(dataStoreSource.preferencesFlow)
-            .thenReturn(flow)
+        val dataStorage = createAndroidPreferenceDataStorage(
+            dataStoreSource = FakePreferenceDataStoreSource(
+                onPreferencesFlow = { flow }
+            )
+        )
 
         dataStorage.isLiveTimesSortByTimeFlow.test {
             assertEquals(DEFAULT_SERVICE_SORTING, awaitItem())
@@ -291,8 +285,13 @@ class AndroidPreferenceDataStorageTest {
             preferencesOf(key to "9"),
             preferencesOf(key to "5")
         )
-        whenever(dataStoreSource.preferencesFlow)
-            .thenReturn(flow)
+        val exceptionLogger = FakeExceptionLogger()
+        val dataStorage = createAndroidPreferenceDataStorage(
+            dataStoreSource = FakePreferenceDataStoreSource(
+                onPreferencesFlow = { flow }
+            ),
+            exceptionLogger = exceptionLogger
+        )
 
         dataStorage.liveTimesNumberOfDeparturesFlow.test {
             assertEquals(4, awaitItem())
@@ -300,22 +299,25 @@ class AndroidPreferenceDataStorageTest {
             assertEquals(5, awaitItem())
             awaitComplete()
         }
-        verify(exceptionLogger, never())
-            .log(any())
+        assertTrue(exceptionLogger.loggedThrowables.isEmpty())
     }
 
     @Test
     fun liveTimesNumberOfDeparturesFlowCopesWithPoorlyFormattedNumber() = runTest {
         val key = stringPreferencesKey(PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE)
         val flow = flowOf(preferencesOf(key to "not a number"))
-        whenever(dataStoreSource.preferencesFlow)
-            .thenReturn(flow)
+        val exceptionLogger = FakeExceptionLogger()
+        val dataStorage = createAndroidPreferenceDataStorage(
+            dataStoreSource = FakePreferenceDataStoreSource(
+                onPreferencesFlow = { flow }
+            ),
+            exceptionLogger = exceptionLogger
+        )
 
         val result = dataStorage.liveTimesNumberOfDeparturesFlow.first()
 
         assertEquals(DEFAULT_NUMBER_OF_DEPARTURES_PER_SERVICE, result)
-        verify(exceptionLogger)
-            .log(any<NumberFormatException>())
+        assertIs<NumberFormatException>(exceptionLogger.loggedThrowables.single())
     }
 
     @Test
@@ -330,8 +332,11 @@ class AndroidPreferenceDataStorageTest {
             preferencesOf(key to false),
             preferencesOf(key to true)
         )
-        whenever(dataStoreSource.preferencesFlow)
-            .thenReturn(flow)
+        val dataStorage = createAndroidPreferenceDataStorage(
+            dataStoreSource = FakePreferenceDataStoreSource(
+                onPreferencesFlow = { flow }
+            )
+        )
 
         dataStorage.isMapZoomControlsVisibleFlow.test {
             assertEquals(DEFAULT_MAP_ZOOM_BUTTONS, awaitItem())
@@ -353,8 +358,11 @@ class AndroidPreferenceDataStorageTest {
             preferencesOf(key to true),
             preferencesOf(key to false)
         )
-        whenever(dataStoreSource.preferencesFlow)
-            .thenReturn(flow)
+        val dataStorage = createAndroidPreferenceDataStorage(
+            dataStoreSource = FakePreferenceDataStoreSource(
+                onPreferencesFlow = { flow }
+            )
+        )
 
         dataStorage.isGpsPromptDisabledFlow.test {
             assertEquals(DEFAULT_DISABLE_GPS_PROMPT, awaitItem())
@@ -390,8 +398,13 @@ class AndroidPreferenceDataStorageTest {
             ),
             preferencesOf()
         )
-        whenever(dataStoreSource.preferencesFlow)
-            .thenReturn(flow)
+        val exceptionLogger = FakeExceptionLogger()
+        val dataStorage = createAndroidPreferenceDataStorage(
+            dataStoreSource = FakePreferenceDataStoreSource(
+                onPreferencesFlow = { flow }
+            ),
+            exceptionLogger = exceptionLogger
+        )
 
         dataStorage.lastMapCameraLocationFlow.test {
             assertEquals(
@@ -420,8 +433,7 @@ class AndroidPreferenceDataStorageTest {
             )
             awaitComplete()
         }
-        verify(exceptionLogger, never())
-            .log(any())
+        assertTrue(exceptionLogger.loggedThrowables.isEmpty())
     }
 
     @Test
@@ -436,19 +448,23 @@ class AndroidPreferenceDataStorageTest {
                 keyMapLastZoom to 3.14f
             )
         )
-        whenever(dataStoreSource.preferencesFlow)
-            .thenReturn(flow)
         val expected = LastMapCameraLocation(
             DEFAULT_LATITUDE,
             DEFAULT_LONGITUDE,
             3.14f
         )
+        val exceptionLogger = FakeExceptionLogger()
+        val dataStorage = createAndroidPreferenceDataStorage(
+            dataStoreSource = FakePreferenceDataStoreSource(
+                onPreferencesFlow = { flow }
+            ),
+            exceptionLogger = exceptionLogger
+        )
 
         val result = dataStorage.lastMapCameraLocationFlow.first()
 
         assertEquals(expected, result)
-        verify(exceptionLogger)
-            .log(any<NumberFormatException>())
+        assertIs<NumberFormatException>(exceptionLogger.loggedThrowables.single())
     }
 
     @Test
@@ -463,19 +479,23 @@ class AndroidPreferenceDataStorageTest {
                 keyMapLastZoom to 3.14f
             )
         )
-        whenever(dataStoreSource.preferencesFlow)
-            .thenReturn(flow)
         val expected = LastMapCameraLocation(
             DEFAULT_LATITUDE,
             DEFAULT_LONGITUDE,
             3.14f
         )
+        val exceptionLogger = FakeExceptionLogger()
+        val dataStorage = createAndroidPreferenceDataStorage(
+            dataStoreSource = FakePreferenceDataStoreSource(
+                onPreferencesFlow = { flow }
+            ),
+            exceptionLogger = exceptionLogger
+        )
 
         val result = dataStorage.lastMapCameraLocationFlow.first()
 
         assertEquals(expected, result)
-        verify(exceptionLogger)
-            .log(any<NumberFormatException>())
+        assertIs<NumberFormatException>(exceptionLogger.loggedThrowables.single())
     }
 
     @Test
@@ -490,8 +510,12 @@ class AndroidPreferenceDataStorageTest {
             preferencesOf(key to 2),
             preferencesOf(key to 3)
         )
-        whenever(dataStoreSource.preferencesFlow)
-            .thenReturn(flow)
+
+        val dataStorage = createAndroidPreferenceDataStorage(
+            dataStoreSource = FakePreferenceDataStoreSource(
+                onPreferencesFlow = { flow }
+            )
+        )
 
         dataStorage.mapTypeFlow.test {
             assertEquals(DEFAULT_MAP_LAST_TYPE, awaitItem())
@@ -505,12 +529,15 @@ class AndroidPreferenceDataStorageTest {
     fun toggleSortByTimeTogglesDefaultValue() = runTest {
         val key = booleanPreferencesKey(PREF_SERVICE_SORTING)
         val preferences = mutablePreferencesOf()
-        doAnswer {
-            val transform = it.getArgument<suspend (MutablePreferences) -> Unit>(0)
-            launch {
-                transform(preferences)
-            }
-        }.whenever(dataStoreSource).edit(any())
+        val dataStorage = createAndroidPreferenceDataStorage(
+            dataStoreSource = FakePreferenceDataStoreSource(
+                onEdit = {
+                    launch {
+                        it(preferences)
+                    }
+                }
+            )
+        )
 
         dataStorage.toggleSortByTime()
         advanceUntilIdle()
@@ -522,12 +549,15 @@ class AndroidPreferenceDataStorageTest {
     fun toggleSortByTimeTogglesExistingValue() = runTest {
         val key = booleanPreferencesKey(PREF_SERVICE_SORTING)
         val preferences = mutablePreferencesOf(key to true)
-        doAnswer {
-            val transform = it.getArgument<suspend (MutablePreferences) -> Unit>(0)
-            launch {
-                transform(preferences)
-            }
-        }.whenever(dataStoreSource).edit(any())
+        val dataStorage = createAndroidPreferenceDataStorage(
+            dataStoreSource = FakePreferenceDataStoreSource(
+                onEdit = {
+                    launch {
+                        it(preferences)
+                    }
+                }
+            )
+        )
 
         dataStorage.toggleSortByTime()
         advanceUntilIdle()
@@ -539,12 +569,15 @@ class AndroidPreferenceDataStorageTest {
     fun toggleAutoRefreshTogglesDefaultValue() = runTest {
         val key = booleanPreferencesKey(PREF_AUTO_REFRESH)
         val preferences = mutablePreferencesOf()
-        doAnswer {
-            val transform = it.getArgument<suspend (MutablePreferences) -> Unit>(0)
-            launch {
-                transform(preferences)
-            }
-        }.whenever(dataStoreSource).edit(any())
+        val dataStorage = createAndroidPreferenceDataStorage(
+            dataStoreSource = FakePreferenceDataStoreSource(
+                onEdit = {
+                    launch {
+                        it(preferences)
+                    }
+                }
+            )
+        )
 
         dataStorage.toggleAutoRefresh()
         advanceUntilIdle()
@@ -556,12 +589,15 @@ class AndroidPreferenceDataStorageTest {
     fun toggleAutoRefreshTogglesExistingValue() = runTest {
         val key = booleanPreferencesKey(PREF_AUTO_REFRESH)
         val preferences = mutablePreferencesOf(key to true)
-        doAnswer {
-            val transform = it.getArgument<suspend (MutablePreferences) -> Unit>(0)
-            launch {
-                transform(preferences)
-            }
-        }.whenever(dataStoreSource).edit(any())
+        val dataStorage = createAndroidPreferenceDataStorage(
+            dataStoreSource = FakePreferenceDataStoreSource(
+                onEdit = {
+                    launch {
+                        it(preferences)
+                    }
+                }
+            )
+        )
 
         dataStorage.toggleAutoRefresh()
         advanceUntilIdle()
@@ -573,12 +609,15 @@ class AndroidPreferenceDataStorageTest {
     fun setIsGpsPromptDisabledSetsValue() = runTest {
         val key = booleanPreferencesKey(PREF_DISABLE_GPS_PROMPT)
         val preferences = mutablePreferencesOf()
-        doAnswer {
-            val transform = it.getArgument<suspend (MutablePreferences) -> Unit>(0)
-            launch {
-                transform(preferences)
-            }
-        }.whenever(dataStoreSource).edit(any())
+        val dataStorage = createAndroidPreferenceDataStorage(
+            dataStoreSource = FakePreferenceDataStoreSource(
+                onEdit = {
+                    launch {
+                        it(preferences)
+                    }
+                }
+            )
+        )
 
         dataStorage.setIsGpsPromptDisabled(true)
         advanceUntilIdle()
@@ -592,16 +631,19 @@ class AndroidPreferenceDataStorageTest {
         val keyMapLastLongitude = stringPreferencesKey(PREF_MAP_LAST_LONGITUDE)
         val keyMapLastZoom = floatPreferencesKey(PREF_MAP_LAST_ZOOM)
         val preferences = mutablePreferencesOf()
-        doAnswer {
-            val transform = it.getArgument<suspend (MutablePreferences) -> Unit>(0)
-            launch {
-                transform(preferences)
-            }
-        }.whenever(dataStoreSource).edit(any())
         val newValue = LastMapCameraLocation(
             latitude = 1.1,
             longitude = 2.2,
             zoomLevel = 3.14f
+        )
+        val dataStorage = createAndroidPreferenceDataStorage(
+            dataStoreSource = FakePreferenceDataStoreSource(
+                onEdit = {
+                    launch {
+                        it(preferences)
+                    }
+                }
+            )
         )
 
         dataStorage.setLastMapCameraLocation(newValue)
@@ -616,16 +658,29 @@ class AndroidPreferenceDataStorageTest {
     fun setMapTypeSetsValue() = runTest {
         val key = intPreferencesKey(PREF_MAP_LAST_MAP_TYPE)
         val preferences = mutablePreferencesOf()
-        doAnswer {
-            val transform = it.getArgument<suspend (MutablePreferences) -> Unit>(0)
-            launch {
-                transform(preferences)
-            }
-        }.whenever(dataStoreSource).edit(any())
+        val dataStorage = createAndroidPreferenceDataStorage(
+            dataStoreSource = FakePreferenceDataStoreSource(
+                onEdit = {
+                    launch {
+                        it(preferences)
+                    }
+                }
+            )
+        )
 
         dataStorage.setMapType(42)
         advanceUntilIdle()
 
         assertEquals(42, preferences[key])
+    }
+
+    private fun createAndroidPreferenceDataStorage(
+        dataStoreSource: PreferenceDataStoreSource = FakePreferenceDataStoreSource(),
+        exceptionLogger: ExceptionLogger = FakeExceptionLogger()
+    ): AndroidPreferenceDataStorage {
+        return AndroidPreferenceDataStorage(
+            dataStoreSource,
+            exceptionLogger
+        )
     }
 }

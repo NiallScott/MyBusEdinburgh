@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,12 +45,13 @@ import uk.org.rivernile.android.bustracker.core.work.WorkManagerInitialiser
  * @author Niall Scott
  */
 @Suppress("unused")
-class StopDatabaseUpdaterInitialiser : Initializer<Unit> {
+public class StopDatabaseUpdaterInitialiser : Initializer<Unit> {
 
     override fun create(context: Context) {
         val hiltEntryPoint = EarlyEntryPoints.get(
             context,
-            StopDatabaseUpdaterInitialiserEntryPoint::class.java)
+            StopDatabaseUpdaterInitialiserEntryPoint::class.java
+        )
 
         hiltEntryPoint.applicationCoroutineScope.launch(hiltEntryPoint.defaultDispatcher) {
             hiltEntryPoint.scheduler.scheduleUpdateBusStopDatabaseJob()
