@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,10 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.ui.theme
 
-import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createComposeRule
 import org.junit.Rule
 import uk.org.rivernile.android.bustracker.ui.text.LocalServiceColours
 import kotlin.test.Test
@@ -43,7 +42,7 @@ import kotlin.test.assertEquals
 class ThemeKtTest {
 
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+    val composeTestRule = createComposeRule()
 
     @Test
     fun myBusThemeUsesCorrectDefaultServiceColours() {
