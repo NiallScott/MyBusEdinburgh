@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -101,7 +101,7 @@ subprojects {
             testOptions {
                 @Suppress("UnstableApiUsage")
                 managedDevices {
-                    devices {
+                    allDevices {
                         maybeCreate<ManagedVirtualDevice>("pixel2api27").apply {
                             device = "Pixel 2"
                             apiLevel = 27
@@ -147,13 +147,13 @@ subprojects {
 
                     groups {
                         maybeCreate("allApis").apply {
-                            targetDevices += devices["pixel2api27"]
-                            targetDevices += devices["pixel2api28"]
-                            targetDevices += devices["pixel2api29"]
-                            targetDevices += devices["pixel2api30"]
-                            targetDevices += devices["pixel2api31"]
-                            targetDevices += devices["pixel2api33"]
-                            targetDevices += devices["pixel2api34"]
+                            targetDevices += allDevices["pixel2api27"]
+                            targetDevices += allDevices["pixel2api28"]
+                            targetDevices += allDevices["pixel2api29"]
+                            targetDevices += allDevices["pixel2api30"]
+                            targetDevices += allDevices["pixel2api31"]
+                            targetDevices += allDevices["pixel2api33"]
+                            targetDevices += allDevices["pixel2api34"]
                         }
                     }
                 }
