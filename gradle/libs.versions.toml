@@ -5,7 +5,7 @@ android-sdk-min = "23"
 android-sdk-target = "34"
 android-build-tools = "35.0.1"
 
-android-gradle-plugin = "8.8.2"
+android-gradle-plugin = "8.9.0"
 coroutines = "1.10.1"
 dagger = "2.55"
 kotlin = "2.1.10"
@@ -23,7 +23,7 @@ androidx-work = "2.10.0"
 
 # Testing versions.
 espresso = "3.6.1"
-mockito = "5.15.2"
+mockito = "5.16.0"
 
 [libraries]
 # Coroutines
@@ -89,7 +89,7 @@ material = { module = "com.google.android.material:material", version = "1.12.0"
 material-compose = { module = "androidx.compose.material3:material3" }
 
 # Firebase
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "33.9.0" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "33.10.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 
 # Play Services
