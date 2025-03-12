@@ -84,30 +84,42 @@ internal fun <T : UiServiceUpdate> ServiceUpdatesScreen(
     onRefresh: () -> Unit,
     itemContent: @Composable LazyItemScope.(item: T) -> Unit
 ) {
-    val nestedScrollInterop = rememberNestedScrollInteropConnection()
-
     PullToRefreshBox(
         isRefreshing = content.isRefreshing,
         onRefresh = onRefresh,
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        when (content) {
-            is UiContent.InProgress -> EmptyProgress()
-            is UiContent.Populated -> PopulatedContent(
-                content = content,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .nestedScroll(nestedScrollInterop),
-                itemContent = itemContent
-            )
-            is UiContent.Error -> Error(
-                error = content.error,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .nestedScroll(nestedScrollInterop)
-            )
-        }
+        Content(
+            content = content,
+            itemContent = itemContent
+        )
+    }
+}
+
+@Composable
+private fun <T : UiServiceUpdate> Content(
+    content: UiContent<T>,
+    modifier: Modifier = Modifier,
+    itemContent: @Composable LazyItemScope.(item: T) -> Unit
+) {
+    val nestedScrollInterop = rememberNestedScrollInteropConnection()
+
+    when (content) {
+        is UiContent.InProgress -> EmptyProgress(modifier = modifier)
+        is UiContent.Populated -> PopulatedContent(
+            content = content,
+            modifier = modifier
+                .fillMaxSize()
+                .nestedScroll(nestedScrollInterop),
+            itemContent = itemContent
+        )
+        is UiContent.Error -> Error(
+            error = content.error,
+            modifier = modifier
+                .fillMaxSize()
+                .nestedScroll(nestedScrollInterop)
+        )
     }
 }
 

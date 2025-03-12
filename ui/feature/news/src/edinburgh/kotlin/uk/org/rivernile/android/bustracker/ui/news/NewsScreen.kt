@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -53,8 +53,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import uk.org.rivernile.android.bustracker.ui.interop.MenuProvider
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.DiversionsScreen
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.UiDiversion
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.UiDiversionsState
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.IncidentsScreen
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIncident
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIncidentsState
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 
 private const val TAB_INCIDENTS = 0
@@ -81,7 +83,6 @@ internal fun NewsScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NewsScreenWithState(
     state: UiState,
@@ -95,48 +96,60 @@ private fun NewsScreenWithState(
     Column (
         modifier = modifier
     ) {
-        var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+        var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
 
-        PrimaryTabRow(
-            selectedTabIndex = selectedTab
-        ) {
-            NewsTab(
-                selected = selectedTab == TAB_INCIDENTS,
-                text = stringResource(id = R.string.news_fragment_tab_incidents),
-                iconRes = R.drawable.ic_bus_alert,
-                countForBadge = state.tabBadges.incidentsCount,
-                onClick = { selectedTab = TAB_INCIDENTS }
-            )
+        NewsTabBar(
+            selectedTabIndex = selectedTabIndex,
+            tabBadges = state.tabBadges,
+            onTabClicked = { selectedTabIndex = it }
+        )
 
-            NewsTab(
-                selected = selectedTab == TAB_DIVERSIONS,
-                text = stringResource(id = R.string.news_fragment_tab_diversions),
-                iconRes = R.drawable.ic_fork_right,
-                countForBadge = state.tabBadges.diversionsCount,
-                onClick = { selectedTab = TAB_DIVERSIONS }
-            )
-        }
-
-        when (selectedTab) {
-            TAB_INCIDENTS -> IncidentsScreen(
-                state = state.incidentsState,
-                onRefresh = onRefresh,
-                onMoreDetailsClicked = onIncidentMoreDetailsClicked,
-                onActionLaunched = onIncidentActionLaunched
-            )
-            TAB_DIVERSIONS -> DiversionsScreen(
-                state = state.diversionsState,
-                onRefresh = onRefresh,
-                onMoreDetailsClicked = onDiversionMoreDetailsClicked,
-                onActionLaunched = onDiversionActionLaunched
-            )
-        }
+        NewsContent(
+            selectedTabIndex = selectedTabIndex,
+            incidentsState = state.incidentsState,
+            diversionsState = state.diversionsState,
+            onRefresh = onRefresh,
+            onIncidentMoreDetailsClicked = onIncidentMoreDetailsClicked,
+            onIncidentActionLaunched = onIncidentActionLaunched,
+            onDiversionMoreDetailsClicked = onDiversionMoreDetailsClicked,
+            onDiversionActionLaunched = onDiversionActionLaunched
+        )
     }
 
     if (!LocalInspectionMode.current) {
         NewsMenuItems(
             actionButtons = state.actionButtons,
             onRefresh = onRefresh
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NewsTabBar(
+    selectedTabIndex: Int,
+    tabBadges: UiTabBadges,
+    modifier: Modifier = Modifier,
+    onTabClicked: (Int) -> Unit
+) {
+    PrimaryTabRow(
+        selectedTabIndex = selectedTabIndex,
+        modifier = modifier
+    ) {
+        NewsTab(
+            selected = selectedTabIndex == TAB_INCIDENTS,
+            text = stringResource(id = R.string.news_fragment_tab_incidents),
+            iconRes = R.drawable.ic_bus_alert,
+            countForBadge = tabBadges.incidentsCount,
+            onClick = { onTabClicked(TAB_INCIDENTS) }
+        )
+
+        NewsTab(
+            selected = selectedTabIndex == TAB_DIVERSIONS,
+            text = stringResource(id = R.string.news_fragment_tab_diversions),
+            iconRes = R.drawable.ic_fork_right,
+            countForBadge = tabBadges.diversionsCount,
+            onClick = { onTabClicked(TAB_DIVERSIONS) }
         )
     }
 }
@@ -225,6 +238,36 @@ private fun NewsMenuItems(
             }
         }
     )
+}
+
+@Composable
+private fun NewsContent(
+    selectedTabIndex: Int,
+    incidentsState: UiIncidentsState,
+    diversionsState: UiDiversionsState,
+    modifier: Modifier = Modifier,
+    onRefresh: () -> Unit,
+    onIncidentMoreDetailsClicked: (UiIncident) -> Unit,
+    onIncidentActionLaunched: () -> Unit,
+    onDiversionMoreDetailsClicked: (UiDiversion) -> Unit,
+    onDiversionActionLaunched: () -> Unit
+) {
+    when (selectedTabIndex) {
+        TAB_INCIDENTS -> IncidentsScreen(
+            state = incidentsState,
+            modifier = modifier,
+            onRefresh = onRefresh,
+            onMoreDetailsClicked = onIncidentMoreDetailsClicked,
+            onActionLaunched = onIncidentActionLaunched
+        )
+        TAB_DIVERSIONS -> DiversionsScreen(
+            state = diversionsState,
+            modifier = modifier,
+            onRefresh = onRefresh,
+            onMoreDetailsClicked = onDiversionMoreDetailsClicked,
+            onActionLaunched = onDiversionActionLaunched
+        )
+    }
 }
 
 @Preview(

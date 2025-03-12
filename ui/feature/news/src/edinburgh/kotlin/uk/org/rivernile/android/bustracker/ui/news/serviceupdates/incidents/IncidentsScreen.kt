@@ -56,6 +56,7 @@ import java.text.SimpleDateFormat
  * A [Composable] which renders the root of the incidents screen with state passed in.
  *
  * @param state The current [UiIncidentsState] to render.
+ * @param modifier Any [Modifier]s which need to be applied.
  * @param onRefresh A lambda which is executed when the content should be refreshed.
  * @param onMoreDetailsClicked A lambda which is executed when the 'More details' button is clicked.
  * @param onActionLaunched A lambda which is executed when an action has been launched.
@@ -64,6 +65,7 @@ import java.text.SimpleDateFormat
 @Composable
 internal fun IncidentsScreen(
     state: UiIncidentsState,
+    modifier: Modifier = Modifier,
     onRefresh: () -> Unit,
     onMoreDetailsClicked: (UiIncident) -> Unit,
     onActionLaunched: () -> Unit
@@ -74,6 +76,7 @@ internal fun IncidentsScreen(
 
     ServiceUpdatesScreen(
         content = state.content,
+        modifier = modifier,
         onRefresh = onRefresh,
         itemContent = { item ->
             IncidentItem(
