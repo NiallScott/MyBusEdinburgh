@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,8 @@
 package uk.org.rivernile.android.bustracker.core.livetimes
 
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
+import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 
 /**
  * This sealed interface and its descendants encapsulate the possible responses from requesting
@@ -34,19 +36,19 @@ import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Live
  *
  * @author Niall Scott
  */
-sealed interface LiveTimesResult {
+public sealed interface LiveTimesResult {
 
     /**
      * The request is currently in progress.
      */
-    data object InProgress : LiveTimesResult
+    public data object InProgress : LiveTimesResult
 
     /**
      * The response is successful.
      *
      * @property liveTimes The [LiveTimes].
      */
-    data class Success(
+    public data class Success(
         val liveTimes: LiveTimes
     ) : LiveTimesResult
 
@@ -54,19 +56,19 @@ sealed interface LiveTimesResult {
      * This sealed interface and its descendants encapsulate error responses from requesting live
      * times.
      */
-    sealed interface Error : LiveTimesResult {
+    public sealed interface Error : LiveTimesResult {
 
         /**
          * The time the error was received at.
          */
-        val receiveTime: Long
+        public val receiveTime: Long
 
         /**
          * This response was not successful due to no connectivity.
          *
          * @property receiveTime The time the error was received at.
          */
-        data class NoConnectivity(
+        public data class NoConnectivity(
             override val receiveTime: Long
         ) : Error
 
@@ -76,7 +78,7 @@ sealed interface LiveTimesResult {
          * @property receiveTime The time the error was received at.
          * @property throwable The [Throwable] which caused the error.
          */
-        data class Io(
+        public data class Io(
             override val receiveTime: Long,
             val throwable: Throwable
         ) : Error
@@ -85,14 +87,14 @@ sealed interface LiveTimesResult {
          * This sealed interface and its descendants encapsulate possible server errors from
          * requesting live times.
          */
-        sealed interface ServerError : Error {
+        public sealed interface ServerError : Error {
 
             /**
              * There was an authentication error against the server.
              *
              * @property receiveTime The time the error was received at.
              */
-            data class Authentication(
+            public data class Authentication(
                 override val receiveTime: Long
             ) : ServerError
 
@@ -101,7 +103,7 @@ sealed interface LiveTimesResult {
              *
              * @property receiveTime The time the error was received at.
              */
-            data class Maintenance(
+            public data class Maintenance(
                 override val receiveTime: Long
             ) : ServerError
 
@@ -110,7 +112,7 @@ sealed interface LiveTimesResult {
              *
              * @property receiveTime The time the error was received at.
              */
-            data class SystemOverloaded(
+            public data class SystemOverloaded(
                 override val receiveTime: Long
             ) : ServerError
 
@@ -119,9 +121,33 @@ sealed interface LiveTimesResult {
              *
              * @property receiveTime The time the error was received at.
              */
-            data class Other(
+            public data class Other(
                 override val receiveTime: Long
             ) : ServerError
         }
+    }
+}
+
+/**
+ * Map a [LiveTimesResponse] to a [LiveTimesResult].
+ *
+ * @param timeUtils Used to get the current timestamp.
+ * @return The mapped [LiveTimesResult].
+ */
+internal fun LiveTimesResponse.toLiveTimesResult(timeUtils: TimeUtils): LiveTimesResult {
+    return when (this) {
+        is LiveTimesResponse.Success -> LiveTimesResult.Success(liveTimes)
+        is LiveTimesResponse.Error.NoConnectivity ->
+            LiveTimesResult.Error.NoConnectivity(timeUtils.currentTimeMills)
+        is LiveTimesResponse.Error.Io ->
+            LiveTimesResult.Error.Io(timeUtils.currentTimeMills, throwable)
+        is LiveTimesResponse.Error.ServerError.Authentication ->
+            LiveTimesResult.Error.ServerError.Authentication(timeUtils.currentTimeMills)
+        is LiveTimesResponse.Error.ServerError.Maintenance ->
+            LiveTimesResult.Error.ServerError.Maintenance(timeUtils.currentTimeMills)
+        is LiveTimesResponse.Error.ServerError.SystemOverloaded ->
+            LiveTimesResult.Error.ServerError.SystemOverloaded(timeUtils.currentTimeMills)
+        is LiveTimesResponse.Error.ServerError.Other ->
+            LiveTimesResult.Error.ServerError.Other(timeUtils.currentTimeMills)
     }
 }

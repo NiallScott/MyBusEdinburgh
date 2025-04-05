@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,20 +24,32 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.livetimes
+package uk.org.rivernile.android.bustracker.core.livetimes.di
+
+import dagger.Binds
+import dagger.Module
+import uk.org.rivernile.android.bustracker.core.livetimes.LiveTimesRepository
+import uk.org.rivernile.android.bustracker.core.livetimes.RealLiveTimesRepository
 
 /**
- * This is used to detect whether a service name is a night service or not.
+ * A [Module] providing dependencies related to live times.
  *
  * @author Niall Scott
  */
-public interface IsNightServiceDetector {
+@Module(
+    includes = [
+        LiveTimesModule.Bindings::class
+    ]
+)
+public class LiveTimesModule {
 
-    /**
-     * Is the given [serviceName] a night service?
-     *
-     * @param serviceName The service to check for being a night service.
-     * @return `true` if the given service is a night service, otherwise `false`.
-     */
-    public fun isNightService(serviceName: String): Boolean
+    @Module
+    internal interface Bindings {
+
+        @Suppress("unused")
+        @Binds
+        fun bindLiveTimesRepository(
+            realLiveTimesRepository: RealLiveTimesRepository
+        ): LiveTimesRepository
+    }
 }

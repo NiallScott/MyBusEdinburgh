@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,15 +28,12 @@ package uk.org.rivernile.android.bustracker.core.livetimes
 
 import app.cash.turbine.test
 import kotlinx.coroutines.test.runTest
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.FakeTrackerEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
-import kotlin.test.BeforeTest
+import uk.org.rivernile.android.bustracker.core.time.FakeTimeUtils
+import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -45,38 +42,43 @@ import kotlin.test.assertEquals
  *
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner::class)
-class LiveTimesRepositoryTest {
-
-    @Mock
-    private lateinit var trackerEndpoint: TrackerEndpoint
-    @Mock
-    private lateinit var liveTimesMapper: LiveTimesMapper
-
-    private lateinit var repository: LiveTimesRepository
-
-    @BeforeTest
-    fun setUp() {
-        repository = LiveTimesRepository(
-            trackerEndpoint,
-            liveTimesMapper
-        )
-    }
+class RealLiveTimesRepositoryTest {
 
     @Test
     fun getLiveTimesFlowEmitsExpectedValues() = runTest {
-        val liveTimes = mock<LiveTimes>()
+        val liveTimes = LiveTimes(
+            stops = emptyMap(),
+            receiveTime = 123L,
+            hasGlobalDisruption = false
+        )
         val response = LiveTimesResponse.Success(liveTimes)
         val expected = LiveTimesResult.Success(liveTimes)
-        whenever(trackerEndpoint.getLiveTimes("123456", 4))
-            .thenReturn(response)
-        whenever(liveTimesMapper.mapToLiveTimesResult(response))
-            .thenReturn(expected)
+        val repository = createLiveTimesRepository(
+            trackerEndpoint = FakeTrackerEndpoint(
+                onGetLiveTimesWithSingleStop = { stopCode, numberOfDepartures ->
+                    assertEquals("123456", stopCode)
+                    assertEquals(4, numberOfDepartures)
+                    response
+                }
+            )
+        )
 
         repository.getLiveTimesFlow("123456", 4).test {
             assertEquals(LiveTimesResult.InProgress, awaitItem())
             assertEquals(expected, awaitItem())
             awaitComplete()
         }
+    }
+
+    private fun createLiveTimesRepository(
+        trackerEndpoint: TrackerEndpoint = FakeTrackerEndpoint(),
+        timeUtils: TimeUtils = FakeTimeUtils(
+            onGetCurrentTimeMillis = { 123L }
+        )
+    ): RealLiveTimesRepository {
+        return RealLiveTimesRepository(
+            trackerEndpoint = trackerEndpoint,
+            timeUtils = timeUtils
+        )
     }
 }
