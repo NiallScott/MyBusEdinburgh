@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,20 +24,21 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.livetimes
+package uk.org.rivernile.android.bustracker.core.livetimes.di
+
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 
 /**
- * This is used to detect whether a service name is a night service or not.
+ * The Android-specific Hilt module for live times.
  *
  * @author Niall Scott
  */
-public interface IsNightServiceDetector {
-
-    /**
-     * Is the given [serviceName] a night service?
-     *
-     * @param serviceName The service to check for being a night service.
-     * @return `true` if the given service is a night service, otherwise `false`.
-     */
-    public fun isNightService(serviceName: String): Boolean
-}
+@InstallIn(SingletonComponent::class)
+@Module(
+    includes = [
+        LiveTimesModule::class
+    ]
+)
+internal interface AndroidLiveTimesModule

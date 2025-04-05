@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,11 @@
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.kapt)
+}
+
+kotlin {
+    explicitApi()
 }
 
 dependencies {
@@ -34,14 +39,15 @@ dependencies {
     implementation(project(":core:time"))
     implementation(project(":endpoint:tracker-endpoint"))
 
-    // Dependency injection
-    implementation(libs.javax.inject)
+    // Dagger 2
+    implementation(libs.dagger.core)
+    kapt(libs.dagger.compiler)
 
     // Testing dependencies
+    testImplementation(testFixtures(project(":core:time")))
+    testImplementation(testFixtures(project(":endpoint:tracker-endpoint")))
     testImplementation(libs.coroutines.test)
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)
-    testImplementation(libs.mockito)
-    testImplementation(libs.mockito.kotlin)
     testImplementation(libs.turbine)
 }

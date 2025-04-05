@@ -142,7 +142,7 @@ dependencies {
     implementation(project(":core:busstop-db-updater-android"))
     implementation(project(":core:favourites"))
     implementation(project(":core:feature"))
-    implementation(project(":core:livetimes"))
+    implementation(project(":core:livetimes-android"))
     implementation(project(":core:location-android"))
     implementation(project(":core:logging-android"))
     implementation(project(":core:permission-android"))

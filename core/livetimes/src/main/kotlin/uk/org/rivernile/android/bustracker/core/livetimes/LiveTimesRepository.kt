@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,19 +30,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
+import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 import javax.inject.Inject
 
 /**
  * This repository is used to access live times.
  *
- * @param trackerEndpoint The endpoint to receive [LiveTimes] from.
- * @param liveTimesMapper Maps live times data.
  * @author Niall Scott
  */
-class LiveTimesRepository @Inject internal constructor(
-    private val trackerEndpoint: TrackerEndpoint,
-    private val liveTimesMapper: LiveTimesMapper
-) {
+public interface LiveTimesRepository {
 
     /**
      * Get a [Flow] object which contains the [LiveTimesResult] of loading [LiveTimes].
@@ -51,7 +47,18 @@ class LiveTimesRepository @Inject internal constructor(
      * @param numberOfDepartures The number of departures per services to obtain.
      * @return A [Flow] object containing the [LiveTimesResult] of loading [LiveTimes].
      */
-    fun getLiveTimesFlow(
+    public fun getLiveTimesFlow(
+        stopCode: String,
+        numberOfDepartures: Int
+    ): Flow<LiveTimesResult>
+}
+
+internal class RealLiveTimesRepository @Inject constructor(
+    private val trackerEndpoint: TrackerEndpoint,
+    private val timeUtils: TimeUtils
+) : LiveTimesRepository {
+
+    override fun getLiveTimesFlow(
         stopCode: String,
         numberOfDepartures: Int
     ): Flow<LiveTimesResult> = flow {
@@ -71,8 +78,7 @@ class LiveTimesRepository @Inject internal constructor(
         stopCode: String,
         numberOfDepartures: Int
     ): LiveTimesResult {
-        return liveTimesMapper.mapToLiveTimesResult(
-            trackerEndpoint.getLiveTimes(stopCode, numberOfDepartures)
-        )
+        return trackerEndpoint.getLiveTimes(stopCode, numberOfDepartures)
+            .toLiveTimesResult(timeUtils)
     }
 }

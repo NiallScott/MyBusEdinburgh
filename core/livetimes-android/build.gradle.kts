@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,20 +24,44 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.livetimes
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.hilt)
+}
 
-/**
- * This is used to detect whether a service name is a night service or not.
- *
- * @author Niall Scott
- */
-public interface IsNightServiceDetector {
+android {
+    namespace = "uk.org.rivernile.android.bustracker.core.livetimes"
 
-    /**
-     * Is the given [serviceName] a night service?
-     *
-     * @param serviceName The service to check for being a night service.
-     * @return `true` if the given service is a night service, otherwise `false`.
-     */
-    public fun isNightService(serviceName: String): Boolean
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+        }
+
+        debug {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
+    }
+}
+
+kotlin {
+    explicitApi()
+}
+
+dependencies {
+
+    api(project(":core:livetimes"))
+
+    // Hilt (dependency injection)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+
+    // Testing dependencies
+    androidTestImplementation(libs.androidx.test.runner)
 }
