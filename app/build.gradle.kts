@@ -25,6 +25,7 @@
  */
 
 import com.android.build.api.variant.ResValue
+import com.google.firebase.appdistribution.gradle.firebaseAppDistribution
 
 plugins {
     alias(libs.plugins.android.application)
