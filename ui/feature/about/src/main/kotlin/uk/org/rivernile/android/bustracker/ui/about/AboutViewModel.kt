@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,7 @@ package uk.org.rivernile.android.bustracker.ui.about
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -64,7 +65,9 @@ internal class AboutViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = UiState(items = aboutItemsGenerator.createAboutItems())
+            initialValue = UiState(
+                items = aboutItemsGenerator.createAboutItems().toImmutableList()
+            )
         )
 
     /**
@@ -114,7 +117,7 @@ internal class AboutViewModel @Inject constructor(
         state.actionFlow
     ) { items, isCreditsShown, isOpenSourceLicencesShown, action ->
         UiState(
-            items = items,
+            items = items.toImmutableList(),
             isCreditsShown = isCreditsShown,
             isOpenSourceLicencesShown = isOpenSourceLicencesShown,
             action = action

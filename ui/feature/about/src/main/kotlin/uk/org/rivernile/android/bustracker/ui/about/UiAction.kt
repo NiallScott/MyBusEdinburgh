@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,8 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.ui.about
 
-import androidx.compose.runtime.Immutable
-
 /**
  * This sealed interface represents possible actions which can be performed on the 'about' screen.
  *
@@ -36,22 +34,17 @@ import androidx.compose.runtime.Immutable
 internal sealed interface UiAction {
 
     /** The privacy policy should be shown. */
-    @Immutable
     data object ShowPrivacyPolicy : UiAction
 
     /** The app's store listing should be shown. */
-    @Immutable
     data object ShowStoreListing : UiAction
 
     /** The app author's website should be shown. */
-    @Immutable
     data object ShowAuthorWebsite : UiAction
 
     /** The app's website should be shown. */
-    @Immutable
     data object ShowAppWebsite : UiAction
 
     /** The app's Twitter account should be shown. */
-    @Immutable
     data object ShowAppTwitter : UiAction
 }

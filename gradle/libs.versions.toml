@@ -53,6 +53,9 @@ retrofit-converter-kotlin-serialization = { module = "com.squareup.retrofit2:con
 # (De-)serialisation
 kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.8.0" }
 
+# Kotlin immutable collections
+kotlin-immutable-collections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.3.8" }
+
 # Edinburgh Bus Tracker API
 edinburgh-bus-tracker-api = { module = "uk.org.rivernile.edinburghbustrackerapi:api-kt", version = "1.3.0" }
 

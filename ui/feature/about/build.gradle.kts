@@ -87,6 +87,9 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.material.compose)
 
+    // Kotlin immutable collections
+    implementation(libs.kotlin.immutable.collections)
+
     // Test dependencies
     androidTestImplementation(testFixtures(project(":core:logging")))
     androidTestImplementation(libs.androidx.compose.ui.test)

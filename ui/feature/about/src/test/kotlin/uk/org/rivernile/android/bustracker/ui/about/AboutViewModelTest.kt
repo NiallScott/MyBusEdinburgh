@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.ui.about
 
 import app.cash.turbine.test
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
@@ -47,7 +48,7 @@ class AboutViewModelTest {
 
     @Test
     fun uiStateFlowEmitsInitialState() = runTest {
-        val expectedItems = listOf(
+        val expectedItems = persistentListOf(
             UiAboutItem.OneLineItem.Credits,
             UiAboutItem.TwoLinesItem.Website
         )
@@ -72,11 +73,11 @@ class AboutViewModelTest {
 
     @Test
     fun uiStateFlowEmitsItemsFromAboutItemsGenerator() = runTest {
-        val expectedItems1 = listOf(
+        val expectedItems1 = persistentListOf(
             UiAboutItem.OneLineItem.Credits,
             UiAboutItem.TwoLinesItem.Website
         )
-        val expectedItems2 = listOf(
+        val expectedItems2 = persistentListOf(
             UiAboutItem.OneLineItem.PrivacyPolicy,
             UiAboutItem.TwoLinesItem.Twitter
         )
@@ -103,7 +104,7 @@ class AboutViewModelTest {
 
     @Test
     fun uiStateFlowEmitsIsCreditsShownValues() = runTest {
-        val expectedItems = listOf(
+        val expectedItems = persistentListOf(
             UiAboutItem.OneLineItem.Credits,
             UiAboutItem.TwoLinesItem.Website
         )
@@ -150,7 +151,7 @@ class AboutViewModelTest {
 
     @Test
     fun uiStateFlowEmitsIsOpenSourceLicencesShownValues() = runTest {
-        val expectedItems = listOf(
+        val expectedItems = persistentListOf(
             UiAboutItem.OneLineItem.Credits,
             UiAboutItem.TwoLinesItem.Website
         )
@@ -197,7 +198,7 @@ class AboutViewModelTest {
 
     @Test
     fun uiStateFlowEmitsActionValues() = runTest {
-        val expectedItems = listOf(
+        val expectedItems = persistentListOf(
             UiAboutItem.OneLineItem.Credits,
             UiAboutItem.TwoLinesItem.Website
         )

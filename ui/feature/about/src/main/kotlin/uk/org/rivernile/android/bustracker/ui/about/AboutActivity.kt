@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,6 +30,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.ReportDrawn
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -56,21 +57,22 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import uk.org.rivernile.android.bustracker.ui.datetime.LocalDateTimeFormatter
+import uk.org.rivernile.android.bustracker.ui.datetime.rememberDateTimeFormatter
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
-import java.text.SimpleDateFormat
 import java.util.Date
 import javax.inject.Inject
 
@@ -90,8 +92,11 @@ class AboutActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            CompositionLocalProvider(LocalAboutActionLauncher provides actionLauncher) {
-                MyBusTheme {
+            MyBusTheme {
+                CompositionLocalProvider(
+                    LocalAboutActionLauncher provides actionLauncher,
+                    LocalDateTimeFormatter provides rememberDateTimeFormatter()
+                ) {
                     EdgeToEdge()
                     AboutScreen(onNavigateUp = this::onNavigateUp)
                     ReportDrawn()
@@ -110,7 +115,7 @@ internal val LocalAboutActionLauncher = staticCompositionLocalOf<AboutActionLaun
 
 @Composable
 private fun EdgeToEdge() {
-    val activity = LocalContext.current as ComponentActivity
+    val activity = LocalActivity.current as ComponentActivity
     val isDarkMode = isSystemInDarkTheme()
     val surfaceColour = MaterialTheme
         .colorScheme
@@ -227,12 +232,10 @@ private fun AboutTopAppBar(
 
 @Composable
 private fun AboutItemsList(
-    aboutItems: List<UiAboutItem>,
+    aboutItems: ImmutableList<UiAboutItem>,
     modifier: Modifier = Modifier,
     onItemClicked: (UiAboutItem) -> Unit
 ) {
-    val dateFormat = remember { SimpleDateFormat.getDateTimeInstance() }
-
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(
@@ -245,7 +248,6 @@ private fun AboutItemsList(
         ) {
             AboutItem(
                 item = it,
-                dateFormat = dateFormat,
                 onItemClicked = onItemClicked
             )
             HorizontalDivider()
@@ -296,25 +298,29 @@ private val UiAboutItem.contentType: Int get() {
 @Composable
 private fun AboutScreenPreview() {
     MyBusTheme {
-        AboutScreenWithState(
-            state = UiState(
-                items = listOf(
-                    UiAboutItem.TwoLinesItem.AppVersion("1.2.3", 4),
-                    UiAboutItem.TwoLinesItem.Author,
-                    UiAboutItem.TwoLinesItem.Website,
-                    UiAboutItem.TwoLinesItem.Twitter,
-                    UiAboutItem.TwoLinesItem.DatabaseVersion(Date(1712498400000L)),
-                    UiAboutItem.TwoLinesItem.TopologyVersion("abc123"),
-                    UiAboutItem.OneLineItem.Credits,
-                    UiAboutItem.OneLineItem.PrivacyPolicy,
-                    UiAboutItem.OneLineItem.OpenSourceLicences
-                )
-            ),
-            onNavigateUp = { },
-            onItemClicked = { },
-            onCreditsDialogDismissed = { },
-            onOpenSourceLicenceDialogDismissed = { },
-            onActionLaunched = { }
-        )
+        CompositionLocalProvider(
+            LocalDateTimeFormatter provides rememberDateTimeFormatter()
+        ) {
+            AboutScreenWithState(
+                state = UiState(
+                    items = persistentListOf(
+                        UiAboutItem.TwoLinesItem.AppVersion("1.2.3", 4),
+                        UiAboutItem.TwoLinesItem.Author,
+                        UiAboutItem.TwoLinesItem.Website,
+                        UiAboutItem.TwoLinesItem.Twitter,
+                        UiAboutItem.TwoLinesItem.DatabaseVersion(Date(1712498400000L)),
+                        UiAboutItem.TwoLinesItem.TopologyVersion("abc123"),
+                        UiAboutItem.OneLineItem.Credits,
+                        UiAboutItem.OneLineItem.PrivacyPolicy,
+                        UiAboutItem.OneLineItem.OpenSourceLicences
+                    )
+                ),
+                onNavigateUp = { },
+                onItemClicked = { },
+                onCreditsDialogDismissed = { },
+                onOpenSourceLicenceDialogDismissed = { },
+                onActionLaunched = { }
+            )
+        }
     }
 }
