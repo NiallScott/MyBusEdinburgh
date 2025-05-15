@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,11 +29,11 @@ package uk.org.rivernile.android.bustracker.ui.about
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.scopes.ActivityScoped
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import javax.inject.Inject
+import androidx.core.net.toUri
 
 /**
  * Launches actions for the 'about' screen.
@@ -86,7 +86,7 @@ internal class AndroidAboutActionLauncher @Inject constructor(
      */
     override fun launchStoreListing() {
         val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse("market://details?id=${context.packageName}")
+            data = "market://details?id=${context.packageName}".toUri()
         }
 
         launchIntent(intent)
@@ -97,7 +97,7 @@ internal class AndroidAboutActionLauncher @Inject constructor(
      */
     override fun launchAuthorWebsite() {
         val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse(context.getString(R.string.app_author_website))
+            data = context.getString(R.string.app_author_website).toUri()
         }
 
         launchIntent(intent)
@@ -108,7 +108,7 @@ internal class AndroidAboutActionLauncher @Inject constructor(
      */
     override fun launchAppWebsite() {
         val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse(context.getString(R.string.app_website))
+            data = context.getString(R.string.app_website).toUri()
         }
 
         launchIntent(intent)
@@ -119,7 +119,7 @@ internal class AndroidAboutActionLauncher @Inject constructor(
      */
     override fun launchAppTwitter() {
         val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse(context.getString(R.string.app_twitter))
+            data = context.getString(R.string.app_twitter).toUri()
         }
 
         launchIntent(intent)
@@ -130,7 +130,7 @@ internal class AndroidAboutActionLauncher @Inject constructor(
      */
     override fun launchPrivacyPolicy() {
         val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse(context.getString(R.string.app_privacy_policy))
+            data = context.getString(R.string.app_privacy_policy).toUri()
         }
 
         launchIntent(intent)

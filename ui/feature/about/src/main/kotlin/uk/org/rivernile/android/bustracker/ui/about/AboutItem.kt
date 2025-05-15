@@ -47,9 +47,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import uk.org.rivernile.android.bustracker.ui.datetime.LocalDateTimeFormatter
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
-import java.text.DateFormat
 
 internal const val TEST_TAG_TITLE = "title"
 internal const val TEST_TAG_CAPTION = "caption"
@@ -58,7 +58,6 @@ internal const val TEST_TAG_CAPTION = "caption"
  * Provides an 'about' item to be displayed.
  *
  * @param item The [UiAboutItem] to display.
- * @param dateFormat An instance of [DateFormat] used to format dates for display.
  * @param modifier Any [Modifier] to be applied.
  * @param onItemClicked A lambda which is executed when an item is clicked.
  * @author Niall Scott
@@ -66,7 +65,6 @@ internal const val TEST_TAG_CAPTION = "caption"
 @Composable
 internal fun AboutItem(
     item: UiAboutItem,
-    dateFormat: DateFormat,
     modifier: Modifier = Modifier,
     onItemClicked: (UiAboutItem) -> Unit
 ) {
@@ -78,7 +76,6 @@ internal fun AboutItem(
         )
         is UiAboutItem.TwoLinesItem -> AboutItem2Lines(
             item = item,
-            dateFormat = dateFormat,
             modifier = modifier,
             onItemClicked = onItemClicked
         )
@@ -118,7 +115,6 @@ private fun AboutItem1Line(
 @Composable
 private fun AboutItem2Lines(
     item: UiAboutItem.TwoLinesItem,
-    dateFormat: DateFormat,
     modifier: Modifier = Modifier,
     onItemClicked: (UiAboutItem) -> Unit
 ) {
@@ -145,7 +141,7 @@ private fun AboutItem2Lines(
             )
     ) {
         AboutItemTitle(text = stringResource(id = item.titleStringRes))
-        AboutItemCaption(text = item.captionText(dateFormat))
+        AboutItemCaption(text = item.captionText)
     }
 }
 
@@ -198,8 +194,7 @@ private val UiAboutItem.titleStringRes: Int get() {
     }
 }
 
-@Composable
-private fun UiAboutItem.TwoLinesItem.captionText(dateFormat: DateFormat): String {
+private val UiAboutItem.TwoLinesItem.captionText: String @Composable get() {
     return when (this) {
         is UiAboutItem.TwoLinesItem.AppVersion -> stringResource(
             id = R.string.about_version_format,
@@ -212,7 +207,7 @@ private fun UiAboutItem.TwoLinesItem.captionText(dateFormat: DateFormat): String
                 stringResource(
                     id = R.string.about_database_version_format,
                     it.time,
-                    dateFormat.format(it)
+                    LocalDateTimeFormatter.current.format(it)
                 )
             } ?: stringResource(id = R.string.about_database_version_loading)
         }
@@ -267,7 +262,6 @@ private fun AboutItem2LinePreview() {
     MyBusTheme {
         AboutItem2Lines(
             item = UiAboutItem.TwoLinesItem.Website,
-            dateFormat = DateFormat.getDateTimeInstance(),
             onItemClicked = { }
         )
     }

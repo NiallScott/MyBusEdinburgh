@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.about
 
-import androidx.compose.runtime.Immutable
+import kotlinx.collections.immutable.ImmutableList
 
 /**
  * This class represents a snapshot of the [UiState].
@@ -37,9 +37,8 @@ import androidx.compose.runtime.Immutable
  * @property action Any action which should be performed.
  * @author Niall Scott
  */
-@Immutable
 internal data class UiState(
-    val items: List<UiAboutItem>,
+    val items: ImmutableList<UiAboutItem>,
     val isCreditsShown: Boolean = false,
     val isOpenSourceLicencesShown: Boolean = false,
     val action: UiAction? = null

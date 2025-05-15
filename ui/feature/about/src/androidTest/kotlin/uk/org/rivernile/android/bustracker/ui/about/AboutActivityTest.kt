@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.ui.about
 
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -34,6 +35,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import kotlinx.collections.immutable.persistentListOf
 import org.junit.Rule
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
@@ -55,9 +57,9 @@ class AboutActivityTest {
         val navigateUpTracker = BasicEventTracker()
 
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutScreenWithState(
-                    state = UiState(items = emptyList()),
+                    state = UiState(items = persistentListOf()),
                     onNavigateUp = navigateUpTracker,
                     onItemClicked = { },
                     onCreditsDialogDismissed = { },
@@ -81,10 +83,10 @@ class AboutActivityTest {
         val onItemClickedTracker = ItemClickedTracker()
 
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutScreenWithState(
                     state = UiState(
-                        items = listOf(UiAboutItem.OneLineItem.PrivacyPolicy)
+                        items = persistentListOf(UiAboutItem.OneLineItem.PrivacyPolicy)
                     ),
                     onNavigateUp = { },
                     onItemClicked = onItemClickedTracker,
@@ -105,10 +107,10 @@ class AboutActivityTest {
     @Test
     fun creditsDialogIsShownWhenSetInState() {
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutScreenWithState(
                     state = UiState(
-                        items = emptyList(),
+                        items = persistentListOf(),
                         isCreditsShown = true
                     ),
                     onNavigateUp = { },
@@ -130,10 +132,10 @@ class AboutActivityTest {
         val onCreditsDialogDismissedTracker = BasicEventTracker()
 
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutScreenWithState(
                     state = UiState(
-                        items = emptyList(),
+                        items = persistentListOf(),
                         isCreditsShown = true
                     ),
                     onNavigateUp = { },
@@ -155,10 +157,10 @@ class AboutActivityTest {
     @Test
     fun openSourceLicenceDialogIsShownWhenSetInState() {
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutScreenWithState(
                     state = UiState(
-                        items = emptyList(),
+                        items = persistentListOf(),
                         isOpenSourceLicencesShown = true
                     ),
                     onNavigateUp = { },
@@ -180,10 +182,10 @@ class AboutActivityTest {
         val onOpenSourceLicenceDialogDismissedTracker = BasicEventTracker()
 
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutScreenWithState(
                     state = UiState(
-                        items = emptyList(),
+                        items = persistentListOf(),
                         isOpenSourceLicencesShown = true
                     ),
                     onNavigateUp = { },
@@ -208,20 +210,20 @@ class AboutActivityTest {
         val actionLauncher = FakeAboutActionLauncher()
 
         composeTestRule.setContent {
-            CompositionLocalProvider(LocalAboutActionLauncher provides actionLauncher) {
-                MyBusTheme {
-                    AboutScreenWithState(
-                        state = UiState(
-                            items = emptyList(),
-                            action = UiAction.ShowStoreListing
-                        ),
-                        onNavigateUp = { },
-                        onItemClicked = { },
-                        onCreditsDialogDismissed = { },
-                        onOpenSourceLicenceDialogDismissed = { },
-                        onActionLaunched = onActionLaunchedTracker
-                    )
-                }
+            MyBusThemeWithCompositionLocals(
+                aboutActionLauncher = actionLauncher
+            ) {
+                AboutScreenWithState(
+                    state = UiState(
+                        items = persistentListOf(),
+                        action = UiAction.ShowStoreListing
+                    ),
+                    onNavigateUp = { },
+                    onItemClicked = { },
+                    onCreditsDialogDismissed = { },
+                    onOpenSourceLicenceDialogDismissed = { },
+                    onActionLaunched = onActionLaunchedTracker
+                )
             }
         }
 
@@ -235,20 +237,20 @@ class AboutActivityTest {
         val actionLauncher = FakeAboutActionLauncher()
 
         composeTestRule.setContent {
-            CompositionLocalProvider(LocalAboutActionLauncher provides actionLauncher) {
-                MyBusTheme {
-                    AboutScreenWithState(
-                        state = UiState(
-                            items = emptyList(),
-                            action = UiAction.ShowAuthorWebsite
-                        ),
-                        onNavigateUp = { },
-                        onItemClicked = { },
-                        onCreditsDialogDismissed = { },
-                        onOpenSourceLicenceDialogDismissed = { },
-                        onActionLaunched = onActionLaunchedTracker
-                    )
-                }
+            MyBusThemeWithCompositionLocals(
+                aboutActionLauncher = actionLauncher
+            ) {
+                AboutScreenWithState(
+                    state = UiState(
+                        items = persistentListOf(),
+                        action = UiAction.ShowAuthorWebsite
+                    ),
+                    onNavigateUp = { },
+                    onItemClicked = { },
+                    onCreditsDialogDismissed = { },
+                    onOpenSourceLicenceDialogDismissed = { },
+                    onActionLaunched = onActionLaunchedTracker
+                )
             }
         }
 
@@ -262,20 +264,20 @@ class AboutActivityTest {
         val actionLauncher = FakeAboutActionLauncher()
 
         composeTestRule.setContent {
-            CompositionLocalProvider(LocalAboutActionLauncher provides actionLauncher) {
-                MyBusTheme {
-                    AboutScreenWithState(
-                        state = UiState(
-                            items = emptyList(),
-                            action = UiAction.ShowAppWebsite
-                        ),
-                        onNavigateUp = { },
-                        onItemClicked = { },
-                        onCreditsDialogDismissed = { },
-                        onOpenSourceLicenceDialogDismissed = { },
-                        onActionLaunched = onActionLaunchedTracker
-                    )
-                }
+            MyBusThemeWithCompositionLocals(
+                aboutActionLauncher = actionLauncher
+            ) {
+                AboutScreenWithState(
+                    state = UiState(
+                        items = persistentListOf(),
+                        action = UiAction.ShowAppWebsite
+                    ),
+                    onNavigateUp = { },
+                    onItemClicked = { },
+                    onCreditsDialogDismissed = { },
+                    onOpenSourceLicenceDialogDismissed = { },
+                    onActionLaunched = onActionLaunchedTracker
+                )
             }
         }
 
@@ -289,20 +291,20 @@ class AboutActivityTest {
         val actionLauncher = FakeAboutActionLauncher()
 
         composeTestRule.setContent {
-            CompositionLocalProvider(LocalAboutActionLauncher provides actionLauncher) {
-                MyBusTheme {
-                    AboutScreenWithState(
-                        state = UiState(
-                            items = emptyList(),
-                            action = UiAction.ShowAppTwitter
-                        ),
-                        onNavigateUp = { },
-                        onItemClicked = { },
-                        onCreditsDialogDismissed = { },
-                        onOpenSourceLicenceDialogDismissed = { },
-                        onActionLaunched = onActionLaunchedTracker
-                    )
-                }
+            MyBusThemeWithCompositionLocals(
+                aboutActionLauncher = actionLauncher
+            ) {
+                AboutScreenWithState(
+                    state = UiState(
+                        items = persistentListOf(),
+                        action = UiAction.ShowAppTwitter
+                    ),
+                    onNavigateUp = { },
+                    onItemClicked = { },
+                    onCreditsDialogDismissed = { },
+                    onOpenSourceLicenceDialogDismissed = { },
+                    onActionLaunched = onActionLaunchedTracker
+                )
             }
         }
 
@@ -316,25 +318,38 @@ class AboutActivityTest {
         val actionLauncher = FakeAboutActionLauncher()
 
         composeTestRule.setContent {
-            CompositionLocalProvider(LocalAboutActionLauncher provides actionLauncher) {
-                MyBusTheme {
-                    AboutScreenWithState(
-                        state = UiState(
-                            items = emptyList(),
-                            action = UiAction.ShowPrivacyPolicy
-                        ),
-                        onNavigateUp = { },
-                        onItemClicked = { },
-                        onCreditsDialogDismissed = { },
-                        onOpenSourceLicenceDialogDismissed = { },
-                        onActionLaunched = onActionLaunchedTracker
-                    )
-                }
+            MyBusThemeWithCompositionLocals(
+                aboutActionLauncher = actionLauncher
+            ) {
+                AboutScreenWithState(
+                    state = UiState(
+                        items = persistentListOf(),
+                        action = UiAction.ShowPrivacyPolicy
+                    ),
+                    onNavigateUp = { },
+                    onItemClicked = { },
+                    onCreditsDialogDismissed = { },
+                    onOpenSourceLicenceDialogDismissed = { },
+                    onActionLaunched = onActionLaunchedTracker
+                )
             }
         }
 
         assertEquals(1, actionLauncher.launchPrivacyPolicyInvocationCount)
         assertEquals(1, onActionLaunchedTracker.numberOfInvocations)
+    }
+
+    @Composable
+    private fun MyBusThemeWithCompositionLocals(
+        aboutActionLauncher: AboutActionLauncher = FakeAboutActionLauncher(),
+        content: @Composable () -> Unit
+    ) {
+        MyBusTheme {
+            CompositionLocalProvider(
+                LocalAboutActionLauncher provides aboutActionLauncher,
+                content = content
+            )
+        }
     }
 
     private class BasicEventTracker : () -> Unit {

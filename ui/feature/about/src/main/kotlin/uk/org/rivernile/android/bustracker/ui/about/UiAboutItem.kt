@@ -48,7 +48,6 @@ internal sealed interface UiAboutItem {
         /**
          * Credits item.
          */
-        @Immutable
         data object Credits : OneLineItem {
 
             override val isClickable get() = true
@@ -57,7 +56,6 @@ internal sealed interface UiAboutItem {
         /**
          * Privacy policy item.
          */
-        @Immutable
         data object PrivacyPolicy : OneLineItem {
 
             override val isClickable get() = true
@@ -66,7 +64,6 @@ internal sealed interface UiAboutItem {
         /**
          * Open source licences item.
          */
-        @Immutable
         data object OpenSourceLicences : OneLineItem {
 
             override val isClickable get() = true
@@ -84,7 +81,6 @@ internal sealed interface UiAboutItem {
          * @property versionName The version name.
          * @property versionCode The version code.
          */
-        @Immutable
         data class AppVersion(
             val versionName: String?,
             val versionCode: Long
@@ -96,7 +92,6 @@ internal sealed interface UiAboutItem {
         /**
          * App author item.
          */
-        @Immutable
         data object Author : TwoLinesItem {
 
             override val isClickable get() = true
@@ -105,7 +100,6 @@ internal sealed interface UiAboutItem {
         /**
          * App website item.
          */
-        @Immutable
         data object Website : TwoLinesItem {
 
             override val isClickable get() = true
@@ -114,7 +108,6 @@ internal sealed interface UiAboutItem {
         /**
          * App Twitter link item.
          */
-        @Immutable
         data object Twitter : TwoLinesItem {
 
             override val isClickable get() = true
@@ -138,7 +131,6 @@ internal sealed interface UiAboutItem {
          *
          * @property topologyId The topology ID string.
          */
-        @Immutable
         data class TopologyVersion(
             val topologyId: String?
         ) : TwoLinesItem {

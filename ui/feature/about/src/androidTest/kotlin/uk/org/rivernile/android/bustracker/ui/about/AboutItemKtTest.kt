@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,8 @@
 package uk.org.rivernile.android.bustracker.ui.about
 
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
@@ -35,11 +37,12 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
 import org.junit.Rule
+import uk.org.rivernile.android.bustracker.ui.datetime.LocalDateTimeFormatter
+import uk.org.rivernile.android.bustracker.ui.datetime.rememberDateTimeFormatter
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -54,20 +57,12 @@ class AboutItemKtTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
-    private lateinit var dateFormat: DateFormat
-
-    @BeforeTest
-    fun setUp() {
-        dateFormat = SimpleDateFormat.getDateTimeInstance()
-    }
-
     @Test
     fun creditsAboutItemDisplaysCorrectText() {
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutItem(
                     item = UiAboutItem.OneLineItem.Credits,
-                    dateFormat = dateFormat,
                     onItemClicked = { }
                 )
             }
@@ -83,10 +78,9 @@ class AboutItemKtTest {
         val itemClickedTracker = ItemClickedTracker()
 
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutItem(
                     item = UiAboutItem.OneLineItem.Credits,
-                    dateFormat = dateFormat,
                     onItemClicked = itemClickedTracker
                 )
             }
@@ -108,10 +102,9 @@ class AboutItemKtTest {
     @Test
     fun openSourceLicencesAboutItemDisplaysCorrectText() {
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutItem(
                     item = UiAboutItem.OneLineItem.OpenSourceLicences,
-                    dateFormat = dateFormat,
                     onItemClicked = { }
                 )
             }
@@ -127,10 +120,9 @@ class AboutItemKtTest {
         val itemClickedTracker = ItemClickedTracker()
 
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutItem(
                     item = UiAboutItem.OneLineItem.OpenSourceLicences,
-                    dateFormat = dateFormat,
                     onItemClicked = itemClickedTracker
                 )
             }
@@ -152,10 +144,9 @@ class AboutItemKtTest {
     @Test
     fun privacyPolicyAboutItemDisplaysCorrectText() {
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutItem(
                     item = UiAboutItem.OneLineItem.PrivacyPolicy,
-                    dateFormat = dateFormat,
                     onItemClicked = { }
                 )
             }
@@ -171,10 +162,9 @@ class AboutItemKtTest {
         val itemClickedTracker = ItemClickedTracker()
 
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutItem(
                     item = UiAboutItem.OneLineItem.PrivacyPolicy,
-                    dateFormat = dateFormat,
                     onItemClicked = itemClickedTracker
                 )
             }
@@ -196,13 +186,12 @@ class AboutItemKtTest {
     @Test
     fun appVersionAboutItemDisplaysCorrectText() {
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutItem(
                     item = UiAboutItem.TwoLinesItem.AppVersion(
                         versionName = "1.2.3",
                         versionCode = 4
                     ),
-                    dateFormat = dateFormat,
                     onItemClicked = { }
                 )
             }
@@ -231,10 +220,9 @@ class AboutItemKtTest {
         val itemClickedTracker = ItemClickedTracker()
 
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutItem(
                     item = item,
-                    dateFormat = dateFormat,
                     onItemClicked = itemClickedTracker
                 )
             }
@@ -260,10 +248,9 @@ class AboutItemKtTest {
     @Test
     fun authorAboutItemDisplaysCorrectText() {
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutItem(
                     item = UiAboutItem.TwoLinesItem.Author,
-                    dateFormat = dateFormat,
                     onItemClicked = { }
                 )
             }
@@ -288,10 +275,9 @@ class AboutItemKtTest {
         val itemClickedTracker = ItemClickedTracker()
 
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutItem(
                     item = UiAboutItem.TwoLinesItem.Author,
-                    dateFormat = dateFormat,
                     onItemClicked = itemClickedTracker
                 )
             }
@@ -319,10 +305,9 @@ class AboutItemKtTest {
         val item = UiAboutItem.TwoLinesItem.DatabaseVersion(null)
 
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutItem(
                     item = item,
-                    dateFormat = dateFormat,
                     onItemClicked = { }
                 )
             }
@@ -347,12 +332,14 @@ class AboutItemKtTest {
     @Test
     fun databaseVersionAboutItemDisplaysCorrectTextWhenLoaded() {
         val item = UiAboutItem.TwoLinesItem.DatabaseVersion(Date(123L))
+        val dateTimeFormat = SimpleDateFormat.getDateTimeInstance()
 
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals(
+                dateTimeFormat = dateTimeFormat
+            ) {
                 AboutItem(
                     item = item,
-                    dateFormat = dateFormat,
                     onItemClicked = { }
                 )
             }
@@ -369,7 +356,7 @@ class AboutItemKtTest {
                 testTag = TEST_TAG_CAPTION,
                 useUnmergedTree = true
             )
-            .assertTextEquals("123 (${dateFormat.format(Date(123L))})")
+            .assertTextEquals("123 (${dateTimeFormat.format(Date(123L))})")
     }
 
     @Test
@@ -378,10 +365,9 @@ class AboutItemKtTest {
         val itemClickedTracker = ItemClickedTracker()
 
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutItem(
                     item = item,
-                    dateFormat = dateFormat,
                     onItemClicked = itemClickedTracker
                 )
             }
@@ -406,10 +392,9 @@ class AboutItemKtTest {
         val item = UiAboutItem.TwoLinesItem.TopologyVersion(topologyId = null)
 
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutItem(
                     item = item,
-                    dateFormat = dateFormat,
                     onItemClicked = { }
                 )
             }
@@ -436,10 +421,9 @@ class AboutItemKtTest {
         val item = UiAboutItem.TwoLinesItem.TopologyVersion(topologyId = "abc123")
 
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutItem(
                     item = item,
-                    dateFormat = dateFormat,
                     onItemClicked = { }
                 )
             }
@@ -465,10 +449,9 @@ class AboutItemKtTest {
         val itemClickedTracker = ItemClickedTracker()
 
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutItem(
                     item = item,
-                    dateFormat = dateFormat,
                     onItemClicked = itemClickedTracker
                 )
             }
@@ -491,10 +474,9 @@ class AboutItemKtTest {
     @Test
     fun twitterAboutItemDisplaysCorrectText() {
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutItem(
                     item = UiAboutItem.TwoLinesItem.Twitter,
-                    dateFormat = dateFormat,
                     onItemClicked = { }
                 )
             }
@@ -519,10 +501,9 @@ class AboutItemKtTest {
         val itemClickedTracker = ItemClickedTracker()
 
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutItem(
                     item = UiAboutItem.TwoLinesItem.Twitter,
-                    dateFormat = dateFormat,
                     onItemClicked = itemClickedTracker
                 )
             }
@@ -548,10 +529,9 @@ class AboutItemKtTest {
     @Test
     fun websiteAboutItemDisplaysCorrectText() {
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutItem(
                     item = UiAboutItem.TwoLinesItem.Website,
-                    dateFormat = dateFormat,
                     onItemClicked = { }
                 )
             }
@@ -576,10 +556,9 @@ class AboutItemKtTest {
         val itemClickedTracker = ItemClickedTracker()
 
         composeTestRule.setContent {
-            MyBusTheme {
+            MyBusThemeWithCompositionLocals {
                 AboutItem(
                     item = UiAboutItem.TwoLinesItem.Website,
-                    dateFormat = dateFormat,
                     onItemClicked = itemClickedTracker
                 )
             }
@@ -600,6 +579,19 @@ class AboutItemKtTest {
             listOf(UiAboutItem.TwoLinesItem.Website),
             itemClickedTracker.invocations
         )
+    }
+
+    @Composable
+    private fun MyBusThemeWithCompositionLocals(
+        dateTimeFormat: DateFormat = rememberDateTimeFormatter(),
+        content: @Composable () -> Unit
+    ) {
+        MyBusTheme {
+            CompositionLocalProvider(
+                LocalDateTimeFormatter provides dateTimeFormat,
+                content = content
+            )
+        }
     }
 
     private class ItemClickedTracker : (UiAboutItem) -> Unit {
