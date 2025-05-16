@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
+import kotlinx.collections.immutable.ImmutableList
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.updates.ServiceUpdate
 import uk.org.rivernile.android.bustracker.core.updates.ServiceUpdatesResult
@@ -54,7 +55,7 @@ internal sealed interface UiServiceUpdatesResult<out T : UiServiceUpdate> {
      * epoch.
      */
     data class Success<out T : UiServiceUpdate>(
-        val serviceUpdates: List<T>?,
+        val serviceUpdates: ImmutableList<T>?,
         val loadTimeMillis: Long
     ) : UiServiceUpdatesResult<T>
 
@@ -87,7 +88,7 @@ internal fun ServiceUpdatesResult.toUiServiceUpdatesResultOfIncidents(
 }
 
 private inline fun <T : UiServiceUpdate> ServiceUpdatesResult.toUiServiceUpdatesResult(
-    itemsMapper: (List<ServiceUpdate>?) -> List<T>?
+    itemsMapper: (List<ServiceUpdate>?) -> ImmutableList<T>?
 ): UiServiceUpdatesResult<T> {
     return when (this) {
         is ServiceUpdatesResult.InProgress -> UiServiceUpdatesResult.InProgress

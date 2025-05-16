@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,8 @@
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents
 
 import androidx.compose.runtime.Immutable
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.datetime.Instant
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.updates.IncidentServiceUpdate
@@ -53,30 +55,31 @@ internal data class UiIncident(
     val lastUpdated: Instant,
     val title: String,
     val summary: String,
-    val affectedServices: List<UiServiceName>?,
+    val affectedServices: ImmutableList<UiServiceName>?,
     val moreDetails: UiMoreDetails?
 ) : UiServiceUpdate
 
 /**
- * Given a [List] of [ServiceUpdate]s, map this to a [List] of [UiIncident]s if it contains any
- * [IncidentServiceUpdate]s. If there are no [IncidentServiceUpdate]s then `null` will be returned.
+ * Given a [List] of [ServiceUpdate]s, map this to an [ImmutableList] of [UiIncident]s if it
+ * contains any [IncidentServiceUpdate]s. If there are no [IncidentServiceUpdate]s then `null` will
+ * be returned.
  *
  * @param coloursForServices A [Map] of service names to [ServiceColours]. May be `null` or services
  * may be missing.
  * @param serviceNamesComparator A [Comparator] used to sort the service names.
- * @return The [List] of [IncidentServiceUpdate]s as a [List] of [UiIncident]s.
+ * @return The [List] of [IncidentServiceUpdate]s as an [ImmutableList] of [UiIncident]s.
  */
 internal fun List<ServiceUpdate>.toUiIncidentsOrNull(
     coloursForServices: Map<String, ServiceColours>?,
     serviceNamesComparator: Comparator<String>
-): List<UiIncident>? {
+): ImmutableList<UiIncident>? {
     return mapNotNull {
         if (it is IncidentServiceUpdate) {
             it.toUiIncident(coloursForServices, serviceNamesComparator)
         } else {
             null
         }
-    }.ifEmpty { null }
+    }.ifEmpty { null }?.toImmutableList()
 }
 
 /**

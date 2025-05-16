@@ -64,6 +64,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableList
 import uk.org.rivernile.android.bustracker.ui.news.R
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
@@ -197,7 +198,7 @@ private fun ContentHeaderBar(
 
 @Composable
 private fun <T : UiServiceUpdate> ItemsList(
-    items: List<T>,
+    items: ImmutableList<T>,
     modifier: Modifier = Modifier,
     itemContent: @Composable LazyItemScope.(item: T) -> Unit
 ) {

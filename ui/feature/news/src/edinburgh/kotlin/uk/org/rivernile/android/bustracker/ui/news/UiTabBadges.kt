@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,8 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.ui.news
 
-import androidx.compose.runtime.Immutable
-
 /**
  * This class holds the count value to show for the tab item badges.
  *
@@ -35,7 +33,6 @@ import androidx.compose.runtime.Immutable
  * @property diversionsCount The number of diversions to show on the badge.
  * @author Niall Scott
  */
-@Immutable
 internal data class UiTabBadges(
     val incidentsCount: Int? = null,
     val diversionsCount: Int? = null

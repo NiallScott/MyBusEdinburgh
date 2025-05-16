@@ -26,7 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
-import androidx.compose.runtime.Immutable
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIncident
 
 /**
@@ -45,7 +46,6 @@ internal sealed interface UiContent<out T : UiServiceUpdate> {
     /**
      * Show the 'in progress' layout.
      */
-    @Immutable
     data object InProgress : UiContent<Nothing> {
 
         override val isRefreshing get() = true
@@ -56,16 +56,15 @@ internal sealed interface UiContent<out T : UiServiceUpdate> {
      *
      * @param T The type of [UiServiceUpdate] to be displayed.
      * @property isRefreshing Is the content currently refreshing?
-     * @property items The [List] of [UiIncident] items to show.
+     * @property items The [ImmutableList] of [UiIncident] items to show.
      * @property error An optional error to show if there's old content to show but an error
      * occurred on this reload attempt.
      * @property hasInternetConnectivity Does the device have internet connectivity?
      * @property lastRefreshTime The last refresh time to display to the user.
      */
-    @Immutable
     data class Populated<out T : UiServiceUpdate>(
         override val isRefreshing: Boolean,
-        val items: List<T>,
+        val items: ImmutableList<T>,
         val error: UiError?,
         val hasInternetConnectivity: Boolean,
         val lastRefreshTime: UiLastRefreshed
@@ -76,7 +75,6 @@ internal sealed interface UiContent<out T : UiServiceUpdate> {
      *
      * @property error The type of error which occurred.
      */
-    @Immutable
     data class Error(
         val error: UiError
     ) : UiContent<Nothing> {
@@ -92,7 +90,7 @@ internal fun <T : UiServiceUpdate> ServiceUpdatesDisplay.Populated<T>.toUiConten
     lastRefreshTime: UiLastRefreshed
 ) = UiContent.Populated(
     isRefreshing = isRefreshing,
-    items = items,
+    items = items.toImmutableList(),
     error = error,
     hasInternetConnectivity = hasInternetConnectivity,
     lastRefreshTime = lastRefreshTime

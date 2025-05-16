@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,14 +27,18 @@
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.Instant
 import org.junit.Rule
+import uk.org.rivernile.android.bustracker.ui.datetime.LocalDateTimeFormatter
+import uk.org.rivernile.android.bustracker.ui.datetime.rememberDateTimeFormatter
 import uk.org.rivernile.android.bustracker.ui.news.R
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
@@ -90,10 +94,13 @@ class ServiceUpdateItemKtTest {
 
         composeTestRule.setContent {
             MyBusTheme {
-                ItemLastUpdated(
-                    lastUpdated = instant,
-                    dateFormat = dateFormat
-                )
+                CompositionLocalProvider(
+                    LocalDateTimeFormatter provides rememberDateTimeFormatter()
+                ) {
+                    ItemLastUpdated(
+                        lastUpdated = instant
+                    )
+                }
             }
         }
 
@@ -107,7 +114,7 @@ class ServiceUpdateItemKtTest {
     fun itemAffectedServicesHandlesEmptyAffectedServices() {
         composeTestRule.setContent {
             MyBusTheme {
-                ItemAffectedServices(affectedServices = emptyList())
+                ItemAffectedServices(affectedServices = persistentListOf())
             }
         }
 
@@ -129,7 +136,7 @@ class ServiceUpdateItemKtTest {
         composeTestRule.setContent {
             MyBusTheme {
                 ItemAffectedServices(
-                    affectedServices = listOf(
+                    affectedServices = persistentListOf(
                         UiServiceName(serviceName = "1"),
                         UiServiceName(serviceName = "2"),
                         UiServiceName(serviceName = "3")

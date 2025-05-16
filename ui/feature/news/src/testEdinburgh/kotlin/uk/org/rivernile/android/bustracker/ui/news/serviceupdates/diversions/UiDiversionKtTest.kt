@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions
 
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.Instant
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.updates.IncidentServiceUpdate
@@ -77,7 +78,7 @@ class UiDiversionKtTest {
 
     @Test
     fun toDiversionsOrNullReturnsListWithItemWhenItemIsPlanned() {
-        val expected = listOf(
+        val expected = persistentListOf(
             createUiDiversion(
                 moreDetails = UiMoreDetails(url = "https://google.com")
             )
@@ -98,7 +99,7 @@ class UiDiversionKtTest {
 
     @Test
     fun toDiversionsOrNullReturnsListWithItemWhenItemIsPlannedAndUrlIsNull() {
-        val expected = listOf(
+        val expected = persistentListOf(
             createUiDiversion(
                 moreDetails = null
             )
@@ -119,7 +120,7 @@ class UiDiversionKtTest {
 
     @Test
     fun toDiversionsOrNullReturnsListWithItemWhenItemIsPlannedAndUrlIsEmpty() {
-        val expected = listOf(
+        val expected = persistentListOf(
             createUiDiversion(
                 moreDetails = null
             )
@@ -160,7 +161,7 @@ class UiDiversionKtTest {
             lastUpdated = Instant.fromEpochMilliseconds(123L),
             title = "Title",
             summary = "Summary",
-            affectedServices = listOf(
+            affectedServices = persistentListOf(
                 UiServiceName(
                     serviceName = "1",
                     colours = UiServiceColours(

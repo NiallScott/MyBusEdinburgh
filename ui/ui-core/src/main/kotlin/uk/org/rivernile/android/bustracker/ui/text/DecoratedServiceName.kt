@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,16 +29,14 @@ package uk.org.rivernile.android.bustracker.ui.text
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ProvidableCompositionLocal
-import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,6 +47,8 @@ import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.node.LayoutModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.platform.InspectorInfo
+import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.TextStyle
@@ -62,6 +62,8 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 
 /**
@@ -72,7 +74,6 @@ import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
  * @property colours The colours attributed to this service name rendering.
  * @author Niall Scott
  */
-@Immutable
 public data class UiServiceName(
     val serviceName: String,
     val colours: UiServiceColours? = null
@@ -86,7 +87,6 @@ public data class UiServiceName(
  * service.
  * @author Niall Scott
  */
-@Immutable
 public data class UiServiceColours(
     val backgroundColour: Int,
     val textColour: Int
@@ -98,19 +98,20 @@ public data class UiServiceColours(
  *
  * @author Niall Scott
  */
-public val LocalServiceColours: ProvidableCompositionLocal<UiServiceColours> = compositionLocalOf {
-    UiServiceColours(
-        backgroundColour = Color.Black.toArgb(),
-        textColour = Color.White.toArgb()
-    )
-}
+public val LocalServiceColours: ProvidableCompositionLocal<UiServiceColours> =
+    staticCompositionLocalOf {
+        UiServiceColours(
+            backgroundColour = Color.Black.toArgb(),
+            textColour = Color.White.toArgb()
+        )
+    }
 
 /**
  * A [Composable] which renders the given [services] in a [FlowRow] as
  * [SmallDecoratedServiceNameText].
  *
  * @param services The services to render. These are rendered in the same order as the supplied
- * [List]. If this [List] is `null` or empty then no composable will be rendered.
+ * [ImmutableList]. If this [ImmutableList] is `null` or empty then no composable will be rendered.
  * @param modifier Any [Modifier] to be applied.
  * @param horizontalArrangement See [FlowRow].
  * @param verticalArrangement See [FlowRow].
@@ -128,10 +129,9 @@ public val LocalServiceColours: ProvidableCompositionLocal<UiServiceColours> = c
  * @see SmallDecoratedServiceNameText
  * @author Niall Scott
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 public fun SmallDecoratedServiceNamesListingText(
-    services: List<UiServiceName>,
+    services: ImmutableList<UiServiceName>,
     modifier: Modifier = Modifier,
     horizontalArrangement: Arrangement.Horizontal = Arrangement.spacedBy(8.dp, Alignment.Start),
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp, Alignment.Top),
@@ -281,15 +281,30 @@ private fun DecoratedServiceNameText(
  * With this [Modifier], this ensures the width of this composeable is at least equal to or greater
  * than the height. This is used to prevent items with small widths looking unsightly.
  */
-private fun Modifier.widthIsAtLeastHeight() = this then WidthAtLeastHeightElement
+private fun Modifier.widthIsAtLeastHeight() =
+    this then WidthAtLeastHeightElement(
+        inspectorInfo = debugInspectorInfo {
+            name = "widthIsAtLeastHeight"
+        }
+    )
 
-private data object WidthAtLeastHeightElement : ModifierNodeElement<WidthAtLeastHeightNode>() {
+private class WidthAtLeastHeightElement(
+    val inspectorInfo: InspectorInfo.() -> Unit
+) : ModifierNodeElement<WidthAtLeastHeightNode>() {
 
     override fun create() = WidthAtLeastHeightNode()
 
     override fun update(node: WidthAtLeastHeightNode) {
         // Nothing to do here.
     }
+
+    override fun InspectorInfo.inspectableProperties() {
+        inspectorInfo()
+    }
+
+    override fun hashCode() = 1
+
+    override fun equals(other: Any?) = other != null && other::class == this::class
 }
 
 private class WidthAtLeastHeightNode : LayoutModifierNode, Modifier.Node() {
@@ -338,7 +353,7 @@ private class WidthAtLeastHeightNode : LayoutModifierNode, Modifier.Node() {
 private fun DecoratedServiceNamesListingTextPreview() {
     MyBusTheme {
         SmallDecoratedServiceNamesListingText(
-            services = listOf(
+            services = persistentListOf(
                 UiServiceName(
                     serviceName = "1",
                     colours = UiServiceColours(

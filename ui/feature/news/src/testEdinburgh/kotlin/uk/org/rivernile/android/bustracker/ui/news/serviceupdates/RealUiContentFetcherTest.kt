@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
 import app.cash.turbine.test
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -555,7 +556,7 @@ class RealUiContentFetcherTest {
     ): UiContent.Populated<T> {
         return UiContent.Populated(
             isRefreshing = false,
-            items = emptyList(),
+            items = persistentListOf(),
             error = null,
             hasInternetConnectivity = hasInternetConnectivity,
             lastRefreshTime = lastRefreshTime

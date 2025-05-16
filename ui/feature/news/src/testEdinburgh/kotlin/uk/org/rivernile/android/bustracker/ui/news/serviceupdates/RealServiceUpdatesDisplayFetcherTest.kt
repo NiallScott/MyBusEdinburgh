@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
 import app.cash.turbine.test
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
@@ -111,7 +112,7 @@ class RealServiceUpdatesDisplayFetcherTest {
                                     lastUpdated = Instant.fromEpochMilliseconds(123L),
                                     title = "Title",
                                     summary = "Summary",
-                                    affectedServices = listOf(
+                                    affectedServices = persistentListOf(
                                         UiServiceName(
                                             serviceName = "1",
                                             colours = UiServiceColours(
@@ -154,7 +155,7 @@ class RealServiceUpdatesDisplayFetcherTest {
                             lastUpdated = Instant.fromEpochMilliseconds(123L),
                             title = "Title",
                             summary = "Summary",
-                            affectedServices = listOf(
+                            affectedServices = persistentListOf(
                                 UiServiceName(
                                     serviceName = "1",
                                     colours = UiServiceColours(
@@ -277,7 +278,7 @@ class RealServiceUpdatesDisplayFetcherTest {
                                     lastUpdated = Instant.fromEpochMilliseconds(123L),
                                     title = "Title",
                                     summary = "Summary",
-                                    affectedServices = listOf(
+                                    affectedServices = persistentListOf(
                                         UiServiceName(
                                             serviceName = "1",
                                             colours = UiServiceColours(
@@ -320,7 +321,7 @@ class RealServiceUpdatesDisplayFetcherTest {
                             lastUpdated = Instant.fromEpochMilliseconds(123L),
                             title = "Title",
                             summary = "Summary",
-                            affectedServices = listOf(
+                            affectedServices = persistentListOf(
                                 UiServiceName(
                                     serviceName = "1",
                                     colours = UiServiceColours(

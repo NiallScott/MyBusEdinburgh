@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
-import androidx.compose.runtime.Immutable
 import uk.org.rivernile.android.bustracker.core.time.ElapsedTimeMinutes
 
 /**
@@ -40,13 +39,11 @@ internal sealed interface UiLastRefreshed {
      * There is no last refresh time. This is an unusual state, designed to encapsulate the case
      * that the current time is prior to the supplied event time.
      */
-    @Immutable
     data object Never : UiLastRefreshed
 
     /**
      * The last refresh time is less than 1 minute ago.
      */
-    @Immutable
     data object Now : UiLastRefreshed
 
     /**
@@ -54,7 +51,6 @@ internal sealed interface UiLastRefreshed {
      *
      * @property minutes The number of minutes since the last refresh.
      */
-    @Immutable
     data class Minutes(
         val minutes: Int
     ) : UiLastRefreshed
@@ -62,7 +58,6 @@ internal sealed interface UiLastRefreshed {
     /**
      * The last refresh time is more than one hour ago.
      */
-    @Immutable
     data object MoreThanOneHour : UiLastRefreshed
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
+import kotlinx.collections.immutable.persistentListOf
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
@@ -64,7 +65,7 @@ class ServiceColoursMapperKtTest {
 
     @Test
     fun toUiServiceNamesOrNullReturnsServiceWithoutColourWhenServiceColoursIsNull() {
-        val expected = listOf(
+        val expected = persistentListOf(
             UiServiceName(
                 serviceName = "1",
                 colours = null
@@ -82,7 +83,7 @@ class ServiceColoursMapperKtTest {
 
     @Test
     fun toUiServiceNamesOrNullReturnsServiceWithoutColourWhenServiceColoursIsEmpty() {
-        val expected = listOf(
+        val expected = persistentListOf(
             UiServiceName(
                 serviceName = "1",
                 colours = null
@@ -100,7 +101,7 @@ class ServiceColoursMapperKtTest {
 
     @Test
     fun toUiServiceNamesOrNullReturnsServiceWithoutColourWhenServiceColourNotKnown() {
-        val expected = listOf(
+        val expected = persistentListOf(
             UiServiceName(
                 serviceName = "1",
                 colours = null
@@ -123,7 +124,7 @@ class ServiceColoursMapperKtTest {
 
     @Test
     fun toUiServiceNamesOrNullReturnsServiceWithColourWhenServiceColourKnown() {
-        val expected = listOf(
+        val expected = persistentListOf(
             UiServiceName(
                 serviceName = "1",
                 colours = UiServiceColours(
@@ -149,7 +150,7 @@ class ServiceColoursMapperKtTest {
 
     @Test
     fun toUiServiceNamesOrNullReturnsExpectedValuesWithRepresentativeExample() {
-        val expected = listOf(
+        val expected = persistentListOf(
             UiServiceName(
                 serviceName = "1",
                 colours = UiServiceColours(

@@ -94,6 +94,9 @@ dependencies {
     // Date/time
     implementation(libs.kotlin.datetime)
 
+    // Kotlin immutable collections
+    implementation(libs.kotlin.immutable.collections)
+
     // Test dependencies
     androidTestImplementation(testFixtures(project(":core:logging")))
     androidTestImplementation(libs.androidx.compose.ui.test)

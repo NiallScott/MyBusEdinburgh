@@ -76,6 +76,9 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.material.compose)
 
+    // Kotlin immutable collections
+    implementation(libs.kotlin.immutable.collections)
+
     androidTestImplementation(libs.androidx.compose.ui.test)
     androidTestImplementation(libs.androidx.test.espresso)
     androidTestImplementation(libs.androidx.test.runner)

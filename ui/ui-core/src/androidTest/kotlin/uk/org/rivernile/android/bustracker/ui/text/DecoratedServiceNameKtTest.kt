@@ -39,6 +39,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onParent
 import androidx.compose.ui.unit.height
+import kotlinx.collections.immutable.persistentListOf
 import org.junit.Rule
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import kotlin.test.Test
@@ -110,7 +111,7 @@ class DecoratedServiceNameKtTest {
         composeTestRule.setContent {
             MyBusTheme {
                 SmallDecoratedServiceNamesListingText(
-                    services = emptyList()
+                    services = persistentListOf()
                 )
             }
         }
@@ -128,7 +129,7 @@ class DecoratedServiceNameKtTest {
         composeTestRule.setContent {
             MyBusTheme {
                 SmallDecoratedServiceNamesListingText(
-                    services = listOf(
+                    services = persistentListOf(
                         UiServiceName(
                             serviceName = "1"
                         )
@@ -157,7 +158,7 @@ class DecoratedServiceNameKtTest {
         composeTestRule.setContent {
             MyBusTheme {
                 SmallDecoratedServiceNamesListingText(
-                    services = listOf(
+                    services = persistentListOf(
                         UiServiceName(
                             serviceName = "1"
                         ),

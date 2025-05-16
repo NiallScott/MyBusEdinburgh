@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,31 +26,34 @@
 
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 
 /**
- * Map a given [Collection] of [String] service names to a [List] of [UiServiceName]s.
+ * Map a given [Collection] of [String] service names to an [ImmutableList] of [UiServiceName]s.
  *
  * @param serviceNames A [Collection] containing the service names of affected services.
  * @param serviceColours A [Map] of [ServiceColours] used to populate the colours for the services.
  * May be `null` if not available.
  * @param serviceNamesComparator A [Comparator] used to sort the services by name.
- * @return The given [serviceNames] mapped to a [List] of [UiServiceName]s, in the order defined
- * by [serviceNamesComparator], with colours provided by [serviceColours].
+ * @return The given [serviceNames] mapped to an [ImmutableList] of [UiServiceName]s, in the order
+ * defined by [serviceNamesComparator], with colours provided by [serviceColours].
  */
 internal fun toUiServiceNamesOrNull(
     serviceNames: Collection<String>?,
     serviceColours: Map<String, ServiceColours>?,
     serviceNamesComparator: Comparator<String>
-): List<UiServiceName>? {
+): ImmutableList<UiServiceName>? {
     return serviceNames
         ?.ifEmpty { null }
         ?.sortedWith(serviceNamesComparator)
         ?.map {
             toUiServiceName(it, serviceColours?.get(it))
         }
+        ?.toImmutableList()
 }
 
 /**

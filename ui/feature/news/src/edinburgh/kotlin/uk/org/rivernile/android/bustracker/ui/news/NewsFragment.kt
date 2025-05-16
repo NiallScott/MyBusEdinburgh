@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,6 +33,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.compose.content
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.ui.datetime.LocalDateTimeFormatter
+import uk.org.rivernile.android.bustracker.ui.datetime.rememberDateTimeFormatter
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.DiversionsActionLauncher
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.LocalDiversionsActionLauncher
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.IncidentsActionLauncher
@@ -60,11 +62,12 @@ class NewsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ) = content {
-        CompositionLocalProvider(
-            LocalDiversionsActionLauncher provides diversionsActionLauncher,
-            LocalIncidentsActionLauncher provides incidentsActionLauncher
-        ) {
-            MyBusTheme {
+        MyBusTheme {
+            CompositionLocalProvider(
+                LocalDiversionsActionLauncher provides diversionsActionLauncher,
+                LocalIncidentsActionLauncher provides incidentsActionLauncher,
+                LocalDateTimeFormatter provides rememberDateTimeFormatter()
+            ) {
                 NewsScreen()
             }
         }

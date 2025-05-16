@@ -30,17 +30,19 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.Instant
+import uk.org.rivernile.android.bustracker.ui.datetime.LocalDateTimeFormatter
+import uk.org.rivernile.android.bustracker.ui.datetime.rememberDateTimeFormatter
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ServiceUpdatesScreen
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiContent
@@ -50,7 +52,6 @@ import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiMoreDetails
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
-import java.text.SimpleDateFormat
 
 /**
  * A [Composable] which renders the root of the diversions screen with state passed in.
@@ -70,8 +71,6 @@ internal fun DiversionsScreen(
     onMoreDetailsClicked: (UiDiversion) -> Unit,
     onActionLaunched: () -> Unit
 ) {
-    val configuration = LocalConfiguration.current
-    val dateFormat = remember(configuration) { SimpleDateFormat.getDateTimeInstance() }
     val doublePadding = dimensionResource(id = Rcore.dimen.padding_double)
 
     ServiceUpdatesScreen(
@@ -81,7 +80,6 @@ internal fun DiversionsScreen(
         itemContent = { item ->
             DiversionItem(
                 item = item,
-                dateFormat = dateFormat,
                 modifier = Modifier
                     .widthIn(0.dp, 568.dp)
                     .padding(start = doublePadding, end = doublePadding),
@@ -134,13 +132,13 @@ private fun LaunchAction(
 )
 @Composable
 private fun DiversionsScreenContentPreview() {
-    val diversions = listOf(
+    val diversions = persistentListOf(
         UiDiversion(
             id = "1",
             lastUpdated = Instant.fromEpochMilliseconds(1719063420000L),
             title = "Princes Street",
             summary = "Due to road works buses are being diverted from Princes Street.",
-            affectedServices = listOf(
+            affectedServices = persistentListOf(
                 UiServiceName(
                     serviceName = "1",
                     UiServiceColours(
@@ -170,7 +168,7 @@ private fun DiversionsScreenContentPreview() {
             lastUpdated = Instant.fromEpochMilliseconds(1719063420000L),
             title = "Princes Street",
             summary = "Due to road works buses are being diverted from Princes Street.",
-            affectedServices = listOf(
+            affectedServices = persistentListOf(
                 UiServiceName(
                     serviceName = "1",
                     colours = UiServiceColours(
@@ -200,7 +198,7 @@ private fun DiversionsScreenContentPreview() {
             lastUpdated = Instant.fromEpochMilliseconds(1719063420000L),
             title = "Princes Street",
             summary = "Due to road works buses are being diverted from Princes Street.",
-            affectedServices = listOf(
+            affectedServices = persistentListOf(
                 UiServiceName(
                     serviceName = "1",
                     colours = UiServiceColours(
@@ -228,20 +226,24 @@ private fun DiversionsScreenContentPreview() {
     )
 
     MyBusTheme {
-        DiversionsScreen(
-            state = UiDiversionsState(
-                content = UiContent.Populated(
-                    isRefreshing = false,
-                    items = diversions,
-                    error = null,
-                    hasInternetConnectivity = true,
-                    lastRefreshTime = UiLastRefreshed.Minutes(minutes = 5)
-                )
-            ),
-            onRefresh = { },
-            onMoreDetailsClicked = { },
-            onActionLaunched = { }
-        )
+        CompositionLocalProvider(
+            LocalDateTimeFormatter provides rememberDateTimeFormatter()
+        ) {
+            DiversionsScreen(
+                state = UiDiversionsState(
+                    content = UiContent.Populated(
+                        isRefreshing = false,
+                        items = diversions,
+                        error = null,
+                        hasInternetConnectivity = true,
+                        lastRefreshTime = UiLastRefreshed.Minutes(minutes = 5)
+                    )
+                ),
+                onRefresh = { },
+                onMoreDetailsClicked = { },
+                onActionLaunched = { }
+            )
+        }
     }
 }
 
@@ -262,14 +264,18 @@ private fun DiversionsScreenContentPreview() {
 @Composable
 private fun DiversionsScreenProgressPreview() {
     MyBusTheme {
-        DiversionsScreen(
-            state = UiDiversionsState(
-                content = UiContent.InProgress
-            ),
-            onRefresh = { },
-            onMoreDetailsClicked = { },
-            onActionLaunched = { }
-        )
+        CompositionLocalProvider(
+            LocalDateTimeFormatter provides rememberDateTimeFormatter()
+        ) {
+            DiversionsScreen(
+                state = UiDiversionsState(
+                    content = UiContent.InProgress
+                ),
+                onRefresh = { },
+                onMoreDetailsClicked = { },
+                onActionLaunched = { }
+            )
+        }
     }
 }
 
@@ -290,15 +296,19 @@ private fun DiversionsScreenProgressPreview() {
 @Composable
 private fun DiversionsScreenEmptyErrorPreview() {
     MyBusTheme {
-        DiversionsScreen(
-            state = UiDiversionsState(
-                content = UiContent.Error(
-                    error = UiError.EMPTY
-                )
-            ),
-            onRefresh = { },
-            onMoreDetailsClicked = { },
-            onActionLaunched = { }
-        )
+        CompositionLocalProvider(
+            LocalDateTimeFormatter provides rememberDateTimeFormatter()
+        ) {
+            DiversionsScreen(
+                state = UiDiversionsState(
+                    content = UiContent.Error(
+                        error = UiError.EMPTY
+                    )
+                ),
+                onRefresh = { },
+                onMoreDetailsClicked = { },
+                onActionLaunched = { }
+            )
+        }
     }
 }

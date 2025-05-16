@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,12 +39,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.datetime.Instant
+import uk.org.rivernile.android.bustracker.ui.datetime.LocalDateTimeFormatter
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.news.R
 import uk.org.rivernile.android.bustracker.ui.text.SmallDecoratedServiceNamesListingText
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
-import java.text.DateFormat
 import java.util.Date
 
 internal const val TEST_TAG_ITEM_TITLE = "item-title"
@@ -99,19 +100,17 @@ internal fun ItemSummary(
  * A Service Update item "last updated" text.
  *
  * @param lastUpdated The [Instant] the item was last updated.
- * @param dateFormat A [DateFormat] instance used to format the timestamp.
  * @param modifier The [Modifier] to be applied to the last updated text.
  */
 @Composable
 internal fun ItemLastUpdated(
     lastUpdated: Instant,
-    dateFormat: DateFormat,
     modifier: Modifier = Modifier
 ) {
     Text(
         text = stringResource(
             R.string.serviceupdates_item_last_updated,
-            dateFormat.format(Date(lastUpdated.toEpochMilliseconds()))
+            LocalDateTimeFormatter.current.format(Date(lastUpdated.toEpochMilliseconds()))
         ),
         modifier = modifier
             .semantics {
@@ -125,12 +124,12 @@ internal fun ItemLastUpdated(
 /**
  * A Service Update item affected services listing.
  *
- * @param affectedServices An ordered [List] of [UiServiceName]s.
+ * @param affectedServices An ordered [ImmutableList] of [UiServiceName]s.
  * @param modifier The [Modifier] to be applied to the affected services listing.
  */
 @Composable
 internal fun ItemAffectedServices(
-    affectedServices: List<UiServiceName>,
+    affectedServices: ImmutableList<UiServiceName>,
     modifier: Modifier = Modifier
 ) {
     Column(

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,8 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions
 
-import androidx.compose.runtime.Immutable
-
 /**
  * This sealed interface represents possible actions which can be performed on the 'diversions'
  * screen.
@@ -41,7 +39,6 @@ internal sealed interface UiDiversionAction {
      *
      * @property url The URL to be shown.
      */
-    @Immutable
     data class ShowUrl(
         val url: String
     ) : UiDiversionAction
