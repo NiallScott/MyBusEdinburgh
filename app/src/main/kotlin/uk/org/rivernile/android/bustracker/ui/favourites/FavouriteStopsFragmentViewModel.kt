@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -64,11 +64,12 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class FavouriteStopsFragmentViewModel @Inject constructor(
-        private val savedState: SavedStateHandle,
-        favouriteStopsRetriever: FavouriteStopsRetriever,
-        private val alertsRepository: AlertsRepository,
-        featureRepository: FeatureRepository,
-        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
+    private val savedState: SavedStateHandle,
+    favouriteStopsRetriever: FavouriteStopsRetriever,
+    private val alertsRepository: AlertsRepository,
+    featureRepository: FeatureRepository,
+    @param:ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
+) : ViewModel() {
 
     companion object {
 

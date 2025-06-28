@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -91,13 +91,12 @@ class AlertsRetriever @Inject constructor(
     private fun combineAlertsAndStopDetails(
         alerts: List<Alert>,
         stopDetailsMap: Map<String, StopDetails>?
-    ) = alerts.mapNotNull {
+    ) = alerts.map {
         val stopDetails = stopDetailsMap?.get(it.stopCode)
 
         when (it) {
             is ArrivalAlert -> combineArrivalAlertAndStopDetails(it, stopDetails)
             is ProximityAlert -> combineProximityAlertAndStopDetails(it, stopDetails)
-            else -> null
         }
     }
 

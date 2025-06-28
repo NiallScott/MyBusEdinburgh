@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -67,8 +67,8 @@ import javax.inject.Inject
  */
 class SettingsPreferenceDataStore @Inject constructor(
     private val dataStoreSource: PreferenceDataStoreSource,
-    @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
-    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
+    @param:ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
+    @param:ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : PreferenceDataStore() {
 
     override fun putString(key: String, value: String?) {

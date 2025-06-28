@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -50,8 +50,9 @@ import javax.inject.Inject
 class DeleteFavouriteDialogFragmentViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val favouritesRepository: FavouritesRepository,
-    @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
-    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
+    @param:ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
+    @param:ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
+) : ViewModel() {
 
     companion object {
 

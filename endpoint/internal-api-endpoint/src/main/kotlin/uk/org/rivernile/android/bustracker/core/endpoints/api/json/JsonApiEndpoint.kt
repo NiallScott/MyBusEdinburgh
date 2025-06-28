@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -51,7 +51,7 @@ import javax.net.SocketFactory
 internal class JsonApiEndpoint @Inject constructor(
     private val apiServiceFactory: ApiServiceFactory,
     private val apiKeyGenerator: ApiKeyGenerator,
-    @ForInternalApiSchemaName private val schemaType: String,
+    @param:ForInternalApiSchemaName private val schemaType: String,
     private val exceptionLogger: ExceptionLogger
 ) : ApiEndpoint {
 

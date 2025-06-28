@@ -77,7 +77,7 @@ internal interface AboutActionLauncher {
  */
 @ActivityScoped
 internal class AndroidAboutActionLauncher @Inject constructor(
-    @ActivityContext private val context: Context,
+    @param:ActivityContext private val context: Context,
     private val exceptionLogger: ExceptionLogger
 ) : AboutActionLauncher {
 

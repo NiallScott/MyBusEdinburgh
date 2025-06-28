@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -54,7 +54,7 @@ internal class ApiTwitterEndpoint @Inject constructor(
     private val twitterService: TwitterService,
     private val connectivityRepository: ConnectivityRepository,
     private val apiKeyGenerator: ApiKeyGenerator,
-    @ForInternalApiAppName private val appName: String,
+    @param:ForInternalApiAppName private val appName: String,
     private val tweetsMapper: TweetsMapper,
     private val exceptionLogger: ExceptionLogger
 ) : TwitterEndpoint {

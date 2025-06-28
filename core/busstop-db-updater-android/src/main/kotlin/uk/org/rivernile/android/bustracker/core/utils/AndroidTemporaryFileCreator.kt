@@ -43,7 +43,7 @@ import javax.inject.Inject
  */
 internal class AndroidTemporaryFileCreator @Inject constructor(
     private val context: Context,
-    @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher
+    @param:ForIoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : TemporaryFileCreator {
 
     @Throws(IOException::class)

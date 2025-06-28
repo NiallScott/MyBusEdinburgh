@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -84,9 +84,9 @@ class BusStopMapViewModel @Inject constructor(
     private val routeLineRetriever: RouteLineRetriever,
     isMyLocationEnabledDetector: IsMyLocationEnabledDetector,
     private val preferenceRepository: PreferenceRepository,
-    @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
-    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher)
-    : ViewModel() {
+    @param:ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
+    @param:ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
+) : ViewModel() {
 
     companion object {
 

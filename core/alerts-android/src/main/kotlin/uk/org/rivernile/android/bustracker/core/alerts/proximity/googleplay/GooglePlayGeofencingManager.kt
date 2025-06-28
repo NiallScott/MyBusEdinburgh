@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -52,7 +52,7 @@ private const val PENDING_INTENT_FLAGS =
  * @author Niall Scott
  */
 internal class GooglePlayGeofencingManager @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val geofencingClient: GeofencingClient,
     private val permissionChecker: AndroidPermissionChecker,
     private val exceptionLogger: ExceptionLogger
