@@ -30,14 +30,18 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
+import dagger.multibindings.IntoSet
+import uk.org.rivernile.android.bustracker.ui.news.Refreshable
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.RealServiceUpdatesDisplayCalculator
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.RealServiceUpdatesFetcher
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.RealUiContentFetcher
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.RealServiceUpdatesDisplayFetcher
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.RealServiceUpdatesErrorTracker
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ServiceUpdatesDisplayCalculator
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ServiceUpdatesFetcher
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiContentFetcher
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ServiceUpdatesDisplayFetcher
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ServiceUpdatesErrorTracker
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.DiversionsViewModelState
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.RealDiversionsViewModelState
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.IncidentsViewModelState
@@ -73,9 +77,22 @@ internal interface NewsViewModelModule {
 
     @Suppress("unused")
     @Binds
+    fun bindServiceUpdatesErrorTracker(
+        realServiceUpdatesErrorTracker: RealServiceUpdatesErrorTracker
+    ): ServiceUpdatesErrorTracker
+
+    @Suppress("unused")
+    @Binds
     fun bindServiceUpdatesFetcher(
         realServiceUpdatesFetcher: RealServiceUpdatesFetcher
     ): ServiceUpdatesFetcher
+
+    @Suppress("unused")
+    @Binds
+    @IntoSet
+    fun bindServiceUpdatesFetcherAsRefreshable(
+        serviceUpdatesFetcher: ServiceUpdatesFetcher
+    ): Refreshable
 
     @Suppress("unused")
     @Binds

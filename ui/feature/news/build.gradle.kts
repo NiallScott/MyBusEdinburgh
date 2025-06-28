@@ -80,6 +80,7 @@ dependencies {
 
     // AndroidX
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.androidx.core)
     implementation(libs.androidx.fragment.compose)
     implementation(libs.androidx.viewmodel.compose)

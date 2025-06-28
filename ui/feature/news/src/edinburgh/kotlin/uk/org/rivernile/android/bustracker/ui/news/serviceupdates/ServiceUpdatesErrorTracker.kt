@@ -26,30 +26,43 @@
 
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
+import androidx.lifecycle.SavedStateHandle
+import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
-import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.UiDiversion
-import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIncident
+import javax.inject.Inject
 
 /**
- * A fake [ServiceUpdatesDisplayFetcher] for testing.
+ * This tracks when transient errors have been shown to the user. This is to ensure they are not
+ * shown again until a new reload event has occurred.
  *
  * @author Niall Scott
  */
-internal class FakeServiceUpdatesDisplayFetcher(
-    private val onDiversionsDisplayFlow: () -> Flow<ServiceUpdatesDisplay<UiDiversion>> =
-        { throw NotImplementedError() },
-    private val onIncidentsDisplayFlow: () -> Flow<ServiceUpdatesDisplay<UiIncident>> =
-        { throw NotImplementedError() },
-    private val onClose: () -> Unit = { throw NotImplementedError() }
-) : ServiceUpdatesDisplayFetcher {
+internal interface ServiceUpdatesErrorTracker {
 
-    override val diversionsDisplayFlow: Flow<ServiceUpdatesDisplay<UiDiversion>>
-        get() = onDiversionsDisplayFlow()
+    /**
+     * A [Flow] which emits the timestamp of when the last error was shown at.
+     */
+    val lastErrorTimestampShownFlow: Flow<Long>
 
-    override val incidentsDisplayFlow: Flow<ServiceUpdatesDisplay<UiIncident>>
-        get() = onIncidentsDisplayFlow()
+    /**
+     * Update the timestamp of the last shown error.
+     *
+     * @param timestamp The timestamp the last error was shown at.
+     */
+    fun onServiceUpdatesTransientErrorShown(timestamp: Long)
+}
 
-    override fun close() {
-        onClose()
+private const val KEY_LAST_ERROR_TIMESTAMP = "lastErrorTimestamp"
+
+@ViewModelScoped
+internal class RealServiceUpdatesErrorTracker @Inject constructor(
+    private val savedState: SavedStateHandle
+) : ServiceUpdatesErrorTracker {
+
+    override val lastErrorTimestampShownFlow = savedState
+        .getStateFlow(KEY_LAST_ERROR_TIMESTAMP, 0L)
+
+    override fun onServiceUpdatesTransientErrorShown(timestamp: Long) {
+        savedState[KEY_LAST_ERROR_TIMESTAMP] = timestamp
     }
 }

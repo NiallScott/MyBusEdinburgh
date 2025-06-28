@@ -30,6 +30,10 @@ plugins {
     `java-test-fixtures`
 }
 
+kotlin {
+    explicitApi()
+}
+
 dependencies {
 
     implementation(project(":cities:edinburgh:edinburgh-service-updates-endpoint"))

@@ -61,13 +61,15 @@ internal sealed interface UiContent<out T : UiServiceUpdate> {
      * occurred on this reload attempt.
      * @property hasInternetConnectivity Does the device have internet connectivity?
      * @property lastRefreshTime The last refresh time to display to the user.
+     * @property loadTimeMillis The timestamp the data was last loaded at.
      */
     data class Populated<out T : UiServiceUpdate>(
         override val isRefreshing: Boolean,
         val items: ImmutableList<T>,
         val error: UiError?,
         val hasInternetConnectivity: Boolean,
-        val lastRefreshTime: UiLastRefreshed
+        val lastRefreshTime: UiLastRefreshed,
+        val loadTimeMillis: Long
     ) : UiContent<T>
 
     /**
@@ -87,13 +89,15 @@ internal fun toUiContentInProgress() = UiContent.InProgress
 
 internal fun <T : UiServiceUpdate> ServiceUpdatesDisplay.Populated<T>.toUiContentPopulated(
     hasInternetConnectivity: Boolean,
+    lastErrorTimestampShown: Long,
     lastRefreshTime: UiLastRefreshed
 ) = UiContent.Populated(
     isRefreshing = isRefreshing,
     items = items.toImmutableList(),
-    error = error,
+    error = if (lastErrorTimestampShown < lastLoadTimeMillis) error else null,
     hasInternetConnectivity = hasInternetConnectivity,
-    lastRefreshTime = lastRefreshTime
+    lastRefreshTime = lastRefreshTime,
+    loadTimeMillis = lastLoadTimeMillis
 )
 
 internal fun ServiceUpdatesDisplay.Error.toUiContentError() =

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,7 @@ package uk.org.rivernile.android.bustracker.core.endpoints.updates.service
  *
  * @author Niall Scott
  */
-enum class ServiceUpdateType {
+public enum class ServiceUpdateType {
 
     /** The service update is for a planned event. */
     PLANNED,

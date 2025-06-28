@@ -53,24 +53,16 @@ internal interface ServiceUpdatesDisplayFetcher : AutoCloseable {
     /**
      * A [kotlinx.coroutines.flow.Flow] which emits [UiServiceUpdatesResult] items containing
      * [UiDiversion]s. The initial subscription to this may already have loaded data or may cause a
-     * new load to happen. To cause new data loads (i.e. to refresh the data), call [refresh].
+     * new load to happen.
      */
     val diversionsDisplayFlow: Flow<ServiceUpdatesDisplay<UiDiversion>>
 
     /**
      * A [kotlinx.coroutines.flow.Flow] which emits [UiServiceUpdatesResult] items containing
      * [UiIncident]s. The initial subscription to this may already have loaded data or may cause a
-     * new load to happen. To cause new data loads (i.e. to refresh the data), call [refresh].
+     * new load to happen.
      */
     val incidentsDisplayFlow: Flow<ServiceUpdatesDisplay<UiIncident>>
-
-    /**
-     * Trigger a refresh on the Service Updates data. The new data will be emitted from
-     * [diversionsDisplayFlow] and [incidentsDisplayFlow]. If this method is called while a load
-     * is taking place, it will cause the current load to be aborted a new fresh loading attempt
-     * is performed.
-     */
-    fun refresh()
 }
 
 @ViewModelScoped
@@ -80,7 +72,7 @@ internal class RealServiceUpdatesDisplayFetcher @Inject constructor(
     private val serviceNamesComparator: Comparator<String>,
     private val serviceUpdatesDisplayCalculator: ServiceUpdatesDisplayCalculator,
     @ForViewModelCoroutineScope private val viewModelCoroutineScope: CoroutineScope
-) : ServiceUpdatesDisplayFetcher {
+) : ServiceUpdatesDisplayFetcher, AutoCloseable by serviceUpdatesFetcher {
 
     override val diversionsDisplayFlow get() = serviceUpdatesFetcher
         .serviceUpdatesFlow
@@ -99,14 +91,6 @@ internal class RealServiceUpdatesDisplayFetcher @Inject constructor(
             operation = serviceUpdatesDisplayCalculator::calculateServiceUpdatesDisplayForIncidents
         )
         .distinctUntilChanged()
-
-    override fun refresh() {
-        serviceUpdatesFetcher.refresh()
-    }
-
-    override fun close() {
-        serviceUpdatesFetcher.close()
-    }
 
     private val serviceColoursFlow = servicesRepository
         .getColoursForServicesFlow()

@@ -136,7 +136,8 @@ class RealServiceUpdatesDisplayFetcherTest {
                                 )
                             ),
                             error = null,
-                            loadTimeMillis = 123L
+                            successLoadTimeMillis = 123L,
+                            lastLoadTimeMillis = 123L
                         )
                         else -> fail()
                     }
@@ -179,7 +180,8 @@ class RealServiceUpdatesDisplayFetcherTest {
                         )
                     ),
                     error = null,
-                    loadTimeMillis = 123L
+                    successLoadTimeMillis = 123L,
+                    lastLoadTimeMillis = 123L
                 ),
                 awaitItem()
             )
@@ -194,7 +196,7 @@ class RealServiceUpdatesDisplayFetcherTest {
                 onServiceUpdatesFlow = {
                     flowOf(
                         ServiceUpdatesResult.InProgress,
-                        ServiceUpdatesResult.Error.NoConnectivity
+                        ServiceUpdatesResult.Error.NoConnectivity(loadTimeMillis = 123L)
                     )
                 }
             ),
@@ -302,7 +304,8 @@ class RealServiceUpdatesDisplayFetcherTest {
                                 )
                             ),
                             error = null,
-                            loadTimeMillis = 123L
+                            successLoadTimeMillis = 123L,
+                            lastLoadTimeMillis = 123L
                         )
                         else -> fail()
                     }
@@ -345,7 +348,8 @@ class RealServiceUpdatesDisplayFetcherTest {
                         )
                     ),
                     error = null,
-                    loadTimeMillis = 123L
+                    successLoadTimeMillis = 123L,
+                    lastLoadTimeMillis = 123L
                 ),
                 awaitItem()
             )
@@ -360,7 +364,7 @@ class RealServiceUpdatesDisplayFetcherTest {
                 onServiceUpdatesFlow = {
                     flowOf(
                         ServiceUpdatesResult.InProgress,
-                        ServiceUpdatesResult.Error.NoConnectivity
+                        ServiceUpdatesResult.Error.NoConnectivity(loadTimeMillis = 123L)
                     )
                 }
             ),
@@ -385,21 +389,6 @@ class RealServiceUpdatesDisplayFetcherTest {
             )
             ensureAllEventsConsumed()
         }
-    }
-
-    @Test
-    fun refreshCallsRefreshOnServiceUpdatesFetcher() = runTest {
-        var refreshInvocationCount = 0
-        val fetcher = createFetcher(
-            serviceUpdatesFetcher = FakeServiceUpdatesFetcher(
-                onRefresh = { refreshInvocationCount++ }
-            ),
-            servicesRepository = createServicesRepositoryWithNullColours()
-        )
-
-        fetcher.refresh()
-
-        assertEquals(1, refreshInvocationCount)
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,21 +39,27 @@ class UiErrorKtTest {
 
     @Test
     fun toUiErrorMapsNoConnectivity() {
-        val result = ServiceUpdatesResult.Error.NoConnectivity.toUiError()
+        val result = ServiceUpdatesResult.Error.NoConnectivity(loadTimeMillis = 123L).toUiError()
 
         assertEquals(UiError.NO_CONNECTIVITY, result)
     }
 
     @Test
     fun toUiErrorMapsIo() {
-        val result = ServiceUpdatesResult.Error.Io(Throwable()).toUiError()
+        val result = ServiceUpdatesResult
+            .Error
+            .Io(
+                loadTimeMillis = 123L,
+                throwable = Throwable()
+            )
+            .toUiError()
 
         assertEquals(UiError.IO, result)
     }
 
     @Test
     fun toUiErrorMapsServer() {
-        val result = ServiceUpdatesResult.Error.Server.toUiError()
+        val result = ServiceUpdatesResult.Error.Server(loadTimeMillis = 123L).toUiError()
 
         assertEquals(UiError.SERVER, result)
     }

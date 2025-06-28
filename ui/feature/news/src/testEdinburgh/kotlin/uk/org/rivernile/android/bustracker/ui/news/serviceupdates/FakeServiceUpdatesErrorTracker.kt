@@ -27,29 +27,20 @@
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
 import kotlinx.coroutines.flow.Flow
-import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.UiDiversion
-import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIncident
 
 /**
- * A fake [ServiceUpdatesDisplayFetcher] for testing.
+ * A fake [ServiceUpdatesErrorTracker] to be used in testing.
  *
  * @author Niall Scott
  */
-internal class FakeServiceUpdatesDisplayFetcher(
-    private val onDiversionsDisplayFlow: () -> Flow<ServiceUpdatesDisplay<UiDiversion>> =
-        { throw NotImplementedError() },
-    private val onIncidentsDisplayFlow: () -> Flow<ServiceUpdatesDisplay<UiIncident>> =
-        { throw NotImplementedError() },
-    private val onClose: () -> Unit = { throw NotImplementedError() }
-) : ServiceUpdatesDisplayFetcher {
+internal class FakeServiceUpdatesErrorTracker(
+    private val onLastErrorTimestampShownFlow: () -> Flow<Long> = { throw NotImplementedError() },
+    private val onUpdateErrorShownTimestamp: (Long) -> Unit = { throw NotImplementedError() }
+) : ServiceUpdatesErrorTracker {
 
-    override val diversionsDisplayFlow: Flow<ServiceUpdatesDisplay<UiDiversion>>
-        get() = onDiversionsDisplayFlow()
+    override val lastErrorTimestampShownFlow get() = onLastErrorTimestampShownFlow()
 
-    override val incidentsDisplayFlow: Flow<ServiceUpdatesDisplay<UiIncident>>
-        get() = onIncidentsDisplayFlow()
-
-    override fun close() {
-        onClose()
+    override fun onServiceUpdatesTransientErrorShown(timestamp: Long) {
+        onUpdateErrorShownTimestamp(timestamp)
     }
 }

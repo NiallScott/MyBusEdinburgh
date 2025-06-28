@@ -63,7 +63,7 @@ class LothianServiceUpdatesEndpointTest {
 
         val result = endpoint.getServiceUpdates()
 
-        assertEquals(ServiceUpdatesResponse.Error.NoConnectivity, result)
+        assertEquals(ServiceUpdatesResponse.Error.NoConnectivity(loadTimeMillis = 123L), result)
     }
 
     @Test
@@ -81,6 +81,7 @@ class LothianServiceUpdatesEndpointTest {
         val result = endpoint.getServiceUpdates()
 
         assertIs<ServiceUpdatesResponse.Error.ServerError>(result)
+        assertEquals(123L, result.loadTimeMillis)
         assertEquals(1, exceptionLogger.loggedThrowables.size)
         assertSame(exception, exceptionLogger.loggedThrowables.last())
     }
@@ -99,7 +100,13 @@ class LothianServiceUpdatesEndpointTest {
 
         val result = endpoint.getServiceUpdates()
 
-        assertEquals(ServiceUpdatesResponse.Error.Io(exception), result)
+        assertEquals(
+            ServiceUpdatesResponse.Error.Io(
+                loadTimeMillis = 123L,
+                throwable = exception
+            ),
+            result
+        )
         assertEquals(1, exceptionLogger.loggedThrowables.size)
         assertSame(exception, exceptionLogger.loggedThrowables.last())
     }
@@ -120,6 +127,7 @@ class LothianServiceUpdatesEndpointTest {
         val result = endpoint.getServiceUpdates()
 
         assertIs<ServiceUpdatesResponse.Error.ServerError>(result)
+        assertEquals(123L, result.loadTimeMillis)
         assertEquals(1, exceptionLogger.loggedThrowables.size)
         assertIs<RuntimeException>(exceptionLogger.loggedThrowables.last())
     }
@@ -182,7 +190,9 @@ class LothianServiceUpdatesEndpointTest {
     private fun createLothianServiceUpdatesEndpoint(
         lothianServiceUpdatesApi: LothianServiceUpdatesApi = FakeLothianServiceUpdatesApi(),
         connectivityRepository: ConnectivityRepository = FakeConnectivityRepository(),
-        timeUtils: TimeUtils = FakeTimeUtils(),
+        timeUtils: TimeUtils = FakeTimeUtils(
+            onGetCurrentTimeMillis = { 123L }
+        ),
         exceptionLogger: ExceptionLogger = FakeExceptionLogger()
     ): LothianServiceUpdatesEndpoint {
         return LothianServiceUpdatesEndpoint(

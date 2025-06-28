@@ -31,6 +31,10 @@ plugins {
     `java-test-fixtures`
 }
 
+kotlin {
+    explicitApi()
+}
+
 dependencies {
 
     implementation(project(":cities:edinburgh:lothian-api-core"))

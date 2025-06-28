@@ -79,7 +79,8 @@ internal fun NewsScreen(
         onIncidentMoreDetailsClicked = viewModel::onIncidentMoreDetailsClicked,
         onIncidentActionLaunched = viewModel::onIncidentActionLaunched,
         onDiversionMoreDetailsClicked = viewModel::onDiversionMoreDetailsClicked,
-        onDiversionActionLaunched = viewModel::onDiversionActionLaunched
+        onDiversionActionLaunched = viewModel::onDiversionActionLaunched,
+        onErrorSnackbarShown = viewModel::onServiceUpdatesTransientErrorShown
     )
 }
 
@@ -91,7 +92,8 @@ private fun NewsScreenWithState(
     onIncidentMoreDetailsClicked: (UiIncident) -> Unit,
     onIncidentActionLaunched: () -> Unit,
     onDiversionMoreDetailsClicked: (UiDiversion) -> Unit,
-    onDiversionActionLaunched: () -> Unit
+    onDiversionActionLaunched: () -> Unit,
+    onErrorSnackbarShown: (Long) -> Unit
 ) {
     Column (
         modifier = modifier
@@ -112,7 +114,8 @@ private fun NewsScreenWithState(
             onIncidentMoreDetailsClicked = onIncidentMoreDetailsClicked,
             onIncidentActionLaunched = onIncidentActionLaunched,
             onDiversionMoreDetailsClicked = onDiversionMoreDetailsClicked,
-            onDiversionActionLaunched = onDiversionActionLaunched
+            onDiversionActionLaunched = onDiversionActionLaunched,
+            onErrorSnackbarShown = onErrorSnackbarShown
         )
     }
 
@@ -250,7 +253,8 @@ private fun NewsContent(
     onIncidentMoreDetailsClicked: (UiIncident) -> Unit,
     onIncidentActionLaunched: () -> Unit,
     onDiversionMoreDetailsClicked: (UiDiversion) -> Unit,
-    onDiversionActionLaunched: () -> Unit
+    onDiversionActionLaunched: () -> Unit,
+    onErrorSnackbarShown: (Long) -> Unit
 ) {
     when (selectedTabIndex) {
         TAB_INCIDENTS -> IncidentsScreen(
@@ -258,14 +262,16 @@ private fun NewsContent(
             modifier = modifier,
             onRefresh = onRefresh,
             onMoreDetailsClicked = onIncidentMoreDetailsClicked,
-            onActionLaunched = onIncidentActionLaunched
+            onActionLaunched = onIncidentActionLaunched,
+            onErrorSnackbarShown = onErrorSnackbarShown
         )
         TAB_DIVERSIONS -> DiversionsScreen(
             state = diversionsState,
             modifier = modifier,
             onRefresh = onRefresh,
             onMoreDetailsClicked = onDiversionMoreDetailsClicked,
-            onActionLaunched = onDiversionActionLaunched
+            onActionLaunched = onDiversionActionLaunched,
+            onErrorSnackbarShown = onErrorSnackbarShown
         )
     }
 }
@@ -293,7 +299,8 @@ private fun NewsScreenPreview() {
             onIncidentMoreDetailsClicked = { },
             onIncidentActionLaunched = { },
             onDiversionMoreDetailsClicked = { },
-            onDiversionActionLaunched = { }
+            onDiversionActionLaunched = { },
+            onErrorSnackbarShown = { }
         )
     }
 }

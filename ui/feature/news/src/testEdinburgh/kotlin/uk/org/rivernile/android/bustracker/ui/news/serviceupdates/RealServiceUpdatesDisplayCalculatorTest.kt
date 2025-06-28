@@ -74,12 +74,13 @@ class RealServiceUpdatesDisplayCalculatorTest {
             isRefreshing = false,
             items = diversions,
             error = null,
-            loadTimeMillis = 123L
+            successLoadTimeMillis = 123L,
+            lastLoadTimeMillis = 123L
         )
 
         val result = calculator.calculateServiceUpdatesDisplayForDiversions(
             previousDisplay = ServiceUpdatesDisplay.InProgress,
-            result = createUiServiceUpdatesResultSuccessForDiversions(diversions)
+            result = createUiServiceUpdatesResultSuccessForDiversions(diversions = diversions)
         )
 
         assertEquals(expected, result)
@@ -132,7 +133,10 @@ class RealServiceUpdatesDisplayCalculatorTest {
 
         val result = calculator.calculateServiceUpdatesDisplayForDiversions(
             previousDisplay = createServiceUpdatesDisplayError(error = UiError.SERVER),
-            result = createUiServiceUpdatesResultError(error = UiError.IO)
+            result = createUiServiceUpdatesResultError(
+                error = UiError.IO,
+                loadTimeMillis = 456L
+            )
         )
 
         assertEquals(expected, result)
@@ -146,12 +150,16 @@ class RealServiceUpdatesDisplayCalculatorTest {
             isRefreshing = false,
             items = diversions,
             error = null,
-            loadTimeMillis = 123L
+            successLoadTimeMillis = 456L,
+            lastLoadTimeMillis = 456L
         )
 
         val result = calculator.calculateServiceUpdatesDisplayForDiversions(
             previousDisplay = createServiceUpdatesDisplayError(error = UiError.SERVER),
-            result = createUiServiceUpdatesResultSuccessForDiversions(diversions)
+            result = createUiServiceUpdatesResultSuccessForDiversions(
+                diversions = diversions,
+                loadTimeMillis = 456L
+            )
         )
 
         assertEquals(expected, result)
@@ -164,7 +172,10 @@ class RealServiceUpdatesDisplayCalculatorTest {
 
         val result = calculator.calculateServiceUpdatesDisplayForDiversions(
             previousDisplay = createServiceUpdatesDisplayError(error = UiError.SERVER),
-            result = createUiServiceUpdatesResultSuccessForDiversions(diversions = null)
+            result = createUiServiceUpdatesResultSuccessForDiversions(
+                diversions = null,
+                loadTimeMillis = 456L
+            )
         )
 
         assertEquals(expected, result)
@@ -178,7 +189,8 @@ class RealServiceUpdatesDisplayCalculatorTest {
         val result = calculator.calculateServiceUpdatesDisplayForDiversions(
             previousDisplay = createServiceUpdatesDisplayError(error = UiError.SERVER),
             result = createUiServiceUpdatesResultSuccessForDiversions(
-                diversions = persistentListOf()
+                diversions = persistentListOf(),
+                loadTimeMillis = 456L
             )
         )
 
@@ -193,13 +205,15 @@ class RealServiceUpdatesDisplayCalculatorTest {
             isRefreshing = false,
             items = diversions,
             error = null,
-            loadTimeMillis = 123L
+            successLoadTimeMillis = 123L,
+            lastLoadTimeMillis = 123L
         )
         val expected = ServiceUpdatesDisplay.Populated(
             isRefreshing = true,
             items = diversions,
             error = null,
-            loadTimeMillis = 123L
+            successLoadTimeMillis = 123L,
+            lastLoadTimeMillis = 123L
         )
 
         val result = calculator.calculateServiceUpdatesDisplayForDiversions(
@@ -218,18 +232,23 @@ class RealServiceUpdatesDisplayCalculatorTest {
             isRefreshing = false,
             items = diversions,
             error = null,
-            loadTimeMillis = 123L
+            successLoadTimeMillis = 123L,
+            lastLoadTimeMillis = 123L
         )
         val expected = ServiceUpdatesDisplay.Populated(
             isRefreshing = false,
             items = diversions,
             error = UiError.SERVER,
-            loadTimeMillis = 123L
+            successLoadTimeMillis = 123L,
+            lastLoadTimeMillis = 456L
         )
 
         val result = calculator.calculateServiceUpdatesDisplayForDiversions(
             previousDisplay = previousDisplay,
-            result = UiServiceUpdatesResult.Error(error = UiError.SERVER)
+            result = UiServiceUpdatesResult.Error(
+                error = UiError.SERVER,
+                loadTimeMillis = 456L
+            )
         )
 
         assertEquals(expected, result)
@@ -244,13 +263,15 @@ class RealServiceUpdatesDisplayCalculatorTest {
             isRefreshing = false,
             items = diversions1,
             error = null,
-            loadTimeMillis = 123L
+            successLoadTimeMillis = 123L,
+            lastLoadTimeMillis = 123L
         )
         val expected = ServiceUpdatesDisplay.Populated(
             isRefreshing = false,
             items = diversions2,
             error = null,
-            loadTimeMillis = 456L
+            successLoadTimeMillis = 456L,
+            lastLoadTimeMillis = 456L
         )
 
         val result = calculator.calculateServiceUpdatesDisplayForDiversions(
@@ -272,13 +293,17 @@ class RealServiceUpdatesDisplayCalculatorTest {
             isRefreshing = false,
             items = diversions,
             error = null,
-            loadTimeMillis = 123L
+            successLoadTimeMillis = 123L,
+            lastLoadTimeMillis = 123L
         )
         val expected = createServiceUpdatesDisplayError(error = UiError.EMPTY)
 
         val result = calculator.calculateServiceUpdatesDisplayForDiversions(
             previousDisplay = previousDisplay,
-            result = createUiServiceUpdatesResultSuccessForDiversions(diversions = null)
+            result = createUiServiceUpdatesResultSuccessForDiversions(
+                diversions = null,
+                loadTimeMillis = 456L
+            )
         )
 
         assertEquals(expected, result)
@@ -292,14 +317,16 @@ class RealServiceUpdatesDisplayCalculatorTest {
             isRefreshing = false,
             items = diversions,
             error = null,
-            loadTimeMillis = 123L
+            successLoadTimeMillis = 123L,
+            lastLoadTimeMillis = 123L
         )
         val expected = createServiceUpdatesDisplayError(error = UiError.EMPTY)
 
         val result = calculator.calculateServiceUpdatesDisplayForDiversions(
             previousDisplay = previousDisplay,
             result = createUiServiceUpdatesResultSuccessForDiversions(
-                diversions = persistentListOf()
+                diversions = persistentListOf(),
+                loadTimeMillis = 456L
             )
         )
 
@@ -339,12 +366,13 @@ class RealServiceUpdatesDisplayCalculatorTest {
             isRefreshing = false,
             items = incidents,
             error = null,
-            loadTimeMillis = 123L
+            successLoadTimeMillis = 123L,
+            lastLoadTimeMillis = 123L
         )
 
         val result = calculator.calculateServiceUpdatesDisplayForIncidents(
             previousDisplay = ServiceUpdatesDisplay.InProgress,
-            result = createUiServiceUpdatesResultSuccessForIncidents(incidents)
+            result = createUiServiceUpdatesResultSuccessForIncidents(incidents = incidents)
         )
 
         assertEquals(expected, result)
@@ -395,7 +423,10 @@ class RealServiceUpdatesDisplayCalculatorTest {
 
         val result = calculator.calculateServiceUpdatesDisplayForIncidents(
             previousDisplay = createServiceUpdatesDisplayError(error = UiError.SERVER),
-            result = createUiServiceUpdatesResultError(error = UiError.IO)
+            result = createUiServiceUpdatesResultError(
+                error = UiError.IO,
+                loadTimeMillis = 456L
+            )
         )
 
         assertEquals(expected, result)
@@ -409,12 +440,16 @@ class RealServiceUpdatesDisplayCalculatorTest {
             isRefreshing = false,
             items = incidents,
             error = null,
-            loadTimeMillis = 123L
+            successLoadTimeMillis = 456L,
+            lastLoadTimeMillis = 456L
         )
 
         val result = calculator.calculateServiceUpdatesDisplayForIncidents(
             previousDisplay = createServiceUpdatesDisplayError(error = UiError.SERVER),
-            result = createUiServiceUpdatesResultSuccessForIncidents(incidents)
+            result = createUiServiceUpdatesResultSuccessForIncidents(
+                incidents = incidents,
+                loadTimeMillis = 456L
+            )
         )
 
         assertEquals(expected, result)
@@ -427,7 +462,10 @@ class RealServiceUpdatesDisplayCalculatorTest {
 
         val result = calculator.calculateServiceUpdatesDisplayForIncidents(
             previousDisplay = createServiceUpdatesDisplayError(error = UiError.SERVER),
-            result = createUiServiceUpdatesResultSuccessForIncidents(incidents = null)
+            result = createUiServiceUpdatesResultSuccessForIncidents(
+                incidents = null,
+                loadTimeMillis = 456L
+            )
         )
 
         assertEquals(expected, result)
@@ -440,7 +478,10 @@ class RealServiceUpdatesDisplayCalculatorTest {
 
         val result = calculator.calculateServiceUpdatesDisplayForIncidents(
             previousDisplay = createServiceUpdatesDisplayError(error = UiError.SERVER),
-            result = createUiServiceUpdatesResultSuccessForIncidents(incidents = persistentListOf())
+            result = createUiServiceUpdatesResultSuccessForIncidents(
+                incidents = persistentListOf(),
+                loadTimeMillis = 456L
+            )
         )
 
         assertEquals(expected, result)
@@ -454,13 +495,15 @@ class RealServiceUpdatesDisplayCalculatorTest {
             isRefreshing = false,
             items = incidents,
             error = null,
-            loadTimeMillis = 123L
+            successLoadTimeMillis = 123L,
+            lastLoadTimeMillis = 123L
         )
         val expected = ServiceUpdatesDisplay.Populated(
             isRefreshing = true,
             items = incidents,
             error = null,
-            loadTimeMillis = 123L
+            successLoadTimeMillis = 123L,
+            lastLoadTimeMillis = 123L
         )
 
         val result = calculator.calculateServiceUpdatesDisplayForIncidents(
@@ -479,18 +522,23 @@ class RealServiceUpdatesDisplayCalculatorTest {
             isRefreshing = false,
             items = incidents,
             error = null,
-            loadTimeMillis = 123L
+            successLoadTimeMillis = 123L,
+            lastLoadTimeMillis = 123L
         )
         val expected = ServiceUpdatesDisplay.Populated(
             isRefreshing = false,
             items = incidents,
             error = UiError.SERVER,
-            loadTimeMillis = 123L
+            successLoadTimeMillis = 123L,
+            lastLoadTimeMillis = 456L
         )
 
         val result = calculator.calculateServiceUpdatesDisplayForIncidents(
             previousDisplay = previousDisplay,
-            result = UiServiceUpdatesResult.Error(error = UiError.SERVER)
+            result = UiServiceUpdatesResult.Error(
+                error = UiError.SERVER,
+                loadTimeMillis = 456L
+            )
         )
 
         assertEquals(expected, result)
@@ -505,13 +553,15 @@ class RealServiceUpdatesDisplayCalculatorTest {
             isRefreshing = false,
             items = incidents1,
             error = null,
-            loadTimeMillis = 123L
+            successLoadTimeMillis = 123L,
+            lastLoadTimeMillis = 456L,
         )
         val expected = ServiceUpdatesDisplay.Populated(
             isRefreshing = false,
             items = incidents2,
             error = null,
-            loadTimeMillis = 456L
+            successLoadTimeMillis = 456L,
+            lastLoadTimeMillis = 456L
         )
 
         val result = calculator.calculateServiceUpdatesDisplayForIncidents(
@@ -533,13 +583,17 @@ class RealServiceUpdatesDisplayCalculatorTest {
             isRefreshing = false,
             items = incidents,
             error = null,
-            loadTimeMillis = 123L
+            successLoadTimeMillis = 123L,
+            lastLoadTimeMillis = 123L
         )
         val expected = createServiceUpdatesDisplayError(error = UiError.EMPTY)
 
         val result = calculator.calculateServiceUpdatesDisplayForIncidents(
             previousDisplay = previousDisplay,
-            result = createUiServiceUpdatesResultSuccessForIncidents(incidents = null)
+            result = createUiServiceUpdatesResultSuccessForIncidents(
+                incidents = null,
+                loadTimeMillis = 456L
+            )
         )
 
         assertEquals(expected, result)
@@ -553,13 +607,17 @@ class RealServiceUpdatesDisplayCalculatorTest {
             isRefreshing = false,
             items = incidents,
             error = null,
-            loadTimeMillis = 123L
+            successLoadTimeMillis = 123L,
+            lastLoadTimeMillis = 123L
         )
         val expected = createServiceUpdatesDisplayError(error = UiError.EMPTY)
 
         val result = calculator.calculateServiceUpdatesDisplayForIncidents(
             previousDisplay = previousDisplay,
-            result = createUiServiceUpdatesResultSuccessForIncidents(incidents = persistentListOf())
+            result = createUiServiceUpdatesResultSuccessForIncidents(
+                incidents = persistentListOf(),
+                loadTimeMillis = 456L
+            )
         )
 
         assertEquals(expected, result)
@@ -567,8 +625,13 @@ class RealServiceUpdatesDisplayCalculatorTest {
 
     private fun createCalculator() = RealServiceUpdatesDisplayCalculator()
 
-    private fun createUiServiceUpdatesResultError(error: UiError) =
-        UiServiceUpdatesResult.Error(error = error)
+    private fun createUiServiceUpdatesResultError(
+        error: UiError,
+        loadTimeMillis: Long = 123L
+    ) = UiServiceUpdatesResult.Error(
+        error = error,
+        loadTimeMillis = loadTimeMillis
+    )
 
     private fun createUiServiceUpdatesResultSuccessForDiversions(
         diversions: ImmutableList<UiDiversion>? = null,

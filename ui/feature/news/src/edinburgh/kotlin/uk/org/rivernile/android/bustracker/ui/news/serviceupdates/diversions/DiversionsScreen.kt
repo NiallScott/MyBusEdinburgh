@@ -61,6 +61,8 @@ import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
  * @param onRefresh A lambda which is executed when the content should be refreshed.
  * @param onMoreDetailsClicked A lambda which is executed when the 'More details' button is clicked.
  * @param onActionLaunched A lambda which is executed when an action has been launched.
+ * @param onErrorSnackbarShown A lambda which is called when the snackbar transient error has been
+ * shown.
  * @author Niall Scott
  */
 @Composable
@@ -69,7 +71,8 @@ internal fun DiversionsScreen(
     modifier: Modifier = Modifier,
     onRefresh: () -> Unit,
     onMoreDetailsClicked: (UiDiversion) -> Unit,
-    onActionLaunched: () -> Unit
+    onActionLaunched: () -> Unit,
+    onErrorSnackbarShown: (Long) -> Unit
 ) {
     val doublePadding = dimensionResource(id = Rcore.dimen.padding_double)
 
@@ -77,6 +80,7 @@ internal fun DiversionsScreen(
         content = state.content,
         modifier = modifier,
         onRefresh = onRefresh,
+        onErrorSnackbarShown = onErrorSnackbarShown,
         itemContent = { item ->
             DiversionItem(
                 item = item,
@@ -236,12 +240,14 @@ private fun DiversionsScreenContentPreview() {
                         items = diversions,
                         error = null,
                         hasInternetConnectivity = true,
-                        lastRefreshTime = UiLastRefreshed.Minutes(minutes = 5)
+                        lastRefreshTime = UiLastRefreshed.Minutes(minutes = 5),
+                        loadTimeMillis = 123L
                     )
                 ),
                 onRefresh = { },
                 onMoreDetailsClicked = { },
-                onActionLaunched = { }
+                onActionLaunched = { },
+                onErrorSnackbarShown = { }
             )
         }
     }
@@ -273,7 +279,8 @@ private fun DiversionsScreenProgressPreview() {
                 ),
                 onRefresh = { },
                 onMoreDetailsClicked = { },
-                onActionLaunched = { }
+                onActionLaunched = { },
+                onErrorSnackbarShown = { }
             )
         }
     }
@@ -307,7 +314,8 @@ private fun DiversionsScreenEmptyErrorPreview() {
                 ),
                 onRefresh = { },
                 onMoreDetailsClicked = { },
-                onActionLaunched = { }
+                onActionLaunched = { },
+                onErrorSnackbarShown = { }
             )
         }
     }

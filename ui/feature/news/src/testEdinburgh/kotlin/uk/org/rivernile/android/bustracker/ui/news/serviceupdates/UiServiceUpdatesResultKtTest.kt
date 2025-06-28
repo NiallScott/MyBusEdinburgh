@@ -68,14 +68,18 @@ class UiServiceUpdatesResultKtTest {
 
     @Test
     fun toUiServiceUpdatesResultOfDiversionsMapsToError() {
-        val result = ServiceUpdatesResult.Error.Server.toUiServiceUpdatesResultOfDiversions(
-            coloursForServices = null,
-            serviceNamesComparator = naturalOrder()
-        )
+        val result = ServiceUpdatesResult
+            .Error
+            .Server(loadTimeMillis = 123L)
+            .toUiServiceUpdatesResultOfDiversions(
+                coloursForServices = null,
+                serviceNamesComparator = naturalOrder()
+            )
 
         assertEquals(
             UiServiceUpdatesResult.Error(
-                error = UiError.SERVER
+                error = UiError.SERVER,
+                loadTimeMillis = 123L
             ),
             result
         )
@@ -112,14 +116,18 @@ class UiServiceUpdatesResultKtTest {
 
     @Test
     fun toUiServiceUpdatesResultOfIncidentsMapsToError() {
-        val result = ServiceUpdatesResult.Error.Server.toUiServiceUpdatesResultOfIncidents(
-            coloursForServices = null,
-            serviceNamesComparator = naturalOrder()
-        )
+        val result = ServiceUpdatesResult
+            .Error
+            .Server(loadTimeMillis = 123L)
+            .toUiServiceUpdatesResultOfIncidents(
+                coloursForServices = null,
+                serviceNamesComparator = naturalOrder()
+            )
 
         assertEquals(
             UiServiceUpdatesResult.Error(
-                error = UiError.SERVER
+                error = UiError.SERVER,
+                loadTimeMillis = 123L
             ),
             result
         )

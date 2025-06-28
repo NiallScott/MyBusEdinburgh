@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,20 +36,20 @@ import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.Servic
  *
  * @author Niall Scott
  */
-sealed interface ServiceUpdate {
+public sealed interface ServiceUpdate {
 
     /** The ID of the service update. */
-    val id: String
+    public val id: String
     /** The time the update was last updated. */
-    val lastUpdated: Instant
+    public val lastUpdated: Instant
     /** A title for the update */
-    val title: String
+    public val title: String
     /** A summary for the update. */
-    val summary: String
+    public val summary: String
     /** The affected services, if there are any. */
-    val affectedServices: Set<String>?
+    public val affectedServices: Set<String>?
     /** A URL which describes the update in more detail. */
-    val url: String?
+    public val url: String?
 }
 
 /**
@@ -62,7 +62,7 @@ sealed interface ServiceUpdate {
  * @property affectedServices The affected services, if there are any.
  * @property url A URL which describes the update in more detail.
  */
-data class IncidentServiceUpdate(
+public data class IncidentServiceUpdate(
     override val id: String,
     override val lastUpdated: Instant,
     override val title: String,
@@ -81,7 +81,7 @@ data class IncidentServiceUpdate(
  * @property affectedServices The affected services, if there are any.
  * @property url A URL which describes the update in more detail.
  */
-data class PlannedServiceUpdate(
+public data class PlannedServiceUpdate(
     override val id: String,
     override val lastUpdated: Instant,
     override val title: String,

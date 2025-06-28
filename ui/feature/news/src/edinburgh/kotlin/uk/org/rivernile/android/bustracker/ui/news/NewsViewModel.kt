@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForViewModelCoroutineScope
+import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ServiceUpdatesErrorTracker
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.IncidentsViewModelState
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIncident
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIncidentAction
@@ -55,7 +56,10 @@ import javax.inject.Inject
  *
  * @param incidentsViewModelState Used to hold state for incidents.
  * @param diversionsViewModelState Used to hold state for diversions.
+ * @param refreshables A [Set] of refreshables which should be refreshed when the user wishes to
+ * refresh the data.
  * @param contentFetcher Used to fetch the content.
+ * @param serviceUpdatesErrorTracker Used to track when errors are shown to the user.
  * @param defaultCoroutineDispatcher The default [CoroutineDispatcher] to run coroutines on.
  * @param viewModelCoroutineScope The [CoroutineScope] to launch coroutines on.
  * @author Niall Scott
@@ -64,7 +68,9 @@ import javax.inject.Inject
 internal class NewsViewModel @Inject constructor(
     private val incidentsViewModelState: IncidentsViewModelState,
     private val diversionsViewModelState: DiversionsViewModelState,
+    private val refreshables: Set<@JvmSuppressWildcards Refreshable>,
     private val contentFetcher: UiContentFetcher,
+    private val serviceUpdatesErrorTracker: ServiceUpdatesErrorTracker,
     @ForDefaultDispatcher defaultCoroutineDispatcher: CoroutineDispatcher,
     @ForViewModelCoroutineScope viewModelCoroutineScope: CoroutineScope
 ) : ViewModel(viewModelCoroutineScope, contentFetcher) {
@@ -85,7 +91,7 @@ internal class NewsViewModel @Inject constructor(
      * Reload data from their data sources.
      */
     fun onRefresh() {
-        contentFetcher.refresh()
+        refreshables.forEach(Refreshable::refresh)
     }
 
     /**
@@ -122,6 +128,15 @@ internal class NewsViewModel @Inject constructor(
      */
     fun onDiversionActionLaunched() {
         diversionsViewModelState.action = null
+    }
+
+    /**
+     * This is called when a transient error has been shown for service updates.
+     *
+     * @param timestamp The timestamp the data was loaded at, so we know which error has been shown.
+     */
+    fun onServiceUpdatesTransientErrorShown(timestamp: Long) {
+        serviceUpdatesErrorTracker.onServiceUpdatesTransientErrorShown(timestamp)
     }
 
     private val uiIncidentsState get() = contentFetcher

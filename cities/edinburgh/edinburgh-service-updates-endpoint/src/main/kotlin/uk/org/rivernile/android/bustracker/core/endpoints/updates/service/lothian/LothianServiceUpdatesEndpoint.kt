@@ -55,28 +55,40 @@ internal class LothianServiceUpdatesEndpoint @Inject constructor(
         return if (connectivityRepository.hasInternetConnectivity) {
             try {
                 val response = lothianServiceUpdatesApi.getServiceUpdates()
+                val currentTimeMillis = timeUtils.currentTimeMills
 
                 if (response.isSuccessful) {
                     ServiceUpdatesResponse.Success(
-                        serviceUpdates = response.body()?.toServiceUpdatesOrNull(),
-                        loadTimeMillis = timeUtils.currentTimeMills
+                        loadTimeMillis = currentTimeMillis,
+                        serviceUpdates = response.body()?.toServiceUpdatesOrNull()
                     )
                 } else {
                     val error = "Status code = ${response.code()}; " +
                             "Body = ${response.errorBody()?.string()}"
 
                     exceptionLogger.log(RuntimeException(error))
-                    ServiceUpdatesResponse.Error.ServerError(error)
+                    ServiceUpdatesResponse.Error.ServerError(
+                        loadTimeMillis = currentTimeMillis,
+                        errorString = error
+                    )
                 }
             } catch (e: IOException) {
                 exceptionLogger.log(e)
-                ServiceUpdatesResponse.Error.Io(e)
+                ServiceUpdatesResponse.Error.Io(
+                    loadTimeMillis = timeUtils.currentTimeMills,
+                    throwable = e
+                )
             } catch (e: SerializationException) {
                 exceptionLogger.log(e)
-                ServiceUpdatesResponse.Error.ServerError("Could not parse data.")
+                ServiceUpdatesResponse.Error.ServerError(
+                    loadTimeMillis = timeUtils.currentTimeMills,
+                    "Could not parse data."
+                )
             }
         } else {
-            ServiceUpdatesResponse.Error.NoConnectivity
+            ServiceUpdatesResponse.Error.NoConnectivity(
+                loadTimeMillis = timeUtils.currentTimeMills
+            )
         }
     }
 }

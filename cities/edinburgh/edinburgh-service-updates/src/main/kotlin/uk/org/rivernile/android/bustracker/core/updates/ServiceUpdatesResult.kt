@@ -31,12 +31,12 @@ package uk.org.rivernile.android.bustracker.core.updates
  *
  * @author Niall Scott
  */
-sealed interface ServiceUpdatesResult {
+public sealed interface ServiceUpdatesResult {
 
     /**
      * The request is in progress.
      */
-    data object InProgress : ServiceUpdatesResult
+    public data object InProgress : ServiceUpdatesResult
 
     /**
      * The result is successful.
@@ -45,7 +45,7 @@ sealed interface ServiceUpdatesResult {
      * @property loadTimeMillis The time this data was loaded at, in milliseconds since the UNIX
      * epoch.
      */
-    data class Success(
+    public data class Success(
         val serviceUpdates: List<ServiceUpdate>?,
         val loadTimeMillis: Long
     ) : ServiceUpdatesResult
@@ -53,25 +53,43 @@ sealed interface ServiceUpdatesResult {
     /**
      * This interface describes errors which can arise from getting service updates.
      */
-    sealed interface Error : ServiceUpdatesResult {
+    public sealed interface Error : ServiceUpdatesResult {
+
+        /**
+         * The time this data was loaded at, in milliseconds since the UNIX epoch.
+         */
+        public val loadTimeMillis: Long
 
         /**
          * The result is not successful due to no connectivity.
+         *
+         * @property loadTimeMillis The time this data was loaded at, in milliseconds since the
+         * UNIX epoch.
          */
-        data object NoConnectivity : Error
+        public data class NoConnectivity(
+            override val loadTimeMillis: Long
+        ) : Error
 
         /**
          * The result is not successful due to an IO error.
          *
+         * @property loadTimeMillis The time this data was loaded at, in milliseconds since the UNIX
+         * epoch.
          * @property throwable The [Throwable] which caused this error.
          */
-        data class Io(
+        public data class Io(
+            override val loadTimeMillis: Long,
             val throwable: Throwable
         ) : Error
 
         /**
          * The result is not successful because of a server error.
+         *
+         * @property loadTimeMillis The time this data was loaded at, in milliseconds since the UNIX
+         * epoch.
          */
-        data object Server : Error
+        public data class Server(
+            override val loadTimeMillis: Long
+        ) : Error
     }
 }

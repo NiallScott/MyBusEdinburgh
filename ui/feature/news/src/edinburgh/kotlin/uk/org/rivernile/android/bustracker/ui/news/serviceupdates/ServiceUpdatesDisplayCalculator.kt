@@ -147,7 +147,10 @@ internal class RealServiceUpdatesDisplayCalculator @Inject constructor()
         return when (previousDisplay) {
             is ServiceUpdatesDisplay.InProgress, is ServiceUpdatesDisplay.Error ->
                 ServiceUpdatesDisplay.InProgress
-            is ServiceUpdatesDisplay.Populated -> previousDisplay.copy(isRefreshing = true)
+            is ServiceUpdatesDisplay.Populated -> previousDisplay.copy(
+                isRefreshing = true,
+                error = null
+            )
         }
     }
 
@@ -162,7 +165,8 @@ internal class RealServiceUpdatesDisplayCalculator @Inject constructor()
                     isRefreshing = false,
                     items = it,
                     error = null,
-                    loadTimeMillis = result.loadTimeMillis
+                    successLoadTimeMillis = result.loadTimeMillis,
+                    lastLoadTimeMillis = result.loadTimeMillis
                 )
             }
             ?: ServiceUpdatesDisplay.Error(
@@ -177,7 +181,8 @@ internal class RealServiceUpdatesDisplayCalculator @Inject constructor()
         return if (previousDisplay is ServiceUpdatesDisplay.Populated) {
             previousDisplay.copy(
                 isRefreshing = false,
-                error = result.error
+                error = result.error,
+                lastLoadTimeMillis = result.loadTimeMillis
             )
         } else {
             ServiceUpdatesDisplay.Error(

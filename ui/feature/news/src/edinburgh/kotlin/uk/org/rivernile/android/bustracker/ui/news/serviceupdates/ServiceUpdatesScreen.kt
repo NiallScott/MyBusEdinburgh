@@ -31,6 +31,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -49,9 +50,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -64,6 +69,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
+import androidx.constraintlayout.compose.atLeast
 import kotlinx.collections.immutable.ImmutableList
 import uk.org.rivernile.android.bustracker.ui.news.R
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
@@ -75,6 +83,8 @@ import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
  * @param content The content to render.
  * @param modifier A [Modifier] to be applied to the Service Updates screen.
  * @param onRefresh A lambda which is called when a refresh request is performed.
+ * @param onErrorSnackbarShown A lambda which is called when the snackbar transient error has been
+ * shown.
  * @param itemContent A lambda which generates individual Service Update items.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,6 +93,7 @@ internal fun <T : UiServiceUpdate> ServiceUpdatesScreen(
     content: UiContent<T>,
     modifier: Modifier = Modifier,
     onRefresh: () -> Unit,
+    onErrorSnackbarShown: (Long) -> Unit,
     itemContent: @Composable LazyItemScope.(item: T) -> Unit
 ) {
     PullToRefreshBox(
@@ -93,31 +104,35 @@ internal fun <T : UiServiceUpdate> ServiceUpdatesScreen(
     ) {
         Content(
             content = content,
+            onErrorSnackbarShown = onErrorSnackbarShown,
             itemContent = itemContent
         )
     }
 }
 
 @Composable
-private fun <T : UiServiceUpdate> Content(
+private fun <T : UiServiceUpdate> BoxScope.Content(
     content: UiContent<T>,
-    modifier: Modifier = Modifier,
+    onErrorSnackbarShown: (Long) -> Unit,
     itemContent: @Composable LazyItemScope.(item: T) -> Unit
 ) {
     val nestedScrollInterop = rememberNestedScrollInteropConnection()
 
     when (content) {
-        is UiContent.InProgress -> EmptyProgress(modifier = modifier)
+        is UiContent.InProgress -> EmptyProgress(
+            modifier = Modifier.align(Alignment.Center)
+        )
         is UiContent.Populated -> PopulatedContent(
             content = content,
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .nestedScroll(nestedScrollInterop),
+            onErrorSnackbarShown = onErrorSnackbarShown,
             itemContent = itemContent
         )
-        is UiContent.Error -> Error(
+        is UiContent.Error -> InlineError(
             error = content.error,
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .nestedScroll(nestedScrollInterop)
         )
@@ -128,23 +143,49 @@ private fun <T : UiServiceUpdate> Content(
 private fun <T : UiServiceUpdate> PopulatedContent(
     content: UiContent.Populated<T>,
     modifier: Modifier = Modifier,
+    onErrorSnackbarShown: (Long) -> Unit,
     itemContent: @Composable LazyItemScope.(item: T) -> Unit
 ) {
-    Column(
+    ConstraintLayout(
         modifier = modifier
     ) {
+        val (contentHeaderBarRef, itemsListRef, errorSnackbarRef) = createRefs()
+
+        ItemsList(
+            items = content.items,
+            modifier = Modifier
+                .constrainAs(itemsListRef) {
+                    width = Dimension.fillToConstraints
+                    height = Dimension.fillToConstraints
+                    top.linkTo(contentHeaderBarRef.bottom)
+                    bottom.linkTo(parent.bottom)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                },
+            itemContent = itemContent
+        )
+
         ContentHeaderBar(
             lastRefreshed = content.lastRefreshTime,
             hasInternetConnectivity = content.hasInternetConnectivity,
             modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 48.dp)
+                .constrainAs(contentHeaderBarRef) {
+                    width = Dimension.fillToConstraints
+                    height = Dimension.preferredWrapContent.atLeast(48.dp)
+                    top.linkTo(parent.top)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }
         )
 
-        ItemsList(
-            items = content.items,
-            modifier = Modifier.fillMaxSize(),
-            itemContent = itemContent
+        ErrorSnackbar(
+            error = content.error,
+            loadTimeMillis = content.loadTimeMillis,
+            modifier = Modifier
+                .constrainAs(errorSnackbarRef) {
+                    top.linkTo(contentHeaderBarRef.bottom, margin = 16.dp)
+                },
+            onErrorSnackbarShown = onErrorSnackbarShown
         )
     }
 }
@@ -218,32 +259,10 @@ private fun <T : UiServiceUpdate> ItemsList(
 }
 
 @Composable
-private fun Error(
+private fun InlineError(
     error: UiError,
     modifier: Modifier = Modifier
 ) {
-    @StringRes val titleRes: Int
-    @DrawableRes val iconRes: Int
-
-    when (error) {
-        UiError.NO_CONNECTIVITY -> {
-            titleRes = R.string.serviceupdates_error_noconnectivity
-            iconRes = R.drawable.ic_error_cloud_off
-        }
-        UiError.EMPTY -> {
-            titleRes = R.string.serviceupdates_error_empty
-            iconRes = R.drawable.ic_error_newspaper
-        }
-        UiError.IO -> {
-            titleRes = R.string.serviceupdates_error_io
-            iconRes = R.drawable.ic_error_generic
-        }
-        UiError.SERVER -> {
-            titleRes = R.string.serviceupdates_error_server
-            iconRes = R.drawable.ic_error_generic
-        }
-    }
-
     Column(
         modifier = modifier
             .padding(dimensionResource(id = Rcore.dimen.padding_double))
@@ -255,11 +274,11 @@ private fun Error(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         ErrorIcon(
-            iconRes = iconRes
+            iconRes = error.iconResId
         )
 
         ErrorText(
-            text = stringResource(id = titleRes),
+            text = stringResource(id = error.titleResId),
         )
     }
 }
@@ -291,6 +310,32 @@ private fun ContentHeaderBarNoInternetConnectivityIcon(
         modifier = modifier,
         tint = MaterialTheme.colorScheme.inverseOnSurface
     )
+}
+
+@Composable
+private fun ErrorSnackbar(
+    error: UiError?,
+    loadTimeMillis: Long,
+    modifier: Modifier = Modifier,
+    onErrorSnackbarShown: (Long) -> Unit
+) {
+    // This is a temporary workaround because the main app UI is still using Views. When this is
+    // converted to Compose and uses the scaffolding, we'll use a central Snackbar instead.
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    SnackbarHost(
+        hostState = snackbarHostState,
+        modifier = modifier
+    )
+
+    if (error != null) {
+        val errorText = stringResource(error.titleResId)
+
+        LaunchedEffect(loadTimeMillis) {
+            snackbarHostState.showSnackbar(message = errorText)
+            onErrorSnackbarShown(loadTimeMillis)
+        }
+    }
 }
 
 @Composable
@@ -336,6 +381,25 @@ private fun getLastRefreshedString(lastRefreshed: UiLastRefreshed): String {
     }
 
     return stringResource(R.string.serviceupdates_last_updated, timeComponent)
+}
+
+@get:StringRes
+private val UiError.titleResId: Int get() {
+    return when (this) {
+        UiError.NO_CONNECTIVITY -> R.string.serviceupdates_error_noconnectivity
+        UiError.EMPTY -> R.string.serviceupdates_error_empty
+        UiError.IO -> R.string.serviceupdates_error_io
+        UiError.SERVER -> R.string.serviceupdates_error_server
+    }
+}
+
+@get:DrawableRes
+private val UiError.iconResId: Int get() {
+    return when (this) {
+        UiError.NO_CONNECTIVITY -> R.drawable.ic_error_cloud_off
+        UiError.EMPTY -> R.drawable.ic_error_newspaper
+        UiError.IO, UiError.SERVER -> R.drawable.ic_error_generic
+    }
 }
 
 @Preview(
@@ -401,7 +465,7 @@ private fun ContentHeaderBarPreview() {
 @Composable
 private fun NoConnectivityErrorPreview() {
     MyBusTheme {
-        Error(UiError.NO_CONNECTIVITY)
+        InlineError(UiError.NO_CONNECTIVITY)
     }
 }
 
@@ -422,7 +486,7 @@ private fun NoConnectivityErrorPreview() {
 @Composable
 private fun EmptyErrorPreview() {
     MyBusTheme {
-        Error(UiError.EMPTY)
+        InlineError(UiError.EMPTY)
     }
 }
 
@@ -443,7 +507,7 @@ private fun EmptyErrorPreview() {
 @Composable
 private fun IoErrorPreview() {
     MyBusTheme {
-        Error(UiError.IO)
+        InlineError(UiError.IO)
     }
 }
 
@@ -464,6 +528,6 @@ private fun IoErrorPreview() {
 @Composable
 private fun ServerErrorPreview() {
     MyBusTheme {
-        Error(UiError.SERVER)
+        InlineError(UiError.SERVER)
     }
 }

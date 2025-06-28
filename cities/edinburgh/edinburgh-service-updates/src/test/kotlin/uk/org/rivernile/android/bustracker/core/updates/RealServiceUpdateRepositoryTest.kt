@@ -46,14 +46,14 @@ class RealServiceUpdateRepositoryTest {
         val repository = createServiceUpdateRepository(
             serviceUpdatesEndpoint = FakeServiceUpdatesEndpoint(
                 onGetServiceUpdates = {
-                    ServiceUpdatesResponse.Error.ServerError()
+                    ServiceUpdatesResponse.Error.ServerError(loadTimeMillis = 123L)
                 }
             )
         )
 
         repository.serviceUpdatesFlow.test {
             assertEquals(ServiceUpdatesResult.InProgress, awaitItem())
-            assertEquals(ServiceUpdatesResult.Error.Server, awaitItem())
+            assertEquals(ServiceUpdatesResult.Error.Server(loadTimeMillis = 123L), awaitItem())
             awaitComplete()
         }
     }
@@ -64,14 +64,23 @@ class RealServiceUpdateRepositoryTest {
         val repository = createServiceUpdateRepository(
             serviceUpdatesEndpoint = FakeServiceUpdatesEndpoint(
                 onGetServiceUpdates = {
-                    ServiceUpdatesResponse.Error.Io(exception)
+                    ServiceUpdatesResponse.Error.Io(
+                        loadTimeMillis = 123L,
+                        throwable = exception
+                    )
                 }
             )
         )
 
         repository.serviceUpdatesFlow.test {
             assertEquals(ServiceUpdatesResult.InProgress, awaitItem())
-            assertEquals(ServiceUpdatesResult.Error.Io(exception), awaitItem())
+            assertEquals(
+                ServiceUpdatesResult.Error.Io(
+                    loadTimeMillis = 123L,
+                    throwable = exception
+                ),
+                awaitItem()
+            )
             awaitComplete()
         }
     }
@@ -81,14 +90,17 @@ class RealServiceUpdateRepositoryTest {
         val repository = createServiceUpdateRepository(
             serviceUpdatesEndpoint = FakeServiceUpdatesEndpoint(
                 onGetServiceUpdates = {
-                    ServiceUpdatesResponse.Error.NoConnectivity
+                    ServiceUpdatesResponse.Error.NoConnectivity(loadTimeMillis = 123L)
                 }
             )
         )
 
         repository.serviceUpdatesFlow.test {
             assertEquals(ServiceUpdatesResult.InProgress, awaitItem())
-            assertEquals(ServiceUpdatesResult.Error.NoConnectivity, awaitItem())
+            assertEquals(
+                ServiceUpdatesResult.Error.NoConnectivity(loadTimeMillis = 123L),
+                awaitItem()
+            )
             awaitComplete()
         }
     }

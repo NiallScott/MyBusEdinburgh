@@ -63,9 +63,12 @@ internal sealed interface UiServiceUpdatesResult<out T : UiServiceUpdate> {
      * This describes an error which has occurred while getting service updates.
      *
      * @property error The error which has occurred.
+     * @property loadTimeMillis The time this data was loaded at, in milliseconds since the UNIX
+     * epoch.
      */
     data class Error(
-        val error: UiError
+        val error: UiError,
+        val loadTimeMillis: Long
     ) : UiServiceUpdatesResult<Nothing>
 }
 
@@ -98,6 +101,9 @@ private inline fun <T : UiServiceUpdate> ServiceUpdatesResult.toUiServiceUpdates
                 loadTimeMillis = loadTimeMillis
             )
         }
-        is ServiceUpdatesResult.Error -> UiServiceUpdatesResult.Error(toUiError())
+        is ServiceUpdatesResult.Error -> UiServiceUpdatesResult.Error(
+            error = toUiError(),
+            loadTimeMillis = loadTimeMillis
+        )
     }
 }

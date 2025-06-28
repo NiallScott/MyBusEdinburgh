@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,7 +40,7 @@ import kotlinx.datetime.Instant
  * @property url An optional URL which provides a web link for this disruption.
  * @author Niall Scott
  */
-data class ServiceUpdate(
+public data class ServiceUpdate(
     val id: String,
     val lastUpdated: Instant,
     val serviceUpdateType: ServiceUpdateType,

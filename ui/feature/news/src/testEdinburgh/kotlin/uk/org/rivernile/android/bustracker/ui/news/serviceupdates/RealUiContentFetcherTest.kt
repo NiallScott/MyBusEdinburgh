@@ -74,7 +74,8 @@ class RealUiContentFetcherTest {
                             isRefreshing = false,
                             items = emptyList(),
                             error = null,
-                            loadTimeMillis = 1000L
+                            successLoadTimeMillis = 1000L,
+                            lastLoadTimeMillis = 1001L
                         )
                     )
                 }
@@ -101,35 +102,40 @@ class RealUiContentFetcherTest {
             assertEquals(
                 createUiContentPopulated(
                     hasInternetConnectivity = true,
-                    lastRefreshTime = UiLastRefreshed.Now
+                    lastRefreshTime = UiLastRefreshed.Now,
+                    loadTimeMillis = 1001L
                 ),
                 awaitItem()
             )
             assertEquals(
                 createUiContentPopulated(
                     hasInternetConnectivity = true,
-                    lastRefreshTime = UiLastRefreshed.Minutes(1)
+                    lastRefreshTime = UiLastRefreshed.Minutes(1),
+                    loadTimeMillis = 1001L
                 ),
                 awaitItem()
             )
             assertEquals(
                 createUiContentPopulated(
                     hasInternetConnectivity = true,
-                    lastRefreshTime = UiLastRefreshed.Minutes(2)
+                    lastRefreshTime = UiLastRefreshed.Minutes(2),
+                    loadTimeMillis = 1001L
                 ),
                 awaitItem()
             )
             assertEquals(
                 createUiContentPopulated(
                     hasInternetConnectivity = true,
-                    lastRefreshTime = UiLastRefreshed.Minutes(3)
+                    lastRefreshTime = UiLastRefreshed.Minutes(3),
+                    loadTimeMillis = 1001L
                 ),
                 awaitItem()
             )
             assertEquals(
                 createUiContentPopulated(
                     hasInternetConnectivity = true,
-                    lastRefreshTime = UiLastRefreshed.MoreThanOneHour
+                    lastRefreshTime = UiLastRefreshed.MoreThanOneHour,
+                    loadTimeMillis = 1001L
                 ),
                 awaitItem()
             )
@@ -147,7 +153,8 @@ class RealUiContentFetcherTest {
                             isRefreshing = false,
                             items = emptyList(),
                             error = null,
-                            loadTimeMillis = 1000L
+                            successLoadTimeMillis = 1000L,
+                            lastLoadTimeMillis = 1001L
                         )
                     )
                 }
@@ -173,21 +180,81 @@ class RealUiContentFetcherTest {
             assertEquals(
                 createUiContentPopulated(
                     hasInternetConnectivity = true,
-                    lastRefreshTime = UiLastRefreshed.Minutes(2)
+                    lastRefreshTime = UiLastRefreshed.Minutes(2),
+                    loadTimeMillis = 1001L
                 ),
                 awaitItem()
             )
             assertEquals(
                 createUiContentPopulated(
                     hasInternetConnectivity = false,
-                    lastRefreshTime = UiLastRefreshed.Minutes(2)
+                    lastRefreshTime = UiLastRefreshed.Minutes(2),
+                    loadTimeMillis = 1001L
                 ),
                 awaitItem()
             )
             assertEquals(
                 createUiContentPopulated(
                     hasInternetConnectivity = true,
-                    lastRefreshTime = UiLastRefreshed.Minutes(2)
+                    lastRefreshTime = UiLastRefreshed.Minutes(2),
+                    loadTimeMillis = 1001L
+                ),
+                awaitItem()
+            )
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun diversionsContentFlowPopulatedEmitsNewValuesWhenLastErrorTimestampShownChanged() = runTest {
+        val fetcher = createFetcher(
+            serviceUpdatesDisplayFetcher = FakeServiceUpdatesDisplayFetcher(
+                onDiversionsDisplayFlow = {
+                    flowOf(
+                        ServiceUpdatesDisplay.Populated(
+                            isRefreshing = false,
+                            items = emptyList(),
+                            error = UiError.NO_CONNECTIVITY,
+                            successLoadTimeMillis = 1000L,
+                            lastLoadTimeMillis = 1001L
+                        )
+                    )
+                }
+            ),
+            connectivityRepository = createAlwaysConnectedConnectivityRepository(),
+            serviceUpdatesErrorTracker = FakeServiceUpdatesErrorTracker(
+                onLastErrorTimestampShownFlow = {
+                    intervalFlowOf(
+                        initialDelay = 0L,
+                        interval = 10L,
+                        1000L, 1001L, 1002L
+                    )
+                }
+            ),
+            elapsedTimeCalculator = FakeElapsedTimeCalculator(
+                onGetElapsedTimeMinutesFlow = {
+                    assertEquals(1000L, it)
+                    flowOf(ElapsedTimeMinutes.Minutes(2))
+                }
+            )
+        )
+
+        fetcher.diversionsContentFlow.test {
+            assertEquals(
+                createUiContentPopulated(
+                    error = UiError.NO_CONNECTIVITY,
+                    hasInternetConnectivity = true,
+                    lastRefreshTime = UiLastRefreshed.Minutes(2),
+                    loadTimeMillis = 1001L
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                createUiContentPopulated(
+                    error = null,
+                    hasInternetConnectivity = true,
+                    lastRefreshTime = UiLastRefreshed.Minutes(2),
+                    loadTimeMillis = 1001L
                 ),
                 awaitItem()
             )
@@ -226,7 +293,8 @@ class RealUiContentFetcherTest {
                                 isRefreshing = false,
                                 items = emptyList(),
                                 error = null,
-                                loadTimeMillis = 1000L
+                                successLoadTimeMillis = 1000L,
+                                lastLoadTimeMillis = 1001L
                             )
                         )
                     }
@@ -252,21 +320,24 @@ class RealUiContentFetcherTest {
             assertEquals(
                 createUiContentPopulated(
                     hasInternetConnectivity = true,
-                    lastRefreshTime = UiLastRefreshed.Minutes(1)
+                    lastRefreshTime = UiLastRefreshed.Minutes(1),
+                    loadTimeMillis = 1001L
                 ),
                 awaitItem()
             )
             assertEquals(
                 createUiContentPopulated(
                     hasInternetConnectivity = true,
-                    lastRefreshTime = UiLastRefreshed.Minutes(2)
+                    lastRefreshTime = UiLastRefreshed.Minutes(2),
+                    loadTimeMillis = 1001L
                 ),
                 awaitItem()
             )
             assertEquals(
                 createUiContentPopulated(
                     hasInternetConnectivity = true,
-                    lastRefreshTime = UiLastRefreshed.Minutes(3)
+                    lastRefreshTime = UiLastRefreshed.Minutes(3),
+                    loadTimeMillis = 1001L
                 ),
                 awaitItem()
             )
@@ -301,7 +372,8 @@ class RealUiContentFetcherTest {
                             isRefreshing = false,
                             items = emptyList(),
                             error = null,
-                            loadTimeMillis = 1000L
+                            successLoadTimeMillis = 1000L,
+                            lastLoadTimeMillis = 1001L
                         )
                     )
                 }
@@ -328,35 +400,40 @@ class RealUiContentFetcherTest {
             assertEquals(
                 createUiContentPopulated(
                     hasInternetConnectivity = true,
-                    lastRefreshTime = UiLastRefreshed.Now
+                    lastRefreshTime = UiLastRefreshed.Now,
+                    loadTimeMillis = 1001L
                 ),
                 awaitItem()
             )
             assertEquals(
                 createUiContentPopulated(
                     hasInternetConnectivity = true,
-                    lastRefreshTime = UiLastRefreshed.Minutes(1)
+                    lastRefreshTime = UiLastRefreshed.Minutes(1),
+                    loadTimeMillis = 1001L
                 ),
                 awaitItem()
             )
             assertEquals(
                 createUiContentPopulated(
                     hasInternetConnectivity = true,
-                    lastRefreshTime = UiLastRefreshed.Minutes(2)
+                    lastRefreshTime = UiLastRefreshed.Minutes(2),
+                    loadTimeMillis = 1001L
                 ),
                 awaitItem()
             )
             assertEquals(
                 createUiContentPopulated(
                     hasInternetConnectivity = true,
-                    lastRefreshTime = UiLastRefreshed.Minutes(3)
+                    lastRefreshTime = UiLastRefreshed.Minutes(3),
+                    loadTimeMillis = 1001L
                 ),
                 awaitItem()
             )
             assertEquals(
                 createUiContentPopulated(
                     hasInternetConnectivity = true,
-                    lastRefreshTime = UiLastRefreshed.MoreThanOneHour
+                    lastRefreshTime = UiLastRefreshed.MoreThanOneHour,
+                    loadTimeMillis = 1001L
                 ),
                 awaitItem()
             )
@@ -374,7 +451,8 @@ class RealUiContentFetcherTest {
                             isRefreshing = false,
                             items = emptyList(),
                             error = null,
-                            loadTimeMillis = 1000L
+                            successLoadTimeMillis = 1000L,
+                            lastLoadTimeMillis = 1001L
                         )
                     )
                 }
@@ -400,21 +478,81 @@ class RealUiContentFetcherTest {
             assertEquals(
                 createUiContentPopulated(
                     hasInternetConnectivity = true,
-                    lastRefreshTime = UiLastRefreshed.Minutes(2)
+                    lastRefreshTime = UiLastRefreshed.Minutes(2),
+                    loadTimeMillis = 1001L
                 ),
                 awaitItem()
             )
             assertEquals(
                 createUiContentPopulated(
                     hasInternetConnectivity = false,
-                    lastRefreshTime = UiLastRefreshed.Minutes(2)
+                    lastRefreshTime = UiLastRefreshed.Minutes(2),
+                    loadTimeMillis = 1001L
                 ),
                 awaitItem()
             )
             assertEquals(
                 createUiContentPopulated(
                     hasInternetConnectivity = true,
-                    lastRefreshTime = UiLastRefreshed.Minutes(2)
+                    lastRefreshTime = UiLastRefreshed.Minutes(2),
+                    loadTimeMillis = 1001L
+                ),
+                awaitItem()
+            )
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun incidentsContentFlowPopulatedEmitsNewValuesWhenLastErrorTimestampShownChanged() = runTest {
+        val fetcher = createFetcher(
+            serviceUpdatesDisplayFetcher = FakeServiceUpdatesDisplayFetcher(
+                onIncidentsDisplayFlow = {
+                    flowOf(
+                        ServiceUpdatesDisplay.Populated(
+                            isRefreshing = false,
+                            items = emptyList(),
+                            error = UiError.NO_CONNECTIVITY,
+                            successLoadTimeMillis = 1000L,
+                            lastLoadTimeMillis = 1001L
+                        )
+                    )
+                }
+            ),
+            connectivityRepository = createAlwaysConnectedConnectivityRepository(),
+            serviceUpdatesErrorTracker = FakeServiceUpdatesErrorTracker(
+                onLastErrorTimestampShownFlow = {
+                    intervalFlowOf(
+                        initialDelay = 0L,
+                        interval = 10L,
+                        1000L, 1001L, 1002L
+                    )
+                }
+            ),
+            elapsedTimeCalculator = FakeElapsedTimeCalculator(
+                onGetElapsedTimeMinutesFlow = {
+                    assertEquals(1000L, it)
+                    flowOf(ElapsedTimeMinutes.Minutes(2))
+                }
+            )
+        )
+
+        fetcher.incidentsContentFlow.test {
+            assertEquals(
+                createUiContentPopulated(
+                    error = UiError.NO_CONNECTIVITY,
+                    hasInternetConnectivity = true,
+                    lastRefreshTime = UiLastRefreshed.Minutes(2),
+                    loadTimeMillis = 1001L
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                createUiContentPopulated(
+                    error = null,
+                    hasInternetConnectivity = true,
+                    lastRefreshTime = UiLastRefreshed.Minutes(2),
+                    loadTimeMillis = 1001L
                 ),
                 awaitItem()
             )
@@ -453,7 +591,8 @@ class RealUiContentFetcherTest {
                                 isRefreshing = false,
                                 items = emptyList(),
                                 error = null,
-                                loadTimeMillis = 1000L
+                                successLoadTimeMillis = 1000L,
+                                lastLoadTimeMillis = 1001L
                             )
                         )
                     }
@@ -479,40 +618,29 @@ class RealUiContentFetcherTest {
             assertEquals(
                 createUiContentPopulated(
                     hasInternetConnectivity = true,
-                    lastRefreshTime = UiLastRefreshed.Minutes(1)
+                    lastRefreshTime = UiLastRefreshed.Minutes(1),
+                    loadTimeMillis = 1001L
                 ),
                 awaitItem()
             )
             assertEquals(
                 createUiContentPopulated(
                     hasInternetConnectivity = true,
-                    lastRefreshTime = UiLastRefreshed.Minutes(2)
+                    lastRefreshTime = UiLastRefreshed.Minutes(2),
+                    loadTimeMillis = 1001L
                 ),
                 awaitItem()
             )
             assertEquals(
                 createUiContentPopulated(
                     hasInternetConnectivity = true,
-                    lastRefreshTime = UiLastRefreshed.Minutes(3)
+                    lastRefreshTime = UiLastRefreshed.Minutes(3),
+                    loadTimeMillis = 1001L
                 ),
                 awaitItem()
             )
             awaitComplete()
         }
-    }
-
-    @Test
-    fun refreshCallsRefreshOnServiceUpdatesDisplayFetcher() {
-        var refreshInvocationCount = 0
-        val fetcher = createFetcher(
-            serviceUpdatesDisplayFetcher = FakeServiceUpdatesDisplayFetcher(
-                onRefresh = { refreshInvocationCount++ }
-            )
-        )
-
-        fetcher.refresh()
-
-        assertEquals(1, refreshInvocationCount)
     }
 
     @Test
@@ -533,11 +661,15 @@ class RealUiContentFetcherTest {
         serviceUpdatesDisplayFetcher: ServiceUpdatesDisplayFetcher =
             FakeServiceUpdatesDisplayFetcher(),
         connectivityRepository: ConnectivityRepository = FakeConnectivityRepository(),
+        serviceUpdatesErrorTracker: ServiceUpdatesErrorTracker = FakeServiceUpdatesErrorTracker(
+            onLastErrorTimestampShownFlow = { flowOf(0L) }
+        ),
         elapsedTimeCalculator: ElapsedTimeCalculator = FakeElapsedTimeCalculator()
     ): RealUiContentFetcher {
         return RealUiContentFetcher(
             serviceUpdatesDisplayFetcher = serviceUpdatesDisplayFetcher,
             connectivityRepository = connectivityRepository,
+            serviceUpdatesErrorTracker = serviceUpdatesErrorTracker,
             elapsedTimeCalculator = elapsedTimeCalculator
         )
     }
@@ -550,16 +682,20 @@ class RealUiContentFetcherTest {
         )
     }
 
+    @Suppress("SameParameterValue")
     private fun <T : UiServiceUpdate> createUiContentPopulated(
+        error: UiError? = null,
         hasInternetConnectivity: Boolean,
-        lastRefreshTime: UiLastRefreshed
+        lastRefreshTime: UiLastRefreshed,
+        loadTimeMillis: Long
     ): UiContent.Populated<T> {
         return UiContent.Populated(
             isRefreshing = false,
             items = persistentListOf(),
-            error = null,
+            error = error,
             hasInternetConnectivity = hasInternetConnectivity,
-            lastRefreshTime = lastRefreshTime
+            lastRefreshTime = lastRefreshTime,
+            loadTimeMillis = loadTimeMillis
         )
     }
 }

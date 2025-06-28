@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.shareIn
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForViewModelCoroutineScope
 import uk.org.rivernile.android.bustracker.core.updates.ServiceUpdateRepository
 import uk.org.rivernile.android.bustracker.core.updates.ServiceUpdatesResult
+import uk.org.rivernile.android.bustracker.ui.news.Refreshable
 import javax.inject.Inject
 
 /**
@@ -45,7 +46,7 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-internal interface ServiceUpdatesFetcher : AutoCloseable {
+internal interface ServiceUpdatesFetcher : Refreshable, AutoCloseable {
 
     /**
      * A [kotlinx.coroutines.flow.Flow] which emits [ServiceUpdatesResult]s. The initial
@@ -53,13 +54,6 @@ internal interface ServiceUpdatesFetcher : AutoCloseable {
      * cause new data loads (i.e. to refresh the data), call [refresh].
      */
     val serviceUpdatesFlow: Flow<ServiceUpdatesResult>
-
-    /**
-     * Trigger a refresh on the Service Updates data. The new data will be emitted from
-     * [serviceUpdatesFlow]. If this method is called while a load is taking place, it will cause
-     * the current load to be aborted a new fresh loading attempt is performed.
-     */
-    fun refresh()
 }
 
 @ViewModelScoped

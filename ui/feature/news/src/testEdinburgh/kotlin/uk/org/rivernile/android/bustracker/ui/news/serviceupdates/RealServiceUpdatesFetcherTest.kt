@@ -90,7 +90,7 @@ class RealServiceUpdatesFetcherTest {
                         )
                         1 -> flowOf(
                             ServiceUpdatesResult.InProgress,
-                            ServiceUpdatesResult.Error.Server
+                            ServiceUpdatesResult.Error.Server(loadTimeMillis = 456L)
                         )
                         else -> throw IndexOutOfBoundsException()
                     }.also { iteration++ }
@@ -111,7 +111,7 @@ class RealServiceUpdatesFetcherTest {
             fetcher.refresh()
 
             assertEquals(ServiceUpdatesResult.InProgress, awaitItem())
-            assertEquals(ServiceUpdatesResult.Error.Server, awaitItem())
+            assertEquals(ServiceUpdatesResult.Error.Server(loadTimeMillis = 456L), awaitItem())
             ensureAllEventsConsumed()
         }
 

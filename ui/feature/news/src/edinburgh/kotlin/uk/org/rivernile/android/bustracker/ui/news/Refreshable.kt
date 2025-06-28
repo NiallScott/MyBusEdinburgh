@@ -24,32 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
-
-import kotlinx.coroutines.flow.Flow
-import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.UiDiversion
-import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIncident
+package uk.org.rivernile.android.bustracker.ui.news
 
 /**
- * A fake [ServiceUpdatesDisplayFetcher] for testing.
+ * Implementors of this interface denote that they are able to refresh news data.
  *
  * @author Niall Scott
  */
-internal class FakeServiceUpdatesDisplayFetcher(
-    private val onDiversionsDisplayFlow: () -> Flow<ServiceUpdatesDisplay<UiDiversion>> =
-        { throw NotImplementedError() },
-    private val onIncidentsDisplayFlow: () -> Flow<ServiceUpdatesDisplay<UiIncident>> =
-        { throw NotImplementedError() },
-    private val onClose: () -> Unit = { throw NotImplementedError() }
-) : ServiceUpdatesDisplayFetcher {
+internal interface Refreshable {
 
-    override val diversionsDisplayFlow: Flow<ServiceUpdatesDisplay<UiDiversion>>
-        get() = onDiversionsDisplayFlow()
-
-    override val incidentsDisplayFlow: Flow<ServiceUpdatesDisplay<UiIncident>>
-        get() = onIncidentsDisplayFlow()
-
-    override fun close() {
-        onClose()
-    }
+    /**
+     * Perform a new refresh of the news data. This may cause an in-flight refresh to terminate
+     * abruptly and a new refresh to begin.
+     */
+    fun refresh()
 }

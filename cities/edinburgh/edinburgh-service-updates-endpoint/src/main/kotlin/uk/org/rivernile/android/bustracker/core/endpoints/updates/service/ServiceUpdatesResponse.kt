@@ -32,48 +32,64 @@ package uk.org.rivernile.android.bustracker.core.endpoints.updates.service
  *
  * @author Niall Scott
  */
-sealed interface ServiceUpdatesResponse {
+public sealed interface ServiceUpdatesResponse {
+
+    /**
+     * The time this data was loaded at, in milliseconds since the UNIX epoch.
+     */
+    public val loadTimeMillis: Long
 
     /**
      * The response is successful.
      *
-     * @property serviceUpdates The [ServiceUpdate]s [List]ing. This can be `null` or empty if there
-     * are no updates.
      * @property loadTimeMillis The time this data was loaded at, in milliseconds since the UNIX
      * epoch.
+     * @property serviceUpdates The [ServiceUpdate]s [List]ing. This can be `null` or empty if there
+     * are no updates.
      */
-    data class Success(
-        val serviceUpdates: List<ServiceUpdate>?,
-        val loadTimeMillis: Long
+    public data class Success(
+        override val loadTimeMillis: Long,
+        val serviceUpdates: List<ServiceUpdate>?
     ) : ServiceUpdatesResponse
 
     /**
      * This sealed interface and its descendants encapsulate error responses from requesting
      * service updates.
      */
-    sealed interface Error : ServiceUpdatesResponse {
+    public sealed interface Error : ServiceUpdatesResponse {
 
         /**
          * This response was not successful due to no connectivity.
+         *
+         * @property loadTimeMillis The time this data was loaded at, in milliseconds since the UNIX
+         * epoch.
          */
-        data object NoConnectivity : Error
+        public data class NoConnectivity(
+            override val loadTimeMillis: Long
+        ) : Error
 
         /**
          * This response was not successful due to an IO error.
          *
+         * @property loadTimeMillis The time this data was loaded at, in milliseconds since the UNIX
+         * epoch.
          * @property throwable The IO error.
          */
-        data class Io(
+        public data class Io(
+            override val loadTimeMillis: Long,
             val throwable: Throwable
         ) : Error
 
         /**
          * The server returned us an error.
          *
+         * @property loadTimeMillis The time this data was loaded at, in milliseconds since the UNIX
+         * epoch.
          * @property errorString The error string returned from the server. May be `null` if no
          * error was returned.
          */
-        data class ServerError(
+        public data class ServerError(
+            override val loadTimeMillis: Long,
             val errorString: String? = null
         ) : Error
     }

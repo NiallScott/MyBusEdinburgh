@@ -49,14 +49,16 @@ internal sealed interface ServiceUpdatesDisplay<out T : UiServiceUpdate> {
      * @property items The [List] of [UiIncident] items to show.
      * @property error An optional error to show if there's old content to show but an error
      * occurred on the latest load.
-     * @property loadTimeMillis The time the populated data was loaded at.
-     * occurred on this reload attempt.
+     * @property successLoadTimeMillis The timestamp of when the populated data was loaded at.
+     * @property lastLoadTimeMillis The timestamp of when the data was last loaded at. This is not
+     * necessarily equal to [successLoadTimeMillis] as errors may have occurred since then.
      */
     data class Populated<out T : UiServiceUpdate>(
         val isRefreshing: Boolean,
         val items: List<T>,
         val error: UiError?,
-        val loadTimeMillis: Long
+        val successLoadTimeMillis: Long,
+        val lastLoadTimeMillis: Long
     ) : ServiceUpdatesDisplay<T>
 
     /**

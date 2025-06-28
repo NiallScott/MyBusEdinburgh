@@ -38,12 +38,12 @@ import javax.inject.Singleton
  *
  * @author Niall Scott
  */
-interface ServiceUpdateRepository {
+public interface ServiceUpdateRepository {
 
     /**
      * A [Flow] which emits [ServiceUpdatesResult]s for all service update types.
      */
-    val serviceUpdatesFlow: Flow<ServiceUpdatesResult>
+    public val serviceUpdatesFlow: Flow<ServiceUpdatesResult>
 }
 
 /**
@@ -67,9 +67,14 @@ internal class RealServiceUpdateRepository @Inject constructor(
                     loadTimeMillis = response.loadTimeMillis
                 )
             is ServiceUpdatesResponse.Error.NoConnectivity ->
-                ServiceUpdatesResult.Error.NoConnectivity
-            is ServiceUpdatesResponse.Error.Io -> ServiceUpdatesResult.Error.Io(response.throwable)
-            is ServiceUpdatesResponse.Error.ServerError -> ServiceUpdatesResult.Error.Server
+                ServiceUpdatesResult.Error.NoConnectivity(loadTimeMillis = response.loadTimeMillis)
+            is ServiceUpdatesResponse.Error.Io ->
+                ServiceUpdatesResult.Error.Io(
+                    loadTimeMillis = response.loadTimeMillis,
+                    throwable = response.throwable
+                )
+            is ServiceUpdatesResponse.Error.ServerError ->
+                ServiceUpdatesResult.Error.Server(loadTimeMillis = response.loadTimeMillis)
         }
 
         emit(result)

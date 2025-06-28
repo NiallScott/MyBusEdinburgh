@@ -27,11 +27,13 @@
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
 import dagger.hilt.android.scopes.ViewModelScoped
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
 import uk.org.rivernile.android.bustracker.core.time.ElapsedTimeCalculator
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.UiDiversion
@@ -47,79 +49,70 @@ internal interface UiContentFetcher : AutoCloseable {
 
     /**
      * A [kotlinx.coroutines.flow.Flow] which emits [UiDiversion] [UiContent] items. The initial
-     * subscription to this may already have loaded data or may cause a new load to happen. To
-     * cause new data loads (i.e. to refresh the data), call [refresh].
+     * subscription to this may already have loaded data or may cause a new load to happen.
      */
     val diversionsContentFlow: Flow<UiContent<UiDiversion>>
 
     /**
      * A [kotlinx.coroutines.flow.Flow] which emits [UiIncident] [UiContent] items. The initial
-     * subscription to this may already have loaded data or may cause a new load to happen. To
-     * cause new data loads (i.e. to refresh the data), call [refresh].
+     * subscription to this may already have loaded data or may cause a new load to happen.
      */
     val incidentsContentFlow: Flow<UiContent<UiIncident>>
-
-    /**
-     * Trigger a refresh on the Service Updates data. The new data will be emitted from
-     * [diversionsContentFlow] and [incidentsContentFlow]. If this method is called while a load
-     * is taking place, it will cause the current load to be aborted a new fresh loading attempt
-     * is performed.
-     */
-    fun refresh()
 }
 
 @ViewModelScoped
 internal class RealUiContentFetcher @Inject constructor(
     private val serviceUpdatesDisplayFetcher: ServiceUpdatesDisplayFetcher,
     private val connectivityRepository: ConnectivityRepository,
+    private val serviceUpdatesErrorTracker: ServiceUpdatesErrorTracker,
     private val elapsedTimeCalculator: ElapsedTimeCalculator
-) : UiContentFetcher {
+) : UiContentFetcher, AutoCloseable by serviceUpdatesDisplayFetcher {
 
     override val diversionsContentFlow get() = serviceUpdatesDisplayFetcher
         .diversionsDisplayFlow
-        .combine(connectivityRepository.hasInternetConnectivityFlow, ::FetchedDataHolder)
-        .produceUiState()
-        .distinctUntilChanged()
+        .toContentFlow()
 
     override val incidentsContentFlow get() = serviceUpdatesDisplayFetcher
         .incidentsDisplayFlow
-        .combine(connectivityRepository.hasInternetConnectivityFlow, ::FetchedDataHolder)
-        .produceUiState()
-        .distinctUntilChanged()
+        .toContentFlow()
 
-    override fun refresh() {
-        serviceUpdatesDisplayFetcher.refresh()
-    }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun <T : UiServiceUpdate> Flow<ServiceUpdatesDisplay<T>>.toContentFlow() =
+        combineToFetchedDataHolder()
+            .flatMapLatest(::produceUiContentFlow)
+            .distinctUntilChanged()
 
-    override fun close() {
-        serviceUpdatesDisplayFetcher.close()
-    }
+    private fun <T : UiServiceUpdate> Flow<ServiceUpdatesDisplay<T>>.combineToFetchedDataHolder() =
+        combine(
+            this,
+            connectivityRepository.hasInternetConnectivityFlow,
+            serviceUpdatesErrorTracker.lastErrorTimestampShownFlow,
+            ::FetchedDataHolder
+        )
 
-    private fun <T : UiServiceUpdate> Flow<FetchedDataHolder<T>>.produceUiState() = channelFlow {
-        collectLatest { fetchedData ->
-            when (val serviceUpdatesDisplay = fetchedData.serviceUpdatesDisplay) {
-                is ServiceUpdatesDisplay.InProgress ->
-                    send(toUiContentInProgress())
-                is ServiceUpdatesDisplay.Populated -> {
-                    elapsedTimeCalculator
-                        .getElapsedTimeMinutesFlow(serviceUpdatesDisplay.loadTimeMillis)
-                        .collectLatest {
-                            val uiContent = serviceUpdatesDisplay.toUiContentPopulated(
-                                hasInternetConnectivity = fetchedData.hasInternetConnectivity,
-                                lastRefreshTime = it.toUiLastRefreshed()
-                            )
-
-                            send(uiContent)
-                        }
-                }
-                is ServiceUpdatesDisplay.Error ->
-                    send(serviceUpdatesDisplay.toUiContentError())
+    private fun <T : UiServiceUpdate> produceUiContentFlow(
+        fetchedData: FetchedDataHolder<T>
+    ): Flow<UiContent<T>> {
+        return when (val serviceUpdatesDisplay = fetchedData.serviceUpdatesDisplay) {
+            is ServiceUpdatesDisplay.InProgress -> flowOf(toUiContentInProgress())
+            is ServiceUpdatesDisplay.Populated -> {
+                elapsedTimeCalculator
+                    .getElapsedTimeMinutesFlow(serviceUpdatesDisplay.successLoadTimeMillis)
+                    .map {
+                        serviceUpdatesDisplay.toUiContentPopulated(
+                            hasInternetConnectivity = fetchedData.hasInternetConnectivity,
+                            lastErrorTimestampShown = fetchedData.lastErrorTimestampShown,
+                            lastRefreshTime = it.toUiLastRefreshed()
+                        )
+                    }
             }
+            is ServiceUpdatesDisplay.Error -> flowOf(serviceUpdatesDisplay.toUiContentError())
         }
     }
 
     private data class FetchedDataHolder<out T : UiServiceUpdate>(
         val serviceUpdatesDisplay: ServiceUpdatesDisplay<T>,
-        val hasInternetConnectivity: Boolean
+        val hasInternetConnectivity: Boolean,
+        val lastErrorTimestampShown: Long
     )
 }
