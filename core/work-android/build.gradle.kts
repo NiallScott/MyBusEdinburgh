@@ -36,7 +36,6 @@ android {
 
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles += file("proguard-consumer-rules.pro")
     }
 
     buildTypes {

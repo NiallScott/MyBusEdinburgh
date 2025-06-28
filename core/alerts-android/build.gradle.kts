@@ -36,7 +36,6 @@ android {
 
     defaultConfig {
         testInstrumentationRunner = "uk.org.rivernile.android.bustracker.core.alerts.AlertsTestRunner"
-        consumerProguardFiles += file("proguard-consumer-rules.pro")
     }
 
     buildTypes {
