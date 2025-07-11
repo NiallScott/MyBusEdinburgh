@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,7 +45,8 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsFragmentViewModel @Inject constructor(
     preferenceRepository: PreferenceRepository,
-    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher): ViewModel() {
+    @param:ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
+): ViewModel() {
 
     /**
      * This [LiveData] emits the current app theme.

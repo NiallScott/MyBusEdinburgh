@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,200 +29,367 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 import app.cash.turbine.test
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopDatabase
+import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabase
+import uk.org.rivernile.android.bustracker.core.database.busstop.FakeBusStopDatabase
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * Tests for [ProxyStopDao].
  *
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner::class)
 class ProxyStopDaoTest {
-
-    @Mock
-    private lateinit var database: AndroidBusStopDatabase
-
-    @Mock
-    private lateinit var roomStopDao: RoomStopDao
-
-    private lateinit var dao: ProxyStopDao
-
-    @BeforeTest
-    fun setUp() {
-        dao = ProxyStopDao(database)
-
-        whenever(database.roomStopDao)
-            .thenReturn(roomStopDao)
-    }
 
     @Test
     fun getNameForStopFlowRespondsToDatabaseOpenStatus() = runTest {
-        val first = mock<RoomStopName>()
-        val second = mock<RoomStopName>()
-        whenever(database.isDatabaseOpenFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, true, false, true))
-        whenever(roomStopDao.getNameForStopFlow("123456"))
-            .thenReturn(
+        val first = FakeStopName(
+            name = "Name 1",
+            locality = "Locality 1"
+        )
+        val second = FakeStopName(
+            name = "Name 2",
+            locality = "Locality 2"
+        )
+        val flows = ArrayDeque(
+            listOf(
                 flowOf(first),
                 flowOf(second)
             )
+        )
+        val dao = createProxyStopDao(
+            database = FakeBusStopDatabase(
+                onStopDao = {
+                    FakeStopDao(
+                        onGetNameForStopFlow = {
+                            assertEquals("123456", it)
+                            flows.removeFirst()
+                        }
+                    )
+                },
+                onIsDatabaseOpenFlow = { intervalFlowOf(0L, 10L, true, false, true) }
+            )
+        )
 
         dao.getNameForStopFlow("123456").test {
             assertEquals(first, awaitItem())
             assertEquals(second, awaitItem())
             awaitComplete()
         }
+        assertTrue(flows.isEmpty())
     }
 
     @Test
     fun getLocationForStopFlowRespondsToDatabaseOpenStatus() = runTest {
-        val first = mock<RoomStopLocation>()
-        val second = mock<RoomStopLocation>()
-        whenever(database.isDatabaseOpenFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, true, false, true))
-        whenever(roomStopDao.getLocationForStopFlow("123456"))
-            .thenReturn(
+        val first = FakeStopLocation(latitude = 1.1, longitude = 2.2)
+        val second = FakeStopLocation(latitude = 3.3, 4.4)
+        val flows = ArrayDeque(
+            listOf(
                 flowOf(first),
                 flowOf(second)
             )
+        )
+        val dao = createProxyStopDao(
+            database = FakeBusStopDatabase(
+                onStopDao = {
+                    FakeStopDao(
+                        onGetLocationForStopFlow = {
+                            assertEquals("123456", it)
+                            flows.removeFirst()
+                        }
+                    )
+                },
+                onIsDatabaseOpenFlow = { intervalFlowOf(0L, 10L, true, false, true) }
+            )
+        )
 
         dao.getLocationForStopFlow("123456").test {
             assertEquals(first, awaitItem())
             assertEquals(second, awaitItem())
             awaitComplete()
         }
+        assertTrue(flows.isEmpty())
     }
 
     @Test
     fun getStopDetailsFlowSingleRespondsToDatabaseOpenStatus() = runTest {
-        val first = mock<RoomStopDetails>()
-        val second = mock<RoomStopDetails>()
-        whenever(database.isDatabaseOpenFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, true, false, true))
-        whenever(roomStopDao.getStopDetailsFlow("123456"))
-            .thenReturn(
+        val first = firstStopDetails
+        val second = secondStopDetails
+        val flows = ArrayDeque(
+            listOf(
                 flowOf(first),
                 flowOf(second)
             )
+        )
+        val dao = createProxyStopDao(
+            database = FakeBusStopDatabase(
+                onStopDao = {
+                    FakeStopDao(
+                        onGetStopDetailsFlowForSingleStop = {
+                            assertEquals("123456", it)
+                            flows.removeFirst()
+                        }
+                    )
+                },
+                onIsDatabaseOpenFlow = { intervalFlowOf(0L, 10L, true, false, true) }
+            )
+        )
 
         dao.getStopDetailsFlow("123456").test {
             assertEquals(first, awaitItem())
             assertEquals(second, awaitItem())
             awaitComplete()
         }
+        assertTrue(flows.isEmpty())
     }
 
     @Test
     fun getStopDetailsFlowMultipleRespondsToDatabaseOpenStatus() = runTest {
-        val first = mock<Map<String, RoomStopDetails>>()
-        val second = mock<Map<String, RoomStopDetails>>()
-        whenever(database.isDatabaseOpenFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, true, false, true))
-        whenever(roomStopDao.getStopDetailsFlow(setOf("123456")))
-            .thenReturn(
+        val first = mapOf("1" to firstStopDetails)
+        val second = mapOf("2" to secondStopDetails)
+        val flows = ArrayDeque(
+            listOf(
                 flowOf(first),
                 flowOf(second)
             )
+        )
+        val dao = createProxyStopDao(
+            database = FakeBusStopDatabase(
+                onStopDao = {
+                    FakeStopDao(
+                        onGetStopDetailsFlowForMultipleStops = {
+                            assertEquals(setOf("123456"), it)
+                            flows.removeFirst()
+                        }
+                    )
+                },
+                onIsDatabaseOpenFlow = { intervalFlowOf(0L, 10L, true, false, true) }
+            )
+        )
 
         dao.getStopDetailsFlow(setOf("123456")).test {
             assertEquals(first, awaitItem())
             assertEquals(second, awaitItem())
             awaitComplete()
         }
+        assertTrue(flows.isEmpty())
     }
 
     @Test
     fun getStopDetailsWithServiceFilterFlowRespondsToDatabaseOpenStatus() = runTest {
-        val first = mock<List<StopDetails>>()
-        val second = mock<List<StopDetails>>()
-        whenever(database.isDatabaseOpenFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, true, false, true))
-        whenever(roomStopDao.getStopDetailsWithServiceFilterFlow(setOf("1")))
-            .thenReturn(
+        val first = listOf(firstStopDetails)
+        val second = listOf(secondStopDetails)
+        val flows = ArrayDeque(
+            listOf(
                 flowOf(first),
                 flowOf(second)
             )
+        )
+        val dao = createProxyStopDao(
+            database = FakeBusStopDatabase(
+                onStopDao = {
+                    FakeStopDao(
+                        onGetStopDetailsWithServiceFilterFlow = {
+                            assertEquals(setOf("1"), it)
+                            flows.removeFirst()
+                        }
+                    )
+                },
+                onIsDatabaseOpenFlow = { intervalFlowOf(0L, 10L, true, false, true) }
+            )
+        )
 
         dao.getStopDetailsWithServiceFilterFlow(setOf("1")).test {
             assertEquals(first, awaitItem())
             assertEquals(second, awaitItem())
             awaitComplete()
         }
+        assertTrue(flows.isEmpty())
     }
 
     @Test
     fun getStopDetailsWithinSpanFlowRespondsToDatabaseOpenStatus() = runTest {
-        val first = mock<List<RoomStopDetailsWithServices>>()
-        val second = mock<List<RoomStopDetailsWithServices>>()
-        whenever(database.isDatabaseOpenFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, true, false, true))
-        whenever(roomStopDao.getStopDetailsWithinSpanFlow(
-            any(),
-            any(),
-            any(),
-            any()))
-            .thenReturn(
+        val first = listOf(firstStopDetailsWithServices)
+        val second = listOf(secondStopDetailsWithServices)
+        val flows = ArrayDeque(
+            listOf(
                 flowOf(first),
                 flowOf(second)
             )
+        )
+        val dao = createProxyStopDao(
+            database = FakeBusStopDatabase(
+                onStopDao = {
+                    FakeStopDao(
+                        onGetStopDetailsWithinSpanFlow = { minLat, minLon, maxLat, maxLon ->
+                            assertEquals(1.1, minLat)
+                            assertEquals(2.2, minLon)
+                            assertEquals(3.3, maxLat)
+                            assertEquals(4.4, maxLon)
+                            flows.removeFirst()
+                        }
+                    )
+                },
+                onIsDatabaseOpenFlow = { intervalFlowOf(0L, 10L, true, false, true) }
+            )
+        )
 
         dao.getStopDetailsWithinSpanFlow(1.1, 2.2, 3.3, 4.4).test {
             assertEquals(first, awaitItem())
             assertEquals(second, awaitItem())
             awaitComplete()
         }
+        assertTrue(flows.isEmpty())
     }
 
     @Test
     fun getStopDetailsWithinSpanFlowWithServiceFilterRespondsToDatabaseOpenStatus() = runTest {
-        val first = mock<List<RoomStopDetailsWithServices>>()
-        val second = mock<List<RoomStopDetailsWithServices>>()
-        whenever(database.isDatabaseOpenFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, true, false, true))
-        whenever(roomStopDao.getStopDetailsWithinSpanFlow(
-            any(),
-            any(),
-            any(),
-            any(),
-            any()))
-            .thenReturn(
+        val first = listOf(firstStopDetailsWithServices)
+        val second = listOf(secondStopDetailsWithServices)
+        val flows = ArrayDeque(
+            listOf(
                 flowOf(first),
                 flowOf(second)
             )
+        )
+        val dao = createProxyStopDao(
+            database = FakeBusStopDatabase(
+                onStopDao = {
+                    FakeStopDao(
+                        onGetStopDetailsWithinSpanFlowWithServiceFilter = { minLat, minLon, maxLat,
+                                                                            maxLon, serviceFilter ->
+                            assertEquals(1.1, minLat)
+                            assertEquals(2.2, minLon)
+                            assertEquals(3.3, maxLat)
+                            assertEquals(4.4, maxLon)
+                            assertEquals(setOf("1"), serviceFilter)
+                            flows.removeFirst()
+                        }
+                    )
+                },
+                onIsDatabaseOpenFlow = { intervalFlowOf(0L, 10L, true, false, true) }
+            )
+        )
 
         dao.getStopDetailsWithinSpanFlow(1.1, 2.2, 3.3, 4.4, setOf("1")).test {
             assertEquals(first, awaitItem())
             assertEquals(second, awaitItem())
             awaitComplete()
         }
+        assertTrue(flows.isEmpty())
     }
 
     @Test
     fun getStopSearchResultsFlowRespondsToDatabaseOpenStatus() = runTest {
-        val first = mock<List<RoomStopSearchResult>>()
-        val second = mock<List<RoomStopSearchResult>>()
-        whenever(database.isDatabaseOpenFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, true, false, true))
-        whenever(roomStopDao.getStopSearchResultsFlow("abc123"))
-            .thenReturn(
+        val first = listOf(
+            FakeStopSearchResult(
+                stopCode = "1",
+                stopName = FakeStopName(
+                    name = "Name 1",
+                    locality = "Locality 1"
+                ),
+                orientation = StopOrientation.NORTH,
+                serviceListing = "100, 200"
+            )
+        )
+        val second = listOf(
+            FakeStopSearchResult(
+                stopCode = "2",
+                stopName = FakeStopName(
+                    name = "Name 2",
+                    locality = "Locality 2"
+                ),
+                orientation = StopOrientation.SOUTH,
+                serviceListing = "300, 400"
+            )
+        )
+        val flows = ArrayDeque(
+            listOf(
                 flowOf(first),
                 flowOf(second)
             )
+        )
+        val dao = createProxyStopDao(
+            database = FakeBusStopDatabase(
+                onStopDao = {
+                    FakeStopDao(
+                        onGetStopSearchResultsFlow = {
+                            assertEquals("abc123", it)
+                            flows.removeFirst()
+                        }
+                    )
+                },
+                onIsDatabaseOpenFlow = { intervalFlowOf(0L, 10L, true, false, true) }
+            )
+        )
 
         dao.getStopSearchResultsFlow("abc123").test {
             assertEquals(first, awaitItem())
             assertEquals(second, awaitItem())
             awaitComplete()
         }
+        assertTrue(flows.isEmpty())
     }
+
+    private fun createProxyStopDao(
+        database: BusStopDatabase = FakeBusStopDatabase()
+    ): ProxyStopDao {
+        return ProxyStopDao(database = database)
+    }
+
+    private val firstStopDetails get() = FakeStopDetails(
+        stopCode = "1",
+        stopName = FakeStopName(
+            name = "Name 1",
+            locality = "Locality 1"
+        ),
+        location = FakeStopLocation(
+            latitude = 1.1,
+            longitude = 2.2
+        ),
+        orientation = StopOrientation.NORTH
+    )
+
+    private val secondStopDetails get() = FakeStopDetails(
+        stopCode = "2",
+        stopName = FakeStopName(
+            name = "Name 2",
+            locality = "Locality 2"
+        ),
+        location = FakeStopLocation(
+            latitude = 3.3,
+            longitude = 4.4
+        ),
+        orientation = StopOrientation.SOUTH
+    )
+
+    private val firstStopDetailsWithServices get() = FakeStopDetailsWithServices(
+        stopCode = "1",
+        stopName = FakeStopName(
+            name = "Name 1",
+            locality = "Locality 1"
+        ),
+        location = FakeStopLocation(
+            latitude = 1.1,
+            longitude = 2.2
+        ),
+        orientation = StopOrientation.NORTH,
+        serviceListing = "100, 200"
+    )
+
+    private val secondStopDetailsWithServices get() = FakeStopDetailsWithServices(
+        stopCode = "2",
+        stopName = FakeStopName(
+            name = "Name 2",
+            locality = "Locality 2"
+        ),
+        location = FakeStopLocation(
+            latitude = 3.3,
+            longitude = 4.4
+        ),
+        orientation = StopOrientation.SOUTH,
+        serviceListing = "300, 400"
+    )
 }

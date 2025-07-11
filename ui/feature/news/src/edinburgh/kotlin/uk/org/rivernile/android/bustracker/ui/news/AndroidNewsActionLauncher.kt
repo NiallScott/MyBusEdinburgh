@@ -46,7 +46,7 @@ import androidx.core.net.toUri
  */
 @FragmentScoped
 internal class AndroidNewsActionLauncher @Inject constructor(
-    @ActivityContext private val context: Context,
+    @param:ActivityContext private val context: Context,
     private val exceptionLogger: ExceptionLogger
 ): DiversionsActionLauncher, IncidentsActionLauncher {
 

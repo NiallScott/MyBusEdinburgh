@@ -71,7 +71,7 @@ internal class RealServiceUpdatesDisplayFetcher @Inject constructor(
     servicesRepository: ServicesRepository,
     private val serviceNamesComparator: Comparator<String>,
     private val serviceUpdatesDisplayCalculator: ServiceUpdatesDisplayCalculator,
-    @ForViewModelCoroutineScope private val viewModelCoroutineScope: CoroutineScope
+    @param:ForViewModelCoroutineScope private val viewModelCoroutineScope: CoroutineScope
 ) : ServiceUpdatesDisplayFetcher, AutoCloseable by serviceUpdatesFetcher {
 
     override val diversionsDisplayFlow get() = serviceUpdatesFetcher

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -57,7 +57,8 @@ sealed interface ServicesChooserParams : Parcelable {
     @Parcelize
     data class AllServices(
         @StringRes override val titleResId: Int,
-        override val selectedServices: List<String>?) : ServicesChooserParams
+        override val selectedServices: List<String>?
+    ) : ServicesChooserParams
 
     /**
      * Only services for the given [stopCode] should be shown for selection.
@@ -70,5 +71,6 @@ sealed interface ServicesChooserParams : Parcelable {
     data class Stop(
         @StringRes override val titleResId: Int,
         override val selectedServices: List<String>?,
-        val stopCode: String) : ServicesChooserParams
+        val stopCode: String
+    ) : ServicesChooserParams
 }

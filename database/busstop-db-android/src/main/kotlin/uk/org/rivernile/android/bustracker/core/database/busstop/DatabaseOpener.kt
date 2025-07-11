@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,6 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import okio.IOException
-import java.io.File
 import java.nio.ByteBuffer
 import javax.inject.Inject
 
@@ -50,12 +49,13 @@ internal class DatabaseOpener @Inject constructor(
     /**
      * Create an instance of the [SupportSQLiteOpenHelper], which allows a database to be opened.
      *
-     * @param databaseFile A [File] object representing the disk location of the database.
+     * @param databaseFile A [BusStopDatabaseFile] object representing the disk location of the
+     * database.
      * @return A new instance of [SupportSQLiteOpenHelper] which can be used to open the database.
      * @throws IOException When the database file could not be accessed.
      */
     @Throws(IOException::class)
-    fun createOpenHelper(databaseFile: File): SupportSQLiteOpenHelper {
+    fun createOpenHelper(databaseFile: BusStopDatabaseFile): SupportSQLiteOpenHelper {
         val version = readVersion(databaseFile)
         val configuration = SupportSQLiteOpenHelper.Configuration.builder(context)
             .name(databaseFile.absolutePath)
@@ -84,7 +84,7 @@ internal class DatabaseOpener @Inject constructor(
      * @see [User Version Number](https://www.sqlite.org/fileformat.html.user_version_number).
      */
     @Throws(IOException::class)
-    private fun readVersion(databaseFile: File): Int {
+    private fun readVersion(databaseFile: BusStopDatabaseFile): Int {
         return databaseFile.inputStream().channel.use { input ->
             val buffer = ByteBuffer.allocate(4)
             input.tryLock(60, 4, true)

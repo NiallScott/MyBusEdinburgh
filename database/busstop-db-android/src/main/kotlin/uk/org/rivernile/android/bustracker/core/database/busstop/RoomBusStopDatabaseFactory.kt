@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,23 +30,13 @@ import android.content.Context
 import androidx.room.Room
 import uk.org.rivernile.android.bustracker.core.database.busstop.migrations.Migration1To2
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
- * This class is a factory to create [RoomBusStopDatabase] objects.
+ * This is a factory to create [RoomBusStopDatabase] objects.
  *
- * @param context The application [Context].
- * @param migration1To2 An implementation which migrates the database from version 1 to 2.
- * @param bundledDatabaseOpenHelperFactory The open helper used to copy the bundled database if
- * required.
  * @author Niall Scott
  */
-@Singleton
-internal class RoomBusStopDatabaseFactory @Inject constructor(
-    private val context: Context,
-    private val migration1To2: Migration1To2,
-    private val bundledDatabaseOpenHelperFactory: BundledDatabaseOpenHelperFactory
-) {
+internal interface RoomBusStopDatabaseFactory {
 
     /**
      * Create an instance of [RoomBusStopDatabase].
@@ -60,8 +50,21 @@ internal class RoomBusStopDatabaseFactory @Inject constructor(
     fun createRoomBusStopDatabase(
         databaseName: String,
         allowAssetExtraction: Boolean
+    ): RoomBusStopDatabase
+}
+
+internal class RealRoomBusStopDatabaseFactory @Inject constructor(
+    private val context: Context,
+    private val migration1To2: Migration1To2,
+    private val bundledDatabaseOpenHelperFactory: BundledDatabaseOpenHelperFactory
+) : RoomBusStopDatabaseFactory {
+
+    override fun createRoomBusStopDatabase(
+        databaseName: String,
+        allowAssetExtraction: Boolean
     ): RoomBusStopDatabase {
-        val builder = Room.databaseBuilder(context, RoomBusStopDatabase::class.java, databaseName)
+        val builder = Room
+            .databaseBuilder<RoomBusStopDatabase>(context, databaseName)
             .addMigrations(migration1To2)
 
         if (allowAssetExtraction) {

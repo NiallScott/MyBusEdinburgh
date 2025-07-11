@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -42,8 +42,8 @@ import javax.net.SocketFactory
  * @author Niall Scott
  */
 internal class ApiServiceFactory @Inject constructor(
-    @ForInternalApi private val retrofit: Retrofit,
-    @ForInternalApi private val okHttpClient: OkHttpClient
+    @param:ForInternalApi private val retrofit: Retrofit,
+    @param:ForInternalApi private val okHttpClient: OkHttpClient
 ) {
 
     /**

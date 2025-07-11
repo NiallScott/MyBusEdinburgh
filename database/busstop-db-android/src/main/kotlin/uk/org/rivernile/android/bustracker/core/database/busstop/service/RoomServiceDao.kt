@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,14 +38,14 @@ import kotlinx.coroutines.flow.map
  * @author Niall Scott
  */
 @Dao
-internal abstract class RoomServiceDao {
+internal abstract class RoomServiceDao : ServiceDao {
 
     @get:Query("""
         SELECT name, hexColour 
         FROM service 
         ORDER BY CASE WHEN name GLOB '[^0-9.]*' THEN name ELSE cast(name AS int) END
     """)
-    abstract val allServiceNamesWithColourFlow: Flow<List<RoomServiceWithColour>?>
+    abstract override val allServiceNamesWithColourFlow: Flow<List<RoomServiceWithColour>?>
 
     @Query("""
         SELECT name, hexColour 
@@ -57,15 +57,17 @@ internal abstract class RoomServiceDao {
         )
         ORDER BY CASE WHEN name GLOB '[^0-9.]*' THEN name ELSE cast(name AS int) END
     """)
-    abstract fun getServiceNamesWithColourFlow(stopCode: String): Flow<List<RoomServiceWithColour>?>
+    abstract override fun getServiceNamesWithColourFlow(
+        stopCode: String
+    ): Flow<List<RoomServiceWithColour>?>
 
     @get:Query("""
         SELECT COUNT(*) 
         FROM service
     """)
-    abstract val serviceCountFlow: Flow<Int?>
+    abstract override val serviceCountFlow: Flow<Int?>
 
-    fun getColoursForServicesFlow(services: Set<String>?): Flow<Map<String, Int?>?> {
+    override fun getColoursForServicesFlow(services: Set<String>?): Flow<Map<String, Int?>?> {
         val flow = services
             ?.ifEmpty { null }
             ?.let {
@@ -98,7 +100,7 @@ internal abstract class RoomServiceDao {
         )
         ORDER BY CASE WHEN name GLOB '[^0-9.]*' THEN name ELSE cast(name AS int) END
     """)
-    abstract fun getServiceDetailsFlow(stopCode: String): Flow<List<RoomServiceDetails>?>
+    abstract override fun getServiceDetailsFlow(stopCode: String): Flow<List<RoomServiceDetails>?>
 
     @Query("""
         SELECT name, hexColour 

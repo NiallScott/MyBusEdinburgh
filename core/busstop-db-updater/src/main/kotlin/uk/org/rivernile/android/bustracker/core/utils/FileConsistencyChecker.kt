@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,7 +43,7 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 internal class FileConsistencyChecker @Inject constructor(
-    @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher
+    @param:ForIoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) {
 
     /**

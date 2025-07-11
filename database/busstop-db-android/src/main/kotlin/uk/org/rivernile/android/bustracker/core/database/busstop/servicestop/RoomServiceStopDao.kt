@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,7 +37,7 @@ import kotlinx.coroutines.flow.Flow
  * @author Niall Scott
  */
 @Dao
-internal abstract class RoomServiceStopDao {
+internal interface RoomServiceStopDao : ServiceStopDao {
 
     @Query("""
         SELECT serviceName 
@@ -46,7 +46,7 @@ internal abstract class RoomServiceStopDao {
         ORDER BY CASE WHEN serviceName GLOB '[^0-9.]*' THEN 
             serviceName ELSE cast(serviceName AS int) END
     """)
-    abstract fun getServicesForStopFlow(stopCode: String): Flow<List<String>?>
+    override fun getServicesForStopFlow(stopCode: String): Flow<List<String>?>
 
     @Query("""
         SELECT stopCode, serviceName
@@ -55,7 +55,7 @@ internal abstract class RoomServiceStopDao {
         ORDER BY stopCode ASC, 
             CASE WHEN serviceName GLOB '[^0-9.]*' THEN serviceName ELSE cast(serviceName AS int) END
     """)
-    abstract fun getServicesForStopsFlow(
+    override fun getServicesForStopsFlow(
         stopCodes: Set<String>
     ): Flow<Map<
             @MapColumn(columnName = "stopCode") String,

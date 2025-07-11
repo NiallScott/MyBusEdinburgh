@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,7 +36,7 @@ import kotlinx.coroutines.flow.Flow
  * @author Niall Scott
  */
 @Dao
-internal abstract class RoomDatabaseDao {
+internal interface RoomDatabaseDao : DatabaseDao {
 
     @get:Query("""
         SELECT topologyId 
@@ -44,7 +44,7 @@ internal abstract class RoomDatabaseDao {
         ORDER BY updateTimestamp DESC 
         LIMIT 1
     """)
-    abstract val topologyIdFlow: Flow<String?>
+    override val topologyIdFlow: Flow<String?>
 
     @get:Query("""
         SELECT updateTimestamp, topologyId 
@@ -52,5 +52,5 @@ internal abstract class RoomDatabaseDao {
         ORDER BY updateTimestamp DESC 
         LIMIT 1
     """)
-    abstract val databaseMetadataFlow: Flow<RoomDatabaseMetadata?>
+    override val databaseMetadataFlow: Flow<RoomDatabaseMetadata?>
 }

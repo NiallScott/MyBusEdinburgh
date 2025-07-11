@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,9 +36,9 @@ import kotlinx.coroutines.flow.Flow
  * @author Niall Scott
  */
 @Dao
-internal abstract class RoomServicePointDao {
+internal abstract class RoomServicePointDao : ServicePointDao {
 
-    fun getServicePointsFlow(serviceNames: Set<String>?): Flow<List<ServicePoint>?> {
+    override fun getServicePointsFlow(serviceNames: Set<String>?): Flow<List<ServicePoint>?> {
         return serviceNames
             ?.ifEmpty { null }
             ?.let {

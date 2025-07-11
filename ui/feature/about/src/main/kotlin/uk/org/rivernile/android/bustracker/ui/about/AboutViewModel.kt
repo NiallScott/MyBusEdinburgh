@@ -53,7 +53,7 @@ import javax.inject.Inject
 internal class AboutViewModel @Inject constructor(
     private val state: AboutViewModelState,
     private val aboutItemsGenerator: AboutItemsGenerator,
-    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
+    @param:ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
     @ForViewModelCoroutineScope viewModelCoroutineScope: CoroutineScope
 ) : ViewModel(viewModelCoroutineScope) {
 

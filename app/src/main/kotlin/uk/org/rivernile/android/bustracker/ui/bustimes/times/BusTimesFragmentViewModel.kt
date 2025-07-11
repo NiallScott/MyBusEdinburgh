@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -81,8 +81,9 @@ class BusTimesFragmentViewModel @Inject constructor(
     private val refreshController: RefreshController,
     private val preferenceRepository: PreferenceRepository,
     connectivityRepository: ConnectivityRepository,
-    @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
-    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
+    @param:ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
+    @param:ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
+) : ViewModel() {
 
     companion object {
 

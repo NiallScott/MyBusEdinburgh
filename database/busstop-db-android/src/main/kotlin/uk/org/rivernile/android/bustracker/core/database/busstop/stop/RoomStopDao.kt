@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,7 +37,7 @@ import kotlinx.coroutines.flow.Flow
  * @author Niall Scott
  */
 @Dao
-internal abstract class RoomStopDao {
+internal abstract class RoomStopDao : StopDao {
 
     @Query("""
         SELECT stopName AS name, locality 
@@ -45,7 +45,7 @@ internal abstract class RoomStopDao {
         WHERE stopCode = :stopCode 
         LIMIT 1
     """)
-    abstract fun getNameForStopFlow(stopCode: String): Flow<RoomStopName?>
+    abstract override fun getNameForStopFlow(stopCode: String): Flow<RoomStopName?>
 
     @Query("""
         SELECT latitude, longitude 
@@ -55,7 +55,7 @@ internal abstract class RoomStopDao {
         AND longitude NOT NULL 
         LIMIT 1
     """)
-    abstract fun getLocationForStopFlow(stopCode: String): Flow<RoomStopLocation?>
+    abstract override fun getLocationForStopFlow(stopCode: String): Flow<RoomStopLocation?>
 
     @Query("""
         SELECT stopCode, stopName AS name, locality, latitude, longitude, orientation 
@@ -65,7 +65,7 @@ internal abstract class RoomStopDao {
         AND longitude NOT NULL 
         LIMIT 1
     """)
-    abstract fun getStopDetailsFlow(stopCode: String): Flow<RoomStopDetails?>
+    abstract override fun getStopDetailsFlow(stopCode: String): Flow<RoomStopDetails?>
 
     @Query("""
         SELECT stopCode, stopName AS name, locality, latitude, longitude, orientation 
@@ -74,11 +74,11 @@ internal abstract class RoomStopDao {
         AND latitude NOT NULL 
         AND longitude NOT NULL 
     """)
-    abstract fun getStopDetailsFlow(
+    abstract override fun getStopDetailsFlow(
         stopCodes: Set<String>
     ): Flow<Map<@MapColumn(columnName = "stopCode") String, RoomStopDetails>?>
 
-    fun getStopDetailsWithServiceFilterFlow(
+    override fun getStopDetailsWithServiceFilterFlow(
         serviceFilter: Set<String>?
     ): Flow<List<StopDetails>?> {
         return serviceFilter
@@ -104,7 +104,7 @@ internal abstract class RoomStopDao {
         WHERE (latitude BETWEEN :minLatitude AND :maxLatitude) 
         AND (longitude BETWEEN :minLongitude AND :maxLongitude)
     """)
-    abstract fun getStopDetailsWithinSpanFlow(
+    abstract override fun getStopDetailsWithinSpanFlow(
         minLatitude: Double,
         minLongitude: Double,
         maxLatitude: Double,
@@ -131,7 +131,7 @@ internal abstract class RoomStopDao {
             WHERE serviceName IN (:serviceFilter)
         )
     """)
-    abstract fun getStopDetailsWithinSpanFlow(
+    abstract override fun getStopDetailsWithinSpanFlow(
         minLatitude: Double,
         minLongitude: Double,
         maxLatitude: Double,
@@ -155,7 +155,7 @@ internal abstract class RoomStopDao {
         OR stopName LIKE '%' || :searchTerm || '%' 
         OR locality LIKE '%' || :searchTerm || '%'
     """)
-    abstract fun getStopSearchResultsFlow(searchTerm: String): Flow<List<RoomStopSearchResult>?>
+    abstract override fun getStopSearchResultsFlow(searchTerm: String): Flow<List<RoomStopSearchResult>?>
 
     @get:Query("""
         SELECT stopCode, stopName AS name, locality, latitude, longitude, orientation 

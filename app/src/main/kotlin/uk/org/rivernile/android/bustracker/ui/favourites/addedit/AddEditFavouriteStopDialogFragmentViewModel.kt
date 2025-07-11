@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -69,9 +69,9 @@ class AddEditFavouriteStopDialogFragmentViewModel @Inject constructor(
     private val favouritesRepository: FavouritesRepository,
     private val fetcher: FavouriteStopFetcher,
     private val textFormattingUtils: TextFormattingUtils,
-    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
-    @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope)
-    : ViewModel() {
+    @param:ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
+    @param:ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope
+) : ViewModel() {
 
     companion object {
 

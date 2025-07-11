@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,74 +29,82 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.database
 import app.cash.turbine.test
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopDatabase
+import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabase
+import uk.org.rivernile.android.bustracker.core.database.busstop.FakeBusStopDatabase
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * Tests for [ProxyDatabaseDao].
  *
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner::class)
 class ProxyDatabaseDaoTest {
-
-    @Mock
-    private lateinit var database: AndroidBusStopDatabase
-
-    @Mock
-    private lateinit var roomDatabaseDao: RoomDatabaseDao
-
-    private lateinit var dao: ProxyDatabaseDao
-
-    @BeforeTest
-    fun setUp() {
-        dao = ProxyDatabaseDao(database)
-
-        whenever(database.roomDatabaseDao)
-            .thenReturn(roomDatabaseDao)
-    }
 
     @Test
     fun topologyIdFlowRespondsToDatabaseOpenStatus() = runTest {
-        whenever(database.isDatabaseOpenFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, true, false, true))
-        whenever(roomDatabaseDao.topologyIdFlow)
-            .thenReturn(
+        val flows = ArrayDeque(
+            listOf(
                 flowOf("first"),
                 flowOf("second")
             )
+        )
+        val dao = createProxyDatabaseDao(
+            database = FakeBusStopDatabase(
+                onDatabaseDao = {
+                    FakeDatabaseDao(
+                        onTopologyIdFlow = { flows.removeFirst() }
+                    )
+                },
+                onIsDatabaseOpenFlow = { intervalFlowOf(0L, 10L, true, false, true) }
+            )
+        )
 
         dao.topologyIdFlow.test {
             assertEquals("first", awaitItem())
             assertEquals("second", awaitItem())
             awaitComplete()
         }
+        assertTrue(flows.isEmpty())
     }
 
     @Test
     fun databaseMetadataFlowRespondsToDatabaseOpenStatus() = runTest {
-        val first = mock<RoomDatabaseMetadata>()
-        val second = mock<RoomDatabaseMetadata>()
-        whenever(database.isDatabaseOpenFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, true, false, true))
-        whenever(roomDatabaseDao.databaseMetadataFlow)
-            .thenReturn(
-                flowOf(first),
-                flowOf(second)
+        val first = FakeDatabaseMetadata(
+            updateTimestamp = 1L,
+            topologyVersionId = "a"
+        )
+        val second = FakeDatabaseMetadata(
+            updateTimestamp = 2L,
+            topologyVersionId = "b"
+        )
+        val databaseMetadatas = ArrayDeque(listOf(first, second))
+        val dao = createProxyDatabaseDao(
+            database = FakeBusStopDatabase(
+                onDatabaseDao = {
+                    FakeDatabaseDao(
+                        onDatabaseMetadataFlow = {
+                            flowOf(databaseMetadatas.removeFirst())
+                        }
+                    )
+                },
+                onIsDatabaseOpenFlow = { intervalFlowOf(0L, 10L, true, false, true) }
             )
+        )
 
         dao.databaseMetadataFlow.test {
             assertEquals(first, awaitItem())
             assertEquals(second, awaitItem())
             awaitComplete()
         }
+        assertTrue(databaseMetadatas.isEmpty())
+    }
+
+    private fun createProxyDatabaseDao(
+        database: BusStopDatabase = FakeBusStopDatabase()
+    ): ProxyDatabaseDao {
+        return ProxyDatabaseDao(database = database)
     }
 }

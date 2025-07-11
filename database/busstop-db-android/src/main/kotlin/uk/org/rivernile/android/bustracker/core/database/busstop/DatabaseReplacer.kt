@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,41 +24,23 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
-}
+package uk.org.rivernile.android.bustracker.core.database.busstop
 
-android {
-    namespace = "uk.org.rivernile.android.bustracker.core.connectivity"
+/**
+ * This supports replacing the database with a new database file.
+ *
+ * @author Niall Scott
+ */
+internal interface DatabaseReplacer {
 
-    defaultConfig {
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-
-        debug {
-            enableUnitTestCoverage = true
-            enableAndroidTestCoverage = true
-        }
-    }
-}
-
-dependencies {
-
-    api(project(":core:connectivity"))
-    implementation(project(":core:coroutines"))
-
-    // Hilt (dependency injection)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
-
-    // Testing dependencies
-    androidTestImplementation(libs.androidx.test.runner)
+    /**
+     * Given a [newDatabaseFile], attempt to replace the existing database with this file. If the
+     * new database does not pass some internal checks, the operation will fail and the existing
+     * database will continue to be used.
+     *
+     * @param newDatabaseFile The new database file. This is assumed to already be in the database
+     * directory.
+     * @return `true` if the database was replaced, `false` if not.
+     */
+    suspend fun replaceDatabase(newDatabaseFile: BusStopDatabaseFile): Boolean
 }

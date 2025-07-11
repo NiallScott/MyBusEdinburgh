@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -64,7 +64,7 @@ interface ConnectivityRepository {
 @Singleton
 internal class RealConnectivityRepository @Inject constructor(
     private val connectivityChecker: ConnectivityChecker,
-    @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope
+    @param:ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope
 ) : ConnectivityRepository {
 
     /**

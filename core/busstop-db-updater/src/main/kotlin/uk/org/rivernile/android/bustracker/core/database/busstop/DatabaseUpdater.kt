@@ -63,7 +63,7 @@ internal class RealDatabaseUpdater @Inject constructor(
     private val fileConsistencyChecker: FileConsistencyChecker,
     private val databaseRepository: BusStopDatabaseRepository,
     private val exceptionLogger: ExceptionLogger,
-    @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher
+    @param:ForIoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : DatabaseUpdater {
 
     override suspend fun updateDatabase(

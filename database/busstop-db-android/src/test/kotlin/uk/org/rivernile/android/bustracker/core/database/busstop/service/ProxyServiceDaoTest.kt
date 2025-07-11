@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,132 +29,203 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.service
 import app.cash.turbine.test
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopDatabase
+import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabase
+import uk.org.rivernile.android.bustracker.core.database.busstop.FakeBusStopDatabase
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /**
  * Tests for [ProxyServiceDao].
  *
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner::class)
 class ProxyServiceDaoTest {
-
-    @Mock
-    private lateinit var database: AndroidBusStopDatabase
-
-    @Mock
-    private lateinit var roomServiceDao: RoomServiceDao
-
-    private lateinit var dao: ProxyServiceDao
-
-    @BeforeTest
-    fun setUp() {
-        dao = ProxyServiceDao(database)
-
-        whenever(database.roomServiceDao)
-            .thenReturn(roomServiceDao)
-    }
 
     @Test
     fun allServiceNamesWithColourFlowRespondsToDatabaseOpenStatus() = runTest {
-        val first = mock<List<RoomServiceWithColour>>()
-        val second = mock<List<RoomServiceWithColour>>()
-        whenever(database.isDatabaseOpenFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, true, false, true))
-        whenever(roomServiceDao.allServiceNamesWithColourFlow)
-            .thenReturn(
+        val first = listOf(
+            FakeServiceWithColour(
+                name = "1",
+                colour = 100
+            )
+        )
+        val second = listOf(
+            FakeServiceWithColour(
+                name = "2",
+                colour = 200
+            )
+        )
+        val flows = ArrayDeque(
+            listOf(
                 flowOf(first),
                 flowOf(second)
             )
+        )
+        val dao = createProxyServiceDao(
+            database = FakeBusStopDatabase(
+                onServiceDao = {
+                    FakeServiceDao(
+                        onAllServiceNamesWithColourFlow = { flows.removeFirst() }
+                    )
+                },
+                onIsDatabaseOpenFlow = { intervalFlowOf(0L, 10L, true, false, true) }
+            )
+        )
 
         dao.allServiceNamesWithColourFlow.test {
             assertEquals(first, awaitItem())
             assertEquals(second, awaitItem())
             awaitComplete()
         }
+        assertTrue(flows.isEmpty())
     }
 
     @Test
     fun getServiceNamesWithColourFlowRespondsToDatabaseOpenStatus() = runTest {
-        val first = mock<List<RoomServiceWithColour>>()
-        val second = mock<List<RoomServiceWithColour>>()
-        whenever(database.isDatabaseOpenFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, true, false, true))
-        whenever(roomServiceDao.getServiceNamesWithColourFlow("123456"))
-            .thenReturn(
+        val first = listOf(
+            FakeServiceWithColour(
+                name = "1",
+                colour = 100
+            )
+        )
+        val second = listOf(
+            FakeServiceWithColour(
+                name = "2",
+                colour = 200
+            )
+        )
+        val flows = ArrayDeque(
+            listOf(
                 flowOf(first),
                 flowOf(second)
             )
+        )
+        val dao = createProxyServiceDao(
+            database = FakeBusStopDatabase(
+                onServiceDao = {
+                    FakeServiceDao(
+                        onGetServiceNamesWithColourFlow = {
+                            assertEquals("123456", it)
+                            flows.removeFirst()
+                        }
+                    )
+                },
+                onIsDatabaseOpenFlow = { intervalFlowOf(0L, 10L, true, false, true) }
+            )
+        )
 
         dao.getServiceNamesWithColourFlow("123456").test {
             assertEquals(first, awaitItem())
             assertEquals(second, awaitItem())
             awaitComplete()
         }
+        assertTrue(flows.isEmpty())
     }
 
     @Test
     fun serviceCountFlowRespondsToDatabaseOpenStatus() = runTest {
-        whenever(database.isDatabaseOpenFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, true, false, true))
-        whenever(roomServiceDao.serviceCountFlow)
-            .thenReturn(
-                flowOf(0),
-                flowOf(10)
+        val flows = ArrayDeque(listOf(flowOf(0), flowOf(10)))
+        val dao = createProxyServiceDao(
+            database = FakeBusStopDatabase(
+                onServiceDao = {
+                    FakeServiceDao(
+                        onServiceCountFlow = { flows.removeFirst() }
+                    )
+                },
+                onIsDatabaseOpenFlow = { intervalFlowOf(0L, 10L, true, false, true) }
             )
+        )
 
         dao.serviceCountFlow.test {
             assertEquals(0, awaitItem())
             assertEquals(10, awaitItem())
             awaitComplete()
         }
+        assertTrue(flows.isEmpty())
     }
 
     @Test
     fun getColoursForServicesFlowRespondsToDatabaseOpenStatus() = runTest {
-        val first = mock<Map<String, Int>>()
-        val second = mock<Map<String, Int>>()
-        whenever(database.isDatabaseOpenFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, true, false, true))
-        whenever(roomServiceDao.getColoursForServicesFlow(anyOrNull()))
-            .thenReturn(
+        val first = mapOf("1" to 100)
+        val second = mapOf("2" to 200)
+        val flows = ArrayDeque(
+            listOf(
                 flowOf(first),
                 flowOf(second)
             )
+        )
+        val dao = createProxyServiceDao(
+            database = FakeBusStopDatabase(
+                onServiceDao = {
+                    FakeServiceDao(
+                        onGetColoursForServicesFlow = {
+                            assertNull(it)
+                            flows.removeFirst()
+                        }
+                    )
+                },
+                onIsDatabaseOpenFlow = { intervalFlowOf(0L, 10L, true, false, true) }
+            )
+        )
 
         dao.getColoursForServicesFlow(null).test {
             assertEquals(first, awaitItem())
             assertEquals(second, awaitItem())
             awaitComplete()
         }
+        assertTrue(flows.isEmpty())
     }
 
     @Test
     fun getServiceDetailsFlowRespondsToDatabaseOpenStatus() = runTest {
-        val first = mock<List<RoomServiceDetails>>()
-        val second = mock<List<RoomServiceDetails>>()
-        whenever(database.isDatabaseOpenFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, true, false, true))
-        whenever(roomServiceDao.getServiceDetailsFlow("123456"))
-            .thenReturn(
+        val first = listOf(
+            FakeServiceDetails(
+                name = "1",
+                description = "Description 1",
+                colour = 100
+            )
+        )
+        val second = listOf(
+            FakeServiceDetails(
+                name = "2",
+                description = "Description 2",
+                colour = 200
+            )
+        )
+        val flows = ArrayDeque(
+            listOf(
                 flowOf(first),
                 flowOf(second)
             )
+        )
+        val dao = createProxyServiceDao(
+            database = FakeBusStopDatabase(
+                onServiceDao = {
+                    FakeServiceDao(
+                        onGetServiceDetailsFlow = {
+                            assertEquals("123456", it)
+                            flows.removeFirst()
+                        }
+                    )
+                },
+                onIsDatabaseOpenFlow = { intervalFlowOf(0L, 10L, true, false, true) }
+            )
+        )
 
         dao.getServiceDetailsFlow("123456").test {
             assertEquals(first, awaitItem())
             assertEquals(second, awaitItem())
             awaitComplete()
         }
+        assertTrue(flows.isEmpty())
+    }
+
+    private fun createProxyServiceDao(
+        database: BusStopDatabase = FakeBusStopDatabase()
+    ): ProxyServiceDao {
+        return ProxyServiceDao(database = database)
     }
 }

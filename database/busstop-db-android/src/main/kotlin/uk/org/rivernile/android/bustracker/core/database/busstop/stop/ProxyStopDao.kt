@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,10 +26,10 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopDatabase
+import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabase
+import uk.org.rivernile.android.bustracker.core.database.busstop.withFlowIfDatabaseIsOpenOrEmptyFlow
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * The proxy implementation of [StopDao] which responds to the database opening/closing and
@@ -38,113 +38,68 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopD
  * @param database A reference to the database.
  * @author Niall Scott
  */
-internal class ProxyStopDao(
-    private val database: AndroidBusStopDatabase
+@Singleton
+internal class ProxyStopDao @Inject constructor(
+    private val database: BusStopDatabase
 ) : StopDao {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getNameForStopFlow(stopCode: String) =
-        database.isDatabaseOpenFlow
-            .flatMapLatest {
-                if (it) {
-                    database.roomStopDao.getNameForStopFlow(stopCode)
-                } else {
-                    emptyFlow()
-                }
-            }
+    override fun getNameForStopFlow(stopCode: String) = database
+        .withFlowIfDatabaseIsOpenOrEmptyFlow {
+            stopDao.getNameForStopFlow(stopCode)
+        }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getLocationForStopFlow(stopCode: String) =
-        database.isDatabaseOpenFlow
-            .flatMapLatest {
-                if (it) {
-                    database.roomStopDao.getLocationForStopFlow(stopCode)
-                } else {
-                    emptyFlow()
-                }
-            }
+    override fun getLocationForStopFlow(stopCode: String) = database
+        .withFlowIfDatabaseIsOpenOrEmptyFlow {
+            stopDao.getLocationForStopFlow(stopCode)
+        }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getStopDetailsFlow(stopCode: String) =
-        database.isDatabaseOpenFlow
-            .flatMapLatest {
-                if (it) {
-                    database.roomStopDao.getStopDetailsFlow(stopCode)
-                } else {
-                    emptyFlow()
-                }
-            }
+    override fun getStopDetailsFlow(stopCode: String) = database
+        .withFlowIfDatabaseIsOpenOrEmptyFlow {
+            stopDao.getStopDetailsFlow(stopCode)
+        }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getStopDetailsFlow(stopCodes: Set<String>) =
-        database.isDatabaseOpenFlow
-            .flatMapLatest {
-                if (it) {
-                    database.roomStopDao.getStopDetailsFlow(stopCodes)
-                } else {
-                    emptyFlow()
-                }
-            }
+    override fun getStopDetailsFlow(stopCodes: Set<String>) = database
+        .withFlowIfDatabaseIsOpenOrEmptyFlow {
+            stopDao.getStopDetailsFlow(stopCodes)
+        }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getStopDetailsWithServiceFilterFlow(serviceFilter: Set<String>?) =
-        database.isDatabaseOpenFlow
-            .flatMapLatest {
-                if (it) {
-                    database.roomStopDao.getStopDetailsWithServiceFilterFlow(serviceFilter)
-                } else {
-                    emptyFlow()
-                }
-            }
+    override fun getStopDetailsWithServiceFilterFlow(serviceFilter: Set<String>?) = database
+        .withFlowIfDatabaseIsOpenOrEmptyFlow {
+            stopDao.getStopDetailsWithServiceFilterFlow(serviceFilter)
+        }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getStopDetailsWithinSpanFlow(
         minLatitude: Double,
         minLongitude: Double,
         maxLatitude: Double,
         maxLongitude: Double
-    ) =
-        database.isDatabaseOpenFlow
-            .flatMapLatest {
-                if (it) {
-                    database.roomStopDao.getStopDetailsWithinSpanFlow(
-                        minLatitude,
-                        minLongitude, maxLatitude, maxLongitude)
-                } else {
-                    emptyFlow()
-                }
-            }
+    ) = database.withFlowIfDatabaseIsOpenOrEmptyFlow {
+        stopDao.getStopDetailsWithinSpanFlow(
+            minLatitude = minLatitude,
+            minLongitude = minLongitude,
+            maxLatitude = maxLatitude,
+            maxLongitude = maxLongitude
+        )
+    }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getStopDetailsWithinSpanFlow(
         minLatitude: Double,
         minLongitude: Double,
         maxLatitude: Double,
         maxLongitude: Double,
         serviceFilter: Set<String>
-    ) =
-        database.isDatabaseOpenFlow
-            .flatMapLatest {
-                if (it) {
-                    database.roomStopDao.getStopDetailsWithinSpanFlow(
-                        minLatitude,
-                        minLongitude,
-                        maxLatitude,
-                        maxLongitude,
-                        serviceFilter)
-                } else {
-                    emptyFlow()
-                }
-            }
+    ) = database.withFlowIfDatabaseIsOpenOrEmptyFlow {
+        stopDao.getStopDetailsWithinSpanFlow(
+            minLatitude = minLatitude,
+            minLongitude = minLongitude,
+            maxLatitude = maxLatitude,
+            maxLongitude = maxLongitude,
+            serviceFilter = serviceFilter
+        )
+    }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getStopSearchResultsFlow(searchTerm: String) =
-        database.isDatabaseOpenFlow
-            .flatMapLatest {
-                if (it) {
-                    database.roomStopDao.getStopSearchResultsFlow(searchTerm)
-                } else {
-                    emptyFlow()
-                }
-            }
+    override fun getStopSearchResultsFlow(searchTerm: String) = database
+        .withFlowIfDatabaseIsOpenOrEmptyFlow {
+            stopDao.getStopSearchResultsFlow(searchTerm)
+        }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,7 +45,7 @@ private const val HEADER_USER_AGENT = "User-Agent"
  */
 internal class UserAgentInterceptor @Inject constructor(
     private val appRepository: AppRepository,
-    @ForUserAgentAppName private val userAgentAppName: String
+    @param:ForUserAgentAppName private val userAgentAppName: String
 ) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {

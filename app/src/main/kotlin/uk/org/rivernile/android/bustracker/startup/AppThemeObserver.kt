@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -66,9 +66,10 @@ sealed interface AppThemeObserver {
  */
 class LegacyAppThemeObserver @Inject constructor(
     private val preferenceRepository: PreferenceRepository,
-    @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
-    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
-    @ForMainDispatcher private val mainDispatcher: CoroutineDispatcher) : AppThemeObserver {
+    @param:ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
+    @param:ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
+    @param:ForMainDispatcher private val mainDispatcher: CoroutineDispatcher
+) : AppThemeObserver {
 
     override fun observeAppTheme() {
         applicationCoroutineScope.launch(mainDispatcher) {
@@ -111,9 +112,10 @@ class LegacyAppThemeObserver @Inject constructor(
 class V31AppThemeObserver @Inject constructor(
     private val uiModeManager: UiModeManager,
     private val preferenceRepository: PreferenceRepository,
-    @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
-    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
-    @ForMainDispatcher private val mainDispatcher: CoroutineDispatcher) : AppThemeObserver {
+    @param:ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
+    @param:ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
+    @param:ForMainDispatcher private val mainDispatcher: CoroutineDispatcher
+) : AppThemeObserver {
 
     override fun observeAppTheme() {
         applicationCoroutineScope.launch(mainDispatcher) {

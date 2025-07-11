@@ -59,7 +59,7 @@ internal interface ServiceUpdatesFetcher : Refreshable, AutoCloseable {
 @ViewModelScoped
 internal class RealServiceUpdatesFetcher @Inject constructor(
     private val serviceUpdateRepository: ServiceUpdateRepository,
-    @ForViewModelCoroutineScope private val viewModelCoroutineScope: CoroutineScope
+    @param:ForViewModelCoroutineScope private val viewModelCoroutineScope: CoroutineScope
 ) : ServiceUpdatesFetcher {
 
     private val refreshChannel = Channel<Unit>(capacity = 1).apply { trySend(Unit) }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -64,7 +64,7 @@ class DatabaseOpenerTest {
 
     @Test(expected = IOException::class)
     fun createOpenHelperThrowsIoExceptionWhenDatabaseFileDoesNotExist() {
-        val databaseFile = context.getDatabasePath(DB_NAME)
+        val databaseFile = context.getDatabasePath(DB_NAME).toBusStopDatabaseFile()
 
         assertFalse(databaseFile.exists())
         opener.createOpenHelper(databaseFile).readableDatabase.close()
@@ -72,23 +72,31 @@ class DatabaseOpenerTest {
 
     @Test(expected = IOException::class)
     fun createOpenHelperThrowsIoExceptionWhenDatabaseFileIsEmpty() {
-        val databaseFile = context.getDatabasePath(DB_NAME)
-        databaseFile.createNewFile()
+        val databaseFile = context
+            .getDatabasePath(DB_NAME)
+            .apply {
+                createNewFile()
+            }
+            .toBusStopDatabaseFile()
 
         opener.createOpenHelper(databaseFile).readableDatabase.close()
     }
 
     @Test(expected = IOException::class)
     fun createOpenHelperThrowsIoExceptionWhenDatabaseFileIsCorrupt() {
-        val databaseFile = context.getDatabasePath(DB_NAME)
-        databaseFile.writeText("This is not a valid file")
+        val databaseFile = context
+            .getDatabasePath(DB_NAME)
+            .apply {
+                writeText("This is not a valid file")
+            }
+            .toBusStopDatabaseFile()
 
         opener.createOpenHelper(databaseFile).readableDatabase.close()
     }
 
     @Test
     fun createOpenHelperSetsTheDatabaseVersionTo1WhenNoVersionWasFound() {
-        val databaseFile = context.getDatabasePath(DB_NAME)
+        val databaseFile = context.getDatabasePath(DB_NAME).toBusStopDatabaseFile()
         SQLiteDatabase
             .openDatabase(
                 databaseFile.absolutePath,
@@ -106,7 +114,7 @@ class DatabaseOpenerTest {
 
     @Test
     fun createOpenHelperSetsTheDatabaseVersionTo1WhenVersionIs0() {
-        val databaseFile = context.getDatabasePath(DB_NAME)
+        val databaseFile = context.getDatabasePath(DB_NAME).toBusStopDatabaseFile()
         SQLiteDatabase
             .openDatabase(
                 databaseFile.absolutePath,
@@ -126,7 +134,7 @@ class DatabaseOpenerTest {
 
     @Test
     fun createOpenHelperLeavesTheDatabaseVersionAt1WhenTheVersionIsAlready1() {
-        val databaseFile = context.getDatabasePath(DB_NAME)
+        val databaseFile = context.getDatabasePath(DB_NAME).toBusStopDatabaseFile()
         SQLiteDatabase
             .openDatabase(
                 databaseFile.absolutePath,
@@ -146,7 +154,7 @@ class DatabaseOpenerTest {
 
     @Test
     fun createOpenHelperLeavesTheDatabaseVersionAt2WhenTheVersionIs2() {
-        val databaseFile = context.getDatabasePath(DB_NAME)
+        val databaseFile = context.getDatabasePath(DB_NAME).toBusStopDatabaseFile()
         SQLiteDatabase
             .openDatabase(
                 databaseFile.absolutePath,

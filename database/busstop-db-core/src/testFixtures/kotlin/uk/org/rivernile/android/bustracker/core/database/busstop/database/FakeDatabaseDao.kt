@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,41 +24,22 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
-}
+package uk.org.rivernile.android.bustracker.core.database.busstop.database
 
-android {
-    namespace = "uk.org.rivernile.android.bustracker.core.connectivity"
+import kotlinx.coroutines.flow.Flow
 
-    defaultConfig {
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
+/**
+ * A fake [DatabaseDao] for testing.
+ *
+ * @author Niall Scott
+ */
+class FakeDatabaseDao(
+    private val onTopologyIdFlow: () -> Flow<String?> = { throw NotImplementedError() },
+    private val onDatabaseMetadataFlow: () -> Flow<DatabaseMetadata?> =
+        { throw NotImplementedError() }
+) : DatabaseDao {
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
+    override val topologyIdFlow get() = onTopologyIdFlow()
 
-        debug {
-            enableUnitTestCoverage = true
-            enableAndroidTestCoverage = true
-        }
-    }
-}
-
-dependencies {
-
-    api(project(":core:connectivity"))
-    implementation(project(":core:coroutines"))
-
-    // Hilt (dependency injection)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
-
-    // Testing dependencies
-    androidTestImplementation(libs.androidx.test.runner)
+    override val databaseMetadataFlow get() = onDatabaseMetadataFlow()
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,33 +26,44 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
-import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseMetadata
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
+import java.io.FileInputStream
 
 /**
- * This class represents an Android-specific implementation of the bus stop database repository.
+ * A fake [BusStopDatabaseFile] for testing.
  *
- * @param databaseReplacer An implementation which replaces the database.
- * @param databaseDao The DAO for accessing database information.
  * @author Niall Scott
  */
-@Singleton
-internal class AndroidBusStopDatabaseRepository @Inject constructor(
-    private val databaseReplacer: DatabaseReplacer,
-    private val databaseDao: DatabaseDao
-) : BusStopDatabaseRepository {
+internal class FakeBusStopDatabaseFile(
+    val name: String,
+    private val onAbsolutePath: () -> String = { throw NotImplementedError() },
+    private val onDelete: () -> Boolean = { throw NotImplementedError() },
+    private val onExists: () -> Boolean = { throw NotImplementedError() },
+    private val onInputStream: () -> FileInputStream = { throw NotImplementedError() },
+    private val onRenameTo: (File) -> Boolean = { throw NotImplementedError() }
+) : BusStopDatabaseFile {
 
-    override suspend fun replaceDatabase(newDatabase: File) =
-        databaseReplacer.replaceDatabase(newDatabase.toBusStopDatabaseFile())
+    override val absolutePath get() = onAbsolutePath()
 
-    override val databaseMetadataFlow: Flow<DatabaseMetadata?> get() =
-        databaseDao.databaseMetadataFlow
+    override fun delete() = onDelete()
 
-    override suspend fun getTopologyVersionId() =
-        databaseDao.topologyIdFlow.first()
+    override fun exists() = onExists()
+
+    override fun inputStream() = onInputStream()
+
+    override fun renameTo(destination: File) = onRenameTo(destination)
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+
+        if (other !is FakeBusStopDatabaseFile) {
+            return false
+        }
+
+        return name == other.name
+    }
+
+    override fun hashCode() = name.hashCode()
 }

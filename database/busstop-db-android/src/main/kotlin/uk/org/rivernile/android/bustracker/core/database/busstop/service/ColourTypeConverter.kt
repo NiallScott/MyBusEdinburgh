@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,8 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.service
 
-import android.graphics.Color
 import androidx.room.TypeConverter
+import androidx.core.graphics.toColorInt
 
 /**
  * This [TypeConverter] is used to convert colours in the database (stored in hex representation) in
@@ -51,7 +51,7 @@ internal class ColourTypeConverter {
             ?.ifBlank { null }
             ?.let {
                 try {
-                    Color.parseColor(it)
+                    it.toColorInt()
                 } catch (e: IllegalArgumentException) {
                     null
                 }

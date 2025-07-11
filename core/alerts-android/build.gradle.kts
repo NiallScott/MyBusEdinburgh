@@ -27,7 +27,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
 }
 
@@ -36,7 +36,6 @@ android {
 
     defaultConfig {
         testInstrumentationRunner = "uk.org.rivernile.android.bustracker.core.alerts.AlertsTestRunner"
-        consumerProguardFiles += file("proguard-consumer-rules.pro")
     }
 
     buildTypes {
@@ -70,7 +69,7 @@ dependencies {
 
     // Hilt (dependency injection)
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
+    ksp(libs.hilt.compiler)
 
     // Play Services
     implementation(libs.play.services.location)

@@ -26,8 +26,8 @@
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ksp)
     `java-test-fixtures`
 }
 
@@ -45,7 +45,7 @@ dependencies {
 
     // Dagger 2
     implementation(libs.dagger.core)
-    kapt(libs.dagger.compiler)
+    ksp(libs.dagger.compiler)
 
     // Retrofit
     implementation(libs.retrofit)

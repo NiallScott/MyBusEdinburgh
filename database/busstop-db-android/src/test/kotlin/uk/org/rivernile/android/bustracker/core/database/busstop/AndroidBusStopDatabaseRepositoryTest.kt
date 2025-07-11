@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,15 +29,10 @@ package uk.org.rivernile.android.bustracker.core.database.busstop
 import app.cash.turbine.test
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseMetadata
+import uk.org.rivernile.android.bustracker.core.database.busstop.database.FakeDatabaseDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.database.FakeDatabaseMetadata
 import java.io.File
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -48,29 +43,19 @@ import kotlin.test.assertTrue
  *
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner::class)
 class AndroidBusStopDatabaseRepositoryTest {
-
-    @Mock
-    private lateinit var database: AndroidBusStopDatabase
-    @Mock
-    private lateinit var databaseDao: DatabaseDao
-
-    private lateinit var repository: AndroidBusStopDatabaseRepository
-
-    @BeforeTest
-    fun setUp() {
-        repository = AndroidBusStopDatabaseRepository(
-            database,
-            databaseDao
-        )
-    }
 
     @Test
     fun replaceDatabaseReturnsFalseWhenReplaceDatabaseReturnsFalse() = runTest {
         val fakeFile = File("/fake/file/path.db")
-        whenever(repository.replaceDatabase(fakeFile))
-            .thenReturn(false)
+        val repository = createRepository(
+            databaseReplacer = FakeDatabaseReplacer(
+                onReplaceDatabase = {
+                    assertEquals(fakeFile.toBusStopDatabaseFile(), it)
+                    false
+                }
+            )
+        )
 
         val result = repository.replaceDatabase(fakeFile)
 
@@ -80,8 +65,14 @@ class AndroidBusStopDatabaseRepositoryTest {
     @Test
     fun replaceDatabaseReturnsTrueWhenReplaceDatabaseReturnsTrue() = runTest {
         val fakeFile = File("/fake/file/path.db")
-        whenever(repository.replaceDatabase(fakeFile))
-            .thenReturn(true)
+        val repository = createRepository(
+            databaseReplacer = FakeDatabaseReplacer(
+                onReplaceDatabase = {
+                    assertEquals(fakeFile.toBusStopDatabaseFile(), it)
+                    true
+                }
+            )
+        )
 
         val result = repository.replaceDatabase(fakeFile)
 
@@ -90,9 +81,15 @@ class AndroidBusStopDatabaseRepositoryTest {
 
     @Test
     fun databaseMetadataFlowReturnsFlowFromDatabaseInformationDao() = runTest {
-        val databaseMetadata = mock<DatabaseMetadata>()
-        whenever(databaseDao.databaseMetadataFlow)
-            .thenReturn(flowOf(databaseMetadata))
+        val databaseMetadata = FakeDatabaseMetadata(
+            updateTimestamp = 123L,
+            topologyVersionId = "abc123"
+        )
+        val repository = createRepository(
+            databaseDao = FakeDatabaseDao(
+                onDatabaseMetadataFlow = { flowOf(databaseMetadata) }
+            )
+        )
 
         repository.databaseMetadataFlow.test {
             assertEquals(databaseMetadata, awaitItem())
@@ -102,11 +99,24 @@ class AndroidBusStopDatabaseRepositoryTest {
 
     @Test
     fun getTopologyVersionIdReturnsTopologyIdFromDao() = runTest {
-        whenever(databaseDao.topologyIdFlow)
-            .thenReturn(flowOf("topoId"))
+        val repository = createRepository(
+            databaseDao = FakeDatabaseDao(
+                onTopologyIdFlow = { flowOf("topoId") }
+            )
+        )
 
         val result = repository.getTopologyVersionId()
 
         assertEquals("topoId", result)
+    }
+
+    private fun createRepository(
+       databaseReplacer: DatabaseReplacer = FakeDatabaseReplacer(),
+        databaseDao: DatabaseDao = FakeDatabaseDao()
+    ): AndroidBusStopDatabaseRepository {
+        return AndroidBusStopDatabaseRepository(
+            databaseReplacer = databaseReplacer,
+            databaseDao = databaseDao
+        )
     }
 }
