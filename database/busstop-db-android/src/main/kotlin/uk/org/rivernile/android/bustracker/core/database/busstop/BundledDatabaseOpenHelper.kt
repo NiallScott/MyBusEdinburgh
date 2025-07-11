@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -143,13 +143,16 @@ internal class BundledDatabaseOpenHelper(
         var deleteDatabase = false
 
         try {
-            databaseOpener.createOpenHelper(databaseFile).readableDatabase.use { db ->
-                val updateTimestamp = db.updateTimestamp
+            databaseOpener
+                .createOpenHelper(databaseFile.toBusStopDatabaseFile())
+                .readableDatabase
+                .use { db ->
+                    val updateTimestamp = db.updateTimestamp
 
-                if (updateTimestamp == null || updateTimestamp < minimumUpdateTimestamp) {
-                    deleteDatabase = true
+                    if (updateTimestamp == null || updateTimestamp < minimumUpdateTimestamp) {
+                        deleteDatabase = true
+                    }
                 }
-            }
         } catch (e: IOException) {
             exceptionLogger.log(e)
             deleteDatabase = true
@@ -199,7 +202,10 @@ internal class BundledDatabaseOpenHelper(
 
             // We open and immediately close the database so that its version code is set to 1. This
             // means that downstream Room will run the migration code for us.
-            databaseOpener.createOpenHelper(intermediateFile).writableDatabase.close()
+            databaseOpener
+                .createOpenHelper(intermediateFile.toBusStopDatabaseFile())
+                .writableDatabase
+                .close()
         } catch (e: IOException) {
             intermediateFile.delete()
             throw e

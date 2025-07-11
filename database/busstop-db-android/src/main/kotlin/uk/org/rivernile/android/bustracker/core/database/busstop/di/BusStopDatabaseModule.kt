@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,11 +34,22 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopDatabase
 import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopDatabaseRepository
+import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabase
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabaseRepository
+import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseReplacer
+import uk.org.rivernile.android.bustracker.core.database.busstop.DownloadedDatabasePreparer
+import uk.org.rivernile.android.bustracker.core.database.busstop.RealDownloadedDatabasePreparer
+import uk.org.rivernile.android.bustracker.core.database.busstop.RealRoomBusStopDatabaseFactory
+import uk.org.rivernile.android.bustracker.core.database.busstop.RoomBusStopDatabaseFactory
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.database.ProxyDatabaseDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.ProxyServiceDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.service.ServiceDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.ProxyServicePointDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.ServicePointDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.ProxyServiceStopDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.ServiceStopDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.ProxyStopDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDao
 
 /**
@@ -54,26 +65,6 @@ internal class BusStopDatabaseModule {
     fun provideFrameworkSQLiteOpenHelperFactory(): FrameworkSQLiteOpenHelperFactory =
         FrameworkSQLiteOpenHelperFactory()
 
-    @Provides
-    fun provideDatabaseDao(database: AndroidBusStopDatabase): DatabaseDao =
-        database.databaseDao
-
-    @Provides
-    fun provideServiceDao(database: AndroidBusStopDatabase): ServiceDao =
-        database.serviceDao
-
-    @Provides
-    fun provideServicePointDao(database: AndroidBusStopDatabase): ServicePointDao =
-        database.servicePointDao
-
-    @Provides
-    fun provideServiceStopDao(database: AndroidBusStopDatabase): ServiceStopDao =
-        database.serviceStopDao
-
-    @Provides
-    fun provideStopDao(database: AndroidBusStopDatabase): StopDao =
-        database.stopDao
-
     @Suppress("unused")
     @InstallIn(SingletonComponent::class)
     @Module
@@ -81,8 +72,48 @@ internal class BusStopDatabaseModule {
 
         @Suppress("unused")
         @Binds
+        fun bindBusStopDatabase(androidBusStopDatabase: AndroidBusStopDatabase): BusStopDatabase
+
+        @Suppress("unused")
+        @Binds
         fun bindBusStopDatabaseRepository(
             androidBusStopDatabaseRepository: AndroidBusStopDatabaseRepository
         ): BusStopDatabaseRepository
+
+        @Suppress("unused")
+        @Binds
+        fun bindDatabaseDao(proxyDatabaseDao: ProxyDatabaseDao): DatabaseDao
+
+        @Suppress("unused")
+        @Binds
+        fun bindDatabaseReplacer(androidBusStopDatabase: AndroidBusStopDatabase): DatabaseReplacer
+
+        @Suppress("unused")
+        @Binds
+        fun bindDownloadedDatabasePreparer(
+            realDownloadedDatabasePreparer: RealDownloadedDatabasePreparer
+        ): DownloadedDatabasePreparer
+
+        @Suppress("unused")
+        @Binds
+        fun bindRoomBusStopDatabaseFactory(
+            realRoomBusStopDatabaseFactory: RealRoomBusStopDatabaseFactory
+        ): RoomBusStopDatabaseFactory
+
+        @Suppress("unused")
+        @Binds
+        fun bindServiceDao(proxyServiceDao: ProxyServiceDao): ServiceDao
+
+        @Suppress("unused")
+        @Binds
+        fun bindServicePointDao(proxyServicePointDao: ProxyServicePointDao): ServicePointDao
+
+        @Suppress("unused")
+        @Binds
+        fun bindServiceStopDao(proxyServiceStopDao: ProxyServiceStopDao): ServiceStopDao
+
+        @Suppress("unused")
+        @Binds
+        fun bindStopDao(proxyStopDao: ProxyStopDao): StopDao
     }
 }

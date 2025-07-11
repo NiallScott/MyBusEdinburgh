@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,10 +26,10 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopDatabase
+import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabase
+import uk.org.rivernile.android.bustracker.core.database.busstop.withFlowIfDatabaseIsOpenOrEmptyFlow
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * The proxy implementation of [ServicePointDao] which responds to the database opening/closing and
@@ -38,18 +38,13 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopD
  * @param database A reference to the database.
  * @author Niall Scott
  */
-internal class ProxyServicePointDao(
-    private val database: AndroidBusStopDatabase
+@Singleton
+internal class ProxyServicePointDao @Inject constructor(
+    private val database: BusStopDatabase
 ) : ServicePointDao {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getServicePointsFlow(serviceNames: Set<String>?) =
-        database.isDatabaseOpenFlow
-            .flatMapLatest {
-                if (it) {
-                    database.roomServicePointDao.getServicePointsFlow(serviceNames)
-                } else {
-                    emptyFlow()
-                }
-            }
+    override fun getServicePointsFlow(serviceNames: Set<String>?) = database
+        .withFlowIfDatabaseIsOpenOrEmptyFlow {
+            servicePointDao.getServicePointsFlow(serviceNames)
+        }
 }

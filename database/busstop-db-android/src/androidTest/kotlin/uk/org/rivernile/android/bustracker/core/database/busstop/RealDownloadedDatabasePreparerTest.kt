@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -50,7 +50,7 @@ import kotlin.test.assertTrue
  *
  * @author Niall Scott
  */
-class DownloadedDatabasePreparerTest {
+class RealDownloadedDatabasePreparerTest {
 
     companion object {
 
@@ -65,7 +65,7 @@ class DownloadedDatabasePreparerTest {
     @Test
     fun prepareDownloadedDatabaseReturnsFalseWhenDatabaseFileDoesNotExist() = runTest {
         val preparer = createDownloadedDatabasePreparer()
-        val databaseFile = context.getDatabasePath(DB_NAME)
+        val databaseFile = context.getDatabasePath(DB_NAME).toBusStopDatabaseFile()
 
         assertFalse(databaseFile.exists())
         val result = preparer.prepareDownloadedDatabase(databaseFile)
@@ -80,9 +80,11 @@ class DownloadedDatabasePreparerTest {
     @Test
     fun prepareDownloadedDatabaseReturnsFalseWhenDatabaseFileIsEmpty() = runTest {
         val preparer = createDownloadedDatabasePreparer()
-        val databaseFile = context.getDatabasePath(DB_NAME).apply {
-            createNewFile()
-        }
+        val databaseFile = context
+            .getDatabasePath(DB_NAME).apply {
+                createNewFile()
+            }
+            .toBusStopDatabaseFile()
 
         val result = preparer.prepareDownloadedDatabase(databaseFile)
 
@@ -96,9 +98,12 @@ class DownloadedDatabasePreparerTest {
     @Test
     fun prepareDownloadedDatabaseReturnsFalseWhenDatabaseFileIsCorrupt() = runTest {
         val preparer = createDownloadedDatabasePreparer()
-        val databaseFile = context.getDatabasePath(DB_NAME).apply {
-            writeText("This is a corrupt file")
-        }
+        val databaseFile = context
+            .getDatabasePath(DB_NAME)
+            .apply {
+                writeText("This is a corrupt file")
+            }
+            .toBusStopDatabaseFile()
 
         val result = preparer.prepareDownloadedDatabase(databaseFile)
 
@@ -112,7 +117,7 @@ class DownloadedDatabasePreparerTest {
     @Test
     fun prepareDownloadedDatabaseReturnsFalseWhenDatabaseDoesNotHaveExpectedSchema() = runTest {
         val preparer = createDownloadedDatabasePreparer()
-        val databaseFile = context.getDatabasePath(DB_NAME)
+        val databaseFile = context.getDatabasePath(DB_NAME).toBusStopDatabaseFile()
         SQLiteDatabase
             .openDatabase(
                 databaseFile.absolutePath,
@@ -133,7 +138,7 @@ class DownloadedDatabasePreparerTest {
     @Test
     fun prepareDownloadedDatabaseReturnsFalseWhenDatabaseVersionIsTooHigh() = runTest {
         val preparer = createDownloadedDatabasePreparer()
-        val databaseFile = context.getDatabasePath(DB_NAME)
+        val databaseFile = context.getDatabasePath(DB_NAME).toBusStopDatabaseFile()
         SQLiteDatabase
             .openDatabase(
                 databaseFile.absolutePath,
@@ -157,7 +162,7 @@ class DownloadedDatabasePreparerTest {
     @Test
     fun prepareDownloadedDatabaseReturnsFalseWhenDatabaseVersionIs2ButBadSchema() = runTest {
         val preparer = createDownloadedDatabasePreparer()
-        val databaseFile = context.getDatabasePath(DB_NAME)
+        val databaseFile = context.getDatabasePath(DB_NAME).toBusStopDatabaseFile()
         SQLiteDatabase
             .openDatabase(
                 databaseFile.absolutePath,
@@ -181,7 +186,7 @@ class DownloadedDatabasePreparerTest {
     @Test
     fun prepareDownloadedDatabaseReturnsFalseWhenDatabaseVersionIs2WithOldSchema() = runTest {
         val preparer = createDownloadedDatabasePreparer()
-        val databaseFile = context.getDatabasePath(DB_NAME)
+        val databaseFile = context.getDatabasePath(DB_NAME).toBusStopDatabaseFile()
         SQLiteDatabase
             .openDatabase(
                 databaseFile.absolutePath,
@@ -206,7 +211,7 @@ class DownloadedDatabasePreparerTest {
     @Test
     fun prepareDownloadedDatabaseReturnsTrueWhenDatabaseVersionIsMissingButGoodSchema() = runTest {
         val preparer = createDownloadedDatabasePreparer()
-        val databaseFile = context.getDatabasePath(DB_NAME)
+        val databaseFile = context.getDatabasePath(DB_NAME).toBusStopDatabaseFile()
         SQLiteDatabase
             .openDatabase(
                 databaseFile.absolutePath,
@@ -226,7 +231,7 @@ class DownloadedDatabasePreparerTest {
     @Test
     fun prepareDownloadedDatabaseReturnsTrueWhenDatabaseVersionIs0WithGoodSchema() = runTest {
         val preparer = createDownloadedDatabasePreparer()
-        val databaseFile = context.getDatabasePath(DB_NAME)
+        val databaseFile = context.getDatabasePath(DB_NAME).toBusStopDatabaseFile()
         SQLiteDatabase
             .openDatabase(
                 databaseFile.absolutePath,
@@ -247,7 +252,7 @@ class DownloadedDatabasePreparerTest {
     @Test
     fun prepareDownloadedDatabaseReturnsTrueWhenDatabaseVersionIs1WithGoodSchema() = runTest {
         val preparer = createDownloadedDatabasePreparer()
-        val databaseFile = context.getDatabasePath(DB_NAME)
+        val databaseFile = context.getDatabasePath(DB_NAME).toBusStopDatabaseFile()
         SQLiteDatabase
             .openDatabase(
                 databaseFile.absolutePath,
@@ -319,7 +324,7 @@ class DownloadedDatabasePreparerTest {
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun TestScope.createDownloadedDatabasePreparer(): DownloadedDatabasePreparer {
+    private fun TestScope.createDownloadedDatabasePreparer(): RealDownloadedDatabasePreparer {
         val context = context
         val frameworkSQLiteOpenHelperFactory = FrameworkSQLiteOpenHelperFactory()
         val databaseOpener = DatabaseOpener(
@@ -327,9 +332,9 @@ class DownloadedDatabasePreparerTest {
             frameworkSQLiteOpenHelperFactory = frameworkSQLiteOpenHelperFactory
         )
 
-        return DownloadedDatabasePreparer(
+        return RealDownloadedDatabasePreparer(
             databaseOpener = databaseOpener,
-            databaseFactory = RoomBusStopDatabaseFactory(
+            databaseFactory = RealRoomBusStopDatabaseFactory(
                 context = context,
                 migration1To2 = Migration1To2(),
                 bundledDatabaseOpenHelperFactory = BundledDatabaseOpenHelperFactory(

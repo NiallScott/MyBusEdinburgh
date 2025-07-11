@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,31 +26,20 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.database
 
-import androidx.room.Dao
-import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
 /**
- * This is the Room implementation of [DatabaseDao].
+ * A fake [DatabaseDao] for testing.
  *
  * @author Niall Scott
  */
-@Dao
-internal interface RoomDatabaseDao : DatabaseDao {
+class FakeDatabaseDao(
+    private val onTopologyIdFlow: () -> Flow<String?> = { throw NotImplementedError() },
+    private val onDatabaseMetadataFlow: () -> Flow<DatabaseMetadata?> =
+        { throw NotImplementedError() }
+) : DatabaseDao {
 
-    @get:Query("""
-        SELECT topologyId 
-        FROM database_info 
-        ORDER BY updateTimestamp DESC 
-        LIMIT 1
-    """)
-    override val topologyIdFlow: Flow<String?>
+    override val topologyIdFlow get() = onTopologyIdFlow()
 
-    @get:Query("""
-        SELECT updateTimestamp, topologyId 
-        FROM database_info 
-        ORDER BY updateTimestamp DESC 
-        LIMIT 1
-    """)
-    override val databaseMetadataFlow: Flow<RoomDatabaseMetadata?>
+    override val databaseMetadataFlow get() = onDatabaseMetadataFlow()
 }

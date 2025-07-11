@@ -110,14 +110,12 @@ dependencies {
     androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.coroutines.test)
     androidTestImplementation(libs.kotlin.test.junit)
-    androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.turbine)
 
     testImplementation(project(":testutils"))
+    testImplementation(testFixtures(project(":database:busstop-db-core")))
     testImplementation(libs.coroutines.test)
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)
-    testImplementation(libs.mockito)
-    testImplementation(libs.mockito.kotlin)
     testImplementation(libs.turbine)
 }

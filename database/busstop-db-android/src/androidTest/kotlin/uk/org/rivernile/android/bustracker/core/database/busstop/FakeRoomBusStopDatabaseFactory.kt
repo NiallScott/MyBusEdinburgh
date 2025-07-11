@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,33 +24,20 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.busstop.database
-
-import androidx.room.Dao
-import androidx.room.Query
-import kotlinx.coroutines.flow.Flow
+package uk.org.rivernile.android.bustracker.core.database.busstop
 
 /**
- * This is the Room implementation of [DatabaseDao].
+ * A fake [RoomBusStopDatabaseFactory] for testing.
  *
  * @author Niall Scott
  */
-@Dao
-internal interface RoomDatabaseDao : DatabaseDao {
+internal class FakeRoomBusStopDatabaseFactory(
+    private val onCreateRoomBusStopDatabase: (String, Boolean) -> RoomBusStopDatabase =
+        { _, _ -> throw NotImplementedError() }
+) : RoomBusStopDatabaseFactory {
 
-    @get:Query("""
-        SELECT topologyId 
-        FROM database_info 
-        ORDER BY updateTimestamp DESC 
-        LIMIT 1
-    """)
-    override val topologyIdFlow: Flow<String?>
-
-    @get:Query("""
-        SELECT updateTimestamp, topologyId 
-        FROM database_info 
-        ORDER BY updateTimestamp DESC 
-        LIMIT 1
-    """)
-    override val databaseMetadataFlow: Flow<RoomDatabaseMetadata?>
+    override fun createRoomBusStopDatabase(
+        databaseName: String,
+        allowAssetExtraction: Boolean
+    ) = onCreateRoomBusStopDatabase(databaseName, allowAssetExtraction)
 }

@@ -28,43 +28,105 @@ package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import android.content.Context
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForIoDispatcher
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.database.ProxyDatabaseDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.service.ProxyServiceDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.service.ServiceDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.ProxyServicePointDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.ServicePointDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.ProxyServiceStopDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.ServiceStopDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.ProxyStopDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDao
-import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * This is the Android-specific implementation of the bus stop database.
+ * Provides access to the underlying bus stop database.
  *
- * @param context The application [Context].
- * @param databaseFactory Used to construct [RoomBusStopDatabase] instances.
- * @param downloadedDatabasePreparer Used to prepare downloaded databases by migrating them to the
- * expected schema.
- * @param ioDispatcher The IO [CoroutineDispatcher].
  * @author Niall Scott
  */
+internal interface BusStopDatabase {
+
+    /**
+     * The current [DatabaseDao] instance.
+     *
+     * Do not hold on to this instance as it will become invalid when the database is closed. Only
+     * obtain an instance when [isDatabaseOpenFlow] is emitting `true`.
+     */
+    val databaseDao: DatabaseDao
+
+    /**
+     * The current [ServiceDao] instance.
+     *
+     * Do not hold on to this instance as it will become invalid when the database is closed. Only
+     * obtain an instance when [isDatabaseOpenFlow] is emitting `true`.
+     */
+    val serviceDao: ServiceDao
+
+    /**
+     * The current [ServicePointDao] instance.
+     *
+     * Do not hold on to this instance as it will become invalid when the database is closed. Only
+     * obtain an instance when [isDatabaseOpenFlow] is emitting `true`.
+     */
+    val servicePointDao: ServicePointDao
+
+    /**
+     * The current [ServiceStopDao] instance.
+     *
+     * Do not hold on to this instance as it will become invalid when the database is closed. Only
+     * obtain an instance when [isDatabaseOpenFlow] is emitting `true`.
+     */
+    val serviceStopDao: ServiceStopDao
+
+    /**
+     * The current [StopDao] instance.
+     *
+     * Do not hold on to this instance as it will become invalid when the database is closed. Only
+     * obtain an instance when [isDatabaseOpenFlow] is emitting `true`.
+     */
+    val stopDao: StopDao
+
+    /**
+     * A [Flow] which emits whether the database is open (`true`) or not (`false`).
+     */
+    val isDatabaseOpenFlow: Flow<Boolean>
+}
+
+/**
+ * When the database is open, produce a [Flow] with [flowProducer], otherwise when the database is
+ * closed, use [emptyFlow].
+ *
+ * @param flowProducer A factory function which produces a [Flow] when the database is open.
+ * @param T The type of the data emitted from the [Flow].
+ * @return A [Flow] which switches depending on whether the database's open state.
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+internal inline fun <T> BusStopDatabase.withFlowIfDatabaseIsOpenOrEmptyFlow(
+    crossinline flowProducer: BusStopDatabase.() -> Flow<T>
+): Flow<T> {
+    return isDatabaseOpenFlow
+        .flatMapLatest {
+            if (it) {
+                flowProducer()
+            } else {
+                emptyFlow()
+            }
+        }
+}
+
 @Singleton
 internal class AndroidBusStopDatabase @Inject constructor(
     private val context: Context,
     private val databaseFactory: RoomBusStopDatabaseFactory,
     private val downloadedDatabasePreparer: DownloadedDatabasePreparer,
     @param:ForIoDispatcher private val ioDispatcher: CoroutineDispatcher
-) {
+) : BusStopDatabase, DatabaseReplacer {
 
     companion object {
 
@@ -78,52 +140,19 @@ internal class AndroidBusStopDatabase @Inject constructor(
     private val databaseMutex = Mutex()
     private val _isDatabaseOpenFlow = MutableStateFlow(true)
 
-    /**
-     * A [Flow] which emits whether the database is open or not.
-     */
-    val isDatabaseOpenFlow: Flow<Boolean> get() = _isDatabaseOpenFlow
+    override val databaseDao get() = database.databaseDao
 
-    /**
-     * The [DatabaseDao].
-     */
-    val databaseDao: DatabaseDao = ProxyDatabaseDao(this)
+    override val serviceDao get() = database.serviceDao
 
-    /**
-     * The [ServiceDao].
-     */
-    val serviceDao: ServiceDao = ProxyServiceDao(this)
+    override val servicePointDao get() = database.servicePointDao
 
-    /**
-     * The [ServicePointDao].
-     */
-    val servicePointDao: ServicePointDao = ProxyServicePointDao(this)
+    override val serviceStopDao get() = database.serviceStopDao
 
-    /**
-     * The [ServiceStopDao].
-     */
-    val serviceStopDao: ServiceStopDao = ProxyServiceStopDao(this)
+    override val stopDao get() = database.stopDao
 
-    /**
-     * The [StopDao].
-     */
-    val stopDao: StopDao = ProxyStopDao(this)
+    override val isDatabaseOpenFlow get() = _isDatabaseOpenFlow
 
-    val roomDatabaseDao get() = database.databaseDao
-    val roomServiceDao get() = database.serviceDao
-    val roomServicePointDao get() = database.servicePointDao
-    val roomServiceStopDao get() = database.serviceStopDao
-    val roomStopDao get() = database.stopDao
-
-    /**
-     * Given a [newDatabaseFile], attempt to replace the existing database with this file. If the
-     * new database does not pass some internal checks, the operation will fail and the existing
-     * database will continue to be used.
-     *
-     * @param newDatabaseFile The new database file. This is assumed to already be in the database
-     * directory.
-     * @return `true` if the database was replaced, `false` if not.
-     */
-    suspend fun replaceDatabase(newDatabaseFile: File): Boolean {
+    override suspend fun replaceDatabase(newDatabaseFile: BusStopDatabaseFile): Boolean {
         return databaseMutex.withLock {
             if (downloadedDatabasePreparer.prepareDownloadedDatabase(newDatabaseFile)) {
                 database.close()
@@ -150,7 +179,7 @@ internal class AndroidBusStopDatabase @Inject constructor(
      *
      * @param newDatabaseFile The new database file.
      */
-    private suspend fun replaceDatabaseFile(newDatabaseFile: File) {
+    private suspend fun replaceDatabaseFile(newDatabaseFile: BusStopDatabaseFile) {
         withContext(ioDispatcher) {
             context.deleteDatabase(DATABASE_NAME)
             newDatabaseFile.renameTo(context.getDatabasePath(DATABASE_NAME))

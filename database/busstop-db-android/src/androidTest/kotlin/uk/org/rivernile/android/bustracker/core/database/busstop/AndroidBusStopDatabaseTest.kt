@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,22 +26,16 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
-import android.os.Build
-import androidx.test.filters.SdkSuppress
+import androidx.room.Room
 import androidx.test.platform.app.InstrumentationRegistry
 import app.cash.turbine.test
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit4.MockKRule
-import io.mockk.mockk
-import io.mockk.verify
-import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import java.io.File
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -50,7 +44,6 @@ import kotlin.test.assertTrue
  *
  * @author Niall Scott
  */
-@SdkSuppress(minSdkVersion = Build.VERSION_CODES.P) // Because Mockk.
 class AndroidBusStopDatabaseTest {
 
     companion object {
@@ -58,73 +51,120 @@ class AndroidBusStopDatabaseTest {
         private const val DATABASE_NAME = "busstops10.db"
     }
 
-    @get:Rule
-    val mockkRule = MockKRule(this)
-
-    @MockK
-    private lateinit var databaseFactory: RoomBusStopDatabaseFactory
-    @MockK
-    private lateinit var downloadedDatabasePreparer: DownloadedDatabasePreparer
-
     @Test
     fun replaceDatabaseWhenNewDatabaseCouldNotBePreparedReturnsFalse() = runTest {
-        val testDb = mockk<File>(relaxed = true)
-        val existingDb = mockk<RoomBusStopDatabase>()
-        every { databaseFactory.createRoomBusStopDatabase(DATABASE_NAME, true) } returns existingDb
-        coEvery { downloadedDatabasePreparer.prepareDownloadedDatabase(testDb) } returns false
-        val database = createDatabase()
+        var deleteCount = 0
+        val testDbFile = FakeBusStopDatabaseFile(
+            name = "test",
+            onDelete = {
+                deleteCount++
+                true
+            }
+        )
+        val existingDb = createRoomBusStopDatabase()
+        val database = createDatabase(
+            databaseFactory = FakeRoomBusStopDatabaseFactory(
+                onCreateRoomBusStopDatabase = { databaseName, allowAssetExtraction ->
+                    assertEquals(DATABASE_NAME, databaseName)
+                    assertTrue(allowAssetExtraction)
+                    existingDb
+                }
+            ),
+            downloadedDatabasePreparer = FakeDownloadedDatabasePreparer(
+                onPrepareDownloadedDatabase = {
+                    assertEquals(testDbFile, it)
+                    false
+                }
+            )
+        )
 
-        database.isDatabaseOpenFlow.test {
-            val result = database.replaceDatabase(testDb)
+        try {
+            database.isDatabaseOpenFlow.test {
+                val result = database.replaceDatabase(testDbFile)
 
-            assertFalse(result)
-            assertTrue(awaitItem())
-            ensureAllEventsConsumed()
-        }
-        verify(exactly = 1) {
-            testDb.delete()
+                assertFalse(result)
+                assertTrue(awaitItem())
+                ensureAllEventsConsumed()
+            }
+            assertEquals(1, deleteCount)
+        } finally {
+            existingDb.close()
         }
     }
 
     @Test
     fun replaceDatabaseWhenNewDatabasePassesPreparationReturnsTrue() = runTest {
-        val testDb = mockk<File>(relaxed = true)
-        val existingDb = mockk<RoomBusStopDatabase>(relaxed = true)
-        val newDb = mockk<RoomBusStopDatabase>()
-        every {
-            databaseFactory.createRoomBusStopDatabase(DATABASE_NAME, true)
-        } returnsMany listOf(existingDb, newDb)
-        coEvery { downloadedDatabasePreparer.prepareDownloadedDatabase(testDb) } returns true
-        val database = createDatabase()
+        var deleteCount = 0
+        val renameToOperations = mutableListOf<File>()
+        val testDb = FakeBusStopDatabaseFile(
+            name = "test",
+            onDelete = {
+                deleteCount++
+                true
+            },
+            onRenameTo = {
+                renameToOperations += it
+                true
+            }
+        )
+        val existingDb = createRoomBusStopDatabase()
+        val newDb = createRoomBusStopDatabase()
+        val databases = ArrayDeque(listOf(existingDb, newDb))
+        val database = createDatabase(
+            databaseFactory = FakeRoomBusStopDatabaseFactory(
+                onCreateRoomBusStopDatabase = { databaseName, allowAssetExtraction ->
+                    assertEquals(DATABASE_NAME, databaseName)
+                    assertTrue(allowAssetExtraction)
+                    databases.removeFirst()
+                }
+            ),
+            downloadedDatabasePreparer = FakeDownloadedDatabasePreparer(
+                onPrepareDownloadedDatabase = {
+                    assertEquals(testDb, it)
+                    true
+                }
+            )
+        )
 
-        database.isDatabaseOpenFlow.test {
-            val result = database.replaceDatabase(testDb)
+        try {
+            database.isDatabaseOpenFlow.test {
+                val result = database.replaceDatabase(testDb)
 
-            assertTrue(result)
-            assertTrue(awaitItem())
-            assertFalse(awaitItem())
-            assertTrue(awaitItem())
-            ensureAllEventsConsumed()
-        }
-        verify(exactly = 1) {
+                assertTrue(result)
+                assertTrue(awaitItem())
+                assertFalse(awaitItem())
+                assertTrue(awaitItem())
+                ensureAllEventsConsumed()
+            }
+            assertFalse(existingDb.isOpen)
+            assertEquals(0, deleteCount)
+            assertEquals(
+                listOf(context.getDatabasePath(DATABASE_NAME)),
+                renameToOperations
+            )
+            assertTrue(databases.isEmpty())
+        } finally {
             existingDb.close()
-        }
-        verify(exactly = 0) {
-            testDb.delete()
-        }
-        verify(exactly = 1) {
-            testDb.renameTo(context.getDatabasePath(DATABASE_NAME))
+            newDb.close()
         }
     }
 
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
 
-    private fun TestScope.createDatabase(): AndroidBusStopDatabase {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun TestScope.createDatabase(
+        databaseFactory: RoomBusStopDatabaseFactory = FakeRoomBusStopDatabaseFactory(),
+        downloadedDatabasePreparer: DownloadedDatabasePreparer = FakeDownloadedDatabasePreparer()
+    ): AndroidBusStopDatabase {
         return AndroidBusStopDatabase(
             context,
             databaseFactory,
             downloadedDatabasePreparer,
-            StandardTestDispatcher(testScheduler)
+            UnconfinedTestDispatcher(testScheduler)
         )
+    }
+
+    private fun createRoomBusStopDatabase(): RoomBusStopDatabase {
+        return Room.inMemoryDatabaseBuilder<RoomBusStopDatabase>(context).build()
     }
 }

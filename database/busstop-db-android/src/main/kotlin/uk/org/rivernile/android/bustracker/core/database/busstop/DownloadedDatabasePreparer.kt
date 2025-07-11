@@ -36,32 +36,33 @@ import java.io.File
 import javax.inject.Inject
 
 /**
- * This class prepares a downloaded database file prior to it replacing the existing database. The
+ * This prepares a downloaded database file prior to it replacing the existing database. The
  * candidate database will be migrated to the expected schema before replacement.
  *
- * @param databaseOpener Used to open the database to ensure it has a version code set.
- * @param databaseFactory Used to create [RoomBusStopDatabase] instances.
- * @param exceptionLogger Used to log exceptions.
- * @param ioDispatcher The IO [CoroutineDispatcher].
  * @author Niall Scott
  */
-internal class DownloadedDatabasePreparer @Inject constructor(
-    private val databaseOpener: DatabaseOpener,
-    private val databaseFactory: RoomBusStopDatabaseFactory,
-    private val exceptionLogger: ExceptionLogger,
-    @param:ForIoDispatcher private val ioDispatcher: CoroutineDispatcher
-) {
+internal interface DownloadedDatabasePreparer {
 
     /**
      * Prepare a downloaded database by migrating it to the expected schema prior to it replacing
      * the current database.
      *
-     * @param databaseFile The candidate database [File] to replace the existing database.
+     * @param databaseFile The candidate [BusStopDatabaseFile] to replace the existing database.
      * @return `true` if preparation was successful and this database should replace the existing
      * database, otherwise `false` if preparation was not successful and this candidate should be
      * scrapped.
      */
-    suspend fun prepareDownloadedDatabase(databaseFile: File): Boolean {
+    suspend fun prepareDownloadedDatabase(databaseFile: BusStopDatabaseFile): Boolean
+}
+
+internal class RealDownloadedDatabasePreparer @Inject constructor(
+    private val databaseOpener: DatabaseOpener,
+    private val databaseFactory: RoomBusStopDatabaseFactory,
+    private val exceptionLogger: ExceptionLogger,
+    @param:ForIoDispatcher private val ioDispatcher: CoroutineDispatcher
+) : DownloadedDatabasePreparer {
+
+    override suspend fun prepareDownloadedDatabase(databaseFile: BusStopDatabaseFile): Boolean {
         return if (ensureDatabaseHasVersionCode(databaseFile)) {
             var result: Boolean
 
@@ -92,13 +93,12 @@ internal class DownloadedDatabasePreparer @Inject constructor(
      * @return `true` when we were able to open the database file and it now has a valid version
      * code, otherwise `false`.
      */
-    private suspend fun ensureDatabaseHasVersionCode(databaseFile: File): Boolean {
+    private suspend fun ensureDatabaseHasVersionCode(databaseFile: BusStopDatabaseFile): Boolean {
         return withContext(ioDispatcher) {
             try {
                 // This will open the database and force the version code to be at least 1. Prior to
                 // handing the database over to Room, the version code needs to be at least 1 before
                 // it will run migrations.
-                @Suppress("BlockingMethodInNonBlockingContext")
                 databaseOpener.createOpenHelper(databaseFile).writableDatabase.close()
                 true
             } catch (e: IOException) {

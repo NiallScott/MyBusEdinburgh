@@ -125,7 +125,6 @@ junit = { module = "junit:junit", version = "4.13.2" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "5.4.0" }
-mockk-android = { module =  "io.mockk:mockk-android", version = "1.13.13" }
 turbine = { module = "app.cash.turbine:turbine", version = "1.2.1" }
 
 [plugins]

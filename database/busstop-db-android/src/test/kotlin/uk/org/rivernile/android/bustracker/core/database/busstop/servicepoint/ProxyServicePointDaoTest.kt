@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,58 +29,68 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint
 import app.cash.turbine.test
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopDatabase
+import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabase
+import uk.org.rivernile.android.bustracker.core.database.busstop.FakeBusStopDatabase
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 /**
  * Tests for [ProxyServicePointDao].
  *
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner::class)
 class ProxyServicePointDaoTest {
-
-    @Mock
-    private lateinit var database: AndroidBusStopDatabase
-
-    @Mock
-    private lateinit var roomServicePointDao: RoomServicePointDao
-
-    private lateinit var dao: ProxyServicePointDao
-
-    @BeforeTest
-    fun setUp() {
-        dao = ProxyServicePointDao(database)
-
-        whenever(database.roomServicePointDao)
-            .thenReturn(roomServicePointDao)
-    }
 
     @Test
     fun getServicePointsFlow() = runTest {
-        val first = mock<List<ServicePoint>>()
-        val second = mock<List<ServicePoint>>()
-        whenever(database.isDatabaseOpenFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, true, false, true))
-        whenever(roomServicePointDao.getServicePointsFlow(anyOrNull()))
-            .thenReturn(
+        val first = listOf(
+            FakeServicePoint(
+                serviceName = "1",
+                chainage = 100,
+                latitude = 1.1,
+                longitude = 2.2
+            )
+        )
+        val second = listOf(
+            FakeServicePoint(
+                serviceName = "2",
+                chainage = 200,
+                latitude = 3.3,
+                longitude = 4.4
+            )
+        )
+        val flows = ArrayDeque(
+            listOf(
                 flowOf(first),
                 flowOf(second)
             )
+        )
+        val dao = createProxyServicePointDao(
+            database = FakeBusStopDatabase(
+                onServicePointDao = {
+                    FakeServicePointDao(
+                        onGetServicePointsFlow = {
+                            assertNull(it)
+                            flows.removeFirst()
+                        }
+                    )
+                },
+                onIsDatabaseOpenFlow = { intervalFlowOf(0L, 10L, true, false, true) }
+            )
+        )
 
         dao.getServicePointsFlow(null).test {
             assertEquals(first, awaitItem())
             assertEquals(second, awaitItem())
             awaitComplete()
         }
+    }
+
+    private fun createProxyServicePointDao(
+        database: BusStopDatabase = FakeBusStopDatabase()
+    ): ProxyServicePointDao {
+        return ProxyServicePointDao(database = database)
     }
 }

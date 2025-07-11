@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,33 +24,23 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.busstop.database
-
-import androidx.room.Dao
-import androidx.room.Query
-import kotlinx.coroutines.flow.Flow
+package uk.org.rivernile.android.bustracker.core.database.busstop
 
 /**
- * This is the Room implementation of [DatabaseDao].
+ * This supports replacing the database with a new database file.
  *
  * @author Niall Scott
  */
-@Dao
-internal interface RoomDatabaseDao : DatabaseDao {
+internal interface DatabaseReplacer {
 
-    @get:Query("""
-        SELECT topologyId 
-        FROM database_info 
-        ORDER BY updateTimestamp DESC 
-        LIMIT 1
-    """)
-    override val topologyIdFlow: Flow<String?>
-
-    @get:Query("""
-        SELECT updateTimestamp, topologyId 
-        FROM database_info 
-        ORDER BY updateTimestamp DESC 
-        LIMIT 1
-    """)
-    override val databaseMetadataFlow: Flow<RoomDatabaseMetadata?>
+    /**
+     * Given a [newDatabaseFile], attempt to replace the existing database with this file. If the
+     * new database does not pass some internal checks, the operation will fail and the existing
+     * database will continue to be used.
+     *
+     * @param newDatabaseFile The new database file. This is assumed to already be in the database
+     * directory.
+     * @return `true` if the database was replaced, `false` if not.
+     */
+    suspend fun replaceDatabase(newDatabaseFile: BusStopDatabaseFile): Boolean
 }

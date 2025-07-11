@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,10 +26,10 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.service
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopDatabase
+import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabase
+import uk.org.rivernile.android.bustracker.core.database.busstop.withFlowIfDatabaseIsOpenOrEmptyFlow
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * The proxy implementation of [ServiceDao] which responds to the database opening/closing and
@@ -38,62 +38,32 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopD
  * @param database A reference to the database.
  * @author Niall Scott
  */
-internal class ProxyServiceDao(
-    private val database: AndroidBusStopDatabase
+@Singleton
+internal class ProxyServiceDao @Inject constructor(
+    private val database: BusStopDatabase
 ) : ServiceDao {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override val allServiceNamesWithColourFlow get() =
-        database.isDatabaseOpenFlow
-            .flatMapLatest {
-                if (it) {
-                    database.roomServiceDao.allServiceNamesWithColourFlow
-                } else {
-                    emptyFlow()
-                }
-            }
+    override val allServiceNamesWithColourFlow get() = database
+        .withFlowIfDatabaseIsOpenOrEmptyFlow {
+            serviceDao.allServiceNamesWithColourFlow
+        }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getServiceNamesWithColourFlow(stopCode: String) =
-        database.isDatabaseOpenFlow
-            .flatMapLatest {
-                if (it) {
-                    database.roomServiceDao.getServiceNamesWithColourFlow(stopCode)
-                } else {
-                    emptyFlow()
-                }
-            }
+    override fun getServiceNamesWithColourFlow(stopCode: String) = database
+        .withFlowIfDatabaseIsOpenOrEmptyFlow {
+            serviceDao.getServiceNamesWithColourFlow(stopCode)
+        }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override val serviceCountFlow get() =
-        database.isDatabaseOpenFlow
-            .flatMapLatest {
-                if (it) {
-                    database.roomServiceDao.serviceCountFlow
-                } else {
-                    emptyFlow()
-                }
-            }
+    override val serviceCountFlow get() = database.withFlowIfDatabaseIsOpenOrEmptyFlow {
+        serviceDao.serviceCountFlow
+    }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getColoursForServicesFlow(services: Set<String>?) =
-        database.isDatabaseOpenFlow
-            .flatMapLatest {
-                if (it) {
-                    database.roomServiceDao.getColoursForServicesFlow(services)
-                } else {
-                    emptyFlow()
-                }
-            }
+    override fun getColoursForServicesFlow(services: Set<String>?) = database
+        .withFlowIfDatabaseIsOpenOrEmptyFlow {
+            serviceDao.getColoursForServicesFlow(services)
+        }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getServiceDetailsFlow(stopCode: String) =
-        database.isDatabaseOpenFlow
-            .flatMapLatest {
-                if (it) {
-                    database.roomServiceDao.getServiceDetailsFlow(stopCode)
-                } else {
-                    emptyFlow()
-                }
-            }
+    override fun getServiceDetailsFlow(stopCode: String) = database
+        .withFlowIfDatabaseIsOpenOrEmptyFlow {
+            serviceDao.getServiceDetailsFlow(stopCode)
+        }
 }

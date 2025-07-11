@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,10 +26,10 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.servicestop
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopDatabase
+import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabase
+import uk.org.rivernile.android.bustracker.core.database.busstop.withFlowIfDatabaseIsOpenOrEmptyFlow
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * The proxy implementation of [ServiceStopDao] which responds to the database opening/closing and
@@ -38,29 +38,18 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopD
  * @param database A reference to the database.
  * @author Niall Scott
  */
-internal class ProxyServiceStopDao(
-    private val database: AndroidBusStopDatabase
+@Singleton
+internal class ProxyServiceStopDao @Inject constructor(
+    private val database: BusStopDatabase
 ) : ServiceStopDao {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getServicesForStopFlow(stopCode: String) =
-        database.isDatabaseOpenFlow
-            .flatMapLatest {
-                if (it) {
-                    database.roomServiceStopDao.getServicesForStopFlow(stopCode)
-                } else {
-                    emptyFlow()
-                }
-            }
+    override fun getServicesForStopFlow(stopCode: String) = database
+        .withFlowIfDatabaseIsOpenOrEmptyFlow {
+            serviceStopDao.getServicesForStopFlow(stopCode)
+        }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getServicesForStopsFlow(stopCodes: Set<String>) =
-        database.isDatabaseOpenFlow
-            .flatMapLatest {
-                if (it) {
-                    database.roomServiceStopDao.getServicesForStopsFlow(stopCodes)
-                } else {
-                    emptyFlow()
-                }
-            }
+    override fun getServicesForStopsFlow(stopCodes: Set<String>) = database
+        .withFlowIfDatabaseIsOpenOrEmptyFlow {
+            serviceStopDao.getServicesForStopsFlow(stopCodes)
+        }
 }
