@@ -41,6 +41,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
@@ -65,6 +66,8 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -76,6 +79,14 @@ import kotlinx.collections.immutable.ImmutableList
 import uk.org.rivernile.android.bustracker.ui.news.R
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
+
+internal const val TEST_TAG_EMPTY_PROGRESS = "empty-progress"
+internal const val TEST_TAG_POPULATED_CONTENT = "populated-content"
+internal const val TEST_TAG_INLINE_ERROR = "inline-error"
+internal const val TEST_TAG_INLINE_ERROR_TEXT = "inline-error-text"
+internal const val TEST_TAG_LAST_REFRESHED_TEXT = "last-refreshed-text"
+internal const val TEST_TAG_NO_CONNECTIVITY_ICON = "no-connectivity-icon"
+internal const val TEST_TAG_ERROR_SNACKBAR = "error-snackbar"
 
 /**
  * A reusable [Composable] used to render the content layout for Service Updates screens.
@@ -94,7 +105,7 @@ internal fun <T : UiServiceUpdate> ServiceUpdatesScreen(
     modifier: Modifier = Modifier,
     onRefresh: () -> Unit,
     onErrorSnackbarShown: (Long) -> Unit,
-    itemContent: @Composable LazyItemScope.(item: T) -> Unit
+    itemContent: @Composable LazyItemScope.(item: T, modifier: Modifier) -> Unit
 ) {
     PullToRefreshBox(
         isRefreshing = content.isRefreshing,
@@ -114,7 +125,7 @@ internal fun <T : UiServiceUpdate> ServiceUpdatesScreen(
 private fun <T : UiServiceUpdate> BoxScope.Content(
     content: UiContent<T>,
     onErrorSnackbarShown: (Long) -> Unit,
-    itemContent: @Composable LazyItemScope.(item: T) -> Unit
+    itemContent: @Composable LazyItemScope.(item: T, modifier: Modifier) -> Unit
 ) {
     val nestedScrollInterop = rememberNestedScrollInteropConnection()
 
@@ -144,10 +155,13 @@ private fun <T : UiServiceUpdate> PopulatedContent(
     content: UiContent.Populated<T>,
     modifier: Modifier = Modifier,
     onErrorSnackbarShown: (Long) -> Unit,
-    itemContent: @Composable LazyItemScope.(item: T) -> Unit
+    itemContent: @Composable LazyItemScope.(item: T, modifier: Modifier) -> Unit
 ) {
     ConstraintLayout(
         modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_POPULATED_CONTENT
+            }
     ) {
         val (contentHeaderBarRef, itemsListRef, errorSnackbarRef) = createRefs()
 
@@ -196,6 +210,9 @@ private fun EmptyProgress(
 ) {
     CircularProgressIndicator(
         modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_EMPTY_PROGRESS
+            }
     )
 }
 
@@ -241,7 +258,7 @@ private fun ContentHeaderBar(
 private fun <T : UiServiceUpdate> ItemsList(
     items: ImmutableList<T>,
     modifier: Modifier = Modifier,
-    itemContent: @Composable LazyItemScope.(item: T) -> Unit
+    itemContent: @Composable LazyItemScope.(item: T, modifier: Modifier) -> Unit
 ) {
     LazyColumn(
         modifier = modifier,
@@ -253,7 +270,12 @@ private fun <T : UiServiceUpdate> ItemsList(
             items = items,
             key = { it.id }
         ) { item ->
-            itemContent(item)
+            itemContent(
+                item,
+                Modifier
+                    .widthIn(0.dp, 568.dp)
+                    .animateItem()
+            )
         }
     }
 }
@@ -266,7 +288,10 @@ private fun InlineError(
     Column(
         modifier = modifier
             .padding(dimensionResource(id = Rcore.dimen.padding_double))
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(rememberScrollState())
+            .semantics {
+                testTag = TEST_TAG_INLINE_ERROR
+            },
         verticalArrangement = Arrangement.spacedBy(
             space = dimensionResource(id = Rcore.dimen.padding_default),
             alignment = Alignment.CenterVertically
@@ -290,7 +315,10 @@ private fun ContentHeaderBarLastRefreshedText(
 ) {
     Text(
         text = getLastRefreshedString(lastRefreshed),
-        modifier = modifier,
+        modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_LAST_REFRESHED_TEXT
+            },
         color = MaterialTheme.colorScheme.inverseOnSurface,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
@@ -307,7 +335,10 @@ private fun ContentHeaderBarNoInternetConnectivityIcon(
         contentDescription = stringResource(
             id = R.string.serviceupdates_no_connectivity_content_description
         ),
-        modifier = modifier,
+        modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_NO_CONNECTIVITY_ICON
+            },
         tint = MaterialTheme.colorScheme.inverseOnSurface
     )
 }
@@ -326,6 +357,9 @@ private fun ErrorSnackbar(
     SnackbarHost(
         hostState = snackbarHostState,
         modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_ERROR_SNACKBAR
+            }
     )
 
     if (error != null) {
@@ -358,7 +392,10 @@ private fun ErrorText(
 ) {
     Text(
         text = text,
-        modifier = modifier,
+        modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_INLINE_ERROR_TEXT
+            },
         textAlign = TextAlign.Center,
         color = MaterialTheme.colorScheme.onSurface,
         overflow = TextOverflow.Ellipsis,

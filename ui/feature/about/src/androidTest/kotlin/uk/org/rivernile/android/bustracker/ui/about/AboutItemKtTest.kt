@@ -37,8 +37,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
 import org.junit.Rule
-import uk.org.rivernile.android.bustracker.ui.datetime.LocalDateTimeFormatter
-import uk.org.rivernile.android.bustracker.ui.datetime.rememberDateTimeFormatter
+import uk.org.rivernile.android.bustracker.ui.formatters.LocalDateTimeFormatter
+import uk.org.rivernile.android.bustracker.ui.formatters.rememberDateTimeFormatter
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import java.text.DateFormat
 import java.text.SimpleDateFormat

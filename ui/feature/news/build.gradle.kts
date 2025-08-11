@@ -63,6 +63,10 @@ android {
     }
 }
 
+kotlin {
+    explicitApi()
+}
+
 dependencies {
 
     "edinburghImplementation"(project(":core:alphanumcomparator"))

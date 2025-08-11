@@ -79,7 +79,7 @@ internal class NewsViewModel @Inject constructor(
      * A [kotlinx.coroutines.flow.Flow] which emits the latest [UiState].
      */
     val uiStateFlow = uiIncidentsState
-        .combine(uiDiversionsState, this::createUiState)
+        .combine(uiDiversionsState, ::createUiState)
         .flowOn(defaultCoroutineDispatcher)
         .stateIn(
             scope = viewModelScope,

@@ -37,8 +37,8 @@ import androidx.compose.ui.test.performClick
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.Instant
 import org.junit.Rule
-import uk.org.rivernile.android.bustracker.ui.datetime.LocalDateTimeFormatter
-import uk.org.rivernile.android.bustracker.ui.datetime.rememberDateTimeFormatter
+import uk.org.rivernile.android.bustracker.ui.formatters.LocalDateTimeFormatter
+import uk.org.rivernile.android.bustracker.ui.formatters.rememberDateTimeFormatter
 import uk.org.rivernile.android.bustracker.ui.news.R
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme

@@ -69,8 +69,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import uk.org.rivernile.android.bustracker.ui.datetime.LocalDateTimeFormatter
-import uk.org.rivernile.android.bustracker.ui.datetime.rememberDateTimeFormatter
+import uk.org.rivernile.android.bustracker.ui.formatters.LocalDateTimeFormatter
+import uk.org.rivernile.android.bustracker.ui.formatters.rememberDateTimeFormatter
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import java.util.Date
@@ -248,6 +248,7 @@ private fun AboutItemsList(
         ) {
             AboutItem(
                 item = it,
+                modifier = Modifier.animateItem(),
                 onItemClicked = onItemClicked
             )
             HorizontalDivider()

@@ -38,8 +38,8 @@ import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.Instant
 import org.junit.Rule
-import uk.org.rivernile.android.bustracker.ui.datetime.LocalDateTimeFormatter
-import uk.org.rivernile.android.bustracker.ui.datetime.rememberDateTimeFormatter
+import uk.org.rivernile.android.bustracker.ui.formatters.LocalDateTimeFormatter
+import uk.org.rivernile.android.bustracker.ui.formatters.rememberDateTimeFormatter
 import uk.org.rivernile.android.bustracker.ui.news.R
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.TEST_TAG_ITEM_AFFECTED_SERVICES
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.TEST_TAG_ITEM_BUTTON_MORE_DETAILS

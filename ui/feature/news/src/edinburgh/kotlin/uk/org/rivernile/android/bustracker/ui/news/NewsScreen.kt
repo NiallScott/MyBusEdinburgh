@@ -38,6 +38,7 @@ import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -46,10 +47,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import uk.org.rivernile.android.bustracker.ui.formatters.LocalNumberFormatter
+import uk.org.rivernile.android.bustracker.ui.formatters.rememberNumberFormatter
 import uk.org.rivernile.android.bustracker.ui.interop.MenuProvider
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.DiversionsScreen
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.UiDiversion
@@ -58,6 +63,10 @@ import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.Inci
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIncident
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIncidentsState
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
+
+internal const val TEST_TAG_TAB_INCIDENTS = "incidents-tab"
+internal const val TEST_TAG_TAB_DIVERSIONS = "diversions-tab"
+internal const val TEST_TAG_TAB_BADGE_COUNT = "count-tab-badge"
 
 private const val TAB_INCIDENTS = 0
 private const val TAB_DIVERSIONS = 1
@@ -84,8 +93,25 @@ internal fun NewsScreen(
     )
 }
 
+/**
+ * The entry point in to the News screen for tests which does not depend on [NewsViewModel] as the
+ * state can be injected directly.
+ *
+ * @param state The [UiState] to render.
+ * @param modifier Any [Modifier]s which should be applied.
+ * @param onRefresh A lambda which is executed when the user performs a refresh action.
+ * @param onIncidentMoreDetailsClicked A lambda which is executed when the user presses the
+ * "More details" button on incidents.
+ * @param onIncidentActionLaunched A lambda which is executed when any incidents actions have been
+ * launched.
+ * @param onDiversionMoreDetailsClicked A lambda which is executed when the user presses the
+ * "More details" button on diversions.
+ * @param onDiversionActionLaunched A lambda which is executed when any diversions actions have been
+ * launched.
+ * @param onErrorSnackbarShown A lambda which is executed when the error snackbar has been shown.
+ */
 @Composable
-private fun NewsScreenWithState(
+internal fun NewsScreenWithState(
     state: UiState,
     modifier: Modifier = Modifier,
     onRefresh: () -> Unit,
@@ -143,6 +169,10 @@ private fun NewsTabBar(
             selected = selectedTabIndex == TAB_INCIDENTS,
             text = stringResource(id = R.string.news_fragment_tab_incidents),
             iconRes = R.drawable.ic_bus_alert,
+            modifier = Modifier
+                .semantics {
+                    testTag = TEST_TAG_TAB_INCIDENTS
+                },
             countForBadge = tabBadges.incidentsCount,
             onClick = { onTabClicked(TAB_INCIDENTS) }
         )
@@ -151,6 +181,10 @@ private fun NewsTabBar(
             selected = selectedTabIndex == TAB_DIVERSIONS,
             text = stringResource(id = R.string.news_fragment_tab_diversions),
             iconRes = R.drawable.ic_fork_right,
+            modifier = Modifier
+                .semantics {
+                    testTag = TEST_TAG_TAB_DIVERSIONS
+                },
             countForBadge = tabBadges.diversionsCount,
             onClick = { onTabClicked(TAB_DIVERSIONS) }
         )
@@ -162,11 +196,14 @@ private fun NewsTab(
     selected: Boolean,
     text: String,
     @DrawableRes iconRes: Int,
+    modifier: Modifier = Modifier,
     countForBadge: Int? = null,
     onClick: () -> Unit
 ) {
     Tab(
         selected = selected,
+        onClick = onClick,
+        modifier = modifier,
         text = {
             Text(
                 text = text,
@@ -179,7 +216,13 @@ private fun NewsTab(
                 BadgedBox(
                     badge = {
                         Badge {
-                            Text(countForBadge.toString())
+                            Text(
+                                text = LocalNumberFormatter.current.format(countForBadge),
+                                modifier = Modifier
+                                    .semantics {
+                                        testTag = TEST_TAG_TAB_BADGE_COUNT
+                                    }
+                            )
                         }
                     }
                 ) {
@@ -195,7 +238,6 @@ private fun NewsTab(
                 )
             }
         },
-        onClick = onClick,
         unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }
@@ -292,9 +334,13 @@ private fun NewsContent(
 )
 @Composable
 private fun NewsScreenPreview() {
-    MyBusTheme {
+    MyBusThemeWithCompositionLocals {
         NewsScreenWithState(
-            state = UiState(),
+            state = UiState(
+                tabBadges = UiTabBadges(
+                    diversionsCount = 5
+                )
+            ),
             onRefresh = { },
             onIncidentMoreDetailsClicked = { },
             onIncidentActionLaunched = { },
@@ -398,13 +444,25 @@ private fun NewsTabPreview(
     selected: Boolean,
     countForBadge: Int?
 ) {
-    MyBusTheme {
+    MyBusThemeWithCompositionLocals {
         NewsTab(
             selected = selected,
             text = stringResource(id = R.string.news_fragment_tab_incidents),
             iconRes = R.drawable.ic_bus_alert,
             countForBadge = countForBadge,
             onClick = { }
+        )
+    }
+}
+
+@Composable
+private fun MyBusThemeWithCompositionLocals(
+    content: @Composable () -> Unit
+) {
+    MyBusTheme {
+        CompositionLocalProvider(
+            LocalNumberFormatter provides rememberNumberFormatter(),
+            content = content
         )
     }
 }

@@ -28,13 +28,16 @@ package uk.org.rivernile.android.bustracker.ui.news
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.compose.content
 import dagger.hilt.android.AndroidEntryPoint
-import uk.org.rivernile.android.bustracker.ui.datetime.LocalDateTimeFormatter
-import uk.org.rivernile.android.bustracker.ui.datetime.rememberDateTimeFormatter
+import uk.org.rivernile.android.bustracker.ui.formatters.LocalDateTimeFormatter
+import uk.org.rivernile.android.bustracker.ui.formatters.LocalNumberFormatter
+import uk.org.rivernile.android.bustracker.ui.formatters.rememberDateTimeFormatter
+import uk.org.rivernile.android.bustracker.ui.formatters.rememberNumberFormatter
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.DiversionsActionLauncher
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.LocalDiversionsActionLauncher
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.IncidentsActionLauncher
@@ -49,7 +52,7 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 @AndroidEntryPoint
-class NewsFragment : Fragment() {
+public class NewsFragment : Fragment() {
 
     @Inject
     internal lateinit var diversionsActionLauncher: DiversionsActionLauncher
@@ -61,12 +64,13 @@ class NewsFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ) = content {
+    ): View = content {
         MyBusTheme {
             CompositionLocalProvider(
                 LocalDiversionsActionLauncher provides diversionsActionLauncher,
                 LocalIncidentsActionLauncher provides incidentsActionLauncher,
-                LocalDateTimeFormatter provides rememberDateTimeFormatter()
+                LocalDateTimeFormatter provides rememberDateTimeFormatter(),
+                LocalNumberFormatter provides rememberNumberFormatter()
             ) {
                 NewsScreen()
             }

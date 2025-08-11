@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -37,12 +36,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.datetime.Instant
-import uk.org.rivernile.android.bustracker.ui.datetime.LocalDateTimeFormatter
-import uk.org.rivernile.android.bustracker.ui.datetime.rememberDateTimeFormatter
+import uk.org.rivernile.android.bustracker.ui.formatters.LocalDateTimeFormatter
+import uk.org.rivernile.android.bustracker.ui.formatters.rememberDateTimeFormatter
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ServiceUpdatesScreen
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiContent
@@ -52,6 +52,8 @@ import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiMoreDetails
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
+
+internal const val TEST_TAG_INCIDENTS_SCREEN = "incidents-screen"
 
 /**
  * A [Composable] which renders the root of the incidents screen with state passed in.
@@ -78,14 +80,16 @@ internal fun IncidentsScreen(
 
     ServiceUpdatesScreen(
         content = state.content,
-        modifier = modifier,
+        modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_INCIDENTS_SCREEN
+            },
         onRefresh = onRefresh,
         onErrorSnackbarShown = onErrorSnackbarShown,
-        itemContent = { item ->
+        itemContent = { item, itemModifier ->
             IncidentItem(
                 item = item,
-                modifier = Modifier
-                    .widthIn(0.dp, 568.dp)
+                modifier = itemModifier
                     .padding(start = doublePadding, end = doublePadding),
                 onMoreDetailsClicked = { onMoreDetailsClicked(item) }
             )

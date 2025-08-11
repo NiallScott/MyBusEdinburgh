@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.datetime
+package uk.org.rivernile.android.bustracker.ui.formatters
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ProvidableCompositionLocal
