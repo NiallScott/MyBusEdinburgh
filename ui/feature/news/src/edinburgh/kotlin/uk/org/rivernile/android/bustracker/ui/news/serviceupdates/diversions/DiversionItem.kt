@@ -24,6 +24,8 @@
  *
  */
 
+@file:OptIn(ExperimentalTime::class)
+
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions
 
 import android.content.res.Configuration
@@ -42,7 +44,6 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.datetime.Instant
 import uk.org.rivernile.android.bustracker.ui.formatters.LocalDateTimeFormatter
 import uk.org.rivernile.android.bustracker.ui.formatters.rememberDateTimeFormatter
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
@@ -55,6 +56,8 @@ import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiMoreDetails
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * A [Composable] which renders a diversion item.

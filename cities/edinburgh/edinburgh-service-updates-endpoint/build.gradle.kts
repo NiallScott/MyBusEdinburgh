@@ -56,9 +56,6 @@ dependencies {
     // (De-)serialisation
     implementation(libs.kotlin.serialization.json)
 
-    // Date/time
-    implementation(libs.kotlin.datetime)
-
     // Test dependencies
     testImplementation(testFixtures(project(":core:connectivity")))
     testImplementation(testFixtures(project(":core:logging")))

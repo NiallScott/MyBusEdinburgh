@@ -24,15 +24,18 @@
  *
  */
 
+@file:OptIn(ExperimentalTime::class)
+
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.datetime.Instant
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.UiDiversion
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIncident
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * Tests for [RealServiceUpdatesDisplayCalculator].

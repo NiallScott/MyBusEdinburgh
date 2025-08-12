@@ -24,10 +24,11 @@
  *
  */
 
+@file:OptIn(ExperimentalTime::class)
+
 package uk.org.rivernile.android.bustracker.core.endpoints.updates.service.lothian
 
 import kotlinx.coroutines.test.runTest
-import kotlinx.datetime.Instant
 import kotlinx.serialization.SerializationException
 import okhttp3.ResponseBody.Companion.toResponseBody
 import okio.IOException
@@ -45,6 +46,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertSame
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * Tests for [LothianServiceUpdatesEndpoint].

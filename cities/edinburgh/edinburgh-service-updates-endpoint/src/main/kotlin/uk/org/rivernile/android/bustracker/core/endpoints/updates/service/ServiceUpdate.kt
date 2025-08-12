@@ -26,7 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.updates.service
 
-import kotlinx.datetime.Instant
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * This class contains details for a service update.
@@ -40,6 +41,7 @@ import kotlinx.datetime.Instant
  * @property url An optional URL which provides a web link for this disruption.
  * @author Niall Scott
  */
+@OptIn(ExperimentalTime::class)
 public data class ServiceUpdate(
     val id: String,
     val lastUpdated: Instant,

@@ -43,9 +43,6 @@ dependencies {
     implementation(libs.dagger.core)
     ksp(libs.dagger.compiler)
 
-    // Date/time
-    implementation(libs.kotlin.datetime)
-
     // Test dependencies
     testImplementation(testFixtures(project(":cities:edinburgh:edinburgh-service-updates-endpoint")))
     testImplementation(libs.coroutines.test)

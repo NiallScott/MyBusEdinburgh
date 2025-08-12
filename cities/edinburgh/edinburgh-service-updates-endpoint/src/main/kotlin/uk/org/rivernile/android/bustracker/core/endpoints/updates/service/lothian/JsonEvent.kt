@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,13 +24,16 @@
  *
  */
 
+@file:OptIn(ExperimentalTime::class)
+
 package uk.org.rivernile.android.bustracker.core.endpoints.updates.service.lothian
 
-import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdate
 import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdateType
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * This class defines the structure for an event JSON object.

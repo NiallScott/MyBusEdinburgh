@@ -24,6 +24,8 @@
  *
  */
 
+@file:OptIn(ExperimentalTime::class)
+
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
 import androidx.compose.foundation.layout.Arrangement
@@ -40,13 +42,14 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.datetime.Instant
 import uk.org.rivernile.android.bustracker.ui.formatters.LocalDateTimeFormatter
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.news.R
 import uk.org.rivernile.android.bustracker.ui.text.SmallDecoratedServiceNamesListingText
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import java.util.Date
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 internal const val TEST_TAG_ITEM_TITLE = "item-title"
 internal const val TEST_TAG_ITEM_SUMMARY = "item-summary"

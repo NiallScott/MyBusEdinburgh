@@ -24,10 +24,11 @@
  *
  */
 
+@file:OptIn(ExperimentalTime::class)
+
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents
 
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.datetime.Instant
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.updates.IncidentServiceUpdate
 import uk.org.rivernile.android.bustracker.core.updates.PlannedServiceUpdate
@@ -38,6 +39,8 @@ import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * Tests for `UiIncident.kt`.

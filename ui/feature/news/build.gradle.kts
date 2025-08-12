@@ -96,9 +96,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.material.compose)
 
-    // Date/time
-    implementation(libs.kotlin.datetime)
-
     // Kotlin immutable collections
     implementation(libs.kotlin.immutable.collections)
 

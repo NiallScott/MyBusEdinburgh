@@ -24,6 +24,8 @@
  *
  */
 
+@file:OptIn(ExperimentalTime::class)
+
 package uk.org.rivernile.android.bustracker.ui.news
 
 import app.cash.turbine.test
@@ -34,7 +36,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import kotlinx.datetime.Instant
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.FakeServiceUpdatesErrorTracker
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.FakeUiContentFetcher
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ServiceUpdatesErrorTracker
@@ -55,6 +56,8 @@ import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIn
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * Tests for [NewsViewModel].

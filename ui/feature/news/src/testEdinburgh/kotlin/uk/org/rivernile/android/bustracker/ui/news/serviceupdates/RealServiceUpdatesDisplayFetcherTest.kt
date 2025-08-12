@@ -24,6 +24,8 @@
  *
  */
 
+@file:OptIn(ExperimentalTime::class)
+
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
 import app.cash.turbine.test
@@ -32,7 +34,6 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import kotlinx.datetime.Instant
 import uk.org.rivernile.android.bustracker.core.services.FakeServicesRepository
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
@@ -47,6 +48,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.fail
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * Tests for [RealServiceUpdatesDisplayFetcher].

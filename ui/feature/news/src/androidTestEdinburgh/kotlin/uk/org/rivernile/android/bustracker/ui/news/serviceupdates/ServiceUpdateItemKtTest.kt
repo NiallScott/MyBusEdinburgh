@@ -24,6 +24,8 @@
  *
  */
 
+@file:OptIn(ExperimentalTime::class)
+
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
 import androidx.activity.ComponentActivity
@@ -35,7 +37,6 @@ import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.datetime.Instant
 import org.junit.Rule
 import uk.org.rivernile.android.bustracker.ui.formatters.LocalDateTimeFormatter
 import uk.org.rivernile.android.bustracker.ui.formatters.rememberDateTimeFormatter
@@ -46,6 +47,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * Tests for `ServiceUpdateItem.kt`.

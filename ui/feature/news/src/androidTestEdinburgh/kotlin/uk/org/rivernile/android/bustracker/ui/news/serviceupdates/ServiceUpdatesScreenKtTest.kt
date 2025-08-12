@@ -24,6 +24,8 @@
  *
  */
 
+@file:OptIn(ExperimentalTime::class)
+
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
 import androidx.activity.ComponentActivity
@@ -46,13 +48,14 @@ import androidx.compose.ui.test.swipeDown
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.test.runTest
-import kotlinx.datetime.Instant
 import org.junit.Rule
 import uk.org.rivernile.android.bustracker.ui.news.R
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIncident
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 private const val SNACKBAR_TIMEOUT = 5000L
 

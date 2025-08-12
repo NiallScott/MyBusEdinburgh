@@ -24,6 +24,8 @@
  *
  */
 
+@file:OptIn(ExperimentalTime::class)
+
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents
 
 import android.content.res.Configuration
@@ -40,7 +42,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.datetime.Instant
 import uk.org.rivernile.android.bustracker.ui.formatters.LocalDateTimeFormatter
 import uk.org.rivernile.android.bustracker.ui.formatters.rememberDateTimeFormatter
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
@@ -52,6 +53,8 @@ import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiMoreDetails
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 internal const val TEST_TAG_INCIDENTS_SCREEN = "incidents-screen"
 

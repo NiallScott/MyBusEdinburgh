@@ -104,9 +104,6 @@ play-services-maps-ktx = { module = "com.google.maps.android:maps-ktx", version 
 play-services-maps-utils = { module = "com.google.maps.android:android-maps-utils", version = "3.14.0" }
 play-services-maps-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version = "5.2.0" }
 
-# Date/time
-kotlin-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version = "0.4.1" }
-
 # Testing dependencies.
 androidx-arch-core-test = { module = "androidx.arch.core:core-testing", version = "2.2.0" }
 androidx-benchmark-macro = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "androidx-benchmark" }

@@ -24,12 +24,13 @@
  *
  */
 
+@file:OptIn(ExperimentalTime::class)
+
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions
 
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.datetime.Instant
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.updates.PlannedServiceUpdate
 import uk.org.rivernile.android.bustracker.core.updates.ServiceUpdate
@@ -37,6 +38,8 @@ import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiMoreDetails
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiServiceUpdate
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.toUiServiceNamesOrNull
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * This represents the data for a diversion which is shown on the UI.

@@ -24,11 +24,14 @@
  *
  */
 
+@file:OptIn(ExperimentalTime::class)
+
 package uk.org.rivernile.android.bustracker.core.updates
 
-import kotlinx.datetime.Instant
 import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdate as EndpointServiceUpdate
 import uk.org.rivernile.android.bustracker.core.endpoints.updates.service.ServiceUpdateType
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * This interface defines a service update. Please see the sub-types for specific types of service
