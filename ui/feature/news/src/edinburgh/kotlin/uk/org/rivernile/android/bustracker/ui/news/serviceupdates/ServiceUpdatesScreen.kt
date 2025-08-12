@@ -55,6 +55,8 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -107,11 +109,23 @@ internal fun <T : UiServiceUpdate> ServiceUpdatesScreen(
     onErrorSnackbarShown: (Long) -> Unit,
     itemContent: @Composable LazyItemScope.(item: T, modifier: Modifier) -> Unit
 ) {
+    val isRefreshing = content.isRefreshing
+    val pullToRefreshState = rememberPullToRefreshState()
+
     PullToRefreshBox(
-        isRefreshing = content.isRefreshing,
+        isRefreshing = isRefreshing,
         onRefresh = onRefresh,
         modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        state = pullToRefreshState,
+        contentAlignment = Alignment.Center,
+        indicator = {
+            Indicator(
+                state = pullToRefreshState,
+                isRefreshing = isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter),
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
     ) {
         Content(
             content = content,
