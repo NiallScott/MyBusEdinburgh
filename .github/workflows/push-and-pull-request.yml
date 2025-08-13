@@ -6,12 +6,19 @@ jobs:
     runs-on: ubuntu-latest
     environment: development
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-java
-      - uses: ./.github/actions/write-google-services-file
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: ./.github/actions/setup-java
+      - name: Write Google Services file
+        uses: ./.github/actions/write-google-services-file
+        with:
+          google-services-base64: ${{ secrets.EDINBURGH_GOOGLE_SERVICES_BASE64 }}
       - name: Write debug keystore
         uses: ./.github/actions/write-keystore-file
         id: write-debug-keystore
+        with:
+          keystore-file-base64: ${{ secrets.KEYSTORE_FILE_BASE64 }}
       - name: Build and test
         run: >
           ./gradlew
@@ -30,4 +37,5 @@ jobs:
           assembleDebug
         env:
           JAVA_OPTS: '-Xmx4096m'
-      - uses: ./.github/actions/store-artifacts
+      - name: Store artifacts
+        uses: ./.github/actions/store-artifacts

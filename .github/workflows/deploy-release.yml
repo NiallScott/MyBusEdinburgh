@@ -9,13 +9,23 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-java
-      - uses: ./.github/actions/write-google-services-file
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: ./.github/actions/setup-java
+      - name: Write Google Services file
+        uses: ./.github/actions/write-google-services-file
+        with:
+          google-services-base64: ${{ secrets.EDINBURGH_GOOGLE_SERVICES_BASE64 }}
       - name: Write release keystore
         uses: ./.github/actions/write-keystore-file
         id: write-release-keystore
-      - uses: ./.github/actions/write-firebase-service-credentials-file
+        with:
+          keystore-file-base64: ${{ secrets.KEYSTORE_FILE_BASE64 }}
+      - name: Write Firebase service credentials file
+        uses: ./.github/actions/write-firebase-service-credentials-file
+        with:
+          firebase-service-account-token-base64: ${{ secrets.EDINBURGH_FIREBASE_SERVICE_ACCOUNT_TOKEN_BASE64 }}
       - name: Build, test and deploy
         run: >
           ./gradlew
@@ -35,4 +45,5 @@ jobs:
           :app:appDistributionUploadEdinburghRelease
         env:
           JAVA_OPTS: '-Xmx4096m'
-      - uses: ./.github/actions/store-artifacts
+      - name: Store artifacts
+        uses: ./.github/actions/store-artifacts
