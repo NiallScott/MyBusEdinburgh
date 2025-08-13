@@ -50,6 +50,7 @@ import androidx.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.window.core.layout.WindowSizeClass
 import org.junit.Rule
 import uk.org.rivernile.android.bustracker.ui.formatters.LocalNumberFormatter
 import uk.org.rivernile.android.bustracker.ui.formatters.rememberNumberFormatter
@@ -147,6 +148,47 @@ class NewsScreenKtTest {
     }
 
     @Test
+    fun tabIconsAreShownWhenDeviceHeightIsAtLeastMediumSizeClass() {
+        composeTestRule.setContent {
+            MyBusTheme {
+                NewsScreenWithStateWithDefaultEventHandlers(
+                    state = UiState()
+                )
+            }
+        }
+
+        composeTestRule
+            .onAllNodesWithTag(testTag = TEST_TAG_TAB_ICON, useUnmergedTree = true)
+            .assertCountEquals(2)
+    }
+
+    @Test
+    fun tabIconsAreNotShownWhenDeviceHeightIsLessThanMediumSizeClass() {
+        composeTestRule.setContent {
+            MyBusTheme {
+                NewsScreenWithStateWithDefaultEventHandlers(
+                    state = UiState(
+                        tabBadges = UiTabBadges(
+                            incidentsCount = 1,
+                            diversionsCount = 1024
+                        )
+                    ),
+                    windowSizeClass = createWindowSizeClass(
+                        heightDp = WindowSizeClass.HEIGHT_DP_MEDIUM_LOWER_BOUND - 1f
+                    )
+                )
+            }
+        }
+
+        composeTestRule
+            .onAllNodesWithTag(testTag = TEST_TAG_TAB_ICON, useUnmergedTree = true)
+            .assertCountEquals(0)
+        composeTestRule
+            .onAllNodesWithTag(testTag = TEST_TAG_TAB_BADGE_COUNT, useUnmergedTree = true)
+            .assertCountEquals(0)
+    }
+
+    @Test
     fun tabCountBadgeIsNotShownWhenCountIsNull() {
         composeTestRule.setContent {
             MyBusTheme {
@@ -219,6 +261,7 @@ class NewsScreenKtTest {
     private fun NewsScreenWithStateWithDefaultEventHandlers(
         state: UiState,
         modifier: Modifier = Modifier,
+        windowSizeClass: WindowSizeClass = createWindowSizeClass(),
         onRefresh: () -> Unit = { },
         onIncidentMoreDetailsClicked: (UiIncident) -> Unit = { },
         onIncidentActionLaunched: () -> Unit = { },
@@ -231,6 +274,7 @@ class NewsScreenKtTest {
         ) {
             NewsScreenWithState(
                 state = state,
+                windowSizeClass = windowSizeClass,
                 modifier = modifier,
                 onRefresh = onRefresh,
                 onIncidentMoreDetailsClicked = onIncidentMoreDetailsClicked,
@@ -241,6 +285,11 @@ class NewsScreenKtTest {
             )
         }
     }
+
+    private fun createWindowSizeClass(
+        widthDp: Float = WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND.toFloat(),
+        heightDp: Float = WindowSizeClass.HEIGHT_DP_MEDIUM_LOWER_BOUND.toFloat()
+    ) = WindowSizeClass(widthDp = widthDp, heightDp = heightDp)
 
     private fun performClick(tag: String) {
         composeTestRule

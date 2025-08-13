@@ -37,6 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -53,6 +54,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.window.core.layout.WindowSizeClass
 import uk.org.rivernile.android.bustracker.ui.formatters.LocalNumberFormatter
 import uk.org.rivernile.android.bustracker.ui.formatters.rememberNumberFormatter
 import uk.org.rivernile.android.bustracker.ui.interop.MenuProvider
@@ -66,6 +68,7 @@ import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 
 internal const val TEST_TAG_TAB_INCIDENTS = "incidents-tab"
 internal const val TEST_TAG_TAB_DIVERSIONS = "diversions-tab"
+internal const val TEST_TAG_TAB_ICON = "tab-icon"
 internal const val TEST_TAG_TAB_BADGE_COUNT = "count-tab-badge"
 
 private const val TAB_INCIDENTS = 0
@@ -75,15 +78,18 @@ private const val TAB_DIVERSIONS = 1
  * The main entry point to the News screen.
  *
  * @param viewModel An instance of [NewsViewModel] to coordinate state.
+ * @param windowSizeClass The size class of the window, used to adjust layout for available space.
  */
 @Composable
 internal fun NewsScreen(
-    viewModel: NewsViewModel = viewModel()
+    viewModel: NewsViewModel = viewModel(),
+    windowSizeClass: WindowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
 ) {
     val uiState by viewModel.uiStateFlow.collectAsStateWithLifecycle()
 
     NewsScreenWithState(
         state = uiState,
+        windowSizeClass = windowSizeClass,
         onRefresh = viewModel::onRefresh,
         onIncidentMoreDetailsClicked = viewModel::onIncidentMoreDetailsClicked,
         onIncidentActionLaunched = viewModel::onIncidentActionLaunched,
@@ -98,6 +104,7 @@ internal fun NewsScreen(
  * state can be injected directly.
  *
  * @param state The [UiState] to render.
+ * @param windowSizeClass The size class of the window, used to adjust layout for available space.
  * @param modifier Any [Modifier]s which should be applied.
  * @param onRefresh A lambda which is executed when the user performs a refresh action.
  * @param onIncidentMoreDetailsClicked A lambda which is executed when the user presses the
@@ -113,6 +120,7 @@ internal fun NewsScreen(
 @Composable
 internal fun NewsScreenWithState(
     state: UiState,
+    windowSizeClass: WindowSizeClass,
     modifier: Modifier = Modifier,
     onRefresh: () -> Unit,
     onIncidentMoreDetailsClicked: (UiIncident) -> Unit,
@@ -125,10 +133,13 @@ internal fun NewsScreenWithState(
         modifier = modifier
     ) {
         var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
+        val tabCompactMode = !windowSizeClass
+            .isHeightAtLeastBreakpoint(WindowSizeClass.HEIGHT_DP_MEDIUM_LOWER_BOUND)
 
         NewsTabBar(
             selectedTabIndex = selectedTabIndex,
             tabBadges = state.tabBadges,
+            isCompactMode = tabCompactMode,
             onTabClicked = { selectedTabIndex = it }
         )
 
@@ -159,6 +170,7 @@ private fun NewsTabBar(
     selectedTabIndex: Int,
     tabBadges: UiTabBadges,
     modifier: Modifier = Modifier,
+    isCompactMode: Boolean = false,
     onTabClicked: (Int) -> Unit
 ) {
     PrimaryTabRow(
@@ -173,6 +185,7 @@ private fun NewsTabBar(
                 .semantics {
                     testTag = TEST_TAG_TAB_INCIDENTS
                 },
+            isCompactMode = isCompactMode,
             countForBadge = tabBadges.incidentsCount,
             onClick = { onTabClicked(TAB_INCIDENTS) }
         )
@@ -185,6 +198,7 @@ private fun NewsTabBar(
                 .semantics {
                     testTag = TEST_TAG_TAB_DIVERSIONS
                 },
+            isCompactMode = isCompactMode,
             countForBadge = tabBadges.diversionsCount,
             onClick = { onTabClicked(TAB_DIVERSIONS) }
         )
@@ -197,6 +211,7 @@ private fun NewsTab(
     text: String,
     @DrawableRes iconRes: Int,
     modifier: Modifier = Modifier,
+    isCompactMode: Boolean = false,
     countForBadge: Int? = null,
     onClick: () -> Unit
 ) {
@@ -211,32 +226,16 @@ private fun NewsTab(
                 overflow = TextOverflow.Ellipsis
             )
         },
-        icon = {
-            if (countForBadge != null) {
-                BadgedBox(
-                    badge = {
-                        Badge {
-                            Text(
-                                text = LocalNumberFormatter.current.format(countForBadge),
-                                modifier = Modifier
-                                    .semantics {
-                                        testTag = TEST_TAG_TAB_BADGE_COUNT
-                                    }
-                            )
-                        }
-                    }
-                ) {
-                    NewsTabIcon(
-                        iconRes = iconRes,
-                        contentDescription = text
-                    )
-                }
-            } else {
-                NewsTabIcon(
+        icon = if (!isCompactMode) {
+            {
+                NewsTabIconWithBadge(
                     iconRes = iconRes,
-                    contentDescription = text
+                    contentDescription = text,
+                    countForBadge = countForBadge
                 )
             }
+        } else {
+            null
         },
         unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -249,8 +248,45 @@ private fun NewsTabIcon(
 ) {
     Icon(
         painter = painterResource(id = iconRes),
-        contentDescription = contentDescription
+        contentDescription = contentDescription,
+        modifier = Modifier
+            .semantics {
+                testTag = TEST_TAG_TAB_ICON
+            }
     )
+}
+
+@Composable
+private fun NewsTabIconWithBadge(
+    @DrawableRes iconRes: Int,
+    contentDescription: String?,
+    countForBadge: Int?
+) {
+    if (countForBadge != null) {
+        BadgedBox(
+            badge = {
+                Badge {
+                    Text(
+                        text = LocalNumberFormatter.current.format(countForBadge),
+                        modifier = Modifier
+                            .semantics {
+                                testTag = TEST_TAG_TAB_BADGE_COUNT
+                            }
+                    )
+                }
+            }
+        ) {
+            NewsTabIcon(
+                iconRes = iconRes,
+                contentDescription = contentDescription
+            )
+        }
+    } else {
+        NewsTabIcon(
+            iconRes = iconRes,
+            contentDescription = contentDescription
+        )
+    }
 }
 
 @Composable
@@ -341,6 +377,7 @@ private fun NewsScreenPreview() {
                     diversionsCount = 5
                 )
             ),
+            windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass,
             onRefresh = { },
             onIncidentMoreDetailsClicked = { },
             onIncidentActionLaunched = { },
