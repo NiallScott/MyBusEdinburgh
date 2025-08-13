@@ -1,0 +1,12 @@
+name: Write Google Services file
+description: >
+  Writes the google-services.json file in to the project so it is picked up by the Google Services
+  Gradle plugin.
+runs:
+  using: "composite"
+  steps:
+    - name: Write Google Services file
+      run: |
+        mkdir -p ${GITHUB_WORKSPACE}/app/src/edinburgh/
+        echo ${{ secrets.EDINBURGH_GOOGLE_SERVICES_BASE64 }} | base64 --decode > ${GITHUB_WORKSPACE}/app/src/edinburgh/google-services.json
+      shell: bash

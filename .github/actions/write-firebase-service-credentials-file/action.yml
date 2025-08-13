@@ -1,0 +1,14 @@
+name: Write Firebase Service Credentials File
+description: >
+  Writes the firebase-service-account-token.json file, used to authenticate with the Firebase
+  servers during the build. For example, to push builds to Firebase App Distribution.
+runs:
+  using: "composite"
+  steps:
+    - name: Write Firebase Service Credentials File
+      run: |
+        echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS" >> $GITHUB_ENV
+        echo ${{ secrets.EDINBURGH_FIREBASE_SERVICE_ACCOUNT_TOKEN_BASE64 }} | base64 --decode > $GOOGLE_APPLICATION_CREDENTIALS
+      shell: bash
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account-token.json

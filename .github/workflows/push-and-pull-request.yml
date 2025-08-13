@@ -7,24 +7,11 @@ jobs:
     environment: development
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-          cache: gradle
-      - name: Write Google Services file
-        run: |
-          mkdir -p ${GITHUB_WORKSPACE}/app/src/edinburgh/
-          echo ${{ secrets.EDINBURGH_GOOGLE_SERVICES_BASE64 }} | base64 --decode > ${GITHUB_WORKSPACE}/app/src/edinburgh/google-services.json
-        shell: bash
+      - uses: ./.github/actions/setup-java
+      - uses: ./.github/actions/write-google-services-file
       - name: Write debug keystore
-        run: |
-          echo "KEYSTORE_FILE=$KEYSTORE_FILE" >> $GITHUB_ENV
-          echo ${{ secrets.KEYSTORE_FILE_BASE64 }} | base64 --decode > $KEYSTORE_FILE
-        shell: bash
-        env:
-          KEYSTORE_FILE: ${{ runner.temp }}/debug.keystore
+        uses: ./.github/actions/write-keystore-file
+        id: write-debug-keystore
       - name: Build and test
         run: >
           ./gradlew
@@ -33,7 +20,7 @@ jobs:
           -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
           -Pmybus.edinburgh.apiKey=${{ secrets.EDINBURGH_API_KEY }}
           -Pmybus.edinburgh.debug.mapsKey=${{ secrets.EDINBURGH_GOOGLE_MAPS_API_KEY }}
-          -Pmybus.keystore.debug.file=${{ env.KEYSTORE_FILE }}
+          -Pmybus.keystore.debug.file=${{ steps.write-debug-keystore.outputs.keystore-path }}
           -Pmybus.keystore.debug.storePassword=${{ secrets.KEYSTORE_PASSWORD }}
           -Pmybus.keystore.debug.keyAlias=${{ secrets.KEYSTORE_ALIAS }}
           -Pmybus.keystore.debug.keyPassword=${{ secrets.KEYSTORE_ALIAS_PASSWORD }}
@@ -43,13 +30,4 @@ jobs:
           assembleDebug
         env:
           JAVA_OPTS: '-Xmx4096m'
-      - name: Store APKs
-        uses: actions/upload-artifact@v4
-        with:
-          name: apks
-          path: '**/*.apk'
-      - name: Store reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: reports
-          path: '**/build/reports/**'
+      - uses: ./.github/actions/store-artifacts

@@ -1,0 +1,15 @@
+name: Write keystore file
+description: Writes the keystore file to use for the build
+outputs:
+  keystore-path:
+    description: The path to the keystore
+runs:
+  using: "composite"
+  steps:
+    - name: Write keystore
+      run: |
+        echo ${{ secrets.KEYSTORE_FILE_BASE64 }} | base64 --decode > $KEYSTORE_FILE
+        echo "keystore-path=$KEYSTORE_FILE" >> $GITHUB_OUTPUT
+      shell: bash
+      env:
+        KEYSTORE_FILE: ${{ runner.temp }}/key.keystore

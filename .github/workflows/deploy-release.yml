@@ -10,31 +10,12 @@ jobs:
     environment: production
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-          cache: gradle
-      - name: Write Google Services file
-        run: |
-          mkdir -p ${GITHUB_WORKSPACE}/app/src/edinburghRelease/
-          echo ${{ secrets.EDINBURGH_GOOGLE_SERVICES_BASE64 }} | base64 --decode > ${GITHUB_WORKSPACE}/app/src/edinburghRelease/google-services.json
-        shell: bash
+      - uses: ./.github/actions/setup-java
+      - uses: ./.github/actions/write-google-services-file
       - name: Write release keystore
-        run: |
-          echo "KEYSTORE_FILE=$KEYSTORE_FILE" >> $GITHUB_ENV
-          echo ${{ secrets.KEYSTORE_FILE_BASE64 }} | base64 --decode > $KEYSTORE_FILE
-        shell: bash
-        env:
-          KEYSTORE_FILE: ${{ runner.temp }}/release.keystore
-      - name: Write Firebase Service Credentials File
-        run: |
-          echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS" >> $GITHUB_ENV
-          echo ${{ secrets.EDINBURGH_FIREBASE_SERVICE_ACCOUNT_TOKEN_BASE64 }} | base64 --decode > $GOOGLE_APPLICATION_CREDENTIALS
-        shell: bash
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account-token.json
+        uses: ./.github/actions/write-keystore-file
+        id: write-release-keystore
+      - uses: ./.github/actions/write-firebase-service-credentials-file
       - name: Build, test and deploy
         run: >
           ./gradlew
@@ -43,7 +24,7 @@ jobs:
           -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
           -Pmybus.edinburgh.apiKey=${{ secrets.EDINBURGH_API_KEY }}
           -Pmybus.edinburgh.release.mapsKey=${{ secrets.EDINBURGH_GOOGLE_MAPS_API_KEY }}
-          -Pmybus.keystore.release.file=${{ env.KEYSTORE_FILE }}
+          -Pmybus.keystore.release.file=${{ steps.write-release-keystore.outputs.keystore-path }}
           -Pmybus.keystore.release.storePassword=${{ secrets.KEYSTORE_PASSWORD }}
           -Pmybus.keystore.release.keyAlias=${{ secrets.KEYSTORE_ALIAS }}
           -Pmybus.keystore.release.keyPassword=${{ secrets.KEYSTORE_ALIAS_PASSWORD }}
@@ -54,13 +35,4 @@ jobs:
           :app:appDistributionUploadEdinburghRelease
         env:
           JAVA_OPTS: '-Xmx4096m'
-      - name: Store APKs
-        uses: actions/upload-artifact@v4
-        with:
-          name: apks
-          path: '**/*.apk'
-      - name: Store reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: reports
-          path: '**/build/reports/**'
+      - uses: ./.github/actions/store-artifacts
