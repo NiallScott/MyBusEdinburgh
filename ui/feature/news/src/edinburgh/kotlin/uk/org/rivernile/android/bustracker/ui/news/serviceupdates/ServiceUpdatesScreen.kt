@@ -276,7 +276,7 @@ private fun <T : UiServiceUpdate> ItemsList(
 ) {
     LazyColumn(
         modifier = modifier,
-        contentPadding = PaddingValues(top = 12.dp, bottom = 44.dp),
+        contentPadding = PaddingValues(top = 12.dp, bottom = 36.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
