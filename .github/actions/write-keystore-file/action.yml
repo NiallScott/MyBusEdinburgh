@@ -7,10 +7,12 @@ inputs:
 outputs:
   keystore-path:
     description: The path to the keystore
+    value: ${{ steps.write-keystore.outputs.keystore-path }}
 runs:
   using: "composite"
   steps:
     - name: Write keystore
+      id: write-keystore
       run: |
         echo ${{ inputs.keystore-file-base64 }} | base64 --decode > $KEYSTORE_FILE
         echo "keystore-path=$KEYSTORE_FILE" >> $GITHUB_OUTPUT
