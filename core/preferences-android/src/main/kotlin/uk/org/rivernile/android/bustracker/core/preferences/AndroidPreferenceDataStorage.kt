@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -52,9 +52,6 @@ internal class AndroidPreferenceDataStorage @Inject constructor(
     companion object {
 
         private const val DEFAULT_WIFI_ONLY = false
-        private const val DEFAULT_ALERT_SOUND = true
-        private const val DEFAULT_ALERT_VIBRATE = true
-        private const val DEFAULT_ALERT_LED = true
         private const val DEFAULT_AUTO_REFRESH = false
         private const val DEFAULT_SHOW_NIGHT_BUSES = true
         private const val DEFAULT_SERVICE_SORTING = false
@@ -72,9 +69,6 @@ internal class AndroidPreferenceDataStorage @Inject constructor(
 
     private val keyBusStopDatabaseWifiOnly = booleanPreferencesKey(PREF_BUS_STOP_DATABASE_WIFI_ONLY)
     private val keyAppTheme = stringPreferencesKey(PREF_APP_THEME)
-    private val keyAlertSound = booleanPreferencesKey(PREF_ALERT_SOUND)
-    private val keyAlertVibrate = booleanPreferencesKey(PREF_ALERT_VIBRATE)
-    private val keyAlertLed = booleanPreferencesKey(PREF_ALERT_LED)
     private val keyAutoRefresh = booleanPreferencesKey(PREF_AUTO_REFRESH)
     private val keyShowNightBuses = booleanPreferencesKey(PREF_SHOW_NIGHT_BUSES)
     private val keyServiceSorting = booleanPreferencesKey(PREF_SERVICE_SORTING)
@@ -102,17 +96,6 @@ internal class AndroidPreferenceDataStorage @Inject constructor(
                 APP_THEME_DARK -> AppTheme.DARK
                 else -> AppTheme.SYSTEM_DEFAULT
             }
-        }
-        .distinctUntilChanged()
-
-    override val alertNotificationPreferencesFlow get() = dataStoreSource
-        .preferencesFlow
-        .map {
-            AlertNotificationPreferences(
-                hasSound = it[keyAlertSound] ?: DEFAULT_ALERT_SOUND,
-                hasVibration = it[keyAlertVibrate] ?: DEFAULT_ALERT_VIBRATE,
-                hasLedFlash = it[keyAlertLed] ?: DEFAULT_ALERT_LED
-            )
         }
         .distinctUntilChanged()
 

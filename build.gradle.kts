@@ -101,12 +101,6 @@ subprojects {
                 @Suppress("UnstableApiUsage")
                 managedDevices {
                     allDevices {
-                        maybeCreate<ManagedVirtualDevice>("pixel2api27").apply {
-                            device = "Pixel 2"
-                            apiLevel = 27
-                            systemImageSource = "aosp" // No ATD.
-                        }
-
                         maybeCreate<ManagedVirtualDevice>("pixel2api28").apply {
                             device = "Pixel 2"
                             apiLevel = 28
@@ -146,7 +140,6 @@ subprojects {
 
                     groups {
                         maybeCreate("allApis").apply {
-                            targetDevices += allDevices["pixel2api27"]
                             targetDevices += allDevices["pixel2api28"]
                             targetDevices += allDevices["pixel2api29"]
                             targetDevices += allDevices["pixel2api30"]

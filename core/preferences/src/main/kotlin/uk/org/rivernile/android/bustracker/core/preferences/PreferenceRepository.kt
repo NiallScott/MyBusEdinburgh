@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -49,12 +49,6 @@ class PreferenceRepository @Inject internal constructor(
      * changes.
      */
     val appThemeFlow get() = preferenceDataStorage.appThemeFlow
-
-    /**
-     * A [Flow] which emits alert notification preferences.
-     */
-    val alertNotificationPreferencesFlow get() =
-        preferenceDataStorage.alertNotificationPreferencesFlow
 
     /**
      * A [Flow] which emits whether auto refresh is enabled by default, and will emit further values

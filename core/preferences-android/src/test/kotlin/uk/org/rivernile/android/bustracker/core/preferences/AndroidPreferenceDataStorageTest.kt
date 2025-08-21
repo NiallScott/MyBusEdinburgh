@@ -59,9 +59,6 @@ class AndroidPreferenceDataStorageTest {
     companion object {
 
         private const val DEFAULT_WIFI_ONLY = false
-        private const val DEFAULT_ALERT_SOUND = true
-        private const val DEFAULT_ALERT_VIBRATE = true
-        private const val DEFAULT_ALERT_LED = true
         private const val DEFAULT_AUTO_REFRESH = false
         private const val DEFAULT_SHOW_NIGHT_BUSES = true
         private const val DEFAULT_SERVICE_SORTING = false
@@ -128,71 +125,6 @@ class AndroidPreferenceDataStorageTest {
             assertEquals(AppTheme.LIGHT, awaitItem())
             assertEquals(AppTheme.DARK, awaitItem())
             assertEquals(AppTheme.SYSTEM_DEFAULT, awaitItem())
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun alertNotificationPreferencesFlowEmitsValues() = runTest {
-        val keyAlertSound = booleanPreferencesKey(PREF_ALERT_SOUND)
-        val keyAlertVibrate = booleanPreferencesKey(PREF_ALERT_VIBRATE)
-        val keyAlertLed = booleanPreferencesKey(PREF_ALERT_LED)
-        val flow = intervalFlowOf(
-            0L,
-            10L,
-            preferencesOf(),
-            preferencesOf(
-                keyAlertSound to DEFAULT_ALERT_SOUND,
-                keyAlertVibrate to DEFAULT_ALERT_VIBRATE,
-                keyAlertLed to DEFAULT_ALERT_LED
-            ),
-            preferencesOf(
-                keyAlertSound to false,
-                keyAlertVibrate to false,
-                keyAlertLed to false
-            ),
-            preferencesOf(
-                keyAlertSound to false,
-                keyAlertVibrate to false,
-                keyAlertLed to false
-            ),
-            preferencesOf(
-                keyAlertSound to false,
-                keyAlertVibrate to false,
-                keyAlertLed to true
-            )
-        )
-        val dataStorage = createAndroidPreferenceDataStorage(
-            dataStoreSource = FakePreferenceDataStoreSource(
-                onPreferencesFlow = { flow }
-            )
-        )
-
-        dataStorage.alertNotificationPreferencesFlow.test {
-            assertEquals(
-                AlertNotificationPreferences(
-                    hasSound = DEFAULT_ALERT_SOUND,
-                    hasVibration = DEFAULT_ALERT_VIBRATE,
-                    hasLedFlash = DEFAULT_ALERT_LED
-                ),
-                awaitItem()
-            )
-            assertEquals(
-                AlertNotificationPreferences(
-                    hasSound = false,
-                    hasVibration = false,
-                    hasLedFlash = false
-                ),
-                awaitItem()
-            )
-            assertEquals(
-                AlertNotificationPreferences(
-                    hasSound = false,
-                    hasVibration = false,
-                    hasLedFlash = true
-                ),
-                awaitItem()
-            )
             awaitComplete()
         }
     }
@@ -542,6 +474,7 @@ class AndroidPreferenceDataStorageTest {
         dataStorage.toggleSortByTime()
         advanceUntilIdle()
 
+        @Suppress("KotlinConstantConditions")
         assertEquals(!DEFAULT_SERVICE_SORTING, preferences[key])
     }
 
@@ -582,6 +515,7 @@ class AndroidPreferenceDataStorageTest {
         dataStorage.toggleAutoRefresh()
         advanceUntilIdle()
 
+        @Suppress("KotlinConstantConditions")
         assertEquals(!DEFAULT_AUTO_REFRESH, preferences[key])
     }
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -78,9 +78,9 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
         <item name="android:enforceNavigationBarContrast" tools:targetApi="q">false</item>
-        <item name="android:windowTranslucentNavigation">@bool/translucent_navigation_bar</item>
+        <item name="android:windowTranslucentNavigation">false</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="actionModeCloseDrawable">@drawable/ic_action_close</item>
 

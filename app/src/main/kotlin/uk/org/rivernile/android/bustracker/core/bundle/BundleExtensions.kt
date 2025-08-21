@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.bundle
 
-import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.BundleCompat
@@ -53,7 +52,5 @@ inline fun <reified T : Parcelable> Bundle.getParcelableCompat(key: String): T? 
  * @return See [Bundle.getSerializable].
  * @see Bundle.getSerializable
  */
-inline fun <reified T : Serializable> Bundle.getSerializableCompat(key: String): T? = when {
-    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> getSerializable(key, T::class.java)
-    else -> @Suppress("DEPRECATION") getSerializable(key) as? T
-}
+inline fun <reified T : Serializable> Bundle.getSerializableCompat(key: String): T? =
+    BundleCompat.getSerializable(this, key, T::class.java)

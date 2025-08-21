@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.core.location.di
 
 import android.content.Context
 import android.location.LocationManager
-import android.os.Build
 import androidx.core.content.getSystemService
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
@@ -43,10 +42,7 @@ import uk.org.rivernile.android.bustracker.core.location.AndroidLocationSupport
 import uk.org.rivernile.android.bustracker.core.location.DistanceCalculator
 import uk.org.rivernile.android.bustracker.core.location.HasLocationFeatureDetector
 import uk.org.rivernile.android.bustracker.core.location.IsLocationEnabledDetector
-import uk.org.rivernile.android.bustracker.core.location.IsLocationEnabledFetcher
-import uk.org.rivernile.android.bustracker.core.location.LegacyIsLocationEnabledFetcher
 import uk.org.rivernile.android.bustracker.core.location.LocationSource
-import uk.org.rivernile.android.bustracker.core.location.V28IsLocationEnabledFetcher
 import uk.org.rivernile.android.bustracker.core.location.googleplay.GooglePlayLocationSource
 import uk.org.rivernile.android.bustracker.core.location.platform.PlatformLocationSource
 import javax.inject.Provider
@@ -63,31 +59,22 @@ internal interface LocationModule {
     @Suppress("unused")
     @Binds
     fun bindHasLocationFeatureDetector(
-        androidLocationSupport: AndroidLocationSupport): HasLocationFeatureDetector
+        androidLocationSupport: AndroidLocationSupport
+    ): HasLocationFeatureDetector
 
     @Suppress("unused")
     @Binds
     fun bindIsLocationEnabledDetector(
-        androidLocationSupport: AndroidLocationSupport): IsLocationEnabledDetector
+        androidLocationSupport: AndroidLocationSupport
+    ): IsLocationEnabledDetector
 
     @Suppress("unused")
     @Binds
     fun bindDistanceCalculator(
-        androidLocationSupport: AndroidLocationSupport): DistanceCalculator
+        androidLocationSupport: AndroidLocationSupport
+    ): DistanceCalculator
 
     companion object {
-
-        @Provides
-        fun provideIsLocationEnabledFetcher(
-            legacyIsLocationEnabledFetcher: Provider<LegacyIsLocationEnabledFetcher>,
-            v28IsLocationEnabledFetcher: Provider<V28IsLocationEnabledFetcher>
-        ): IsLocationEnabledFetcher {
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                v28IsLocationEnabledFetcher.get()
-            } else {
-                legacyIsLocationEnabledFetcher.get()
-            }
-        }
 
         @Provides
         fun provideLocationSource(

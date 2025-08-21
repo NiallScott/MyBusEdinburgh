@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,11 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.core.networking
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
@@ -38,52 +36,55 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * This is the legacy implementation of the [ConnectivityChecker]. It provides the way to detect the
- * presence of connectivity up until API level 24, where a new API became available.
+ * This is the Android implementation of [ConnectivityChecker].
  *
- * @param context The application [Context].
  * @param connectivityManager The Android [ConnectivityManager].
  * @author Niall Scott
  */
-internal class LegacyConnectivityChecker @Inject constructor(
-    private val context: Context,
+internal class AndroidConnectivityChecker @Inject constructor(
     private val connectivityManager: ConnectivityManager
 ) : ConnectivityChecker {
 
-    @Suppress("DEPRECATION")
     override val hasInternetConnectivity get() =
-        connectivityManager.activeNetworkInfo?.isConnected ?: false
+        isNetworkInternetCapable(connectivityManager.activeNetwork)
 
-    @Suppress("DEPRECATION")
     override val hasInternetConnectivityFlow get() = callbackFlow {
-        val receiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                if (ConnectivityManager.CONNECTIVITY_ACTION == intent.action) {
-                    val pendingResult = goAsync()
+        val networkCallback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                launch {
+                    handleNetworkEventForConnectivity(network)
+                }
+            }
 
-                    launch {
-                        try {
-                            getAndSendHasInternetConnectivity()
-                        } finally {
-                            pendingResult.finish()
-                        }
-                    }
+            override fun onLost(network: Network) {
+                launch {
+                    send(false)
                 }
             }
         }
 
-        context.registerReceiver(receiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
-        getAndSendHasInternetConnectivity()
+        connectivityManager.registerDefaultNetworkCallback(networkCallback)
+        handleNetworkEventForConnectivity(connectivityManager.activeNetwork)
 
         awaitClose {
-            context.unregisterReceiver(receiver)
+            connectivityManager.unregisterNetworkCallback(networkCallback)
         }
     }
 
     /**
-     * Get the current connectivity status and send it to the [ProducerScope].
+     * Get the internet capability status of the supplied [Network] and send it to the
+     * [ProducerScope]. If the [network] is `null`, then `false` will be sent.
+     *
+     * @param network The [Network] to test for internet connectivity.
      */
-    private suspend fun ProducerScope<Boolean>.getAndSendHasInternetConnectivity() {
-        send(hasInternetConnectivity)
+    private suspend fun ProducerScope<Boolean>.handleNetworkEventForConnectivity(
+        network: Network?
+    ) {
+        send(isNetworkInternetCapable(network))
     }
+
+    private fun isNetworkInternetCapable(network: Network?) = network
+        ?.let(connectivityManager::getNetworkCapabilities)
+        ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        ?: false
 }

@@ -40,8 +40,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.alerts.AlertNotificationDispatcher
 import uk.org.rivernile.android.bustracker.core.alerts.AndroidAlertNotificationDispatcher
-import uk.org.rivernile.android.bustracker.core.alerts.LegacyNotificationPreferences
-import uk.org.rivernile.android.bustracker.core.alerts.NotificationPreferences
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.LegacyAndroidArrivalAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.V31AndroidArrivalAlertTaskLauncher
@@ -73,17 +71,6 @@ internal interface AndroidAlertsModule {
     ): AlertNotificationDispatcher
 
     companion object {
-
-        @Provides
-        fun provideNotificationPreferences(
-            legacyNotificationPreferences: Provider<LegacyNotificationPreferences>
-        ) : NotificationPreferences? {
-            return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                legacyNotificationPreferences.get()
-            } else {
-                null
-            }
-        }
 
         @Provides
         fun provideProximityAlertTaskLauncher(

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -69,37 +69,6 @@ class PreferenceRepositoryTest {
             assertEquals(AppTheme.SYSTEM_DEFAULT, awaitItem())
             assertEquals(AppTheme.LIGHT, awaitItem())
             assertEquals(AppTheme.DARK, awaitItem())
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun alertNotificationPreferencesFlowReturnsFlowFromPreferenceDataStorage() = runTest {
-        val first = AlertNotificationPreferences(
-            hasSound = false,
-            hasVibration = false,
-            hasLedFlash = false
-        )
-        val second = AlertNotificationPreferences(
-            hasSound = true,
-            hasVibration = true,
-            hasLedFlash = true
-        )
-        val third = AlertNotificationPreferences(
-            hasSound = true,
-            hasVibration = false,
-            hasLedFlash = true
-        )
-        val repository = createPreferenceRepository(
-            preferenceDataStorage = FakePreferenceDataStorage(
-                onAlertNotificationPreferencesFlow = { flowOf(first, second, third) }
-            )
-        )
-
-        repository.alertNotificationPreferencesFlow.test {
-            assertEquals(first, awaitItem())
-            assertEquals(second, awaitItem())
-            assertEquals(third, awaitItem())
             awaitComplete()
         }
     }

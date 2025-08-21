@@ -41,9 +41,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.preferences.AndroidPreferenceDataStorage
-import uk.org.rivernile.android.bustracker.core.preferences.PREF_ALERT_LED
-import uk.org.rivernile.android.bustracker.core.preferences.PREF_ALERT_SOUND
-import uk.org.rivernile.android.bustracker.core.preferences.PREF_ALERT_VIBRATE
 import uk.org.rivernile.android.bustracker.core.preferences.PREF_APP_THEME
 import uk.org.rivernile.android.bustracker.core.preferences.PREF_AUTO_REFRESH
 import uk.org.rivernile.android.bustracker.core.preferences.PREF_BUS_STOP_DATABASE_WIFI_ONLY
@@ -101,9 +98,6 @@ internal class PreferenceModule {
     private val keysToMigrate get() = setOf(
         PREF_BUS_STOP_DATABASE_WIFI_ONLY,
         PREF_APP_THEME,
-        PREF_ALERT_SOUND,
-        PREF_ALERT_VIBRATE,
-        PREF_ALERT_LED,
         PREF_AUTO_REFRESH,
         PREF_SHOW_NIGHT_BUSES,
         PREF_SERVICE_SORTING,

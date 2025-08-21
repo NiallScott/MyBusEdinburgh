@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,9 +27,8 @@
 
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
-    
+
     <!-- General -->
     <PreferenceCategory
         android:title="@string/preferences_category_general">
@@ -50,51 +49,26 @@
             android:entryValues="@array/preferences_list_theme_entry_values"
             tools:summary="System default" />
     </PreferenceCategory>
-    
+
     <!-- Notifications -->
     <PreferenceCategory
         android:title="@string/preferences_category_notifications">
 
-        <SwitchPreferenceCompat
-            android:key="pref_alertsound_state"
-            android:title="@string/preferences_checkbox_notifications_sound"
-            android:defaultValue="true"
-            android:persistent="@bool/preferences_legacy_notifications"
-            app:isPreferenceVisible="@bool/preferences_legacy_notifications" />
-
-        <SwitchPreferenceCompat
-            android:key="pref_alertvibrate_state"
-            android:title="@string/preferences_checkbox_notifications_vibrate"
-            android:summary="@string/preferences_checkbox_notifications_vibrate_summary"
-            android:defaultValue="true"
-            android:persistent="@bool/preferences_legacy_notifications"
-            app:isPreferenceVisible="@bool/preferences_legacy_notifications" />
-
-        <SwitchPreferenceCompat
-            android:key="pref_alertled_state"
-            android:title="@string/preferences_checkbox_notifications_led"
-            android:summary="@string/preferences_checkbox_notifications_led_summary"
-            android:defaultValue="true"
-            android:persistent="@bool/preferences_legacy_notifications"
-            app:isPreferenceVisible="@bool/preferences_legacy_notifications" />
-
         <Preference
             android:key="pref_system_notification_settings"
             android:title="@string/preferences_preference_notification_settings"
-            android:persistent="false"
-            app:isPreferenceVisible="@bool/preferences_notification_channels">
+            android:persistent="false">
 
             <intent
                 android:action="android.settings.APP_NOTIFICATION_SETTINGS">
 
-                <!--suppress AndroidElementNotAllowed -->
                 <extra
                     android:name="android.provider.extra.APP_PACKAGE"
                     android:value="@string/package_name" />
             </intent>
         </Preference>
     </PreferenceCategory>
-    
+
     <!-- Bus Times Display -->
     <PreferenceCategory
         android:title="@string/preferences_category_bustimes">
@@ -124,7 +98,7 @@
             android:entries="@array/preferences_num_departures_entries"
             android:entryValues="@array/preferences_num_departures_entry_values" />
     </PreferenceCategory>
-    
+
     <!-- Bus Stop Map -->
     <PreferenceCategory
         android:title="@string/preferences_category_map">
@@ -134,7 +108,7 @@
             android:title="@string/preferences_checkbox_map_zoom_buttons"
             android:defaultValue="true" />
     </PreferenceCategory>
-    
+
     <!-- Nearest Stops Display -->
     <PreferenceCategory
         android:title="@string/preferences_category_neareststops">

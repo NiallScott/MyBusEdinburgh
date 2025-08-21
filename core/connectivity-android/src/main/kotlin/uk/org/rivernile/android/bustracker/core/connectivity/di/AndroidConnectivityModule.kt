@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,17 +28,15 @@ package uk.org.rivernile.android.bustracker.core.connectivity.di
 
 import android.content.Context
 import android.net.ConnectivityManager
-import android.os.Build
 import androidx.core.content.getSystemService
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
-import uk.org.rivernile.android.bustracker.core.networking.LegacyConnectivityChecker
-import uk.org.rivernile.android.bustracker.core.networking.V24ConnectivityChecker
+import uk.org.rivernile.android.bustracker.core.networking.AndroidConnectivityChecker
 import uk.org.rivernile.android.bustracker.core.networking.di.ConnectivityModule
-import javax.inject.Provider
 
 /**
  * This module provides dependencies related to connectivity.
@@ -51,21 +49,18 @@ import javax.inject.Provider
         ConnectivityModule::class
     ]
 )
-internal class AndroidConnectivityModule {
+internal interface AndroidConnectivityModule {
 
-    @Provides
-    fun provideConnectivityChecker(
-        legacyConnectivityChecker: Provider<LegacyConnectivityChecker>,
-        v24ConnectivityChecker: Provider<V24ConnectivityChecker>
-    ): ConnectivityChecker {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            v24ConnectivityChecker.get()
-        } else {
-            legacyConnectivityChecker.get()
-        }
+    @Suppress("unused")
+    @Binds
+    fun bindConnectivityChecker(
+        androidConnectivityChecker: AndroidConnectivityChecker
+    ): ConnectivityChecker
+
+    companion object {
+
+        @Provides
+        fun provideConnectivityManager(context: Context): ConnectivityManager =
+            requireNotNull(context.getSystemService())
     }
-
-    @Provides
-    fun provideConnectivityManager(context: Context): ConnectivityManager =
-        requireNotNull(context.getSystemService())
 }

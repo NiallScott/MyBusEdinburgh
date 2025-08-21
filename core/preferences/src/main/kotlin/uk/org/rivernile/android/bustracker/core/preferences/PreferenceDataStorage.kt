@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,11 +45,6 @@ interface PreferenceDataStorage {
      * changes.
      */
     val appThemeFlow: Flow<AppTheme>
-
-    /**
-     * A [Flow] which emits alert notification preferences.
-     */
-    val alertNotificationPreferencesFlow: Flow<AlertNotificationPreferences>
 
     /**
      * A [Flow] which emits whether auto refresh is enabled by default, and will emit further

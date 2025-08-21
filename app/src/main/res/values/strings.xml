@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -42,15 +42,15 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="yes">Yes</string>
     <string name="remove">Remove</string>
     <string name="loading">Loading&#8230;</string>
-    
+
     <string name="prox_alert_add">Add proximity alert</string>
     <string name="prox_alert_rem">Remove proximity alert</string>
     <string name="time_alert_add">Add arrival alert</string>
     <string name="time_alert_rem">Remove arrival alert</string>
-    
+
     <string name="favourite_add">Add favourite</string>
     <string name="favourite_rem">Remove favourite</string>
-    
+
     <!--
     ***************************
     * String related to times *
@@ -80,7 +80,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
         <item>Faces west</item>
         <item>Faces north west</item>
     </string-array>
-    
+
     <!--
     ****************
     ****************
@@ -88,14 +88,14 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     ****************
     ****************
     -->
-    
+
     <!--
     **********************************
     * Strings for BusStopMapActivity *
     **********************************
     -->
     <string name="map_title">Map</string>
-    
+
     <!--
     ***************************************
     * Strings for DisplayStopDataActivity *
@@ -107,7 +107,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="displaystopdata_error_unknown_stop_name">Unknown stop name</string>
     <string name="displaystopdata_error_stop_code_missing">Unknown stop code</string>
     <string name="displaystopdata_error_street_view_missing">Street View not installed</string>
-    
+
     <!--
     ****************************
     * Strings for MainActivity *
@@ -125,7 +125,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     ********************************
     -->
     <string name="preferences_title">Settings</string>
-    
+
     <string name="preferences_category_general">General</string>
     <string name="preferences_checkbox_general_databaseupdatewifi">Updates via Wi-Fi only</string>
     <string name="preferences_checkbox_general_databaseupdatewifi_summary_ticked">Reduces your data usage over mobile networks. However, bus stop data will be updated less often.</string>
@@ -139,13 +139,8 @@ This version of strings.xml is in the developer's locale (en_GB) -->
         <item>@string/preferences_list_theme_light</item>
         <item>@string/preferences_list_theme_dark</item>
     </string-array>
-    
+
     <string name="preferences_category_notifications">Notifications</string>
-    <string name="preferences_checkbox_notifications_sound">Use sound</string>
-    <string name="preferences_checkbox_notifications_vibrate">Use vibration</string>
-    <string name="preferences_checkbox_notifications_vibrate_summary">If the device supports vibration</string>
-    <string name="preferences_checkbox_notifications_led">Flash device LED</string>
-    <string name="preferences_checkbox_notifications_led_summary">If the device supports it</string>
     <string name="preferences_preference_notification_settings">Notification settings</string>
 
     <string name="preferences_category_bustimes">Bus Times Display</string>
@@ -159,12 +154,12 @@ This version of strings.xml is in the developer's locale (en_GB) -->
 
     <string name="preferences_category_map">Map</string>
     <string name="preferences_checkbox_map_zoom_buttons">Zoom buttons</string>
-    
+
     <string name="preferences_category_neareststops">Nearest Stops Display</string>
     <string name="preferences_checkbox_neareststops_gpsdisabled">Disable GPS prompt</string>
     <string name="preferences_checkbox_neareststops_gpsdisabled_ticked">You will not be prompted when device GPS access is disabled</string>
     <string name="preferences_checkbox_neareststops_gpsdisabled_unticked">You will be prompted when device GPS access is disabled</string>
-    
+
     <string-array name="preferences_num_departures_entries">
         <item>1 departure</item>
         <item>2 departures</item>
@@ -177,7 +172,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
         <item>9 departures</item>
         <item>10 departures</item>
     </string-array>
-    
+
     <!--
     ***************
     ***************
@@ -255,7 +250,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="explore_tab_favourites">Favourites</string>
     <string name="explore_tab_map">Map</string>
     <string name="explore_tab_nearest_stops">Nearest</string>
-    
+
     <!--
     **************************************
     * Strings for FavouriteStopsFragment *
@@ -264,7 +259,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="favouritestops_nosavedstops"><b>You have no saved favourite stops</b>\nTo begin, find a stop from the stop map or nearest stops list</string>
     <string name="favouritestops_star_content_description">Favourite stop</string>
     <string name="favouriteshortcut_title">Select favourite stop</string>
-    
+
     <!--
     ************************************
     * Strings for NearestStopsFragment *
@@ -301,7 +296,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="stopdetails_stop_distance_permission_required">Distance unknown (location permission required)</string>
     <string name="stopdetails_stop_distance_location_off">Distance unknown (location off)</string>
     <string name="stopdetails_no_services">No known services for this stop</string>
-    
+
     <!--
     **********************
     **********************
@@ -380,28 +375,28 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="addtimealertdialog_error_btn_grant_permission">Grant permission</string>
     <string name="addtimealertdialog_error_btn_permission_denied">App settings</string>
     <string name="addtimealertdialog_error_no_app_settings">Unable to show app settings</string>
-    
+
     <!--
     *********************************************
     * Strings for DeleteFavouriteDialogFragment *
     *********************************************
     -->
     <string name="deletefavouritedialog_title">Remove stop as a favourite?</string>
-    
+
     <!--
     **************************************************
     * Strings for DeleteProximityAlertDialogFragment *
     **************************************************
     -->
     <string name="deleteproxdialog_title">Remove proximity alert?</string>
-    
+
     <!--
     *********************************************
     * Strings for DeleteTimeAlertDialogFragment *
     *********************************************
     -->
     <string name="deletetimedialog_title">Remove time alert?</string>
-    
+
     <!--
     ***************************************************
     * Strings for InstallBarcodeScannerDialogFragment *
@@ -439,7 +434,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="serviceschooserdialog_btn_clear_all">Clear all</string>
     <string name="serviceschooserdialog_error_no_services_global">There are no known services</string>
     <string name="serviceschooserdialog_error_no_services_stop">There are no known services for this stop</string>
-    
+
     <!--
     *********************************************
     * Strings for TimeLimitationsDialogFragment *
@@ -453,7 +448,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
         lack of internet access or the device is sleeping.\n\nThis feature may use more battery
         power than normal.
     </string>
-    
+
     <!--
     ***************************************
     * Strings for TurnOnGpsDialogFragment *
@@ -462,7 +457,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="turnongpsdialog_title">GPS is turned off</string>
     <string name="turnongpsdialog_message">To get the most precise location information, GPS needs to be turned on. Turn on now?</string>
     <string name="turnongpsdialog_checkbox">Do not remind me again</string>
-    
+
     <!--
     ***********
     ***********
@@ -470,7 +465,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     ***********
     ***********
     -->
-    
+
     <!--
     ***************************************
     * Strings for BusStopMapFragment menu *
@@ -515,14 +510,14 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="favouritestops_menu_prox_rem">@string/prox_alert_rem</string>
     <string name="favouritestops_menu_time_add">@string/time_alert_add</string>
     <string name="favouritestops_menu_time_rem">@string/time_alert_rem</string>
-    
+
     <!--
     *****************************************
     * Strings for NearestStopsFragment menu *
     *****************************************
     -->
     <string name="neareststops_menu_filter">Filter services</string>
-    
+
     <!--
     **********************************************************
     * Strings for NearestStopsFragment ListView context menu *

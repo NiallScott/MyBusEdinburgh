@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,21 +41,19 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * This is the Android-specific implementation of [HasLocationFeatureDetector] and
- * [IsLocationEnabledFetcher].
+ * This is the Android-specific implementation of [HasLocationFeatureDetector],
+ * [IsLocationEnabledDetector] and [DistanceCalculator].
  *
  * @param context The application [Context].
  * @param packageManager The Android [PackageManager].
- * @param isLocationEnabledFetcher An implementation which retrieves the location enabled setting
- * depending on the platform version.
+ * @param locationManager Used to interact with system location APIs.
  * @author Niall Scott
  */
 @Singleton
 internal class AndroidLocationSupport @Inject constructor(
     private val context: Context,
     private val packageManager: PackageManager,
-    private val locationManager: LocationManager,
-    private val isLocationEnabledFetcher: IsLocationEnabledFetcher
+    private val locationManager: LocationManager
 ) : HasLocationFeatureDetector, IsLocationEnabledDetector, DistanceCalculator {
 
     override val hasLocationFeature get() =
@@ -112,6 +110,6 @@ internal class AndroidLocationSupport @Inject constructor(
      * @param channel The [SendChannel] to send the enabled state to.
      */
     private suspend fun getAndSendIsLocationEnabled(channel: SendChannel<Boolean>) {
-        channel.send(isLocationEnabledFetcher.isLocationEnabled())
+        channel.send(locationManager.isLocationEnabled)
     }
 }

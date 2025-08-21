@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -42,8 +42,6 @@ import javax.inject.Inject
  *
  * @param context The application [Context].
  * @param notificationManager The [NotificationManagerCompat].
- * @param notificationPreferences An implementation of [NotificationPreferences]. This may be `null`
- * when no implementation is available.
  * @param busStopsRepository The repository to access bus stop data.
  * @param deeplinkIntentFactory An implementation which creates [Intent]s for deeplinking.
  * @param textFormattingUtils Utility class for formatting text of stop name.
@@ -52,11 +50,11 @@ import javax.inject.Inject
 internal class AndroidAlertNotificationDispatcher @Inject constructor(
     private val context: Context,
     private val notificationManager: NotificationManagerCompat,
-    private val notificationPreferences: NotificationPreferences?,
     private val busStopsRepository: BusStopsRepository,
     private val permissionChecker: AndroidPermissionChecker,
     private val deeplinkIntentFactory: DeeplinkIntentFactory,
-    private val textFormattingUtils: TextFormattingUtils) : AlertNotificationDispatcher {
+    private val textFormattingUtils: TextFormattingUtils
+) : AlertNotificationDispatcher {
 
     companion object {
 
@@ -68,7 +66,8 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
 
     override suspend fun dispatchTimeAlertNotification(
         arrivalAlert: ArrivalAlert,
-        qualifyingServices: List<Service>) {
+        qualifyingServices: List<Service>
+    ) {
         if (permissionChecker.checkPostNotificationPermission()) {
             val title = context.getString(R.string.arrival_alert_notification_title)
             val summary = createAlertSummaryString(arrivalAlert, qualifyingServices)
@@ -76,23 +75,21 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
 
             NotificationCompat.Builder(
                 context,
-                CHANNEL_ARRIVAL_ALERTS)
-                .apply {
-                    setSmallIcon(R.drawable.ic_directions_bus_black)
-                    setContentTitle(title)
-                    setContentText(summary)
-                    setTicker(summary)
-                    setStyle(NotificationCompat.BigTextStyle().bigText(summary))
-                    priority = NotificationCompat.PRIORITY_HIGH
-                    setCategory(NotificationCompat.CATEGORY_ALARM)
-                    setContentIntent(pendingIntent)
-                    setAutoCancel(true)
-                    setTimeoutAfter(TIMEOUT_ALERT_MILLIS)
-                    notificationPreferences?.applyNotificationPreferences(this)
-                }
-                .let {
-                    notificationManager.notify(NOTIFICATION_ID_ARRIVAL, it.build())
-                }
+                CHANNEL_ARRIVAL_ALERTS
+            ).apply {
+                setSmallIcon(R.drawable.ic_directions_bus_black)
+                setContentTitle(title)
+                setContentText(summary)
+                setTicker(summary)
+                setStyle(NotificationCompat.BigTextStyle().bigText(summary))
+                priority = NotificationCompat.PRIORITY_HIGH
+                setCategory(NotificationCompat.CATEGORY_ALARM)
+                setContentIntent(pendingIntent)
+                setAutoCancel(true)
+                setTimeoutAfter(TIMEOUT_ALERT_MILLIS)
+            }.let {
+                notificationManager.notify(NOTIFICATION_ID_ARRIVAL, it.build())
+            }
         }
     }
 
@@ -101,29 +98,30 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
             val stopName = getDisplayableStopName(proximityAlert.stopCode)
             val title = context.getString(R.string.proximity_alert_notification_title, stopName)
             val ticker = context.getString(R.string.proximity_alert_notification_ticker, stopName)
-            val summary = context.getString(R.string.proximity_alert_notification_summary,
-                proximityAlert.distanceFrom, stopName)
+            val summary = context.getString(
+                R.string.proximity_alert_notification_summary,
+                proximityAlert.distanceFrom,
+                stopName
+            )
             val pendingIntent = createProximityAlertPendingIntent(proximityAlert.stopCode)
 
             NotificationCompat.Builder(
                 context,
-                CHANNEL_PROXIMITY_ALERTS)
-                .apply {
-                    setSmallIcon(R.drawable.ic_directions_bus_black)
-                    setContentTitle(title)
-                    setContentText(summary)
-                    setTicker(ticker)
-                    setStyle(NotificationCompat.BigTextStyle().bigText(summary))
-                    priority = NotificationCompat.PRIORITY_HIGH
-                    setCategory(NotificationCompat.CATEGORY_NAVIGATION)
-                    setContentIntent(pendingIntent)
-                    setAutoCancel(true)
-                    setTimeoutAfter(TIMEOUT_ALERT_MILLIS)
-                    notificationPreferences?.applyNotificationPreferences(this)
-                }
-                .let {
-                    notificationManager.notify(NOTIFICATION_ID_PROXIMITY, it.build())
-                }
+                CHANNEL_PROXIMITY_ALERTS
+            ).apply {
+                setSmallIcon(R.drawable.ic_directions_bus_black)
+                setContentTitle(title)
+                setContentText(summary)
+                setTicker(ticker)
+                setStyle(NotificationCompat.BigTextStyle().bigText(summary))
+                priority = NotificationCompat.PRIORITY_HIGH
+                setCategory(NotificationCompat.CATEGORY_NAVIGATION)
+                setContentIntent(pendingIntent)
+                setAutoCancel(true)
+                setTimeoutAfter(TIMEOUT_ALERT_MILLIS)
+            }.let {
+                notificationManager.notify(NOTIFICATION_ID_PROXIMITY, it.build())
+            }
         }
     }
 
@@ -136,7 +134,8 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
      */
     private suspend fun createAlertSummaryString(
         arrivalAlert: ArrivalAlert,
-        qualifyingServices: List<Service>): String {
+        qualifyingServices: List<Service>
+    ): String {
         val serviceListing = qualifyingServices.joinToString { it.serviceName }
         val numberOfMinutes = getAlertNumberOfMinutesString(arrivalAlert.timeTrigger)
         val displayableStopName = getDisplayableStopName(arrivalAlert.stopCode)
@@ -146,7 +145,8 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
             qualifyingServices.size,
             serviceListing,
             numberOfMinutes,
-            displayableStopName)
+            displayableStopName
+        )
     }
 
     /**
@@ -162,7 +162,8 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
             context.resources.getQuantityString(
                 R.plurals.arrival_alert_notifications_time_plural,
                 minutes,
-                minutes)
+                minutes
+            )
         }
     }
 
@@ -175,7 +176,8 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
     private suspend fun getDisplayableStopName(stopCode: String): String {
         return textFormattingUtils.formatBusStopNameWithStopCode(
             stopCode,
-            busStopsRepository.getNameForStop(stopCode))
+            busStopsRepository.getNameForStop(stopCode)
+        )
     }
 
     /**
@@ -193,7 +195,8 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
                     context,
                     NOTIFICATION_ID_ARRIVAL,
                     it,
-                    PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE)
+                    PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+                )
             }
 
     /**
@@ -212,6 +215,7 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
                     context,
                     NOTIFICATION_ID_PROXIMITY,
                     it,
-                    PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE)
+                    PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+                )
             }
 }

@@ -1,7 +1,7 @@
 [versions]
 # Build targeting.
 android-sdk-compile = "36"
-android-sdk-min = "23"
+android-sdk-min = "28"
 android-sdk-target = "34"
 android-build-tools = "36.0.0"
 

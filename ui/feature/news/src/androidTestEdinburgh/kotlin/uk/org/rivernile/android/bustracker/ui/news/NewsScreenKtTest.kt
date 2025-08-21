@@ -38,7 +38,7 @@ import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.filterToOne
-import androidx.compose.ui.test.hasParent
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -222,9 +222,9 @@ class NewsScreenKtTest {
         composeTestRule
             .onAllNodesWithTag(testTag = TEST_TAG_TAB_BADGE_COUNT, useUnmergedTree = true)
             .apply {
-                filterToOne(hasParent(hasTestTag(TEST_TAG_TAB_INCIDENTS)))
+                filterToOne(hasAnyAncestor(hasTestTag(TEST_TAG_TAB_INCIDENTS)))
                     .assertTextEquals(numberFormat.format(1))
-                filterToOne(hasParent(hasTestTag(TEST_TAG_TAB_DIVERSIONS)))
+                filterToOne(hasAnyAncestor(hasTestTag(TEST_TAG_TAB_DIVERSIONS)))
                     .assertTextEquals(numberFormat.format(1024))
             }
     }

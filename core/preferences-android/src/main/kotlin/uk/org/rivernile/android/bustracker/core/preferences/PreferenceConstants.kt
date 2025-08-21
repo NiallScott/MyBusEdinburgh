@@ -28,9 +28,6 @@ package uk.org.rivernile.android.bustracker.core.preferences
 
 internal const val PREF_BUS_STOP_DATABASE_WIFI_ONLY = "pref_bus_stop_database_wifi_only"
 public const val PREF_APP_THEME: String = "pref_theme"
-internal const val PREF_ALERT_SOUND = "pref_alertsound_state"
-internal const val PREF_ALERT_VIBRATE = "pref_alertvibrate_state"
-internal const val PREF_ALERT_LED = "pref_alertled_state"
 internal const val PREF_AUTO_REFRESH = "pref_autorefresh_state"
 internal const val PREF_SHOW_NIGHT_BUSES = "pref_nightservices_state"
 internal const val PREF_SERVICE_SORTING = "pref_servicessorting_state"

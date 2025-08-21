@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,8 +37,6 @@ class FakePreferenceDataStorage(
     private val onIsDatabaseUpdateWifiOnlyFlow: () -> Flow<Boolean> =
         { throw NotImplementedError() },
     private val onAppThemeFlow: () -> Flow<AppTheme> = { throw NotImplementedError() },
-    private val onAlertNotificationPreferencesFlow: () -> Flow<AlertNotificationPreferences> =
-        { throw NotImplementedError() },
     private val onIsLiveTimesAutoRefreshEnabledFlow: () -> Flow<Boolean> =
         { throw NotImplementedError() },
     private val onIsLiveTimesShowNightServicesEnabledFlow: () -> Flow<Boolean> =
@@ -74,9 +72,6 @@ class FakePreferenceDataStorage(
 
     override val appThemeFlow: Flow<AppTheme>
         get() = onAppThemeFlow()
-
-    override val alertNotificationPreferencesFlow: Flow<AlertNotificationPreferences>
-        get() = onAlertNotificationPreferencesFlow()
 
     override val isLiveTimesAutoRefreshEnabledFlow: Flow<Boolean>
         get() = onIsLiveTimesAutoRefreshEnabledFlow()

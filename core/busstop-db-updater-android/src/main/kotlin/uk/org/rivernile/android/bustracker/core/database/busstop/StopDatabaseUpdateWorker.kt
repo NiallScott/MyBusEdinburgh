@@ -27,13 +27,11 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import android.content.Context
-import android.os.Build
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import javax.net.SocketFactory
 
 /**
  * This [androidx.work.Worker] is the entry point in commencing a check and possible update of the
@@ -53,23 +51,10 @@ internal class StopDatabaseUpdateWorker @AssistedInject constructor(
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
-        return if (updateChecker.checkForDatabaseUpdates(socketFactory)) {
+        return if (updateChecker.checkForDatabaseUpdates(params.network?.socketFactory)) {
             Result.success()
         } else {
             Result.retry()
-        }
-    }
-
-    /**
-     * Used to get the [SocketFactory] of the work in a compatible way. From
-     * [Build.VERSION_CODES.P], this may be non-`null`. Prior to this point, this value will always
-     * be `null`.
-     */
-    private val socketFactory: SocketFactory? get() {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            params.network?.socketFactory
-        } else {
-            null
         }
     }
 }
