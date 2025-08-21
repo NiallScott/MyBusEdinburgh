@@ -5,10 +5,10 @@ android-sdk-min = "28"
 android-sdk-target = "34"
 android-build-tools = "36.0.0"
 
-android-gradle-plugin = "8.12.0"
+android-gradle-plugin = "8.12.1"
 coroutines = "1.10.2"
-dagger = "2.57"
-kotlin = "2.2.0"
+dagger = "2.57.1"
+kotlin = "2.2.10"
 okhttp = "5.1.0"
 retrofit = "3.0.0"
 
@@ -23,7 +23,7 @@ androidx-work = "2.10.3"
 
 # Testing versions.
 espresso = "3.7.0"
-mockito = "5.18.0"
+mockito = "5.19.0"
 
 [libraries]
 # Coroutines
@@ -142,4 +142,4 @@ kotlin-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-ksp = { id = "com.google.devtools.ksp", version = "2.2.0-2.0.2" }
+ksp = { id = "com.google.devtools.ksp", version = "2.2.10-2.0.2" }
