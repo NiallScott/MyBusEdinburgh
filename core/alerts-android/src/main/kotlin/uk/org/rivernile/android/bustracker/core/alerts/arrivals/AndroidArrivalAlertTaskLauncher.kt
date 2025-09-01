@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,7 +32,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
-import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
+import dagger.Lazy
 import javax.inject.Inject
 
 /**
@@ -57,13 +57,14 @@ internal class LegacyAndroidArrivalAlertTaskLauncher @Inject constructor(
  * This is the Android S+ specific implementation of [ArrivalAlertTaskLauncher].
  *
  * @param context The application [Context].
- * @param exceptionLogger Used to log handled exceptions.
+ * @param unableToRunArrivalAlertsHandler The handler to call when the arrival alert task Service
+ * cannot be started.
  * @author Niall Scott
  */
 @RequiresApi(Build.VERSION_CODES.S)
 internal class V31AndroidArrivalAlertTaskLauncher @Inject constructor(
     private val context: Context,
-    private val exceptionLogger: ExceptionLogger
+    private val unableToRunArrivalAlertsHandler: Lazy<UnableToRunArrivalAlertsHandler>
 ) : ArrivalAlertTaskLauncher {
 
     override fun launchArrivalAlertTask() {
@@ -72,8 +73,8 @@ internal class V31AndroidArrivalAlertTaskLauncher @Inject constructor(
                 context,
                 context.arrivalAlertServiceStartIntent
             )
-        } catch (e: ServiceStartNotAllowedException) {
-            exceptionLogger.log(e)
+        } catch (_: ServiceStartNotAllowedException) {
+            unableToRunArrivalAlertsHandler.get().handleUnableToRunArrivalAlerts()
         }
     }
 }

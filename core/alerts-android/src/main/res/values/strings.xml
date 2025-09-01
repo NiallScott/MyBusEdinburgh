@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2023 Niall 'Rivernile' Scott
+  ~ Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
   ~
   ~ This software is provided 'as-is', without any express or implied
   ~ warranty.  In no event will the authors or contributors be held liable for
@@ -78,6 +78,8 @@
         <item quantity="one">in %d minute</item> <!-- %d = number of minutes -->
         <item quantity="other">in %d minutes or less</item> <!-- %d = number of minutes -->
     </plurals>
+    <string name="arrival_alert_notification_unable_to_run_title">Arrival alerts removed</string>
+    <string name="arrival_alert_notification_unable_to_run_summary">Your device is preventing arrival alerts from being checked. Therefore all active arrival alerts have been removed.\n\nPlease re-add any arrival alerts you wish to remain active.</string>
 
     <!--
     *********************************************
@@ -94,4 +96,6 @@
     <string name="proximity_alert_notification_title">Approaching %s</string> <!-- %s = bus stop name and code. -->
     <string name="proximity_alert_notification_summary">You have entered within a %1$dm radius of %2$s</string> <!-- %1$d = number of meters. %2$s = bus stop name and code. -->
     <string name="proximity_alert_notification_ticker">You are approaching %s</string> <!-- %s = bus stop name and code. -->
+    <string name="proximity_alert_notification_unable_to_run_title">Proximity alerts removed</string>
+    <string name="proximity_alert_notification_unable_to_run_summary">Your device is preventing proximity alerts from being monitored. Therefore all active proximity alerts have been removed.\n\nPlease re-add any proximity alerts you wish to remain active.</string>
 </resources>

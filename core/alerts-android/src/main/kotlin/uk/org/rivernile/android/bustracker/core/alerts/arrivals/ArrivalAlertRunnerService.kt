@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,21 +26,16 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts.arrivals
 
-import android.app.Notification
-import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import androidx.core.app.NotificationCompat
+import dagger.Lazy
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import uk.org.rivernile.android.bustracker.core.alerts.CHANNEL_FOREGROUND_TASKS
-import uk.org.rivernile.android.bustracker.core.alerts.DeeplinkIntentFactory
-import uk.org.rivernile.android.bustracker.core.alerts.R
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForServiceCoroutineScope
 import java.util.concurrent.atomic.AtomicBoolean
@@ -62,7 +57,9 @@ class ArrivalAlertRunnerService : Service() {
     @Inject
     internal lateinit var timeAlertRunner: TimeAlertRunner
     @Inject
-    internal lateinit var deeplinkIntentFactory: DeeplinkIntentFactory
+    internal lateinit var notificationFactory: ArrivalServiceNotificationFactory
+    @Inject
+    internal lateinit var unableToRunArrivalAlertsHandler: Lazy<UnableToRunArrivalAlertsHandler>
     @Inject
     @ForServiceCoroutineScope
     internal lateinit var serviceCoroutineScope: CoroutineScope
@@ -73,14 +70,10 @@ class ArrivalAlertRunnerService : Service() {
     private val isStarted = AtomicBoolean(false)
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startForeground(FOREGROUND_NOTIFICATION_ID, foregroundNotification)
-
         if (isStarted.compareAndSet(false, true)) {
             serviceCoroutineScope.launch {
                 try {
-                    withContext(defaultDispatcher) {
-                        timeAlertRunner.run()
-                    }
+                    runService()
                 } finally {
                     // This will usually be because a CancellationException has been thrown
                     // upstream.
@@ -92,6 +85,11 @@ class ArrivalAlertRunnerService : Service() {
         return START_STICKY
     }
 
+    override fun onTimeout(startId: Int, fgsType: Int) {
+        unableToRunArrivalAlertsHandler.get().handleUnableToRunArrivalAlerts()
+        stopSelf()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
 
@@ -100,64 +98,23 @@ class ArrivalAlertRunnerService : Service() {
 
     override fun onBind(intent: Intent): IBinder? = null
 
-    /**
-     * Create the [Notification] which will be shown to the user while the foreground service is
-     * running.
-     *
-     * @return The [Notification] shown to the user while the foreground service is running.
-     */
-    private val foregroundNotification get() =
-        NotificationCompat
-            .Builder(this, CHANNEL_FOREGROUND_TASKS)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setCategory(NotificationCompat.CATEGORY_SERVICE)
-            .setSmallIcon(R.drawable.ic_directions_bus_black)
-            .setContentTitle(getString(R.string.arrival_foreground_service_notification_title))
-            .setContentIntent(notificationActionPendingIntent)
-            .addAction(removeNotificationAction)
-            .build()
+    private suspend fun runService() {
+        try {
+            startForeground()
+        } catch (_: IllegalStateException) {
+            unableToRunArrivalAlertsHandler.get().handleUnableToRunArrivalAlerts()
+            return
+        }
 
-    /**
-     * A [PendingIntent] which will be called when the user taps on the notification.
-     */
-    private val notificationActionPendingIntent get() =
-        deeplinkIntentFactory.createManageAlertsIntent()
-            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            .let {
-                PendingIntent.getActivity(
-                    this,
-                    FOREGROUND_NOTIFICATION_ID,
-                    it,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-            }
+        withContext(defaultDispatcher) {
+            timeAlertRunner.run()
+        }
+    }
 
-    /**
-     * A [NotificationCompat.Action] which allows the user to remove a current arrival time check.
-     */
-    private val removeNotificationAction get() =
-        NotificationCompat.Action
-            .Builder(
-                R.drawable.ic_action_delete_notification,
-                getString(R.string.remove_all),
-                removeActionButtonPendingIntent
-            )
-            .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_DELETE)
-            .build()
-
-    /**
-     * A [PendingIntent] which is called when the user wishes to remove the in-progress arrival
-     * alert check.
-     */
-    private val removeActionButtonPendingIntent get() =
-        Intent(this, RemoveArrivalAlertBroadcastReceiver::class.java)
-            .let {
-                PendingIntent.getBroadcast(
-                    this,
-                    FOREGROUND_NOTIFICATION_ID,
-                    it,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-            }
+    private fun startForeground() {
+        startForeground(
+            FOREGROUND_NOTIFICATION_ID,
+            notificationFactory.createForegroundNotification(this)
+        )
+    }
 }

@@ -342,6 +342,32 @@ class RealAlertsRepositoryTest {
     }
 
     @Test
+    fun getArrivalAlertCountReturnsValueFromDao() = runTest {
+        val repository = createAlertsRepository(
+            alertsDao = FakeAlertsDao(
+                onGetArrivalAlertCount = { 123 }
+            )
+        )
+
+        val result = repository.getArrivalAlertCount()
+
+        assertEquals(123, result)
+    }
+
+    @Test
+    fun getProximityAlertCountReturnsValueFromDao() = runTest {
+        val repository = createAlertsRepository(
+            alertsDao = FakeAlertsDao(
+                onGetProximityAlertCount = { 123 }
+            )
+        )
+
+        val result = repository.getProximityAlertCount()
+
+        assertEquals(123, result)
+    }
+
+    @Test
     fun arrivalAlertCountFlowEmitsDistinctValues() = runTest {
         val repository = createAlertsRepository(
             alertsDao = FakeAlertsDao(

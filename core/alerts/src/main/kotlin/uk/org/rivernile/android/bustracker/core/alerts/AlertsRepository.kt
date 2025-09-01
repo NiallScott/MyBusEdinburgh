@@ -145,6 +145,20 @@ public interface AlertsRepository {
     public fun hasProximityAlertFlow(stopCode: String): Flow<Boolean>
 
     /**
+     * Get the active arrival alert count.
+     *
+     * @return The active arrival alert count.
+     */
+    public suspend fun getArrivalAlertCount(): Int
+
+    /**
+     * Get the active proximity alert count.
+     *
+     * @return The active proximity alert count.
+     */
+    public suspend fun getProximityAlertCount(): Int
+
+    /**
      * A [Flow] which emits the number of arrival alerts.
      */
     public val arrivalAlertCountFlow: Flow<Int>
@@ -252,6 +266,12 @@ internal class RealAlertsRepository @Inject constructor(
         alertsDao
             .getHasProximityAlertFlow(stopCode)
             .distinctUntilChanged()
+
+    override suspend fun getArrivalAlertCount() =
+        alertsDao.getArrivalAlertCount()
+
+    override suspend fun getProximityAlertCount() =
+        alertsDao.getProximityAlertCount()
 
     override val arrivalAlertCountFlow: Flow<Int> get() =
         alertsDao

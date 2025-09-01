@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,7 +32,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
-import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
+import dagger.Lazy
 import javax.inject.Inject
 
 /**
@@ -64,14 +64,13 @@ internal class LegacyAndroidProximityAlertTaskLauncher @Inject constructor(
  * @param context The application [Context].
  * @param proximityPermissionChecker Used to check that we have the relevant permissions to monitor
  * the user's set proximity alerts.
- * @param exceptionLogger Used to log handled exceptions.
  * @author Niall Scott
  */
 @RequiresApi(Build.VERSION_CODES.S)
 internal class V31AndroidProximityAlertTaskLauncher @Inject constructor(
     private val context: Context,
     private val proximityPermissionChecker: ProximityPermissionChecker,
-    private val exceptionLogger: ExceptionLogger
+    private val unableToRunProximityAlertsHandler: Lazy<UnableToRunProximityAlertsHandler>
 ) : ProximityAlertTaskLauncher {
 
     override fun launchProximityAlertTask() {
@@ -81,8 +80,8 @@ internal class V31AndroidProximityAlertTaskLauncher @Inject constructor(
                     context,
                     context.proximityServiceStartIntent
                 )
-            } catch (e: ServiceStartNotAllowedException) {
-                exceptionLogger.log(e)
+            } catch (_: ServiceStartNotAllowedException) {
+                unableToRunProximityAlertsHandler.get().handleUnableToRunProximityAlerts()
             }
         }
     }

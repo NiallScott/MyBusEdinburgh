@@ -40,12 +40,20 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.alerts.AlertNotificationDispatcher
 import uk.org.rivernile.android.bustracker.core.alerts.AndroidAlertNotificationDispatcher
+import uk.org.rivernile.android.bustracker.core.alerts.ErrorNotificationDispatcher
+import uk.org.rivernile.android.bustracker.core.alerts.RealUnableToRunAlertsHandler
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertTaskLauncher
+import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalServiceNotificationFactory
+import uk.org.rivernile.android.bustracker.core.alerts.arrivals.DefaultArrivalServiceNotificationFactory
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.LegacyAndroidArrivalAlertTaskLauncher
+import uk.org.rivernile.android.bustracker.core.alerts.arrivals.UnableToRunArrivalAlertsHandler
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.V31AndroidArrivalAlertTaskLauncher
+import uk.org.rivernile.android.bustracker.core.alerts.proximity.DefaultProximityServiceNotificationFactory
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.GeofencingManager
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.LegacyAndroidProximityAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertTaskLauncher
+import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityServiceNotificationFactory
+import uk.org.rivernile.android.bustracker.core.alerts.proximity.UnableToRunProximityAlertsHandler
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.V31AndroidProximityAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.android.AndroidGeofencingManager
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.googleplay.GooglePlayGeofencingManager
@@ -70,19 +78,37 @@ internal interface AndroidAlertsModule {
         androidAlertNotificationDispatcher: AndroidAlertNotificationDispatcher
     ): AlertNotificationDispatcher
 
-    companion object {
+    @Suppress("unused")
+    @Binds
+    fun bindArrivalServiceNotificationFactory(
+        defaultArrivalServiceNotificationFactory: DefaultArrivalServiceNotificationFactory
+    ): ArrivalServiceNotificationFactory
 
-        @Provides
-        fun provideProximityAlertTaskLauncher(
-            legacyProximityAlertTaskLauncher: Provider<LegacyAndroidProximityAlertTaskLauncher>,
-            v31ProximityAlertTaskLauncher: Provider<V31AndroidProximityAlertTaskLauncher>
-        ): ProximityAlertTaskLauncher {
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                v31ProximityAlertTaskLauncher.get()
-            } else {
-                legacyProximityAlertTaskLauncher.get()
-            }
-        }
+    @Suppress("unused")
+    @Binds
+    fun bindErrorNotificationDispatcher(
+        androidAlertNotificationDispatcher: AndroidAlertNotificationDispatcher
+    ): ErrorNotificationDispatcher
+
+    @Suppress("unused")
+    @Binds
+    fun bindProximityServiceNotificationFactory(
+        defaultProximityServiceNotificationFactory: DefaultProximityServiceNotificationFactory
+    ): ProximityServiceNotificationFactory
+
+    @Suppress("unused")
+    @Binds
+    fun bindUnableToRunArrivalAlertsHandler(
+        realUnableToRunAlertsHandler: RealUnableToRunAlertsHandler
+    ): UnableToRunArrivalAlertsHandler
+
+    @Suppress("unused")
+    @Binds
+    fun bindUnableToRunProximityAlertsHandler(
+        realUnableToRunAlertsHandler: RealUnableToRunAlertsHandler
+    ): UnableToRunProximityAlertsHandler
+
+    companion object {
 
         @Provides
         fun provideArrivalAlertTaskLauncher(
@@ -95,6 +121,10 @@ internal interface AndroidAlertsModule {
                 legacyAndroidArrivalAlertTaskLauncher.get()
             }
         }
+
+        @Provides
+        fun provideGeofencingClient(@ApplicationContext context: Context): GeofencingClient =
+            LocationServices.getGeofencingClient(context)
 
         @Provides
         fun provideGeofencingManager(
@@ -114,7 +144,15 @@ internal interface AndroidAlertsModule {
         }
 
         @Provides
-        fun provideGeofencingClient(@ApplicationContext context: Context): GeofencingClient =
-            LocationServices.getGeofencingClient(context)
+        fun provideProximityAlertTaskLauncher(
+            legacyProximityAlertTaskLauncher: Provider<LegacyAndroidProximityAlertTaskLauncher>,
+            v31ProximityAlertTaskLauncher: Provider<V31AndroidProximityAlertTaskLauncher>
+        ): ProximityAlertTaskLauncher {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                v31ProximityAlertTaskLauncher.get()
+            } else {
+                legacyProximityAlertTaskLauncher.get()
+            }
+        }
     }
 }

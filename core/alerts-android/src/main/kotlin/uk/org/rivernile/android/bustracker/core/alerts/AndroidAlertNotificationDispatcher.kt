@@ -54,7 +54,7 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
     private val permissionChecker: AndroidPermissionChecker,
     private val deeplinkIntentFactory: DeeplinkIntentFactory,
     private val textFormattingUtils: TextFormattingUtils
-) : AlertNotificationDispatcher {
+) : AlertNotificationDispatcher, ErrorNotificationDispatcher {
 
     companion object {
 
@@ -117,6 +117,58 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
                 priority = NotificationCompat.PRIORITY_HIGH
                 setCategory(NotificationCompat.CATEGORY_NAVIGATION)
                 setContentIntent(pendingIntent)
+                setAutoCancel(true)
+                setTimeoutAfter(TIMEOUT_ALERT_MILLIS)
+            }.let {
+                notificationManager.notify(NOTIFICATION_ID_PROXIMITY, it.build())
+            }
+        }
+    }
+
+    override fun dispatchUnableToRunArrivalAlertsNotification() {
+        if (permissionChecker.checkPostNotificationPermission()) {
+            val title = context.getString(R.string.arrival_alert_notification_unable_to_run_title)
+            val summary = context
+                .getString(R.string.arrival_alert_notification_unable_to_run_summary)
+
+            NotificationCompat.Builder(
+                context,
+                CHANNEL_ARRIVAL_ALERTS
+            ).apply {
+                setSmallIcon(R.drawable.ic_directions_bus_black)
+                setContentTitle(title)
+                setContentText(summary)
+                setTicker(summary)
+                setStyle(NotificationCompat.BigTextStyle().bigText(summary))
+                priority = NotificationCompat.PRIORITY_HIGH
+                setCategory(NotificationCompat.CATEGORY_ALARM)
+                setContentIntent(createAlertManagerPendingIntent(NOTIFICATION_ID_ARRIVAL))
+                setAutoCancel(true)
+                setTimeoutAfter(TIMEOUT_ALERT_MILLIS)
+            }.let {
+                notificationManager.notify(NOTIFICATION_ID_ARRIVAL, it.build())
+            }
+        }
+    }
+
+    override fun dispatchUnableToRunProximityAlertsNotification() {
+        if (permissionChecker.checkPostNotificationPermission()) {
+            val title = context.getString(R.string.proximity_alert_notification_unable_to_run_title)
+            val summary = context
+                .getString(R.string.proximity_alert_notification_unable_to_run_summary)
+
+            NotificationCompat.Builder(
+                context,
+                CHANNEL_PROXIMITY_ALERTS
+            ).apply {
+                setSmallIcon(R.drawable.ic_directions_bus_black)
+                setContentTitle(title)
+                setContentText(summary)
+                setTicker(summary)
+                setStyle(NotificationCompat.BigTextStyle().bigText(summary))
+                priority = NotificationCompat.PRIORITY_HIGH
+                setCategory(NotificationCompat.CATEGORY_NAVIGATION)
+                setContentIntent(createAlertManagerPendingIntent(NOTIFICATION_ID_PROXIMITY))
                 setAutoCancel(true)
                 setTimeoutAfter(TIMEOUT_ALERT_MILLIS)
             }.let {
@@ -218,4 +270,25 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
                     PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
                 )
             }
+
+    /**
+     * Create a [PendingIntent] which deep-links the user in to the alert manager UI when the user
+     * clicks on the notification.
+     *
+     * @param notificationId The ID of the notification.
+     * @return A [PendingIntent] which is executed when the user clicks on the notification.
+     */
+    private fun createAlertManagerPendingIntent(notificationId: Int): PendingIntent {
+        return deeplinkIntentFactory.createManageAlertsIntent()
+            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            .let {
+                PendingIntent.getActivity(
+                    context,
+                    notificationId,
+                    it,
+                    PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+                )
+            }
+    }
 }

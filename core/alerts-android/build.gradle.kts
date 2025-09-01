@@ -80,4 +80,9 @@ dependencies {
     androidTestImplementation(libs.coroutines.test)
     androidTestImplementation(libs.kotlin.test.junit)
     androidTestImplementation(libs.hilt.test)
+
+    testImplementation(testFixtures(project(":core:alerts")))
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlin.test.junit)
 }

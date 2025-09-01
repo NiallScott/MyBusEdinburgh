@@ -44,6 +44,8 @@ class FakeAlertsRepository(
     private val onGetAllArrivalAlerts: () -> List<ArrivalAlert>? = { throw NotImplementedError() },
     private val onGetAllArrivalAlertStopCodes: () -> Set<String>? = { throw NotImplementedError() },
     private val onGetProximityAlert: (Int) -> ProximityAlert? = { throw NotImplementedError() },
+    private val onGetArrivalAlertCount: () -> Int = { throw NotImplementedError() },
+    private val onGetProximityAlertCount: () -> Int = { throw NotImplementedError() },
     private val onArrivalAlertCountFlow: () -> Flow<Int> = { throw NotImplementedError() },
     private val onAllProximityAlertsFlow: () -> Flow<List<ProximityAlert>?> =
         { throw NotImplementedError() },
@@ -95,6 +97,10 @@ class FakeAlertsRepository(
     override fun hasProximityAlertFlow(stopCode: String): Flow<Boolean> {
         throw NotImplementedError()
     }
+
+    override suspend fun getArrivalAlertCount() = onGetArrivalAlertCount()
+
+    override suspend fun getProximityAlertCount() = onGetProximityAlertCount()
 
     override val arrivalAlertCountFlow get() = onArrivalAlertCountFlow()
 
