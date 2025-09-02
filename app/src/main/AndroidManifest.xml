@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,7 +39,7 @@
     <uses-feature
         android:name="android.hardware.location.gps"
         android:required="false" />
-              
+
     <application
         android:name="uk.org.rivernile.android.bustracker.BusApplication"
         android:label="@string/app_name"
@@ -51,24 +51,25 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupOnly="true"
         android:networkSecurityConfig="@xml/network_security_config"
+        android:enableOnBackInvokedCallback="true"
         tools:ignore="UnusedAttribute">
-        
+
         <!-- This is the API key used by the backup service. This is linked
              to the package name. -->
         <meta-data
             android:name="com.google.android.backup.api_key"
             android:value="unused" />
-        
+
         <!-- The API key for Google Maps Android API v2. -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${googleMapsApiKey}" />
-        
+
         <!-- This is required by Google Play Services. -->
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
-        
+
         <!-- The MainActivity, which is the entry point. -->
         <activity
             android:name="uk.org.rivernile.android.bustracker.ui.main.MainActivity"
@@ -86,7 +87,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        
+
         <activity-alias
             android:name=".MainActivity"
             android:targetActivity="uk.org.rivernile.android.bustracker.ui.main.MainActivity"
@@ -99,7 +100,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity-alias>
-        
+
         <!-- SelectFavouriteStopActivity, to let the user choose a favourite stop to show as a home
              screen shortcut. -->
         <activity
@@ -115,7 +116,7 @@
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
             </intent-filter>
         </activity>
-        
+
         <!-- DisplayStopDataActivity, to show bus times. -->
         <activity
             android:name="uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity"
@@ -139,13 +140,13 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        
+
         <activity-alias
             android:name=".DisplayStopDataActivity"
             android:targetActivity="uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity"
             android:exported="true"
             android:label="@string/displaystopdata_title" />
-        
+
         <!-- PreferencesActivity, to let the user change app preferences. -->
         <activity
             android:name="uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity"
@@ -159,7 +160,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        
+
         <!-- BusStopMapActivity, to show bus stops on the map. -->
         <activity
             android:name="uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity"
