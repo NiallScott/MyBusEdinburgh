@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,16 +24,32 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.favourites
+package uk.org.rivernile.android.bustracker.core.favourites.di
+
+import dagger.Binds
+import dagger.Module
+import uk.org.rivernile.android.bustracker.core.favourites.DefaultFavouritesRepository
+import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 
 /**
- * A favourite stop.
+ * A [Module] for providing favourites dependencies.
  *
- * @property stopCode The stop code.
- * @property stopName The name.
  * @author Niall Scott
  */
-public data class FavouriteStop(
-    val stopCode: String,
-    val stopName: String
+@Module(
+    includes = [
+        FavouritesModule.Bindings::class
+    ]
 )
+public class FavouritesModule {
+
+    @Module
+    internal interface Bindings {
+
+        @Suppress("unused")
+        @Binds
+        fun bindFavouritesRepository(
+            defaultFavouritesRepository: DefaultFavouritesRepository
+        ): FavouritesRepository
+    }
+}

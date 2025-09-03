@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,12 +33,9 @@ import javax.inject.Inject
 /**
  * This repository is used to access service stops data.
  *
- * @param serviceStopDao The DAO to access the service stops data store.
  * @author Niall Scott
  */
-class ServiceStopsRepository @Inject internal constructor(
-    private val serviceStopDao: ServiceStopDao
-) {
+public interface ServiceStopsRepository {
 
     /**
      * Get a [Flow] which emits the [List] of service names which serve the given `stopCode`. If the
@@ -47,8 +44,7 @@ class ServiceStopsRepository @Inject internal constructor(
      * @param stopCode The stop code to get the services for.
      * @return The [Flow] which emits the [List] of services for the given stop code.
      */
-    fun getServicesForStopFlow(stopCode: String): Flow<List<String>?> =
-        serviceStopDao.getServicesForStopFlow(stopCode)
+    public fun getServicesForStopFlow(stopCode: String): Flow<List<String>?>
 
     /**
      * Get a [Flow] which emits a [Map] of stop codes to a [List] of service names which service
@@ -59,8 +55,16 @@ class ServiceStopsRepository @Inject internal constructor(
      * @return The [Flow] which emits the [Map] of stop codes to a [List] of services which service
      * those stops.
      */
-    fun getServicesForStopsFlow(
-        stopCodes: Set<String>
-    ): Flow<Map<String, List<String>>?> =
+    public fun getServicesForStopsFlow(stopCodes: Set<String>): Flow<Map<String, List<String>>?>
+}
+
+internal class DefaultServiceStopsRepository @Inject constructor(
+    private val serviceStopDao: ServiceStopDao
+) : ServiceStopsRepository {
+
+    override fun getServicesForStopFlow(stopCode: String) =
+        serviceStopDao.getServicesForStopFlow(stopCode)
+
+    override fun getServicesForStopsFlow(stopCodes: Set<String>) =
         serviceStopDao.getServicesForStopsFlow(stopCodes)
 }

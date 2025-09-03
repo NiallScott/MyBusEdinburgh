@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,16 +24,25 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.favourites
+package uk.org.rivernile.android.bustracker.core.servicestops
+
+import kotlinx.coroutines.flow.Flow
 
 /**
- * A favourite stop.
+ * A fake [ServiceStopsRepository] for testing.
  *
- * @property stopCode The stop code.
- * @property stopName The name.
  * @author Niall Scott
  */
-public data class FavouriteStop(
-    val stopCode: String,
-    val stopName: String
-)
+class FakeServiceStopsRepository(
+    private val onGetServicesForStopFlow: (String) -> Flow<List<String>?> =
+        { throw NotImplementedError() },
+    private val onGetServicesForStopsFlow: (Set<String>) -> Flow<Map<String, List<String>>?> =
+        { throw NotImplementedError() }
+) : ServiceStopsRepository {
+
+    override fun getServicesForStopFlow(stopCode: String) =
+        onGetServicesForStopFlow(stopCode)
+
+    override fun getServicesForStopsFlow(stopCodes: Set<String>) =
+        onGetServicesForStopsFlow(stopCodes)
+}

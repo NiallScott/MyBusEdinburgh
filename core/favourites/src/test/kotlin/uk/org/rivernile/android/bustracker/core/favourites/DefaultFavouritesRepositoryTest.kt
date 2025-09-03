@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,11 +40,11 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
- * Tests for [FavouritesRepository].
+ * Tests for [DefaultFavouritesRepository].
  *
  * @author Niall Scott
  */
-class FavouritesRepositoryTest {
+class DefaultFavouritesRepositoryTest {
 
     @Test
     fun addOrUpdateFavouriteStopCallsDao() = runTest {
@@ -148,8 +148,8 @@ class FavouritesRepositoryTest {
 
     private fun createFavouritesRepository(
         favouriteStopsDao: FavouriteStopsDao
-    ): FavouritesRepository {
-        return FavouritesRepository(
+    ): DefaultFavouritesRepository {
+        return DefaultFavouritesRepository(
             favouriteStopsDao = favouriteStopsDao,
             entityFactory = FakeFavouriteStopEntityFactory()
         )

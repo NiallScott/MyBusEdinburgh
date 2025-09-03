@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,7 +40,7 @@ import kotlin.test.assertNull
  *
  * @author Niall Scott
  */
-class ServiceStopsRepositoryTest {
+class DefaultServiceStopsRepositoryTest {
 
     @Test
     fun getServicesForStopFlowReturnsFlowFromDao() = runTest {
@@ -103,7 +103,7 @@ class ServiceStopsRepositoryTest {
 
     private fun createServiceStopsRepository(
         serviceStopDao: ServiceStopDao = FakeServiceStopDao()
-    ): ServiceStopsRepository {
-        return ServiceStopsRepository(serviceStopDao)
+    ): DefaultServiceStopsRepository {
+        return DefaultServiceStopsRepository(serviceStopDao)
     }
 }

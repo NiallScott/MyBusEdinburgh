@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,16 +24,37 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.favourites
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
+}
 
-/**
- * A favourite stop.
- *
- * @property stopCode The stop code.
- * @property stopName The name.
- * @author Niall Scott
- */
-public data class FavouriteStop(
-    val stopCode: String,
-    val stopName: String
-)
+android {
+    namespace = "uk.org.rivernile.android.bustracker.core.servicestops"
+
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+        }
+
+        debug {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
+    }
+}
+
+dependencies {
+
+    api(project(":core:servicestops"))
+
+    // Hilt (dependency injection)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+}

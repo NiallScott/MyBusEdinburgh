@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,16 +24,21 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.favourites
+package uk.org.rivernile.android.bustracker.core.favourites.di
+
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 
 /**
- * A favourite stop.
+ * The Android-specific favourites [Module].
  *
- * @property stopCode The stop code.
- * @property stopName The name.
  * @author Niall Scott
  */
-public data class FavouriteStop(
-    val stopCode: String,
-    val stopName: String
+@InstallIn(SingletonComponent::class)
+@Module(
+    includes = [
+        FavouritesModule::class
+    ]
 )
+internal interface AndroidFavouritesModule
