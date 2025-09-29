@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,7 +45,7 @@ import uk.org.rivernile.android.bustracker.ui.about.R as Rabout
 import uk.org.rivernile.android.bustracker.ui.about.AboutActivity
 import uk.org.rivernile.android.bustracker.ui.alerts.AlertManagerFragment
 import uk.org.rivernile.android.bustracker.ui.explore.ExploreFragment
-import uk.org.rivernile.android.bustracker.ui.favourites.FavouriteStopsFragment
+import uk.org.rivernile.android.bustracker.ui.favouritestops.FavouriteStopsFragment
 import uk.org.rivernile.android.bustracker.ui.news.NewsFragment
 import uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity
 import uk.org.rivernile.edinburghbustracker.android.R

@@ -103,6 +103,7 @@ include(
     ":macrobenchmark:app-macrobenchmark",
     ":testutils",
     ":ui:feature:about",
+    ":ui:feature:favouritestops",
     ":ui:feature:news",
     ":ui:text-formatting",
     ":ui:ui-core",

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,7 +40,7 @@ import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapFragment
 import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment
 import uk.org.rivernile.android.bustracker.ui.HasScrollableContent
 import uk.org.rivernile.android.bustracker.ui.HasTabBar
-import uk.org.rivernile.android.bustracker.ui.favourites.FavouriteStopsFragment
+import uk.org.rivernile.android.bustracker.ui.favouritestops.FavouriteStopsFragment
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentExploreBinding
 
@@ -69,7 +69,7 @@ class ExploreFragment : Fragment(), HasTabBar, HasScrollableContent {
 
         callbacks = try {
             context as Callbacks
-        } catch (ignored: ClassCastException) {
+        } catch (_: ClassCastException) {
             throw IllegalStateException("${context.javaClass.name} does not implement " +
                     Callbacks::class.java.name)
         }

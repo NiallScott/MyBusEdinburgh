@@ -157,6 +157,7 @@ dependencies {
     implementation(project(":endpoint:tracker-endpoint"))
     implementation(project(":endpoint:internal-api-endpoint"))
     implementation(project(":ui:feature:about"))
+    implementation(project(":ui:feature:favouritestops"))
     implementation(project(":ui:feature:news"))
     implementation(project(":ui:text-formatting"))
     implementation(project(":ui:ui-core"))

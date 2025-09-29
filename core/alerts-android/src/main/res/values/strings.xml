@@ -35,6 +35,10 @@
     *******************
     -->
     <string name="remove_all">Remove all</string>
+    <string name="prox_alert_add">Add proximity alert</string>
+    <string name="prox_alert_rem">Remove proximity alert</string>
+    <string name="time_alert_add">Add arrival alert</string>
+    <string name="time_alert_rem">Remove arrival alert</string>
 
     <!--
     *******************

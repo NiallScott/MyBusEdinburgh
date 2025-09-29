@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,15 +27,16 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose.compiler)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
 }
 
 android {
-    namespace = "uk.org.rivernile.android.bustracker.core.alerts"
+    namespace = "uk.org.rivernile.android.bustracker.ui.favouritestops"
 
     defaultConfig {
-        testInstrumentationRunner = "uk.org.rivernile.android.bustracker.core.alerts.AlertsTestRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -49,45 +50,60 @@ android {
         }
     }
 
-    @Suppress("UnstableApiUsage")
-    testFixtures {
-        enable = true
+    buildFeatures {
+        compose = true
     }
+}
+
+kotlin {
+    explicitApi()
 }
 
 dependencies {
 
-    api(project(":core:alerts"))
-    implementation(project(":core:busstops-android"))
+    implementation(project(":core:alerts-android"))
     implementation(project(":core:coroutines-android"))
-    implementation(project(":core:logging"))
-    implementation(project(":core:permission-android"))
-    implementation(project(":core:preferences"))
-    implementation(project(":database:busstop-db-android"))
-    implementation(project(":database:settings-db-android"))
-    implementation(project(":endpoint:tracker-endpoint"))
-    implementation(project(":ui:text-formatting"))
+    implementation(project(":core:favourites-android"))
+    implementation(project(":core:feature"))
+    implementation(project(":core:services-android"))
+    implementation(project(":core:servicestops-android"))
+    implementation(project(":ui:ui-core"))
 
     // AndroidX
+    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core)
-    implementation(libs.androidx.startup)
+    implementation(libs.androidx.fragment.compose)
+    implementation(libs.androidx.viewmodel.compose)
 
     // Hilt (dependency injection)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
-    // Play Services
-    implementation(libs.play.services.location)
+    // Compose
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.material.compose)
+
+    // Kotlin immutable collections
+    implementation(libs.kotlin.immutable.collections)
 
     // Test dependencies
-    androidTestImplementation(testFixtures(project(":core:alerts")))
+    androidTestImplementation(testFixtures(project(":core:alerts-android")))
+    androidTestImplementation(libs.androidx.compose.ui.test)
     androidTestImplementation(libs.androidx.test.runner)
-    androidTestImplementation(libs.coroutines.test)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.uiautomator)
     androidTestImplementation(libs.kotlin.test.junit)
-    androidTestImplementation(libs.hilt.test)
 
     testImplementation(testFixtures(project(":core:alerts")))
+    testImplementation(testFixtures(project(":core:favourites")))
+    testImplementation(testFixtures(project(":core:feature")))
+    testImplementation(testFixtures(project(":core:services")))
+    testImplementation(testFixtures(project(":core:servicestops")))
     testImplementation(libs.coroutines.test)
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.turbine)
 }
