@@ -48,6 +48,11 @@ android {
             enableAndroidTestCoverage = true
         }
     }
+
+    @Suppress("UnstableApiUsage")
+    testFixtures {
+        enable = true
+    }
 }
 
 dependencies {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -114,7 +114,13 @@ class BusTimesFragment : Fragment() {
                 setColorSchemeColors(
                     MaterialColors.getColor(
                         this,
-                        com.google.android.material.R.attr.colorPrimary
+                        android.R.attr.colorPrimary
+                    )
+                )
+                setProgressBackgroundColorSchemeColor(
+                    MaterialColors.getColor(
+                        this,
+                        com.google.android.material.R.attr.colorSurfaceContainerHigh
                     )
                 )
                 setOnRefreshListener {
