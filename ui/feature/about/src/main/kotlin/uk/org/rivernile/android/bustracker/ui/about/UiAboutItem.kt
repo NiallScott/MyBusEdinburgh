@@ -106,9 +106,9 @@ internal sealed interface UiAboutItem {
         }
 
         /**
-         * App Twitter link item.
+         * App Bluesky link item.
          */
-        data object Twitter : TwoLinesItem {
+        data object Bluesky : TwoLinesItem {
 
             override val isClickable get() = true
         }

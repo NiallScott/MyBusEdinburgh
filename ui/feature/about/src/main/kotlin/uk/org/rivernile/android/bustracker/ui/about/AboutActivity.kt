@@ -270,8 +270,8 @@ private fun LaunchAction(
                 actionLauncher.launchAuthorWebsite()
             is UiAction.ShowAppWebsite ->
                 actionLauncher.launchAppWebsite()
-            is UiAction.ShowAppTwitter ->
-                actionLauncher.launchAppTwitter()
+            is UiAction.ShowAppBluesky ->
+                actionLauncher.launchAppBluesky()
             is UiAction.ShowPrivacyPolicy ->
                 actionLauncher.launchPrivacyPolicy()
         }
@@ -307,7 +307,7 @@ private fun AboutScreenPreview() {
                         UiAboutItem.TwoLinesItem.AppVersion("1.2.3", 4),
                         UiAboutItem.TwoLinesItem.Author,
                         UiAboutItem.TwoLinesItem.Website,
-                        UiAboutItem.TwoLinesItem.Twitter,
+                        UiAboutItem.TwoLinesItem.Bluesky,
                         UiAboutItem.TwoLinesItem.DatabaseVersion(Date(1712498400000L)),
                         UiAboutItem.TwoLinesItem.TopologyVersion("abc123"),
                         UiAboutItem.OneLineItem.Credits,

@@ -113,7 +113,7 @@ class RealAboutItemsGeneratorTest {
         ),
         UiAboutItem.TwoLinesItem.Author,
         UiAboutItem.TwoLinesItem.Website,
-        UiAboutItem.TwoLinesItem.Twitter,
+        UiAboutItem.TwoLinesItem.Bluesky,
         UiAboutItem.TwoLinesItem.DatabaseVersion(databaseUpdateTime),
         UiAboutItem.TwoLinesItem.TopologyVersion(topologyId),
         UiAboutItem.OneLineItem.Credits,

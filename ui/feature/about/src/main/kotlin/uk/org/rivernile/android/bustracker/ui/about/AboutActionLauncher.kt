@@ -58,9 +58,9 @@ internal interface AboutActionLauncher {
     fun launchAppWebsite()
 
     /**
-     * Launch the app's Twitter account either with the installed app or the default web browser.
+     * Launch the app's Bluesky account either with the installed app or the default web browser.
      */
-    fun launchAppTwitter()
+    fun launchAppBluesky()
 
     /**
      * Launch the app's privacy policy in the default web browser.
@@ -115,11 +115,11 @@ internal class AndroidAboutActionLauncher @Inject constructor(
     }
 
     /**
-     * Launch the app's Twitter account either with the installed app or the default web browser.
+     * Launch the app's Bluesky account either with the installed app or the default web browser.
      */
-    override fun launchAppTwitter() {
+    override fun launchAppBluesky() {
         val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = context.getString(R.string.app_twitter).toUri()
+            data = context.getString(R.string.app_bluesky).toUri()
         }
 
         launchIntent(intent)
