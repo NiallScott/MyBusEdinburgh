@@ -152,15 +152,9 @@ internal class RealServicesRepository @Inject constructor(
     ): Map<String, ServiceColours>? {
         return buildMap {
             loadedResults.forEach { result ->
-                val serviceColour = serviceColourOverride
-                    ?.overrideServiceColour(result.key, result.value)
-                    ?: result.value
-
-                serviceColoursGenerator
-                    .generateServiceColours(serviceColour)
-                    ?.let {
-                        this[result.key] = it
-                    }
+                produceColoursForService(result.key, result.value)?.let {
+                    this[result.key] = it
+                }
             }
         }.ifEmpty { null }
     }
@@ -172,26 +166,23 @@ internal class RealServicesRepository @Inject constructor(
      * @return The mapped [List].
      */
     private fun mapToServiceDetailsList(
-        details: List<StoredServiceDetails>?): List<ServiceDetails>? {
+        details: List<StoredServiceDetails>?
+    ): List<ServiceDetails>? {
         return details
             ?.ifEmpty { null }
-            ?.map(this::mapToServiceDetails)
+            ?.map { it.toServiceDetails() }
     }
 
     /**
      * Map a [StoredServiceDetails] to [ServiceDetails].
      *
-     * @param details The object to map.
      * @return The mapped result.
      */
-    private fun mapToServiceDetails(details: StoredServiceDetails): ServiceDetails {
-        val colour = serviceColourOverride?.overrideServiceColour(details.name, details.colour)
-            ?: details.colour
-
+    private fun StoredServiceDetails.toServiceDetails(): ServiceDetails {
         return ServiceDetails(
-            details.name,
-            details.description,
-            serviceColoursGenerator.generateServiceColours(colour)
+            name = name,
+            description = description,
+            colours = produceColoursForService(name, colour)
         )
     }
 
@@ -202,27 +193,38 @@ internal class RealServicesRepository @Inject constructor(
      * @return The mapped [List].
      */
     private fun mapToServicesWithColour(
-        servicesWithColour: List<StoredServiceWithColour>?): List<ServiceWithColour>? {
+        servicesWithColour: List<StoredServiceWithColour>?
+    ): List<ServiceWithColour>? {
         return servicesWithColour
             ?.ifEmpty { null }
-            ?.map(this::mapToServiceWithColour)
+            ?.map { it.toServiceWithColour() }
     }
 
     /**
      * Given a [StoredServiceWithColour], map this to a [ServiceWithColour].
      *
-     * @param serviceWithColour The item to map.
      * @return The mapped item.
      */
-    private fun mapToServiceWithColour(
-        serviceWithColour: StoredServiceWithColour): ServiceWithColour {
-        val colour = serviceColourOverride
-            ?.overrideServiceColour(serviceWithColour.name, serviceWithColour.colour)
-            ?: serviceWithColour.colour
-
+    private fun StoredServiceWithColour.toServiceWithColour(): ServiceWithColour {
         return ServiceWithColour(
-            serviceWithColour.name,
-            serviceColoursGenerator.generateServiceColours(colour)
+            name = name,
+            colours = produceColoursForService(name, colour)
         )
+    }
+
+    /**
+     * Given a [serviceName] and a possible primary [serviceColour] for the service, generate the
+     * [ServiceColours] for this service.
+     *
+     * @param serviceName Name of the service.
+     * @param serviceColour The service's primary colour, if available.
+     * @return The [ServiceColours] for this service, or `null` if this could not be determined.
+     */
+    private fun produceColoursForService(
+        serviceName: String,
+        serviceColour: Int?
+    ): ServiceColours? {
+        return serviceColourOverride?.overrideServiceColour(serviceName, serviceColour)
+            ?: serviceColoursGenerator.generateServiceColours(serviceColour)
     }
 }

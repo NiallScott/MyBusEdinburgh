@@ -69,7 +69,9 @@ class RealServicesRepositoryTest {
                 }
             ),
             serviceColourOverride = null,
-            serviceColoursGenerator = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            serviceColoursGenerator = FakeServiceColoursGenerator(
+                onGenerateServiceColours = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            )
         )
 
         repository.getColoursForServicesFlow(null).test {
@@ -109,7 +111,9 @@ class RealServicesRepositoryTest {
                 }
             ),
             serviceColourOverride = null,
-            serviceColoursGenerator = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            serviceColoursGenerator = FakeServiceColoursGenerator(
+                onGenerateServiceColours = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            )
         )
 
         repository.getColoursForServicesFlow(emptySet()).test {
@@ -149,7 +153,9 @@ class RealServicesRepositoryTest {
                 }
             ),
             serviceColourOverride = null,
-            serviceColoursGenerator = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            serviceColoursGenerator = FakeServiceColoursGenerator(
+                onGenerateServiceColours = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            )
         )
 
         repository.getColoursForServicesFlow(setOf("1", "2", "3", "4", "5")).test {
@@ -188,10 +194,21 @@ class RealServicesRepositoryTest {
                     )
                 }
             ),
-            serviceColourOverride = { serviceName, currentColour ->
-                if (serviceName == "3" && currentColour == 3) 33 else null
-            },
-            serviceColoursGenerator = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            serviceColourOverride = FakeServiceColourOverride(
+                onOverrideServiceColour = { serviceName, currentColour ->
+                    if (serviceName == "3" && currentColour == 3) {
+                        ServiceColours(
+                            primaryColour = 33,
+                            colourOnPrimary = 34
+                        )
+                    } else {
+                        null
+                    }
+                }
+            ),
+            serviceColoursGenerator = FakeServiceColoursGenerator(
+                onGenerateServiceColours = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            )
         )
 
         repository.getColoursForServicesFlow(null).test {
@@ -201,7 +218,7 @@ class RealServicesRepositoryTest {
             assertEquals(
                 mapOf(
                     "1" to ServiceColours(1, 10),
-                    "3" to ServiceColours(33, 330)
+                    "3" to ServiceColours(33, 34)
                 ),
                 awaitItem()
             )
@@ -230,10 +247,21 @@ class RealServicesRepositoryTest {
                     )
                 }
             ),
-            serviceColourOverride = { serviceName, currentColour ->
-                if (serviceName == "3" && currentColour == 3) 33 else null
-            },
-            serviceColoursGenerator = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            serviceColourOverride = FakeServiceColourOverride(
+                onOverrideServiceColour = { serviceName, currentColour ->
+                    if (serviceName == "3" && currentColour == 3) {
+                        ServiceColours(
+                            primaryColour = 33,
+                            colourOnPrimary = 34
+                        )
+                    } else {
+                        null
+                    }
+                }
+            ),
+            serviceColoursGenerator = FakeServiceColoursGenerator(
+                onGenerateServiceColours = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            )
         )
 
         repository.getColoursForServicesFlow(emptySet()).test {
@@ -243,7 +271,7 @@ class RealServicesRepositoryTest {
             assertEquals(
                 mapOf(
                     "1" to ServiceColours(1, 10),
-                    "3" to ServiceColours(33, 330)
+                    "3" to ServiceColours(33, 34)
                 ),
                 awaitItem()
             )
@@ -272,31 +300,41 @@ class RealServicesRepositoryTest {
                     )
                 }
             ),
-            serviceColourOverride = { serviceName, currentColour ->
-                when {
-                    serviceName == "3" && currentColour == 3 -> 33
-                    serviceName == "5" -> 5
-                    else -> null
+            serviceColourOverride = FakeServiceColourOverride(
+                onOverrideServiceColour = { serviceName, currentColour ->
+                    when {
+                        serviceName == "3" && currentColour == 3 -> ServiceColours(
+                            primaryColour = 33,
+                            colourOnPrimary = 34
+                        )
+                        serviceName == "5" -> ServiceColours(
+                            primaryColour = 5,
+                            colourOnPrimary = 6
+                        )
+                        else -> null
+                    }
                 }
-            },
-            serviceColoursGenerator = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            ),
+            serviceColoursGenerator = FakeServiceColoursGenerator(
+                onGenerateServiceColours = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            )
         )
 
         repository.getColoursForServicesFlow(setOf("1", "2", "3", "4", "5")).test {
-            assertEquals(mapOf("5" to ServiceColours(5, 50)), awaitItem())
-            assertEquals(mapOf("5" to ServiceColours(5, 50)), awaitItem())
+            assertEquals(mapOf("5" to ServiceColours(5, 6)), awaitItem())
+            assertEquals(mapOf("5" to ServiceColours(5, 6)), awaitItem())
             assertEquals(
                 mapOf(
                     "1" to ServiceColours(1, 10),
-                    "5" to ServiceColours(5, 50)
+                    "5" to ServiceColours(5, 6)
                 ),
                 awaitItem()
             )
             assertEquals(
                 mapOf(
                     "1" to ServiceColours(1, 10),
-                    "3" to ServiceColours(33, 330),
-                    "5" to ServiceColours(5, 50)
+                    "3" to ServiceColours(33, 34),
+                    "5" to ServiceColours(5, 6)
                 ),
                 awaitItem()
             )
@@ -324,7 +362,9 @@ class RealServicesRepositoryTest {
                 }
             ),
             serviceColourOverride = null,
-            serviceColoursGenerator = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            serviceColoursGenerator = FakeServiceColoursGenerator(
+                onGenerateServiceColours = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            )
         )
 
         repository.getServiceDetailsFlow("123456").test {
@@ -365,28 +405,38 @@ class RealServicesRepositoryTest {
                     )
                 }
             ),
-            serviceColourOverride = { serviceName, currentColour ->
-                when {
-                    serviceName == "1" && currentColour == 1 -> 10
-                    serviceName == "2" && currentColour == 2 -> 20
-                    else -> null
+            serviceColourOverride = FakeServiceColourOverride(
+                onOverrideServiceColour = { serviceName, currentColour ->
+                    when {
+                        serviceName == "1" && currentColour == 1 -> ServiceColours(
+                            primaryColour = 10,
+                            colourOnPrimary = 11
+                        )
+                        serviceName == "2" && currentColour == 2 -> ServiceColours(
+                            primaryColour = 20,
+                            colourOnPrimary = 21
+                        )
+                        else -> null
+                    }
                 }
-            },
-            serviceColoursGenerator = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            ),
+            serviceColoursGenerator = FakeServiceColoursGenerator(
+                onGenerateServiceColours = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            )
         )
 
         repository.getServiceDetailsFlow("123456").test {
             assertNull(awaitItem())
             assertEquals(
                 listOf(
-                    ServiceDetails("1", "Route", ServiceColours(10, 100))
+                    ServiceDetails("1", "Route", ServiceColours(10, 11))
                 ),
                 awaitItem()
             )
             assertEquals(
                 listOf(
-                    ServiceDetails("1", "Route", ServiceColours(10, 100)),
-                    ServiceDetails("2", "Route 2", ServiceColours(20, 200))
+                    ServiceDetails("1", "Route", ServiceColours(10, 11)),
+                    ServiceDetails("2", "Route 2", ServiceColours(20, 21))
                 ),
                 awaitItem()
             )
@@ -413,7 +463,9 @@ class RealServicesRepositoryTest {
                 }
             ),
             serviceColourOverride = null,
-            serviceColoursGenerator = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            serviceColoursGenerator = FakeServiceColoursGenerator(
+                onGenerateServiceColours = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            )
         )
 
         repository.allServiceNamesWithColourFlow.test {
@@ -454,14 +506,24 @@ class RealServicesRepositoryTest {
                     )
                 }
             ),
-            serviceColourOverride = { serviceName, currentColour ->
-                when {
-                    serviceName == "2" && currentColour == null -> 2
-                    serviceName == "3" && currentColour == 3 -> 33
-                    else -> null
+            serviceColourOverride = FakeServiceColourOverride(
+                onOverrideServiceColour = { serviceName, currentColour ->
+                    when {
+                        serviceName == "2" && currentColour == null -> ServiceColours(
+                            primaryColour = 2,
+                            colourOnPrimary = 22
+                        )
+                        serviceName == "3" && currentColour == 3 -> ServiceColours(
+                            primaryColour = 33,
+                            colourOnPrimary = 34
+                        )
+                        else -> null
+                    }
                 }
-            },
-            serviceColoursGenerator = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            ),
+            serviceColoursGenerator = FakeServiceColoursGenerator(
+                onGenerateServiceColours = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            )
         )
 
         repository.allServiceNamesWithColourFlow.test {
@@ -475,8 +537,8 @@ class RealServicesRepositoryTest {
             assertEquals(
                 listOf(
                     ServiceWithColour("1", ServiceColours(1, 10)),
-                    ServiceWithColour("2", ServiceColours(2, 20)),
-                    ServiceWithColour("3", ServiceColours(33, 330))
+                    ServiceWithColour("2", ServiceColours(2, 22)),
+                    ServiceWithColour("3", ServiceColours(33, 34))
                 ),
                 awaitItem()
             )
@@ -505,7 +567,9 @@ class RealServicesRepositoryTest {
                 }
             ),
             serviceColourOverride = null,
-            serviceColoursGenerator = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            serviceColoursGenerator = FakeServiceColoursGenerator(
+                onGenerateServiceColours = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            )
         )
 
         repository.getServiceNamesWithColourFlow("123456").test {
@@ -548,14 +612,24 @@ class RealServicesRepositoryTest {
                     )
                 }
             ),
-            serviceColourOverride = { serviceName, currentColour ->
-                when {
-                    serviceName == "2" && currentColour == null -> 2
-                    serviceName == "3" && currentColour == 3 -> 33
-                    else -> null
+            serviceColourOverride = FakeServiceColourOverride(
+                onOverrideServiceColour = { serviceName, currentColour ->
+                    when {
+                        serviceName == "2" && currentColour == null -> ServiceColours(
+                            primaryColour = 2,
+                            colourOnPrimary = 22
+                        )
+                        serviceName == "3" && currentColour == 3 -> ServiceColours(
+                            primaryColour = 33,
+                            colourOnPrimary = 34
+                        )
+                        else -> null
+                    }
                 }
-            },
-            serviceColoursGenerator = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            ),
+            serviceColoursGenerator = FakeServiceColoursGenerator(
+                onGenerateServiceColours = { colour -> colour?.let { ServiceColours(it, it * 10) } }
+            )
         )
 
         repository.getServiceNamesWithColourFlow("123456").test {
@@ -569,8 +643,8 @@ class RealServicesRepositoryTest {
             assertEquals(
                 listOf(
                     ServiceWithColour("1", ServiceColours(1, 10)),
-                    ServiceWithColour("2", ServiceColours(2, 20)),
-                    ServiceWithColour("3", ServiceColours(33, 330))
+                    ServiceWithColour("2", ServiceColours(2, 22)),
+                    ServiceWithColour("3", ServiceColours(33, 34))
                 ),
                 awaitItem()
             )
@@ -622,23 +696,13 @@ class RealServicesRepositoryTest {
 
     private fun createServicesRepository(
         serviceDao: ServiceDao = FakeServiceDao(),
-        serviceColourOverride: ((String, Int?) -> Int?)? = { _, _ -> null },
-        serviceColoursGenerator: (Int?) -> ServiceColours? = { null }
+        serviceColourOverride: ServiceColourOverride? = FakeServiceColourOverride(),
+        serviceColoursGenerator: ServiceColoursGenerator = FakeServiceColoursGenerator()
     ): RealServicesRepository {
-        val serviceColourOverrideCallback = serviceColourOverride?.let {
-            object : ServiceColourOverride {
-                override fun overrideServiceColour(serviceName: String, currentColour: Int?) =
-                    it(serviceName, currentColour)
-            }
-        }
-
         return RealServicesRepository(
             serviceDao,
-            serviceColourOverrideCallback,
-            object : ServiceColoursGenerator {
-                override fun generateServiceColours(serviceColour: Int?) =
-                    serviceColoursGenerator(serviceColour)
-            }
+            serviceColourOverride,
+            serviceColoursGenerator
         )
     }
 }

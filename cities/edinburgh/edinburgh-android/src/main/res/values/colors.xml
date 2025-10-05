@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2020 Niall 'Rivernile' Scott
+  ~ Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
   ~
   ~ This software is provided 'as-is', without any express or implied
   ~ warranty.  In no event will the authors or contributors be held liable for
@@ -27,5 +27,6 @@
 
 <resources>
 
-    <color name="service_colour_night_bus">#000000</color>
+    <color name="service_colour_night_bus_background">#000000</color>
+    <color name="service_colour_night_bus_text_on_background">#FFFFFF</color>
 </resources>

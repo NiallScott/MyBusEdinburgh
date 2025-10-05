@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,11 +41,14 @@ internal class EdinburghServiceColourOverride @Inject constructor(
 
     private val nightServiceRegex = "^N(\\d+).*$".toRegex(RegexOption.IGNORE_CASE)
 
-    override fun overrideServiceColour(serviceName: String, currentColour: Int?): Int? {
+    override fun overrideServiceColour(
+        serviceName: String,
+        currentBackgroundColour: Int?
+    ): ServiceColours? {
         return if (nightServiceRegex.matches(serviceName)) {
-            serviceColourProvider.nightServiceColour
+            serviceColourProvider.nightServiceColours
         } else {
-            currentColour
+            null
         }
     }
 }

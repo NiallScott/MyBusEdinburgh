@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,9 +32,8 @@ package uk.org.rivernile.android.bustracker.core.services
  * @author Niall Scott
  */
 class FakeServiceColourProvider(
-    private val onNightServiceColour: () -> Int = { throw NotImplementedError() }
+    private val onNightServiceColour: () -> ServiceColours = { throw NotImplementedError() }
 ) : ServiceColourProvider {
 
-    override val nightServiceColour: Int
-        get() = onNightServiceColour()
+    override val nightServiceColours get() = onNightServiceColour()
 }

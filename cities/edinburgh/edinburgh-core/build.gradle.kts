@@ -63,4 +63,6 @@ dependencies {
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.mockito)
     testImplementation(libs.mockito.kotlin)
+
+    testFixturesImplementation(project(":core:services"))
 }
