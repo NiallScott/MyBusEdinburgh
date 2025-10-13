@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,6 +35,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import dagger.hilt.android.AndroidEntryPoint
@@ -79,9 +82,9 @@ class AlertManagerFragment : Fragment(), HasScrollableContent {
 
         callbacks = try {
             context as Callbacks
-        } catch (ignored: ClassCastException) {
+        } catch (_: ClassCastException) {
             throw IllegalStateException("${context.javaClass.name} does not implement " +
-                    Callbacks::class.java.name)
+                Callbacks::class.java.name)
         }
     }
 
@@ -89,17 +92,19 @@ class AlertManagerFragment : Fragment(), HasScrollableContent {
         super.onCreate(savedInstanceState)
 
         adapter = AlertAdapter(
-                requireContext(),
-                textFormattingUtils,
-                stopMapMarkerDecorator,
-                mapStyleApplicator,
-                alertItemClickListener)
+            requireContext(),
+            textFormattingUtils,
+            stopMapMarkerDecorator,
+            mapStyleApplicator,
+            alertItemClickListener
+        )
     }
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?): View {
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _viewBinding = FragmentAlertManagerBinding.inflate(inflater, container, false)
 
         return viewBinding.root
@@ -109,7 +114,19 @@ class AlertManagerFragment : Fragment(), HasScrollableContent {
         super.onViewCreated(view, savedInstanceState)
 
         viewBinding.apply {
-            recyclerView.setHasFixedSize(true)
+            ViewCompat.setOnApplyWindowInsetsListener(root) { view, windowInsets ->
+                val insets = windowInsets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() + WindowInsetsCompat.Type.displayCutout()
+                )
+
+                view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    leftMargin = insets.left
+                    rightMargin = insets.right
+                }
+
+                WindowInsetsCompat.CONSUMED
+            }
+
             recyclerView.adapter = adapter
         }
 
@@ -120,9 +137,9 @@ class AlertManagerFragment : Fragment(), HasScrollableContent {
             showSystemLocationSettings()
         }
         viewModel.showRemoveArrivalAlertLiveData.observe(viewLifecycle,
-                this::showRemoveArrivalAlertDialog)
+            this::showRemoveArrivalAlertDialog)
         viewModel.showRemoveProximityAlertLiveData.observe(viewLifecycle,
-                this::showRemoveProximityAlertDialog)
+            this::showRemoveProximityAlertDialog)
     }
 
     override fun onDestroyView() {
@@ -154,15 +171,17 @@ class AlertManagerFragment : Fragment(), HasScrollableContent {
     private fun showSystemLocationSettings() {
         try {
             Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    .let(this::startActivity)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .let(this::startActivity)
         } catch (e: ActivityNotFoundException) {
             exceptionLogger.log(e)
-            Toast.makeText(
+            Toast
+                .makeText(
                     requireContext(),
                     R.string.alertmanager_error_no_location_settings,
-                    Toast.LENGTH_SHORT)
-                    .show()
+                    Toast.LENGTH_SHORT
+                )
+                .show()
         }
     }
 

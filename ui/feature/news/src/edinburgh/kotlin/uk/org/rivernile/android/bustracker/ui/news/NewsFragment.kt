@@ -30,7 +30,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
 import androidx.fragment.app.Fragment
 import androidx.fragment.compose.content
 import dagger.hilt.android.AndroidEntryPoint
@@ -72,7 +78,12 @@ public class NewsFragment : Fragment() {
                 LocalDateTimeFormatter provides rememberDateTimeFormatter(),
                 LocalNumberFormatter provides rememberNumberFormatter()
             ) {
-                NewsScreen()
+                val consumedInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical)
+
+                NewsScreen(
+                    modifier = Modifier
+                        .consumeWindowInsets(consumedInsets)
+                )
             }
         }
     }

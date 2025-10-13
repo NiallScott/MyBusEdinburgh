@@ -125,7 +125,9 @@
             android:exported="true">
             <!-- This Activity attempts to take over HTTP accessing of
                  mobile.mybustracker.co.uk. -->
-            <intent-filter>
+            <intent-filter
+                android:autoVerify="false">
+
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -147,7 +149,7 @@
             android:exported="true"
             android:label="@string/displaystopdata_title" />
 
-        <!-- PreferencesActivity, to let the user change app preferences. -->
+        <!-- SettingsActivity, to let the user change app preferences. -->
         <activity
             android:name="uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity"
             android:label="@string/preferences_title"

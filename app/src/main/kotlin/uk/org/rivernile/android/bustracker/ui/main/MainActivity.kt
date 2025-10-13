@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,7 +29,9 @@ package uk.org.rivernile.android.bustracker.ui.main
 import android.app.SearchManager
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.net.Uri
+import android.content.res.Configuration
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.Menu
@@ -39,6 +41,8 @@ import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.launch
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
@@ -47,7 +51,6 @@ import androidx.appcompat.view.ActionMode
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -72,6 +75,7 @@ import uk.org.rivernile.android.bustracker.ui.alerts.time.DeleteTimeAlertDialogF
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapFragment
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
+import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.explore.ExploreFragment
 import uk.org.rivernile.android.bustracker.ui.favourites.FavouriteStopsFragment
 import uk.org.rivernile.android.bustracker.ui.favourites.addedit.AddEditFavouriteStopDialogFragment
@@ -87,6 +91,8 @@ import uk.org.rivernile.edinburghbustracker.android.BuildConfig
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.ActivityMainBinding
 import javax.inject.Inject
+import androidx.core.net.toUri
+import androidx.core.view.ViewGroupCompat
 
 /**
  * This [android.app.Activity] is the root Activity of the app.
@@ -144,20 +150,28 @@ class MainActivity : AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        val isDarkMode = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+            Configuration.UI_MODE_NIGHT_YES
+
+        enableEdgeToEdge(
+            navigationBarStyle = if (isDarkMode) {
+                SystemBarStyle.dark(scrim = Color.TRANSPARENT)
+            } else {
+                SystemBarStyle.light(
+                    scrim = Color.TRANSPARENT,
+                    darkScrim = Color.TRANSPARENT
+                )
+            }
+        )
 
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
+        ViewGroupCompat.installCompatInsetsDispatch(viewBinding.root)
 
         setSupportActionBar(viewBinding.searchBar)
 
-        window.navigationBarColor = MaterialColors.getColor(
-            viewBinding.root,
-            com.google.android.material.R.attr.colorSurfaceContainer
-        )
-
         viewBinding.apply {
-            setupHorizontalInsets()
+            setUpAppBar()
             setupBottomNavigation()
             setupSearch()
         }
@@ -200,6 +214,7 @@ class MainActivity : AppCompatActivity(),
     override fun onSupportActionModeStarted(mode: ActionMode) {
         super.onSupportActionModeStarted(mode)
 
+        @Suppress("DEPRECATION")
         window.statusBarColor = MaterialColors.getColor(
             viewBinding.root,
             com.google.android.material.R.attr.colorSurfaceContainer
@@ -223,6 +238,7 @@ class MainActivity : AppCompatActivity(),
     override fun onSupportActionModeFinished(mode: ActionMode) {
         super.onSupportActionModeFinished(mode)
 
+        @Suppress("DEPRECATION")
         window.statusBarColor = ContextCompat.getColor(this, android.R.color.transparent)
         viewBinding.apply {
             appBarLayout.isInvisible = false
@@ -237,52 +253,58 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun onShowAddEditFavouriteStop(stopCode: String) {
-        AddEditFavouriteStopDialogFragment.newInstance(stopCode)
-                .show(supportFragmentManager, DIALOG_ADD_FAVOURITE)
+        AddEditFavouriteStopDialogFragment
+            .newInstance(stopCode)
+            .show(supportFragmentManager, DIALOG_ADD_FAVOURITE)
     }
 
     override fun onShowAddProximityAlert(stopCode: String) {
-        AddProximityAlertDialogFragment.newInstance(stopCode)
-                .show(supportFragmentManager, DIALOG_ADD_PROX_ALERT)
+        AddProximityAlertDialogFragment
+            .newInstance(stopCode)
+            .show(supportFragmentManager, DIALOG_ADD_PROX_ALERT)
     }
 
     override fun onShowAddTimeAlert(stopCode: String, defaultServices: Array<String>?) {
-        AddTimeAlertDialogFragment.newInstance(stopCode, defaultServices)
-                .show(supportFragmentManager, DIALOG_ADD_TIME_ALERT)
+        AddTimeAlertDialogFragment
+            .newInstance(stopCode, defaultServices)
+            .show(supportFragmentManager, DIALOG_ADD_TIME_ALERT)
     }
 
     override fun onShowBusStopMapWithStopCode(stopCode: String) {
         Intent(this, BusStopMapActivity::class.java)
-                .putExtra(BusStopMapActivity.EXTRA_STOP_CODE, stopCode)
-                .let(this::startActivity)
+            .putExtra(BusStopMapActivity.EXTRA_STOP_CODE, stopCode)
+            .let(this::startActivity)
     }
 
     override fun onShowBusTimes(stopCode: String) {
         Intent(this, DisplayStopDataActivity::class.java)
-                .putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
-                .let(this::startActivity)
+            .putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
+            .let(this::startActivity)
     }
 
     override fun onShowConfirmDeleteProximityAlert(stopCode: String) {
-        DeleteProximityAlertDialogFragment.newInstance(stopCode)
-                .show(supportFragmentManager, DIALOG_DELETE_PROX_ALERT)
+        DeleteProximityAlertDialogFragment
+            .newInstance(stopCode)
+            .show(supportFragmentManager, DIALOG_DELETE_PROX_ALERT)
     }
 
     override fun onShowConfirmDeleteTimeAlert(stopCode: String) {
-        DeleteTimeAlertDialogFragment.newInstance(stopCode)
-                .show(supportFragmentManager, DIALOG_DELETE_TIME_ALERT)
+        DeleteTimeAlertDialogFragment
+            .newInstance(stopCode)
+            .show(supportFragmentManager, DIALOG_DELETE_TIME_ALERT)
     }
 
     override fun onShowConfirmFavouriteDeletion(stopCode: String) {
-        DeleteFavouriteDialogFragment.newInstance(stopCode)
-                .show(supportFragmentManager, DIALOG_DELETE_FAVOURITE)
+        DeleteFavouriteDialogFragment
+            .newInstance(stopCode)
+            .show(supportFragmentManager, DIALOG_DELETE_FAVOURITE)
     }
 
     override fun onShowSystemLocationPreferences(): Boolean {
         return try {
             Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    .let(this::startActivity)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .let(this::startActivity)
             true
         } catch (e: ActivityNotFoundException) {
             exceptionLogger.log(e)
@@ -292,21 +314,23 @@ class MainActivity : AppCompatActivity(),
 
     override fun onAskTurnOnGps() {
         TurnOnGpsDialogFragment()
-                .show(supportFragmentManager, DIALOG_TURN_ON_GPS)
+            .show(supportFragmentManager, DIALOG_TURN_ON_GPS)
     }
 
     override fun onShowInstallBarcodeScanner() {
         try {
             Intent(Intent.ACTION_VIEW)
-                .setData(Uri.parse(BARCODE_APP_PACKAGE))
+                .setData(BARCODE_APP_PACKAGE.toUri())
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .let(this::startActivity)
         } catch (e: ActivityNotFoundException) {
             exceptionLogger.log(e)
-            Toast.makeText(
-                this,
-                R.string.barcodescannerdialog_noplaystore,
-                Toast.LENGTH_LONG)
+            Toast
+                .makeText(
+                    this,
+                    R.string.barcodescannerdialog_noplaystore,
+                    Toast.LENGTH_LONG
+                )
                 .show()
         }
     }
@@ -316,18 +340,22 @@ class MainActivity : AppCompatActivity(),
     }
 
     /**
-     * Setup the horizontal insets on the root [View] so that our UI takes account of system UI.
+     * Setup the app bar insets.
      */
-    private fun ActivityMainBinding.setupHorizontalInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(root) { view, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+    private fun ActivityMainBinding.setUpAppBar() {
+        ViewCompat.setOnApplyWindowInsetsListener(searchBar) { view, windowInsets ->
+            val insets = windowInsets.getInsets(
+                WindowInsetsCompat.Type.systemBars() + WindowInsetsCompat.Type.displayCutout()
+            )
+
+            val paddingDouble = resources.getDimensionPixelOffset(Rcore.dimen.padding_double)
 
             view.updateLayoutParams<MarginLayoutParams> {
-                leftMargin = insets.left
-                rightMargin = insets.right
+                leftMargin = paddingDouble + insets.left
+                rightMargin = paddingDouble + insets.right
             }
 
-            windowInsets
+            WindowInsetsCompat.CONSUMED
         }
     }
 
@@ -353,6 +381,18 @@ class MainActivity : AppCompatActivity(),
     private fun ActivityMainBinding.setupSearch() {
         searchView.addTransitionListener { _, _, newState ->
             updateBackPressedCallbackState(newState)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                when (newState) {
+                    SearchView.TransitionState.SHOWING,
+                    SearchView.TransitionState.SHOWN -> {
+                        window.isNavigationBarContrastEnforced = true
+                    }
+                    else -> {
+                        window.isNavigationBarContrastEnforced = false
+                    }
+                }
+            }
         }
 
         updateBackPressedCallbackState(searchView.currentTransitionState)
@@ -371,16 +411,6 @@ class MainActivity : AppCompatActivity(),
 
         searchView.editText.doAfterTextChanged {
             performSearch(it?.toString())
-        }
-
-        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.fragmentSearch) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-
-            v.updateLayoutParams<MarginLayoutParams> {
-                bottomMargin = insets.bottom
-            }
-
-            windowInsets
         }
 
         if (!viewModel.hasShownInitialAnimation) {
@@ -439,28 +469,34 @@ class MainActivity : AppCompatActivity(),
 
             when (itemId) {
                 R.id.main_navigation_explore -> {
-                    supportFragmentManager.findFragmentByTag(FRAGMENT_TAG_EXPLORE)
-                            ?.let(this::attach)
-                            ?: add(
-                                    R.id.fragmentContainer,
-                                    ExploreFragment(),
-                                    FRAGMENT_TAG_EXPLORE)
+                    supportFragmentManager
+                        .findFragmentByTag(FRAGMENT_TAG_EXPLORE)
+                        ?.let(this::attach)
+                        ?: add(
+                            R.id.fragmentContainer,
+                            ExploreFragment(),
+                            FRAGMENT_TAG_EXPLORE
+                        )
                 }
                 R.id.main_navigation_updates -> {
-                    supportFragmentManager.findFragmentByTag(FRAGMENT_TAG_UPDATES)
-                            ?.let(this::attach)
-                            ?: add(
-                                    R.id.fragmentContainer,
-                                    NewsFragment(),
-                                    FRAGMENT_TAG_UPDATES)
+                    supportFragmentManager
+                        .findFragmentByTag(FRAGMENT_TAG_UPDATES)
+                        ?.let(this::attach)
+                        ?: add(
+                            R.id.fragmentContainer,
+                            NewsFragment(),
+                            FRAGMENT_TAG_UPDATES
+                        )
                 }
                 R.id.main_navigation_alerts -> {
-                    supportFragmentManager.findFragmentByTag(FRAGMENT_TAG_ALERTS)
-                            ?.let(this::attach)
-                            ?: add(
-                                    R.id.fragmentContainer,
-                                    AlertManagerFragment(),
-                                    FRAGMENT_TAG_ALERTS)
+                    supportFragmentManager
+                        .findFragmentByTag(FRAGMENT_TAG_ALERTS)
+                        ?.let(this::attach)
+                        ?: add(
+                            R.id.fragmentContainer,
+                            AlertManagerFragment(),
+                            FRAGMENT_TAG_ALERTS
+                        )
                 }
                 else -> return@showItem
             }
@@ -512,9 +548,9 @@ class MainActivity : AppCompatActivity(),
     private fun handleShowQrCodeScanner() {
         try {
             scanQrCodeLauncher.launch()
-        } catch (ignored: ActivityNotFoundException) {
+        } catch (_: ActivityNotFoundException) {
             viewModel.onQrScannerNotFound()
-        } catch (ignored: SecurityException) {
+        } catch (_: SecurityException) {
             // SecurityException has been seen out in the wild, albeit from an unsupported app which
             // is hijacking the Intent. When this happens, the user will be directed to install the
             // supported app.
@@ -568,7 +604,8 @@ class MainActivity : AppCompatActivity(),
      */
     private fun applyBottomContentPadding(
         fragmentManager: FragmentManager,
-        bottomContentPadding: Int) {
+        bottomContentPadding: Int
+    ) {
         fragmentManager.fragments.forEach { fragment ->
             if (fragment is RequiresContentPadding) {
                 fragment.contentBottomPadding = bottomContentPadding
@@ -601,7 +638,8 @@ class MainActivity : AppCompatActivity(),
             fm: FragmentManager,
             f: Fragment,
             v: View,
-            savedInstanceState: Bundle?) {
+            savedInstanceState: Bundle?
+        ) {
             if (f is RequiresContentPadding) {
                 val marginParams = viewBinding.searchBar.layoutParams as MarginLayoutParams
                 f.contentBottomPadding = viewBinding.searchBar.height +

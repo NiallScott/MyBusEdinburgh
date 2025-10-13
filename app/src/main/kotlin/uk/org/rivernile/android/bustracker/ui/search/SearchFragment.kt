@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,12 +31,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener
+import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentSearchBinding
 import javax.inject.Inject
@@ -67,9 +72,9 @@ class SearchFragment : Fragment() {
 
         callbacks = try {
             context as Callbacks
-        } catch (e: ClassCastException) {
+        } catch (_: ClassCastException) {
             throw IllegalStateException("${context.javaClass.name} does not implement " +
-                    Callbacks::class.java.name)
+                Callbacks::class.java.name)
         }
     }
 
@@ -80,13 +85,15 @@ class SearchFragment : Fragment() {
             requireContext(),
             stopMapMarkerDecorator,
             textFormattingUtils,
-            viewModel::onItemClicked)
+            viewModel::onItemClicked
+        )
     }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?): View {
+        savedInstanceState: Bundle?
+    ): View {
         return FragmentSearchBinding.inflate(inflater, container, false).also {
             _viewBinding = it
         }.root
@@ -95,9 +102,34 @@ class SearchFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewBinding.recyclerView.apply {
-            adapter = this@SearchFragment.adapter
-            setHasFixedSize(true)
+        viewBinding.apply {
+            ViewCompat.setOnApplyWindowInsetsListener(root) { view, windowInsets ->
+                val insets = windowInsets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() + WindowInsetsCompat.Type.displayCutout()
+                )
+
+                view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    leftMargin = insets.left
+                    rightMargin = insets.right
+                }
+
+                windowInsets
+            }
+
+            ViewCompat.setOnApplyWindowInsetsListener(recyclerView) { view, windowInsets ->
+                val insets = windowInsets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() + WindowInsetsCompat.Type.displayCutout()
+                )
+
+                view.updatePadding(
+                    bottom = resources.getDimensionPixelOffset(Rcore.dimen.padding_default) +
+                        insets.bottom
+                )
+
+                WindowInsetsCompat.CONSUMED
+            }
+
+            recyclerView.adapter = this@SearchFragment.adapter
         }
 
         val viewLifecycleOwner = viewLifecycleOwner

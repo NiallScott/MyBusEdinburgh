@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,23 +28,20 @@ package uk.org.rivernile.android.bustracker.ui.bustimes
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.viewpager2.widget.MarginPageTransformer
 import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.color.MaterialColors
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
@@ -64,6 +61,8 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.ActivityDisplayS
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import javax.inject.Inject
 import kotlin.math.abs
+import androidx.core.net.toUri
+import androidx.core.view.ViewGroupCompat
 
 /**
  * The purpose of this [AppCompatActivity] is to display to the user live departure times and
@@ -117,6 +116,8 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        enableEdgeToEdge()
+
         intent.let {
             viewModel.stopCode = if (Intent.ACTION_VIEW == it.action) {
                 it.data?.getQueryParameter(DEEPLINK_QUERY_PARAMETER_STOP_CODE)
@@ -125,15 +126,9 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
             }
         }
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-
         viewBinding = ActivityDisplayStopDataBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
-
-        window.navigationBarColor = MaterialColors.getColor(
-            viewBinding.root,
-            com.google.android.material.R.attr.colorSurfaceContainer
-        )
+        ViewGroupCompat.installCompatInsetsDispatch(viewBinding.root)
 
         setSupportActionBar(viewBinding.toolbar)
         supportActionBar?.apply {
@@ -145,13 +140,17 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
 
         viewBinding.apply {
             val pagerAdapter = StopDataPagerAdapter(
-                    this@DisplayStopDataActivity,
-                    viewModel.stopCode)
+                this@DisplayStopDataActivity,
+                viewModel.stopCode
+            )
 
             viewPager.apply {
                 adapter = pagerAdapter
-                setPageTransformer(MarginPageTransformer(
-                        resources.getDimensionPixelSize(Rcore.dimen.padding_default)))
+                setPageTransformer(
+                    MarginPageTransformer(
+                        resources.getDimensionPixelSize(Rcore.dimen.padding_default)
+                    )
+                )
                 offscreenPageLimit = 1
             }
 
@@ -184,24 +183,26 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
 
     override fun showMapForStop(stopCode: String) {
         Intent(this, BusStopMapActivity::class.java)
-                .putExtra(BusStopMapActivity.EXTRA_STOP_CODE, stopCode)
-                .let(this::startActivity)
+            .putExtra(BusStopMapActivity.EXTRA_STOP_CODE, stopCode)
+            .let(this::startActivity)
     }
 
     /**
      * Set up the window insets.
      */
     private fun setUpWindowInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root) { view, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.appBarLayout) { view, windowInsets ->
+            val insets = windowInsets.getInsets(
+                WindowInsetsCompat.Type.systemBars() + WindowInsetsCompat.Type.displayCutout()
+            )
 
-            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = insets.bottom
-                leftMargin = insets.left
-                rightMargin = insets.right
-            }
+            view.updatePadding(
+                left = insets.left,
+                top = insets.top,
+                right = insets.right
+            )
 
-            windowInsets
+            WindowInsetsCompat.CONSUMED
         }
     }
 
@@ -310,7 +311,7 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
         streetViewMenuItem?.let { menuItem ->
             menuItem.isVisible = details?.let {
                 buildStreetViewIntent(it.location.latitude, it.location.longitude)
-                        .resolveActivity(packageManager) != null
+                    .resolveActivity(packageManager) != null
             } ?: false
         }
     }
@@ -326,9 +327,9 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
      * @return An [Intent] for launching Street View on this device.
      */
     private fun buildStreetViewIntent(latitude: Double, longitude: Double) =
-            Intent(Intent.ACTION_VIEW)
-                    .setData(Uri.parse("google.streetview:cbll=$latitude,$longitude"))
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        Intent(Intent.ACTION_VIEW)
+            .setData("google.streetview:cbll=$latitude,$longitude".toUri())
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
     /**
      * Show the 'Add favourite' UI.
@@ -336,8 +337,9 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
      * @param stopCode The stop code to add the favourite for.
      */
     private fun showAddFavourite(stopCode: String) {
-        AddEditFavouriteStopDialogFragment.newInstance(stopCode)
-                .show(supportFragmentManager, DIALOG_ADD_FAVOURITE)
+        AddEditFavouriteStopDialogFragment
+            .newInstance(stopCode)
+            .show(supportFragmentManager, DIALOG_ADD_FAVOURITE)
     }
 
     /**
@@ -346,8 +348,9 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
      * @param stopCode The stop code to remove the favourite for.
      */
     private fun showRemoveFavourite(stopCode: String) {
-        DeleteFavouriteDialogFragment.newInstance(stopCode)
-                .show(supportFragmentManager, DIALOG_REMOVE_FAVOURITE)
+        DeleteFavouriteDialogFragment
+            .newInstance(stopCode)
+            .show(supportFragmentManager, DIALOG_REMOVE_FAVOURITE)
     }
 
     /**
@@ -356,8 +359,9 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
      * @param stopCode The stop code to add an arrival alert for.
      */
     private fun showAddArrivalAlert(stopCode: String) {
-        AddTimeAlertDialogFragment.newInstance(stopCode)
-                .show(supportFragmentManager, DIALOG_ADD_ARRIVAL_ALERT)
+        AddTimeAlertDialogFragment
+            .newInstance(stopCode)
+            .show(supportFragmentManager, DIALOG_ADD_ARRIVAL_ALERT)
     }
 
     /**
@@ -366,8 +370,9 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
      * @param stopCode The stop code to remove the arrival alert for.
      */
     private fun showRemoveArrivalAlert(stopCode: String) {
-        DeleteTimeAlertDialogFragment.newInstance(stopCode)
-                .show(supportFragmentManager, DIALOG_REMOVE_ARRIVAL_ALERT)
+        DeleteTimeAlertDialogFragment
+            .newInstance(stopCode)
+            .show(supportFragmentManager, DIALOG_REMOVE_ARRIVAL_ALERT)
     }
 
     /**
@@ -376,8 +381,9 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
      * @param stopCode The stop code to add a proximity alert for.
      */
     private fun showAddProximityAlert(stopCode: String) {
-        AddProximityAlertDialogFragment.newInstance(stopCode)
-                .show(supportFragmentManager, DIALOG_ADD_PROX_ALERT)
+        AddProximityAlertDialogFragment
+            .newInstance(stopCode)
+            .show(supportFragmentManager, DIALOG_ADD_PROX_ALERT)
     }
 
     /**
@@ -386,8 +392,9 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
      * @param stopCode The stop code to remove the proximity alert for.
      */
     private fun showRemoveProximityAlert(stopCode: String) {
-        DeleteProximityAlertDialogFragment.newInstance(stopCode)
-                .show(supportFragmentManager, DIALOG_REMOVE_PROX_ALERT)
+        DeleteProximityAlertDialogFragment
+            .newInstance(stopCode)
+            .show(supportFragmentManager, DIALOG_REMOVE_PROX_ALERT)
     }
 
     /**
@@ -412,9 +419,13 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
             exceptionLogger.log(e)
             // This should not happen as a check happened before even allowing the Street View menu
             // item to be displayed. Handling in case the device state changed since then.
-            Toast.makeText(this, R.string.displaystopdata_error_street_view_missing,
-                    Toast.LENGTH_SHORT)
-                    .show()
+            Toast
+                .makeText(
+                    this,
+                    R.string.displaystopdata_error_street_view_missing,
+                    Toast.LENGTH_SHORT
+                )
+                .show()
         }
     }
 

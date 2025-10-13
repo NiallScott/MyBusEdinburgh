@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -44,6 +44,8 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import com.google.android.gms.common.ConnectionResult
@@ -67,6 +69,7 @@ import uk.org.rivernile.android.bustracker.utils.Event
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentBusStopMapBinding
 import javax.inject.Inject
+import kotlin.math.max
 
 /**
  * This is a [Fragment] for display a map with stop marker icons and route lines.
@@ -151,7 +154,7 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
 
         try {
             callbacks = context as Callbacks
-        } catch (e: ClassCastException) {
+        } catch (_: ClassCastException) {
             throw IllegalStateException("${context.javaClass.name} does not implement " +
                     Callbacks::class.java.name)
         }
@@ -175,9 +178,10 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
     }
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?): View {
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _viewBinding = FragmentBusStopMapBinding.inflate(inflater, container, false)
 
         return viewBinding.root
@@ -188,21 +192,25 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
 
         val viewLifecycleOwner = viewLifecycleOwner
 
-        childFragmentManager.setFragmentResultListener(
+        childFragmentManager
+            .setFragmentResultListener(
                 MapTypeBottomSheetDialogFragment.REQUEST_KEY,
-                viewLifecycleOwner) { _, result ->
-            val mapType = result.getSerializableCompat(
-                    MapTypeBottomSheetDialogFragment.RESULT_CHOSEN_MAP_TYPE)
+                viewLifecycleOwner
+            ) { _, result ->
+                val mapType = result
+                    .getSerializableCompat(MapTypeBottomSheetDialogFragment.RESULT_CHOSEN_MAP_TYPE)
                     ?: MapType.NORMAL
-            viewModel.onMapTypeSelected(mapType)
-        }
+                viewModel.onMapTypeSelected(mapType)
+            }
 
-        childFragmentManager.setFragmentResultListener(
+        childFragmentManager
+            .setFragmentResultListener(
                 ServicesChooserDialogFragment.REQUEST_KEY,
-                viewLifecycleOwner) { _, result ->
-            val selectedServices = result.getStringArrayList(
-                    ServicesChooserDialogFragment.RESULT_CHOSEN_SERVICES)
-            viewModel.onServicesSelected(selectedServices)
+                viewLifecycleOwner
+            ) { _, result ->
+                val selectedServices = result
+                    .getStringArrayList(ServicesChooserDialogFragment.RESULT_CHOSEN_SERVICES)
+                viewModel.onServicesSelected(selectedServices)
         }
 
         viewBinding.apply {
@@ -284,6 +292,7 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
     override fun onDestroyView() {
         super.onDestroyView()
 
+        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.mapView, null)
         clusterManager = null
         routeLineManager = null
         map = null
@@ -329,7 +338,10 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
     override var contentBottomPadding = 0
         set(value) {
             field = value
-            map?.setPadding(0, 0, 0, value)
+
+            if (map != null) {
+                ViewCompat.requestApplyInsets(viewBinding.mapView)
+            }
         }
 
     /**
@@ -337,8 +349,9 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
      */
     private fun updatePermissions() {
         viewModel.permissionsState = PermissionsState(
-                getPermissionState(Manifest.permission.ACCESS_FINE_LOCATION),
-                getPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION))
+            getPermissionState(Manifest.permission.ACCESS_FINE_LOCATION),
+            getPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION)
+        )
     }
 
     /**
@@ -348,10 +361,13 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
      */
     private fun handleRequestLocationPermissions(event: Event<Unit>) {
         event.getContentIfNotHandled()?.let {
-            requestLocationPermissionsLauncher.launch(
+            requestLocationPermissionsLauncher
+                .launch(
                     arrayOf(
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION))
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
+                )
         }
     }
 
@@ -363,11 +379,11 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
      */
     private fun handleLocationPermissionsResult(states: Map<String, Boolean>) {
         val fineLocationState = states[Manifest.permission.ACCESS_FINE_LOCATION]
-                ?.let(this::getPermissionState)
-                ?: getPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+            ?.let(this::getPermissionState)
+            ?: getPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
         val coarseLocationState = states[Manifest.permission.ACCESS_COARSE_LOCATION]
-                ?.let(this::getPermissionState)
-                ?: getPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION)
+            ?.let(this::getPermissionState)
+            ?: getPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION)
 
         viewModel.permissionsState = PermissionsState(fineLocationState, coarseLocationState)
     }
@@ -379,9 +395,10 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
      * @return The determined [PermissionState].
      */
     private fun getPermissionState(permission: String) =
-            getPermissionState(
-                    ContextCompat.checkSelfPermission(requireContext(), permission) ==
-                            PackageManager.PERMISSION_GRANTED)
+        getPermissionState(
+            ContextCompat.checkSelfPermission(requireContext(), permission) ==
+                PackageManager.PERMISSION_GRANTED
+        )
 
     /**
      * Maps the permission granted status in to a [PermissionState].
@@ -463,13 +480,29 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
             // feature is enabled. The button disappears when the feature is not enabled regardless
             // of this setting.
             uiSettings.isMyLocationButtonEnabled = true
-            setPadding(0, 0, 0, contentBottomPadding)
 
             setOnInfoWindowCloseListener {
                 viewModel.onInfoWindowClosed()
             }
 
             mapStyleApplicator.applyMapStyle(context, this)
+
+            ViewCompat.setOnApplyWindowInsetsListener(viewBinding.mapView) { view, windowInsets ->
+                val insets = windowInsets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() + WindowInsetsCompat.Type.displayCutout()
+                )
+
+                setPadding(
+                    insets.left,
+                    0,
+                    insets.right,
+                    max(insets.bottom, contentBottomPadding)
+                )
+
+                WindowInsetsCompat.CONSUMED
+            }
+
+            ViewCompat.requestApplyInsets(viewBinding.mapView)
         }
 
         clusterManager = ClusterManager<UiStopMarker>(context, map).apply {
@@ -480,7 +513,8 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
             setOnClusterItemInfoWindowClickListener(viewModel::onMarkerBubbleClicked)
 
             markerCollection.setInfoWindowAdapter(
-                    MapInfoWindow(context, layoutInflater, view as ViewGroup))
+                    MapInfoWindow(context, layoutInflater, view as ViewGroup)
+            )
         }
 
         routeLineManager = RouteLineManager(context, map)
@@ -513,11 +547,12 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
 
         map?.cameraPosition?.let {
             UiCameraLocation(
-                UiLatLon(
-                    it.target.latitude,
-                    it.target.longitude),
-                it.zoom)
-                .let(viewModel::updateCameraLocation)
+                latLon = UiLatLon(
+                    latitude = it.target.latitude,
+                    longitude = it.target.longitude
+                ),
+                zoomLevel = it.zoom
+            ).let(viewModel::updateCameraLocation)
         }
     }
 
@@ -532,9 +567,13 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
         // complication by doing this.
         map?.apply {
             // Move the camera to the cluster's location, and also zoom in by 1 unit.
-            animateCamera(CameraUpdateFactory.newLatLngZoom(
-                    cluster.position,
-                    cameraPosition.zoom + 1f))
+            animateCamera(
+                CameraUpdateFactory
+                    .newLatLngZoom(
+                        cluster.position,
+                        cameraPosition.zoom + 1f
+                    )
+            )
         }
 
         return true
@@ -607,12 +646,14 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
     private fun handleCameraPositionChanged(cameraLocation: UiCameraLocation?) {
         map?.apply {
             cameraLocation?.let {
-                CameraUpdateFactory.newLatLngZoom(
+                CameraUpdateFactory
+                    .newLatLngZoom(
                         LatLng(
-                                it.latLon.latitude,
-                                it.latLon.longitude),
-                        it.zoomLevel)
-                        .let(this::moveCamera)
+                            it.latLon.latitude,
+                            it.latLon.longitude
+                        ),
+                        it.zoomLevel
+                    ).let(this::moveCamera)
             }
         }
     }
@@ -642,11 +683,14 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
      * @param selectedServices The existing selected services.
      */
     private fun showServicesChooser(selectedServices: List<String>?) {
-        ServicesChooserParams.AllServices(
-            R.string.busstopmapfragment_service_chooser_title,
-            selectedServices)
+        ServicesChooserParams
+            .AllServices(
+                R.string.busstopmapfragment_service_chooser_title,
+                selectedServices
+            )
             .let {
-                ServicesChooserDialogFragment.newInstance(it)
+                ServicesChooserDialogFragment
+                    .newInstance(it)
                     .show(childFragmentManager, DIALOG_SERVICES_CHOOSER)
             }
     }
@@ -655,8 +699,9 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
      * Handle the map type menu item being selected.
      */
     private fun showMapTypeSelection() {
-        MapTypeBottomSheetDialogFragment.newInstance(toMapType())
-                .show(childFragmentManager, DIALOG_MAP_TYPE_BOTTOM_SHEET)
+        MapTypeBottomSheetDialogFragment
+            .newInstance(toMapType())
+            .show(childFragmentManager, DIALOG_MAP_TYPE_BOTTOM_SHEET)
     }
 
     /**
@@ -738,10 +783,13 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
      * performed to make Google Play Services work.
      */
     private fun showFailedToResolvePlayServicesToast() {
-        Toast.makeText(requireContext(),
+        Toast
+            .makeText(
+                requireContext(),
                 R.string.busstopmapfragment_error_play_services_resolve_failed,
-                Toast.LENGTH_SHORT)
-                .show()
+                Toast.LENGTH_SHORT
+            )
+            .show()
     }
 
     private val menuProvider = object : MenuProvider {
@@ -755,11 +803,14 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
 
         override fun onPrepareMenu(menu: Menu) {
             handleServicesMenuItemEnabledChanged(
-                    viewModel.isFilterMenuItemEnabledLiveData.value ?: false)
+                viewModel.isFilterMenuItemEnabledLiveData.value ?: false
+            )
             handleMapTypeMenuItemEnabledChanged(
-                    viewModel.isMapTypeMenuItemEnabledLiveData.value ?: false)
+                viewModel.isMapTypeMenuItemEnabledLiveData.value ?: false
+            )
             handleTrafficViewMenuItemEnabledChanged(
-                    viewModel.isTrafficViewMenuItemEnabledLiveData.value ?: false)
+                viewModel.isTrafficViewMenuItemEnabledLiveData.value ?: false
+            )
             handleTrafficViewMenuItemChanged(viewModel.isTrafficViewEnabledLiveData.value ?: false)
         }
 

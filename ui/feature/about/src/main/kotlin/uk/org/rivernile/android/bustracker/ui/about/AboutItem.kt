@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -103,6 +104,7 @@ private fun AboutItem1Line(
             .focusable(item.isClickable)
             .defaultMinSize(minHeight = 56.dp)
             .wrapContentHeight(Alignment.CenterVertically)
+            .safeDrawingPadding()
             .padding(
                 top = verticalPadding,
                 bottom = verticalPadding,
@@ -133,6 +135,7 @@ private fun AboutItem2Lines(
             .fillMaxWidth()
             .heightIn(min = 72.dp)
             .wrapContentHeight(Alignment.CenterVertically)
+            .safeDrawingPadding()
             .padding(
                 top = verticalPadding,
                 bottom = verticalPadding,

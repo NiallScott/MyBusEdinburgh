@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2016 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -81,6 +81,7 @@
         </LinearLayout>
 
         <include
+            android:id="@+id/progress"
             layout="@layout/indeterminate_progress" />
 
         <TextView

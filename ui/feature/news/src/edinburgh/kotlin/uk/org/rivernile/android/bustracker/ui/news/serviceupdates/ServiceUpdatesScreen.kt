@@ -40,6 +40,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -242,6 +243,7 @@ private fun ContentHeaderBar(
     Row(
         modifier = modifier
             .background(color = MaterialTheme.colorScheme.inverseSurface)
+            .safeDrawingPadding()
             .padding(
                 top = paddingDefault,
                 bottom = paddingDefault,

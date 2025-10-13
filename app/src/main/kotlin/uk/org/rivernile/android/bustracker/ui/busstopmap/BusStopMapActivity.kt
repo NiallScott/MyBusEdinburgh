@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,15 +30,15 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
+import androidx.core.view.ViewGroupCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
-import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.android.bustracker.ui.HasScrollableContent
@@ -70,28 +70,25 @@ class BusStopMapActivity : AppCompatActivity(), BusStopMapFragment.Callbacks {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        enableEdgeToEdge()
         viewBinding = ActivityBusStopMapBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
+        ViewGroupCompat.installCompatInsetsDispatch(viewBinding.root)
 
         setSupportActionBar(viewBinding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        window.navigationBarColor = MaterialColors.getColor(
-            viewBinding.root,
-            com.google.android.material.R.attr.colorSurfaceContainer
-        )
-
-        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root) { view, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.toolbar) { view, windowInsets ->
+            val insets = windowInsets.getInsets(
+                WindowInsetsCompat.Type.systemBars() + WindowInsetsCompat.Type.displayCutout()
+            )
 
             view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = insets.bottom
                 leftMargin = insets.left
                 rightMargin = insets.right
             }
 
-            windowInsets
+            WindowInsetsCompat.CONSUMED
         }
 
         supportFragmentManager.registerFragmentLifecycleCallbacks(fragmentLifecycleCallbacks, true)
@@ -102,8 +99,9 @@ class BusStopMapActivity : AppCompatActivity(), BusStopMapFragment.Callbacks {
                     BusStopMapFragment.newInstance(intent.getStringExtra(EXTRA_STOP_CODE))
                 intent.hasExtra(EXTRA_LATITUDE) && intent.hasExtra(EXTRA_LONGITUDE) -> {
                     val location = UiLatLon(
-                            intent.getDoubleExtra(EXTRA_LATITUDE, 0.0),
-                            intent.getDoubleExtra(EXTRA_LONGITUDE, 0.0))
+                        intent.getDoubleExtra(EXTRA_LATITUDE, 0.0),
+                        intent.getDoubleExtra(EXTRA_LONGITUDE, 0.0)
+                    )
                     BusStopMapFragment.newInstance(location)
                 }
                 else -> BusStopMapFragment.newInstance()
@@ -128,8 +126,9 @@ class BusStopMapActivity : AppCompatActivity(), BusStopMapFragment.Callbacks {
                 }
                 intent.hasExtra(EXTRA_LATITUDE) && intent.hasExtra(EXTRA_LONGITUDE) -> {
                     val location = UiLatLon(
-                            intent.getDoubleExtra(EXTRA_LATITUDE, 0.0),
-                            intent.getDoubleExtra(EXTRA_LONGITUDE, 0.0))
+                        intent.getDoubleExtra(EXTRA_LATITUDE, 0.0),
+                        intent.getDoubleExtra(EXTRA_LONGITUDE, 0.0)
+                    )
                     onRequestCameraLocation(location)
                     setIntent(intent)
                 }
@@ -139,8 +138,8 @@ class BusStopMapActivity : AppCompatActivity(), BusStopMapFragment.Callbacks {
 
     override fun onShowBusTimes(stopCode: String) {
         Intent(this, DisplayStopDataActivity::class.java)
-                .putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
-                .let(this::startActivity)
+            .putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
+            .let(this::startActivity)
     }
 
     /**
@@ -152,7 +151,7 @@ class BusStopMapActivity : AppCompatActivity(), BusStopMapFragment.Callbacks {
     private val fragmentLifecycleCallbacks = object : FragmentManager.FragmentLifecycleCallbacks() {
         override fun onFragmentResumed(fm: FragmentManager, f: Fragment) {
             viewBinding.appBarLayout.liftOnScrollTargetViewId =
-                    (f as? HasScrollableContent)?.scrollableContentIdRes ?: View.NO_ID
+                (f as? HasScrollableContent)?.scrollableContentIdRes ?: View.NO_ID
         }
     }
 }

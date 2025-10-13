@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,12 +35,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
+import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentStopDetailsBinding
 import javax.inject.Inject
 
@@ -89,7 +94,7 @@ class StopDetailsFragment : Fragment() {
 
         callbacks = try {
             context as Callbacks
-        } catch (ignored: ClassCastException) {
+        } catch (_: ClassCastException) {
             throw IllegalStateException("${context::class.qualifiedName} must implement " +
                     Callbacks::class.qualifiedName)
         }
@@ -116,9 +121,30 @@ class StopDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewBinding.recyclerView.apply {
-            setHasFixedSize(true)
-            adapter = this@StopDetailsFragment.adapter
+        viewBinding.apply {
+            ViewCompat.setOnApplyWindowInsetsListener(contentView) { _, windowInsets ->
+                val insets = windowInsets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() + WindowInsetsCompat.Type.displayCutout()
+                )
+
+                contentView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    leftMargin = insets.left
+                    rightMargin = insets.right
+                }
+
+                recyclerView.updatePadding(
+                    bottom = insets.bottom +
+                        resources.getDimensionPixelOffset(Rcore.dimen.padding_default)
+                )
+
+                progress.progress.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = insets.bottom
+                }
+
+                windowInsets
+            }
+
+            recyclerView.adapter = this@StopDetailsFragment.adapter
         }
 
         val lifecycle = viewLifecycleOwner
