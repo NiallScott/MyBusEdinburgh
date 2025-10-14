@@ -28,10 +28,10 @@ package uk.org.rivernile.android.bustracker.ui.about
 
 import android.content.res.Configuration
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.ReportDrawn
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -79,7 +79,7 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 @AndroidEntryPoint
-class AboutActivity : ComponentActivity() {
+class AboutActivity : AppCompatActivity() {
 
     @Inject
     internal lateinit var actionLauncher: AboutActionLauncher

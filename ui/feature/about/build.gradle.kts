@@ -72,8 +72,9 @@ dependencies {
     implementation(project(":ui:ui-core"))
 
     // AndroidX
-    implementation(libs.androidx.core)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.core)
     implementation(libs.androidx.viewmodel.compose)
 
     // Hilt (dependency injection)
