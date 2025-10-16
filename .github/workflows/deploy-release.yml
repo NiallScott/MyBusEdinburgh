@@ -16,7 +16,8 @@ jobs:
       - name: Write Google Services file
         uses: ./.github/actions/write-google-services-file
         with:
-          google-services-base64: ${{ secrets.EDINBURGH_GOOGLE_SERVICES_BASE64 }}
+          google-services-debug-base64: ${{ secrets.EDINBURGH_GOOGLE_SERVICES_DEBUG_BASE64 }}
+          google-services-release-base64: ${{ secrets.EDINBURGH_GOOGLE_SERVICES_RELEASE_BASE64 }}
       - name: Write release keystore
         uses: ./.github/actions/write-keystore-file
         id: write-release-keystore

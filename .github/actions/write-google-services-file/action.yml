@@ -3,14 +3,23 @@ description: >
   Writes the google-services.json file in to the project so it is picked up by the Google Services
   Gradle plugin.
 inputs:
-  google-services-base64:
-    description: google-services.json encoded in Base64
+  google-services-debug-base64:
+    description: Debug google-services.json encoded in Base64
+    required: true
+  google-services-release-base64:
+    description: Release google-services.json encoded in Base64
     required: true
 runs:
   using: "composite"
   steps:
     - name: Write Google Services file
       run: |
-        mkdir -p ${GITHUB_WORKSPACE}/app/src/edinburgh/
-        echo ${{ inputs.google-services-base64 }} | base64 --decode > ${GITHUB_WORKSPACE}/app/src/edinburgh/google-services.json
+        mkdir -p ${GITHUB_WORKSPACE}/app/src/edinburghDebug/
+        mkdir -p ${GITHUB_WORKSPACE}/app/src/edinburghRelease/
+        mkdir -p ${GITHUB_WORKSPACE}/app/src/edinburghBenchmark/
+        mkdir -p ${GITHUB_WORKSPACE}/app/src/edinburghNonMinifiedRelease/
+        echo ${{ inputs.google-services-debug-base64 }} | base64 --decode > ${GITHUB_WORKSPACE}/app/src/edinburghDebug/google-services.json
+        echo ${{ inputs.google-services-release-base64 }} | base64 --decode > ${GITHUB_WORKSPACE}/app/src/edinburghRelease/google-services.json
+        echo ${{ inputs.google-services-release-base64 }} | base64 --decode > ${GITHUB_WORKSPACE}/app/src/edinburghBenchmark/google-services.json
+        echo ${{ inputs.google-services-release-base64 }} | base64 --decode > ${GITHUB_WORKSPACE}/app/src/edinburghNonMinifiedRelease/google-services.json
       shell: bash
