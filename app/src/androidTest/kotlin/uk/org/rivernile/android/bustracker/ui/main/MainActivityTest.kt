@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.ui.main
 
 import android.content.Intent
-import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.onView
@@ -39,7 +38,6 @@ import androidx.test.espresso.intent.rule.IntentsRule
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.filters.LargeTest
-import androidx.test.filters.SdkSuppress
 import org.junit.Rule
 import uk.org.rivernile.android.bustracker.ui.about.R as Rabout
 import uk.org.rivernile.android.bustracker.ui.about.AboutActivity
@@ -89,8 +87,6 @@ class MainActivityTest {
         }
     }
 
-    // TODO: remove suppression after updating testing dependencies.
-    @SdkSuppress(maxSdkVersion = Build.VERSION_CODES.S)
     @Test
     fun showsSettingsActivityWhenSettingsMenuItemClicked() {
         launchActivity<MainActivity>().use {
@@ -102,8 +98,6 @@ class MainActivityTest {
         intended(hasComponent(SettingsActivity::class.java.name))
     }
 
-    // TODO: remove suppression after updating testing dependencies.
-    @SdkSuppress(maxSdkVersion = Build.VERSION_CODES.S)
     @Test
     fun showsAboutActivityWhenAboutMenuItemClicked() {
         launchActivity<MainActivity>().use {
