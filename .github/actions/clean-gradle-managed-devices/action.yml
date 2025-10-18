@@ -1,0 +1,14 @@
+name: Clean Gradle Managed Devices
+description: Cleans up Gradle Managed Devices
+runs:
+  using: "composite"
+  steps:
+    - name: Clean Gradle Managed Devices
+      run: >
+        ./gradlew
+        --no-daemon
+        --no-configuration-cache
+        --no-build-cache
+        cleanManagedDevices
+        --unused-only
+      shell: bash

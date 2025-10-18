@@ -38,12 +38,17 @@ jobs:
         uses: ./.github/actions/enable-hardware-acceleration
       - name: Accept Android SDK licences
         uses: ./.github/actions/accept-android-sdk-licences
+      - name: Clean Gradle Managed Devices
+        uses: ./.github/actions/clean-gradle-managed-devices
       - name: Build, test and deploy
         run: >
           ./gradlew
+          --no-daemon
           --no-configuration-cache
           --no-build-cache
           -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
+          -Pandroid.experimental.androidTest.numManagedDeviceShards=1
+          -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=1
           -Pmybus.edinburgh.apiKey=${{ secrets.EDINBURGH_API_KEY }}
           -Pmybus.edinburgh.release.mapsKey=${{ secrets.EDINBURGH_GOOGLE_MAPS_API_KEY }}
           -Pmybus.keystore.debug.file=${{ steps.write-debug-keystore.outputs.keystore-path }}
