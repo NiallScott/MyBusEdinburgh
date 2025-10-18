@@ -59,7 +59,6 @@ android {
 
 baselineProfile {
     managedDevices += listOf(
-        "pixel2api28",
         "pixel2api29",
         "pixel2api30",
         "pixel2api31",
