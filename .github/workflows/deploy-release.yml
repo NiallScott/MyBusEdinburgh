@@ -42,11 +42,6 @@ jobs:
         run: >
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager
           --install
-          "system-images;android-28;default;x86_64"
-          "system-images;android-29;default;x86_64"
-          "system-images;android-30;aosp_atd;x86_64"
-          "system-images;android-31;aosp_atd;x86_64"
-          "system-images;android-33;aosp_atd;x86_64"
           "system-images;android-34;aosp_atd;x86_64"
       - name: Clean Gradle Managed Devices
         uses: ./.github/actions/clean-gradle-managed-devices
