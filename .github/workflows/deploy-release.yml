@@ -34,6 +34,8 @@ jobs:
         uses: ./.github/actions/write-firebase-service-credentials-file
         with:
           firebase-service-account-token-base64: ${{ secrets.EDINBURGH_FIREBASE_SERVICE_ACCOUNT_TOKEN_BASE64 }}
+      - name: Enable hardware acceleration
+        uses: ./.github/actions/enable-hardware-acceleration
       - name: Build, test and deploy
         run: >
           ./gradlew
