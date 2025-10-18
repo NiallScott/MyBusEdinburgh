@@ -9,10 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - name: Prune disk usage
-        uses: ./.github/actions/prune-disk-usage
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Prune disk usage
+        uses: ./.github/actions/prune-disk-usage
       - name: Setup Java
         uses: ./.github/actions/setup-java
       - name: Write Google Services file
