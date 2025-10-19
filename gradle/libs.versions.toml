@@ -2,8 +2,8 @@
 # Build targeting.
 android-sdk-compile = "36"
 android-sdk-min = "28"
-android-sdk-target = "35"
-android-build-tools = "36.0.0"
+android-sdk-target = "36"
+android-build-tools = "36.1.0"
 
 android-gradle-plugin = "8.13.0"
 coroutines = "1.10.2"
