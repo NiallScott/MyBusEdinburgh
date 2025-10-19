@@ -11,8 +11,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Prune disk usage
-        uses: ./.github/actions/prune-disk-usage
       - name: Setup Java
         uses: ./.github/actions/setup-java
       - name: Write Google Services file
@@ -36,19 +34,6 @@ jobs:
         uses: ./.github/actions/write-firebase-service-credentials-file
         with:
           firebase-service-account-token-base64: ${{ secrets.EDINBURGH_FIREBASE_SERVICE_ACCOUNT_TOKEN_BASE64 }}
-      - name: Enable hardware acceleration
-        uses: ./.github/actions/enable-hardware-acceleration
-      - name: Accept Android SDK licences
-        uses: ./.github/actions/accept-android-sdk-licences
-      - name: Install emulator images
-        run: >
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager
-          --install
-          "system-images;android-31;aosp_atd;x86_64"
-          "system-images;android-33;aosp_atd;x86_64"
-          "system-images;android-34;aosp_atd;x86_64"
-      - name: Clean Gradle Managed Devices
-        uses: ./.github/actions/clean-gradle-managed-devices
       - name: Build, test and deploy
         run: >
           ./gradlew

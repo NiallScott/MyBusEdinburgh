@@ -1,8 +1,0 @@
-name: Accept Android SDK licences
-description: Accepts the Android SDK licences
-runs:
-  using: "composite"
-  steps:
-    - name: Accept Android SDK licences
-      run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-      shell: bash

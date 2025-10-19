@@ -128,8 +128,8 @@ androidComponents {
 }
 
 baselineProfile {
-    automaticGenerationDuringBuild = true
-    saveInSrc = false
+    automaticGenerationDuringBuild = false
+    saveInSrc = true
 }
 
 dependencies {
