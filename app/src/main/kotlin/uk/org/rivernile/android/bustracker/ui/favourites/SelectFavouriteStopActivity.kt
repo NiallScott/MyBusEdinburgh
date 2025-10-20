@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,23 +26,22 @@
 
 package uk.org.rivernile.android.bustracker.ui.favourites
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
+import androidx.core.view.ViewGroupCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
-import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.android.bustracker.ui.HasScrollableContent
@@ -70,28 +69,25 @@ class SelectFavouriteStopActivity : AppCompatActivity(),
             return
         }
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        enableEdgeToEdge()
         viewBinding = ActivitySelectFavouriteStopBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
+        ViewGroupCompat.installCompatInsetsDispatch(viewBinding.root)
 
         setSupportActionBar(viewBinding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        window.navigationBarColor = MaterialColors.getColor(
-            viewBinding.root,
-            com.google.android.material.R.attr.colorSurfaceContainer
-        )
-
-        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root) { view, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.toolbar) { view, windowInsets ->
+            val insets = windowInsets.getInsets(
+                WindowInsetsCompat.Type.systemBars() + WindowInsetsCompat.Type.displayCutout()
+            )
 
             view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = insets.bottom
                 leftMargin = insets.left
                 rightMargin = insets.right
             }
 
-            windowInsets
+            WindowInsetsCompat.CONSUMED
         }
 
         supportFragmentManager.registerFragmentLifecycleCallbacks(fragmentLifecycleCallbacks, true)
@@ -105,21 +101,22 @@ class SelectFavouriteStopActivity : AppCompatActivity(),
 
     override fun onCreateShortcut(stopCode: String, stopName: String) {
         val busTimesIntent = Intent(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA)
-                .setClass(this, DisplayStopDataActivity::class.java)
-                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                .putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
+            .setClass(this, DisplayStopDataActivity::class.java)
+            .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            .putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
 
-        val result = ShortcutInfoCompat.Builder(this, stopCode)
-                .setIntent(busTimesIntent)
-                .setShortLabel(stopName)
-                .setLongLabel(stopName)
-                .setIcon(IconCompat.createWithResource(this, R.drawable.appicon_favourite))
-                .build()
-                .let {
-                    ShortcutManagerCompat.createShortcutResultIntent(this, it)
-                }
+        val result = ShortcutInfoCompat
+            .Builder(this, stopCode)
+            .setIntent(busTimesIntent)
+            .setShortLabel(stopName)
+            .setLongLabel(stopName)
+            .setIcon(IconCompat.createWithResource(this, R.drawable.appicon_favourite))
+            .build()
+            .let {
+                ShortcutManagerCompat.createShortcutResultIntent(this, it)
+            }
 
-        setResult(Activity.RESULT_OK, result)
+        setResult(RESULT_OK, result)
         finish()
     }
 

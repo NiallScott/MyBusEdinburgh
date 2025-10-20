@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,12 +28,12 @@ package uk.org.rivernile.android.bustracker.ui.settings
 
 import android.os.Bundle
 import android.view.ViewGroup.MarginLayoutParams
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
+import androidx.core.view.ViewGroupCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
-import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.edinburghbustracker.android.databinding.ActivitySettingsBinding
 
@@ -48,28 +48,25 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        enableEdgeToEdge()
         val viewBinding = ActivitySettingsBinding.inflate(layoutInflater)
+        ViewGroupCompat.installCompatInsetsDispatch(viewBinding.root)
         setContentView(viewBinding.root)
 
         setSupportActionBar(viewBinding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        window.navigationBarColor = MaterialColors.getColor(
-            viewBinding.root,
-            com.google.android.material.R.attr.colorSurfaceContainer
-        )
-
-        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root) { view, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.toolbar) { view, windowInsets ->
+            val insets = windowInsets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
 
             view.updateLayoutParams<MarginLayoutParams> {
-                bottomMargin = insets.bottom
                 leftMargin = insets.left
                 rightMargin = insets.right
             }
 
-            windowInsets
+            WindowInsetsCompat.CONSUMED
         }
     }
 }

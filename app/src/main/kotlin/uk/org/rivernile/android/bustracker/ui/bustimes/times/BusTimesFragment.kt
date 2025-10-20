@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,6 +36,10 @@ import android.view.ViewGroup
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.view.MenuProvider
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -43,6 +47,7 @@ import com.google.android.material.color.MaterialColors
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.time.ElapsedTimeMinutes
+import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.utils.Event
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentBusTimesBinding
@@ -107,19 +112,61 @@ class BusTimesFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewBinding.apply {
-            recyclerView.setHasFixedSize(true)
             recyclerView.adapter = adapter
 
             swipeRefreshLayout.apply {
                 setColorSchemeColors(
                     MaterialColors.getColor(
                         this,
-                        com.google.android.material.R.attr.colorPrimary
+                        android.R.attr.colorPrimary
+                    )
+                )
+                setProgressBackgroundColorSchemeColor(
+                    MaterialColors.getColor(
+                        this,
+                        com.google.android.material.R.attr.colorSurfaceContainerHigh
                     )
                 )
                 setOnRefreshListener {
                     viewModel.onSwipeToRefresh()
                 }
+            }
+
+            ViewCompat.setOnApplyWindowInsetsListener(layoutContent) { _, windowInsets ->
+                val insets = windowInsets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() + WindowInsetsCompat.Type.displayCutout()
+                )
+
+                val paddingDefault = resources.getDimensionPixelOffset(Rcore.dimen.padding_default)
+                val paddingDouble = resources.getDimensionPixelOffset(Rcore.dimen.padding_double)
+
+                txtLastRefresh.updatePadding(
+                    left = paddingDouble + insets.left,
+                    right = paddingDouble + insets.right
+                )
+
+                recyclerView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    leftMargin = insets.left
+                    rightMargin = insets.right
+                }
+
+                recyclerView.updatePadding(
+                    bottom = paddingDefault + insets.bottom
+                )
+
+                txtError.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    leftMargin = insets.left / 2
+                    rightMargin = insets.right / 2
+                    bottomMargin = insets.bottom +
+                        resources.getDimensionPixelOffset(R.dimen.error_bottom_margin)
+                }
+
+                progress.progress.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    leftMargin = insets.left / 2
+                    rightMargin = insets.right / 2
+                }
+
+                WindowInsetsCompat.CONSUMED
             }
         }
 

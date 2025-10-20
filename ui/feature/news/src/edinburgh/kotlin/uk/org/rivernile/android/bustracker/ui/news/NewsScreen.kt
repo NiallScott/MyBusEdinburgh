@@ -77,11 +77,13 @@ private const val TAB_DIVERSIONS = 1
 /**
  * The main entry point to the News screen.
  *
+ * @param modifier Any [Modifier]s which should be applied.
  * @param viewModel An instance of [NewsViewModel] to coordinate state.
  * @param windowSizeClass The size class of the window, used to adjust layout for available space.
  */
 @Composable
 internal fun NewsScreen(
+    modifier: Modifier = Modifier,
     viewModel: NewsViewModel = viewModel(),
     windowSizeClass: WindowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
 ) {
@@ -90,6 +92,7 @@ internal fun NewsScreen(
     NewsScreenWithState(
         state = uiState,
         windowSizeClass = windowSizeClass,
+        modifier = modifier,
         onRefresh = viewModel::onRefresh,
         onIncidentMoreDetailsClicked = viewModel::onIncidentMoreDetailsClicked,
         onIncidentActionLaunched = viewModel::onIncidentActionLaunched,

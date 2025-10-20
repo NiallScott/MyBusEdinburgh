@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.services
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 /**
  * Tests for [EdinburghServiceColourOverride].
@@ -37,47 +38,69 @@ import kotlin.test.assertEquals
 class EdinburghServiceColourOverrideTest {
 
     @Test
-    fun overrideServiceColourReturnsCurrentColourWhenServiceIsNumeric() {
+    fun overrideServiceColourReturnsNullWhenServiceIsNumeric() {
         val colourOverride = createEdinburghServiceColourOverride()
 
         val result = colourOverride.overrideServiceColour("1", 1)
 
-        assertEquals(1, result)
+        assertNull(result)
     }
 
     @Test
-    fun overrideServiceColourReturnsCurrentColourWhenServiceIsTextButNotNightService() {
+    fun overrideServiceColourReturnsNullWhenServiceIsTextButNotNightService() {
         val colourOverride = createEdinburghServiceColourOverride()
 
         val result = colourOverride.overrideServiceColour("abc123", 1)
 
-        assertEquals(1, result)
+        assertNull(result)
     }
 
     @Test
     fun overrideServiceColourReturnsNightServiceColourWhenServiceIsNightServiceLowercase() {
         val colourOverride = createEdinburghServiceColourOverride(
             serviceColourProvider = FakeServiceColourProvider(
-                onNightServiceColour = { 2 }
+                onNightServiceColour = {
+                    ServiceColours(
+                        primaryColour = 10,
+                        colourOnPrimary = 20
+                    )
+                }
             )
         )
 
         val result = colourOverride.overrideServiceColour("n25", 1)
 
-        assertEquals(2, result)
+        assertEquals(
+            ServiceColours(
+                primaryColour = 10,
+                colourOnPrimary = 20
+            ),
+            result
+        )
     }
 
     @Test
     fun overrideServiceColourReturnsNightServiceColourWhenServiceIsNightServiceUppercase() {
         val colourOverride = createEdinburghServiceColourOverride(
             serviceColourProvider = FakeServiceColourProvider(
-                onNightServiceColour = { 2 }
+                onNightServiceColour = {
+                    ServiceColours(
+                        primaryColour = 10,
+                        colourOnPrimary = 20
+                    )
+                }
             )
         )
 
         val result = colourOverride.overrideServiceColour("N25", 1)
 
-        assertEquals(2, result)
+        assertEquals(
+            ServiceColours(
+                primaryColour = 10,
+                colourOnPrimary = 20
+            ),
+            result
+        )
     }
 
     private fun createEdinburghServiceColourOverride(

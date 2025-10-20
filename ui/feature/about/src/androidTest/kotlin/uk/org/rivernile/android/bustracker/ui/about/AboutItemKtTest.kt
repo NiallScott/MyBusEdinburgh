@@ -472,11 +472,11 @@ class AboutItemKtTest {
     }
 
     @Test
-    fun twitterAboutItemDisplaysCorrectText() {
+    fun blueskyAboutItemDisplaysCorrectText() {
         composeTestRule.setContent {
             MyBusThemeWithCompositionLocals {
                 AboutItem(
-                    item = UiAboutItem.TwoLinesItem.Twitter,
+                    item = UiAboutItem.TwoLinesItem.Bluesky,
                     onItemClicked = { }
                 )
             }
@@ -487,23 +487,23 @@ class AboutItemKtTest {
                 testTag = TEST_TAG_TITLE,
                 useUnmergedTree = true
             )
-            .assertTextEquals(composeTestRule.activity.getString(R.string.about_twitter))
+            .assertTextEquals(composeTestRule.activity.getString(R.string.about_bluesky))
         composeTestRule
             .onNodeWithTag(
                 testTag = TEST_TAG_CAPTION,
                 useUnmergedTree = true
             )
-            .assertTextEquals(composeTestRule.activity.getString(R.string.app_twitter))
+            .assertTextEquals(composeTestRule.activity.getString(R.string.app_bluesky))
     }
 
     @Test
-    fun twitterAboutItemHandlesItemClicked() {
+    fun blueskyAboutItemHandlesItemClicked() {
         val itemClickedTracker = ItemClickedTracker()
 
         composeTestRule.setContent {
             MyBusThemeWithCompositionLocals {
                 AboutItem(
-                    item = UiAboutItem.TwoLinesItem.Twitter,
+                    item = UiAboutItem.TwoLinesItem.Bluesky,
                     onItemClicked = itemClickedTracker
                 )
             }
@@ -521,7 +521,7 @@ class AboutItemKtTest {
             }
 
         assertEquals(
-            listOf(UiAboutItem.TwoLinesItem.Twitter),
+            listOf(UiAboutItem.TwoLinesItem.Bluesky),
             itemClickedTracker.invocations
         )
     }

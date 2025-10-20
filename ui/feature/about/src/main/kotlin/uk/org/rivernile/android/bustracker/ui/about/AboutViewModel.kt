@@ -83,7 +83,7 @@ internal class AboutViewModel @Inject constructor(
             is UiAboutItem.OneLineItem.OpenSourceLicences -> state.isOpenSourceLicencesShown = true
             is UiAboutItem.TwoLinesItem.AppVersion -> state.action = UiAction.ShowStoreListing
             is UiAboutItem.TwoLinesItem.Author -> state.action = UiAction.ShowAuthorWebsite
-            is UiAboutItem.TwoLinesItem.Twitter -> state.action = UiAction.ShowAppTwitter
+            is UiAboutItem.TwoLinesItem.Bluesky -> state.action = UiAction.ShowAppBluesky
             is UiAboutItem.TwoLinesItem.Website -> state.action = UiAction.ShowAppWebsite
             else -> Unit
         }

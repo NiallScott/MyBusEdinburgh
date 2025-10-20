@@ -45,6 +45,6 @@ internal sealed interface UiAction {
     /** The app's website should be shown. */
     data object ShowAppWebsite : UiAction
 
-    /** The app's Twitter account should be shown. */
-    data object ShowAppTwitter : UiAction
+    /** The app's Bluesky account should be shown. */
+    data object ShowAppBluesky : UiAction
 }

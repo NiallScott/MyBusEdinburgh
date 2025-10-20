@@ -78,7 +78,8 @@ class ExploreFragment : Fragment(), HasTabBar, HasScrollableContent {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?): View {
+        savedInstanceState: Bundle?
+    ): View {
         return FragmentExploreBinding.inflate(inflater, container, false).also {
             _viewBinding = it
         }.root
@@ -122,28 +123,34 @@ class ExploreFragment : Fragment(), HasTabBar, HasScrollableContent {
 
             when (position) {
                 0 -> {
-                    childFragmentManager.findFragmentByTag(FRAGMENT_TAG_FAVOURITES)
+                    childFragmentManager
+                        .findFragmentByTag(FRAGMENT_TAG_FAVOURITES)
                         ?.let(this::attach)
                         ?: add(
                             R.id.fragmentContainer,
                             FavouriteStopsFragment(),
-                            FRAGMENT_TAG_FAVOURITES)
+                            FRAGMENT_TAG_FAVOURITES
+                        )
                 }
                 1 -> {
-                    childFragmentManager.findFragmentByTag(FRAGMENT_TAG_MAP)
+                    childFragmentManager
+                        .findFragmentByTag(FRAGMENT_TAG_MAP)
                         ?.let(this::attach)
                         ?: add(
                             R.id.fragmentContainer,
                             BusStopMapFragment.newInstance(),
-                            FRAGMENT_TAG_MAP)
+                            FRAGMENT_TAG_MAP
+                        )
                 }
                 2 -> {
-                    childFragmentManager.findFragmentByTag(FRAGMENT_TAG_NEAREST_STOPS)
+                    childFragmentManager
+                        .findFragmentByTag(FRAGMENT_TAG_NEAREST_STOPS)
                         ?.let(this::attach)
                         ?: add(
                             R.id.fragmentContainer,
                             NearestStopsFragment(),
-                            FRAGMENT_TAG_NEAREST_STOPS)
+                            FRAGMENT_TAG_NEAREST_STOPS
+                        )
                 }
                 else -> return@showItem
             }

@@ -16,11 +16,19 @@ jobs:
       - name: Write Google Services file
         uses: ./.github/actions/write-google-services-file
         with:
-          google-services-base64: ${{ secrets.EDINBURGH_GOOGLE_SERVICES_BASE64 }}
+          google-services-debug-base64: ${{ secrets.EDINBURGH_GOOGLE_SERVICES_DEBUG_BASE64 }}
+          google-services-release-base64: ${{ secrets.EDINBURGH_GOOGLE_SERVICES_RELEASE_BASE64 }}
+      - name: Write debug keystore
+        uses: ./.github/actions/write-keystore-file
+        id: write-debug-keystore
+        with:
+          name: debug
+          keystore-file-base64: ${{ secrets.KEYSTORE_FILE_DEBUG_BASE64 }}
       - name: Write release keystore
         uses: ./.github/actions/write-keystore-file
         id: write-release-keystore
         with:
+          name: release
           keystore-file-base64: ${{ secrets.KEYSTORE_FILE_BASE64 }}
       - name: Write Firebase service credentials file
         uses: ./.github/actions/write-firebase-service-credentials-file
@@ -29,11 +37,18 @@ jobs:
       - name: Build, test and deploy
         run: >
           ./gradlew
+          --no-daemon
           --no-configuration-cache
           --no-build-cache
           -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
+          -Pandroid.experimental.androidTest.numManagedDeviceShards=1
+          -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=1
           -Pmybus.edinburgh.apiKey=${{ secrets.EDINBURGH_API_KEY }}
           -Pmybus.edinburgh.release.mapsKey=${{ secrets.EDINBURGH_GOOGLE_MAPS_API_KEY }}
+          -Pmybus.keystore.debug.file=${{ steps.write-debug-keystore.outputs.keystore-path }}
+          -Pmybus.keystore.debug.storePassword=${{ secrets.KEYSTORE_PASSWORD_DEBUG }}
+          -Pmybus.keystore.debug.keyAlias=${{ secrets.KEYSTORE_ALIAS_DEBUG }}
+          -Pmybus.keystore.debug.keyPassword=${{ secrets.KEYSTORE_ALIAS_PASSWORD_DEBUG }}
           -Pmybus.keystore.release.file=${{ steps.write-release-keystore.outputs.keystore-path }}
           -Pmybus.keystore.release.storePassword=${{ secrets.KEYSTORE_PASSWORD }}
           -Pmybus.keystore.release.keyAlias=${{ secrets.KEYSTORE_ALIAS }}

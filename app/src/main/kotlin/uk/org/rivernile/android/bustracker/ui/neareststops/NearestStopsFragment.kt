@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -42,6 +42,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import dagger.hilt.android.AndroidEntryPoint
@@ -86,7 +89,7 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
     @Inject
     lateinit var textFormattingUtils: TextFormattingUtils
 
-    private val viewModel: NearestStopsFragmentViewModel by viewModels()
+    private val viewModel by viewModels<NearestStopsFragmentViewModel>()
 
     private lateinit var callbacks: Callbacks
     private lateinit var adapter: NearestStopsAdapter
@@ -94,9 +97,10 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
     private val viewBinding get() = _viewBinding!!
     private var _viewBinding: FragmentNearestStopsBinding? = null
 
-    private val requestLocationPermissionsLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions(),
-                    this::handleLocationPermissionsResult)
+    private val requestLocationPermissionsLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+        this::handleLocationPermissionsResult
+    )
 
     private var menuItemFilter: MenuItem? = null
 
@@ -112,7 +116,7 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
 
         callbacks = try {
             context as Callbacks
-        } catch (e: ClassCastException) {
+        } catch (_: ClassCastException) {
             throw IllegalStateException("${context.javaClass.name} does not implement " +
                     Callbacks::class.java.name)
         }
@@ -122,16 +126,18 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
         super.onCreate(savedInstanceState)
 
         adapter = NearestStopsAdapter(
-                requireContext(),
-                itemClickListener,
-                stopMapMarkerDecorator,
-                textFormattingUtils)
+            requireContext(),
+            itemClickListener,
+            stopMapMarkerDecorator,
+            textFormattingUtils
+        )
     }
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?): View {
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _viewBinding = FragmentNearestStopsBinding.inflate(inflater, container, false)
 
         return viewBinding.root
@@ -141,6 +147,19 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
         super.onViewCreated(view, savedInstanceState)
 
         viewBinding.apply {
+            ViewCompat.setOnApplyWindowInsetsListener(root) { view, windowInsets ->
+                val insets = windowInsets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() + WindowInsetsCompat.Type.displayCutout()
+                )
+
+                view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    leftMargin = insets.left
+                    rightMargin = insets.right
+                }
+
+                WindowInsetsCompat.CONSUMED
+            }
+
             recyclerView.adapter = adapter
 
             btnErrorResolve.setOnClickListener {
@@ -150,8 +169,9 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
 
         val viewLifecycleOwner = viewLifecycleOwner
         childFragmentManager.setFragmentResultListener(
-                ServicesChooserDialogFragment.REQUEST_KEY,
-                viewLifecycleOwner) { _, result ->
+            ServicesChooserDialogFragment.REQUEST_KEY,
+            viewLifecycleOwner
+        ) { _, result ->
             handleServicesChosen(result)
         }
 
@@ -164,7 +184,7 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
         viewModel.showContextMenuLiveData.observe(viewLifecycleOwner, this::handleShowContextMenu)
         viewModel.selectedStopNameLiveData.observe(viewLifecycleOwner, this::handleSelectedStopName)
         viewModel.isStopMapVisibleLiveData.observe(viewLifecycleOwner,
-                this::handleIsShowOnMapVisible)
+            this::handleIsShowOnMapVisible)
         viewModel.isArrivalAlertVisibleLiveData.observe(viewLifecycleOwner,
                 this::handleIsArrivalAlertVisible)
         viewModel.isProximityAlertVisibleLiveData.observe(viewLifecycleOwner,
@@ -224,18 +244,22 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
      */
     private fun updatePermissions() {
         viewModel.permissionsState = PermissionsState(
-                getPermissionState(Manifest.permission.ACCESS_FINE_LOCATION),
-                getPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION))
+            getPermissionState(Manifest.permission.ACCESS_FINE_LOCATION),
+            getPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION)
+        )
     }
 
     /**
      * Handle asking the user to grant permissions.
      */
     private fun handleAskLocationForPermissions() {
-        requestLocationPermissionsLauncher.launch(
+        requestLocationPermissionsLauncher
+            .launch(
                 arrayOf(
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION))
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
     }
 
     /**
@@ -246,11 +270,11 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
      */
     private fun handleLocationPermissionsResult(states: Map<String, Boolean>) {
         val fineLocationState = states[Manifest.permission.ACCESS_FINE_LOCATION]
-                ?.let(this::getPermissionState)
-                ?: getPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+            ?.let(this::getPermissionState)
+            ?: getPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
         val coarseLocationState = states[Manifest.permission.ACCESS_COARSE_LOCATION]
-                ?.let(this::getPermissionState)
-                ?: getPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION)
+            ?.let(this::getPermissionState)
+            ?: getPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION)
 
         viewModel.permissionsState = PermissionsState(fineLocationState, coarseLocationState)
     }
@@ -262,9 +286,10 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
      * @return The determined [PermissionState].
      */
     private fun getPermissionState(permission: String) =
-            getPermissionState(
-                    ContextCompat.checkSelfPermission(requireContext(), permission) ==
-                            PackageManager.PERMISSION_GRANTED)
+        getPermissionState(
+            ContextCompat.checkSelfPermission(requireContext(), permission) ==
+                PackageManager.PERMISSION_GRANTED
+        )
 
     /**
      * Maps the permission granted status in to a [PermissionState].
@@ -289,7 +314,7 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
             // Only show ActionMode when it isn't already showing.
             if (actionMode == null) {
                 actionMode = (requireActivity() as? AppCompatActivity)
-                        ?.startSupportActionMode(actionModeCallback)
+                    ?.startSupportActionMode(actionModeCallback)
             }
         } else {
             actionMode?.finish()
@@ -517,11 +542,13 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
      */
     private fun handleShowLocationSettings() {
         if (!callbacks.onShowSystemLocationPreferences()) {
-            Toast.makeText(
+            Toast
+                .makeText(
                     requireContext(),
                     R.string.neareststops_error_no_location_settings,
-                    Toast.LENGTH_SHORT)
-                    .show()
+                    Toast.LENGTH_SHORT
+                )
+                .show()
         }
     }
 
@@ -609,8 +636,8 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
      * @param result The [Bundle] result generated by [ServicesChooserDialogFragment].
      */
     private fun handleServicesChosen(result: Bundle) {
-        viewModel.selectedServices = result.getStringArrayList(
-                ServicesChooserDialogFragment.RESULT_CHOSEN_SERVICES)
+        viewModel.selectedServices = result
+            .getStringArrayList(ServicesChooserDialogFragment.RESULT_CHOSEN_SERVICES)
     }
 
     private val itemClickListener = object : OnNearStopItemClickListener {
@@ -619,7 +646,7 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
         }
 
         override fun onNearestStopLongClicked(stopCode: String) =
-                viewModel.onNearestStopLongClicked(stopCode)
+            viewModel.onNearestStopLongClicked(stopCode)
     }
 
     private val actionModeCallback = object : ActionMode.Callback {

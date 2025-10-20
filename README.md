@@ -15,7 +15,7 @@ set alerts and show the nearest stops to their location.
 As this is the source code hosting service for this project, these pages most likely wont interest
 you unless you're a developer. To find out more about the application, please visit
 [the website](http://www.rivernile.org.uk/bustracker/) or find out the latest news by visiting the
-[Twitter feed](https://www.twitter.com/MyBusEdinburgh).
+[Bluesky feed](https://bsky.app/profile/mybusedinburgh.bsky.social).
 
 This project utilises the Edinburgh Bus Tracker service provided by the City of Edinburgh Council.
 This project started its life as the dissertation project for the author's BSc (Hons) Computer

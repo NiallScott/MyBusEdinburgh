@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2024 Niall 'Rivernile' Scott
+  ~ Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
   ~
   ~ This software is provided 'as-is', without any express or implied
   ~ warranty.  In no event will the authors or contributors be held liable for
@@ -34,7 +34,7 @@
     <string name="about_database_version">Database version</string>
     <string name="about_topology_version">Topology version</string>
     <string name="about_website">Website</string>
-    <string name="about_twitter">Twitter</string>
+    <string name="about_bluesky">Bluesky</string>
     <string name="about_credits">Credits</string>
     <string name="about_privacy_policy">Privacy policy</string>
     <string name="about_open_source">Open source licences</string>

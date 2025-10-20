@@ -79,7 +79,7 @@ class AboutViewModelTest {
         )
         val expectedItems2 = persistentListOf(
             UiAboutItem.OneLineItem.PrivacyPolicy,
-            UiAboutItem.TwoLinesItem.Twitter
+            UiAboutItem.TwoLinesItem.Bluesky
         )
         val expectedUiState1 = UiState(items = expectedItems1)
         val expectedUiState2 = UiState(items = expectedItems2)
@@ -212,7 +212,7 @@ class AboutViewModelTest {
                         1L,
                         UiAction.ShowPrivacyPolicy,
                         null,
-                        UiAction.ShowAppTwitter,
+                        UiAction.ShowAppBluesky,
                         null
                     )
                 }
@@ -243,7 +243,7 @@ class AboutViewModelTest {
             assertEquals(
                 UiState(
                     items = expectedItems,
-                    action = UiAction.ShowAppTwitter
+                    action = UiAction.ShowAppBluesky
                 ),
                 awaitItem()
             )
@@ -371,7 +371,7 @@ class AboutViewModelTest {
     }
 
     @Test
-    fun onItemClickedWhenItemIsTwitterSetsActionToShowAppTwitter() = runTest {
+    fun onItemClickedWhenItemIsBlueskySetsActionToShowAppBluesky() = runTest {
         val setActionInvocationTracker = SetterInvocationTracker<UiAction?>()
         val viewModel = createViewModel(
             state = FakeAboutViewModelState(
@@ -386,9 +386,9 @@ class AboutViewModelTest {
             )
         )
 
-        viewModel.onItemClicked(UiAboutItem.TwoLinesItem.Twitter)
+        viewModel.onItemClicked(UiAboutItem.TwoLinesItem.Bluesky)
 
-        assertEquals(listOf(UiAction. ShowAppTwitter), setActionInvocationTracker.invocations)
+        assertEquals(listOf(UiAction. ShowAppBluesky), setActionInvocationTracker.invocations)
     }
 
     @Test

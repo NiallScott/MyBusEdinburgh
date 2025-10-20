@@ -75,7 +75,7 @@ internal class RealAboutItemsGenerator @Inject constructor(
             ),
             UiAboutItem.TwoLinesItem.Author,
             UiAboutItem.TwoLinesItem.Website,
-            UiAboutItem.TwoLinesItem.Twitter,
+            UiAboutItem.TwoLinesItem.Bluesky,
             UiAboutItem.TwoLinesItem.DatabaseVersion(
                 databaseMetadata?.updateTimestamp?.let(::Date)
             ),

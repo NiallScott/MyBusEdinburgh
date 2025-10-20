@@ -103,38 +103,44 @@ subprojects {
                     allDevices {
                         maybeCreate<ManagedVirtualDevice>("pixel2api28").apply {
                             device = "Pixel 2"
-                            apiLevel = 28
+                            sdkVersion = 28
                             systemImageSource = "aosp" // No ATD.
                         }
 
                         maybeCreate<ManagedVirtualDevice>("pixel2api29").apply {
                             device = "Pixel 2"
-                            apiLevel = 29
+                            sdkVersion = 29
                             systemImageSource = "aosp" // No ATD.
                         }
 
                         maybeCreate<ManagedVirtualDevice>("pixel2api30").apply {
                             device = "Pixel 2"
-                            apiLevel = 30
+                            sdkVersion = 30
                             systemImageSource = "aosp-atd"
                         }
 
                         maybeCreate<ManagedVirtualDevice>("pixel2api31").apply {
                             device = "Pixel 2"
-                            apiLevel = 31
+                            sdkVersion = 31
                             systemImageSource = "aosp-atd"
                         }
 
                         maybeCreate<ManagedVirtualDevice>("pixel2api33").apply {
                             device = "Pixel 2"
-                            apiLevel = 33
+                            sdkVersion = 33
                             systemImageSource = "aosp-atd"
                         }
 
                         maybeCreate<ManagedVirtualDevice>("pixel2api34").apply {
                             device = "Pixel 2"
-                            apiLevel = 34
-                            systemImageSource = "aosp" // No ATD - yet.
+                            sdkVersion = 34
+                            systemImageSource = "aosp-atd"
+                        }
+
+                        maybeCreate<ManagedVirtualDevice>("pixel2api35").apply {
+                            device = "Pixel 2"
+                            sdkVersion = 35
+                            systemImageSource = "aosp-atd"
                         }
                     }
 
@@ -146,6 +152,7 @@ subprojects {
                             targetDevices += allDevices["pixel2api31"]
                             targetDevices += allDevices["pixel2api33"]
                             targetDevices += allDevices["pixel2api34"]
+                            // API 35 is excluded for now as it doesn't seem to work.
                         }
                     }
                 }

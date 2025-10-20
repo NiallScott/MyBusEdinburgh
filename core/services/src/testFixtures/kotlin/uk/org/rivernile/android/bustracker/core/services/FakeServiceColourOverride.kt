@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,30 +26,18 @@
 
 package uk.org.rivernile.android.bustracker.core.services
 
-import android.content.Context
-import androidx.core.content.ContextCompat
-import uk.org.rivernile.android.bustracker.core.edinburgh.R
-import javax.inject.Inject
-
 /**
- * The Android-specific implementation of [ServiceColourProvider].
+ * A fake [ServiceColourOverride] for testing.
  *
- * @param context The application [Context].
  * @author Niall Scott
  */
-internal class AndroidServiceColourProvider @Inject constructor(
-    private val context: Context
-) : ServiceColourProvider {
+class FakeServiceColourOverride(
+    private val onOverrideServiceColour: (String, Int?) -> ServiceColours? =
+        { _, _ -> throw NotImplementedError() }
+) : ServiceColourOverride {
 
-    override val nightServiceColours get() =
-        ServiceColours(
-            primaryColour = ContextCompat.getColor(
-                context,
-                R.color.service_colour_night_bus_background
-            ),
-            colourOnPrimary = ContextCompat.getColor(
-                context,
-                R.color.service_colour_night_bus_text_on_background
-            )
-        )
+    override fun overrideServiceColour(
+        serviceName: String,
+        currentBackgroundColour: Int?
+    ) = onOverrideServiceColour(serviceName, currentBackgroundColour)
 }

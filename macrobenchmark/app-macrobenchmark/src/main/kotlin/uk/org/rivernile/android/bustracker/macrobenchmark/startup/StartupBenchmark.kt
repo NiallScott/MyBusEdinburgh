@@ -22,7 +22,6 @@ import androidx.benchmark.macro.StartupMode
 import androidx.benchmark.macro.StartupTimingMetric
 import androidx.benchmark.macro.junit4.MacrobenchmarkRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.filters.SdkSuppress
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -54,17 +53,16 @@ class HotStartupBenchmark : AbstractStartupBenchmark(StartupMode.HOT)
  * Enables app startups from various states of baseline profile or [CompilationMode]s.
  */
 abstract class AbstractStartupBenchmark(
-    private val startupMode: StartupMode) {
+    private val startupMode: StartupMode
+) {
 
     @get:Rule
     val benchmarkRule = MacrobenchmarkRule()
 
     @Test
-    @SdkSuppress(minSdkVersion = 24)
     fun startupNoCompilation() = startup(CompilationMode.None())
 
     @Test
-    @SdkSuppress(minSdkVersion = 24)
     fun startupPartialCompilation() = startup(
         CompilationMode.Partial(
             baselineProfileMode = BaselineProfileMode.Disable,
@@ -73,7 +71,6 @@ abstract class AbstractStartupBenchmark(
     )
 
     @Test
-    @SdkSuppress(minSdkVersion = 24)
     fun startupPartialWithBaselineProfiles() =
         startup(CompilationMode.Partial(baselineProfileMode = BaselineProfileMode.Require))
 

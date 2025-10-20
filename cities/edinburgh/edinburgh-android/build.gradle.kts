@@ -63,6 +63,7 @@ dependencies {
 
     implementation(project(":cities:edinburgh:edinburgh-core"))
     implementation(project(":core:http-core-android"))
+    implementation(project(":core:services-android"))
     implementation(project(":endpoint:tracker-endpoint"))
 
     // Hilt (dependency injection)

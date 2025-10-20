@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,11 +40,14 @@ interface ServiceColourOverride {
      * This gives implementations the opportunity to override the colour for a given [serviceName],
      * or assign it a colour when it does not already have a colour.
      *
-     * If no changes are being made, then [currentColour] should be returned.
+     * If no changes are being made, then `null` should be returned.
      *
      * @param serviceName The display name of the service.
-     * @param currentColour The currently set colour of the service.
-     * @return The new colour for the service.
+     * @param currentBackgroundColour The currently set colour of the service.
+     * @return The new colour for the service. If `null` is returned, the colour is not overridden.
      */
-    fun overrideServiceColour(serviceName: String, currentColour: Int?): Int?
+    fun overrideServiceColour(
+        serviceName: String,
+        currentBackgroundColour: Int?
+    ): ServiceColours?
 }

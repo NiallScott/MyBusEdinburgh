@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,17 +21,21 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+ *
+ */
 
-    <application>
+package uk.org.rivernile.android.bustracker.core.services
 
-        <provider
-            android:name="androidx.startup.InitializationProvider"
-            android:authorities="${applicationId}.androidx-startup"
-            android:exported="false"
-            tools:node="remove" />
-    </application>
-</manifest>
+/**
+ * A fake [ServiceColoursGenerator] for testing.
+ *
+ * @author Niall Scott
+ */
+class FakeServiceColoursGenerator(
+    private val onGenerateServiceColours: (Int?) -> ServiceColours? =
+        { throw NotImplementedError() }
+) : ServiceColoursGenerator {
+
+    override fun generateServiceColours(serviceColour: Int?) =
+        onGenerateServiceColours(serviceColour)
+}

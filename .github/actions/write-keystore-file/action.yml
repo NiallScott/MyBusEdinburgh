@@ -1,6 +1,9 @@
 name: Write keystore file
 description: Writes the keystore file to use for the build
 inputs:
+  name:
+    description: The name of the key
+    required: true
   keystore-file-base64:
     description: The keystore file encoded as Base64
     required: true
@@ -18,4 +21,4 @@ runs:
         echo "keystore-path=$KEYSTORE_FILE" >> $GITHUB_OUTPUT
       shell: bash
       env:
-        KEYSTORE_FILE: ${{ runner.temp }}/key.keystore
+        KEYSTORE_FILE: ${{ runner.temp }}/${{ inputs.name }}.keystore

@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -103,6 +104,7 @@ private fun AboutItem1Line(
             .focusable(item.isClickable)
             .defaultMinSize(minHeight = 56.dp)
             .wrapContentHeight(Alignment.CenterVertically)
+            .safeDrawingPadding()
             .padding(
                 top = verticalPadding,
                 bottom = verticalPadding,
@@ -133,6 +135,7 @@ private fun AboutItem2Lines(
             .fillMaxWidth()
             .heightIn(min = 72.dp)
             .wrapContentHeight(Alignment.CenterVertically)
+            .safeDrawingPadding()
             .padding(
                 top = verticalPadding,
                 bottom = verticalPadding,
@@ -189,7 +192,7 @@ private val UiAboutItem.titleStringRes: Int get() {
         is UiAboutItem.TwoLinesItem.Author -> R.string.about_author
         is UiAboutItem.TwoLinesItem.DatabaseVersion -> R.string.about_database_version
         is UiAboutItem.TwoLinesItem.TopologyVersion -> R.string.about_topology_version
-        is UiAboutItem.TwoLinesItem.Twitter -> R.string.about_twitter
+        is UiAboutItem.TwoLinesItem.Bluesky -> R.string.about_bluesky
         is UiAboutItem.TwoLinesItem.Website -> R.string.about_website
     }
 }
@@ -214,7 +217,7 @@ private val UiAboutItem.TwoLinesItem.captionText: String @Composable get() {
         is UiAboutItem.TwoLinesItem.TopologyVersion -> {
             topologyId ?: stringResource(id = R.string.about_topology_version_loading)
         }
-        is UiAboutItem.TwoLinesItem.Twitter -> stringResource(id = R.string.app_twitter)
+        is UiAboutItem.TwoLinesItem.Bluesky -> stringResource(id = R.string.app_bluesky)
         is UiAboutItem.TwoLinesItem.Website -> stringResource(id = R.string.app_website)
     }
 }

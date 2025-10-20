@@ -28,20 +28,16 @@ package uk.org.rivernile.android.bustracker.ui.about
 
 import android.content.res.Configuration
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.SystemBarStyle
-import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.ReportDrawn
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -58,9 +54,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -83,7 +79,7 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 @AndroidEntryPoint
-class AboutActivity : ComponentActivity() {
+class AboutActivity : AppCompatActivity() {
 
     @Inject
     internal lateinit var actionLauncher: AboutActionLauncher
@@ -91,13 +87,14 @@ class AboutActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        enableEdgeToEdge()
+
         setContent {
             MyBusTheme {
                 CompositionLocalProvider(
                     LocalAboutActionLauncher provides actionLauncher,
                     LocalDateTimeFormatter provides rememberDateTimeFormatter()
                 ) {
-                    EdgeToEdge()
                     AboutScreen(onNavigateUp = this::onNavigateUp)
                     ReportDrawn()
                 }
@@ -111,31 +108,6 @@ private const val CONTENT_TYPE_TWO_LINES = 2
 
 internal val LocalAboutActionLauncher = staticCompositionLocalOf<AboutActionLauncher> {
     error("LocalAboutActionLauncher has not been set with a value.")
-}
-
-@Composable
-private fun EdgeToEdge() {
-    val activity = LocalActivity.current as ComponentActivity
-    val isDarkMode = isSystemInDarkTheme()
-    val surfaceColour = MaterialTheme
-        .colorScheme
-        .surfaceContainer
-        .toArgb()
-
-    LaunchedEffect(Unit) {
-        if (isDarkMode) {
-            activity.enableEdgeToEdge(
-                navigationBarStyle = SystemBarStyle.dark(surfaceColour)
-            )
-        } else {
-            activity.enableEdgeToEdge(
-                navigationBarStyle = SystemBarStyle.light(
-                    scrim = surfaceColour,
-                    darkScrim = surfaceColour
-                )
-            )
-        }
-    }
 }
 
 @Composable
@@ -176,9 +148,23 @@ internal fun AboutScreenWithState(
             )
         }
     ) { innerPadding ->
+        val topPadding = PaddingValues(top = innerPadding.calculateTopPadding())
+        val paddingDefault = dimensionResource(id = Rcore.dimen.padding_default)
+        val contentPadding = PaddingValues(
+            top = paddingDefault,
+            bottom = paddingDefault + innerPadding.calculateBottomPadding()
+        )
+        val consumedPadding = PaddingValues(
+            top = innerPadding.calculateTopPadding(),
+            bottom = innerPadding.calculateBottomPadding()
+        )
+
         AboutItemsList(
             aboutItems = state.items,
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier
+                .padding(topPadding)
+                .consumeWindowInsets(consumedPadding),
+            contentPadding = contentPadding,
             onItemClicked = onItemClicked
         )
     }
@@ -221,7 +207,7 @@ private fun AboutTopAppBar(
                 onClick = onNavigateUp
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    painter = painterResource(id = R.drawable.ic_arrow_back),
                     contentDescription = stringResource(id = Rcore.string.navigate_up)
                 )
             }
@@ -234,13 +220,13 @@ private fun AboutTopAppBar(
 private fun AboutItemsList(
     aboutItems: ImmutableList<UiAboutItem>,
     modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues.Zero,
     onItemClicked: (UiAboutItem) -> Unit
 ) {
     LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            vertical = dimensionResource(id = Rcore.dimen.padding_default)
-        )
+        modifier = modifier
+            .fillMaxSize(),
+        contentPadding = contentPadding
     ) {
         items(
             items = aboutItems,
@@ -271,8 +257,8 @@ private fun LaunchAction(
                 actionLauncher.launchAuthorWebsite()
             is UiAction.ShowAppWebsite ->
                 actionLauncher.launchAppWebsite()
-            is UiAction.ShowAppTwitter ->
-                actionLauncher.launchAppTwitter()
+            is UiAction.ShowAppBluesky ->
+                actionLauncher.launchAppBluesky()
             is UiAction.ShowPrivacyPolicy ->
                 actionLauncher.launchPrivacyPolicy()
         }
@@ -308,7 +294,7 @@ private fun AboutScreenPreview() {
                         UiAboutItem.TwoLinesItem.AppVersion("1.2.3", 4),
                         UiAboutItem.TwoLinesItem.Author,
                         UiAboutItem.TwoLinesItem.Website,
-                        UiAboutItem.TwoLinesItem.Twitter,
+                        UiAboutItem.TwoLinesItem.Bluesky,
                         UiAboutItem.TwoLinesItem.DatabaseVersion(Date(1712498400000L)),
                         UiAboutItem.TwoLinesItem.TopologyVersion("abc123"),
                         UiAboutItem.OneLineItem.Credits,

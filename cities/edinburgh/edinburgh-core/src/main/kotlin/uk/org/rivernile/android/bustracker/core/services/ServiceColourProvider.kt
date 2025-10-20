@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,5 +36,5 @@ interface ServiceColourProvider {
     /**
      * The colour to use for night services.
      */
-    val nightServiceColour: Int
+    val nightServiceColours: ServiceColours
 }

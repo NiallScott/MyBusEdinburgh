@@ -286,7 +286,7 @@ class AboutActivityTest {
     }
 
     @Test
-    fun showAppTwitterActionCallsActionLauncherAndActionLaunchedCallback() {
+    fun showAppBlueskyActionCallsActionLauncherAndActionLaunchedCallback() {
         val onActionLaunchedTracker = BasicEventTracker()
         val actionLauncher = FakeAboutActionLauncher()
 
@@ -297,7 +297,7 @@ class AboutActivityTest {
                 AboutScreenWithState(
                     state = UiState(
                         items = persistentListOf(),
-                        action = UiAction.ShowAppTwitter
+                        action = UiAction.ShowAppBluesky
                     ),
                     onNavigateUp = { },
                     onItemClicked = { },
@@ -308,7 +308,7 @@ class AboutActivityTest {
             }
         }
 
-        assertEquals(1, actionLauncher.launchAppTwitterInvocationCount)
+        assertEquals(1, actionLauncher.launchAppBlueskyInvocationCount)
         assertEquals(1, onActionLaunchedTracker.numberOfInvocations)
     }
 
@@ -383,7 +383,7 @@ class AboutActivityTest {
         var launchAppWebsiteInvocationCount = 0
             private set
 
-        var launchAppTwitterInvocationCount = 0
+        var launchAppBlueskyInvocationCount = 0
             private set
 
         var launchPrivacyPolicyInvocationCount = 0
@@ -401,8 +401,8 @@ class AboutActivityTest {
             launchAppWebsiteInvocationCount++
         }
 
-        override fun launchAppTwitter() {
-            launchAppTwitterInvocationCount++
+        override fun launchAppBluesky() {
+            launchAppBlueskyInvocationCount++
         }
 
         override fun launchPrivacyPolicy() {
