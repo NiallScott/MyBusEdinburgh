@@ -32,10 +32,21 @@ import androidx.activity.compose.ReportDrawn
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.MutableWindowInsets
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.onConsumedWindowInsetsChanged
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,9 +63,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -149,22 +162,13 @@ internal fun AboutScreenWithState(
         }
     ) { innerPadding ->
         val topPadding = PaddingValues(top = innerPadding.calculateTopPadding())
-        val paddingDefault = dimensionResource(id = Rcore.dimen.padding_default)
-        val contentPadding = PaddingValues(
-            top = paddingDefault,
-            bottom = paddingDefault + innerPadding.calculateBottomPadding()
-        )
-        val consumedPadding = PaddingValues(
-            top = innerPadding.calculateTopPadding(),
-            bottom = innerPadding.calculateBottomPadding()
-        )
 
         AboutItemsList(
             aboutItems = state.items,
             modifier = Modifier
+                .fillMaxSize()
                 .padding(topPadding)
-                .consumeWindowInsets(consumedPadding),
-            contentPadding = contentPadding,
+                .consumeWindowInsets(topPadding),
             onItemClicked = onItemClicked
         )
     }
@@ -216,17 +220,27 @@ private fun AboutTopAppBar(
     )
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun AboutItemsList(
     aboutItems: ImmutableList<UiAboutItem>,
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues.Zero,
     onItemClicked: (UiAboutItem) -> Unit
 ) {
+    val safeDrawingInsets = WindowInsets.safeDrawing
+    val insetsForContentPadding = remember { MutableWindowInsets() }
+
     LazyColumn(
         modifier = modifier
-            .fillMaxSize(),
-        contentPadding = contentPadding
+            .onConsumedWindowInsetsChanged { consumedInsets ->
+                insetsForContentPadding.insets = safeDrawingInsets
+                    .exclude(consumedInsets)
+                    .only(WindowInsetsSides.Vertical)
+            }
+            .consumeWindowInsets(insetsForContentPadding),
+        contentPadding = insetsForContentPadding
+            .asPaddingValues()
+            .toPaddingValuesWithListVerticalPadding()
     ) {
         items(
             items = aboutItems,
@@ -265,6 +279,19 @@ private fun LaunchAction(
 
         onActionLaunched()
     }
+}
+
+@Composable
+private fun PaddingValues.toPaddingValuesWithListVerticalPadding(): PaddingValues {
+    val paddingDefault = dimensionResource(Rcore.dimen.padding_default)
+    val layoutDirection = LocalLayoutDirection.current
+
+    return PaddingValues(
+        start = calculateStartPadding(layoutDirection),
+        top = calculateTopPadding() + paddingDefault,
+        end = calculateEndPadding(layoutDirection),
+        bottom = calculateBottomPadding() + paddingDefault
+    )
 }
 
 private val UiAboutItem.contentType: Int get() {

@@ -31,7 +31,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -123,7 +123,9 @@ internal fun <T : UiServiceUpdate> ServiceUpdatesScreen(
             Indicator(
                 state = pullToRefreshState,
                 isRefreshing = isRefreshing,
-                modifier = Modifier.align(Alignment.TopCenter),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .safeDrawingPadding(),
                 color = MaterialTheme.colorScheme.primary
             )
         }
@@ -137,7 +139,7 @@ internal fun <T : UiServiceUpdate> ServiceUpdatesScreen(
 }
 
 @Composable
-private fun <T : UiServiceUpdate> BoxScope.Content(
+private fun <T : UiServiceUpdate> Content(
     content: UiContent<T>,
     onErrorSnackbarShown: (Long) -> Unit,
     itemContent: @Composable LazyItemScope.(item: T, modifier: Modifier) -> Unit
@@ -146,7 +148,11 @@ private fun <T : UiServiceUpdate> BoxScope.Content(
 
     when (content) {
         is UiContent.InProgress -> EmptyProgress(
-            modifier = Modifier.align(Alignment.Center)
+            modifier = Modifier
+                .fillMaxSize()
+                .safeDrawingPadding()
+                .nestedScroll(nestedScrollInterop)
+                .verticalScroll(rememberScrollState())
         )
         is UiContent.Populated -> PopulatedContent(
             content = content,
@@ -160,7 +166,9 @@ private fun <T : UiServiceUpdate> BoxScope.Content(
             error = content.error,
             modifier = Modifier
                 .fillMaxSize()
+                .safeDrawingPadding()
                 .nestedScroll(nestedScrollInterop)
+                .verticalScroll(rememberScrollState())
         )
     }
 }
@@ -223,12 +231,18 @@ private fun <T : UiServiceUpdate> PopulatedContent(
 private fun EmptyProgress(
     modifier: Modifier = Modifier
 ) {
-    CircularProgressIndicator(
-        modifier = modifier
-            .semantics {
-                testTag = TEST_TAG_EMPTY_PROGRESS
-            }
-    )
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier
+                .padding(dimensionResource(Rcore.dimen.padding_double))
+                .semantics {
+                    testTag = TEST_TAG_EMPTY_PROGRESS
+                }
+        )
+    }
 }
 
 @Composable
@@ -279,7 +293,7 @@ private fun <T : UiServiceUpdate> ItemsList(
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(top = 12.dp, bottom = 36.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(Rcore.dimen.padding_default)),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         items(
@@ -301,26 +315,30 @@ private fun InlineError(
     error: UiError,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .padding(dimensionResource(id = Rcore.dimen.padding_double))
-            .verticalScroll(rememberScrollState())
-            .semantics {
-                testTag = TEST_TAG_INLINE_ERROR
-            },
-        verticalArrangement = Arrangement.spacedBy(
-            space = dimensionResource(id = Rcore.dimen.padding_default),
-            alignment = Alignment.CenterVertically
-        ),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
     ) {
-        ErrorIcon(
-            iconRes = error.iconResId
-        )
+        Column(
+            modifier = Modifier
+                .padding(dimensionResource(Rcore.dimen.padding_double))
+                .semantics {
+                    testTag = TEST_TAG_INLINE_ERROR
+                },
+            verticalArrangement = Arrangement.spacedBy(
+                space = dimensionResource(id = Rcore.dimen.padding_default),
+                alignment = Alignment.CenterVertically
+            ),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            ErrorIcon(
+                iconRes = error.iconResId
+            )
 
-        ErrorText(
-            text = stringResource(id = error.titleResId),
-        )
+            ErrorText(
+                text = stringResource(id = error.titleResId),
+            )
+        }
     }
 }
 

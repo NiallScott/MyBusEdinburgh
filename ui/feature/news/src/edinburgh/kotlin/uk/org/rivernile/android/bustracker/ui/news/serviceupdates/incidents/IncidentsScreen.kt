@@ -30,6 +30,7 @@ package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -93,7 +94,8 @@ internal fun IncidentsScreen(
             IncidentItem(
                 item = item,
                 modifier = itemModifier
-                    .padding(start = doublePadding, end = doublePadding),
+                    .safeDrawingPadding()
+                    .padding(horizontal = doublePadding),
                 onMoreDetailsClicked = { onMoreDetailsClicked(item) }
             )
         }
