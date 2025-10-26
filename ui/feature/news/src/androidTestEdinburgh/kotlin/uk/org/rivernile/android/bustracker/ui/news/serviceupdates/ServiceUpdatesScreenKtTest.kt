@@ -42,7 +42,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
 import androidx.test.platform.app.InstrumentationRegistry
@@ -505,7 +505,8 @@ class ServiceUpdatesScreenKtTest {
         }
 
         composeTestRule
-            .onRoot()
+            .onNodeWithTag(TEST_TAG_INLINE_ERROR)
+            .onParent()
             .performTouchInput {
                 swipeDown()
             }
