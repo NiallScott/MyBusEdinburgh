@@ -71,6 +71,7 @@ dependencies {
 
     // AndroidX
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core)
     implementation(libs.androidx.fragment.compose)
     implementation(libs.androidx.viewmodel.compose)
@@ -96,6 +97,15 @@ dependencies {
     androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.androidx.test.uiautomator)
     androidTestImplementation(libs.kotlin.test.junit)
+
+    // TODO: remove this when Compose UI Test targets a newer version of Espresso compatible with
+    //  Android 16.
+    constraints {
+        androidTestImplementation(libs.androidx.test.espresso) {
+            because("Compose UI Test brings in an old version of Espresso incompatible with " +
+                "Android 16.")
+        }
+    }
 
     testImplementation(testFixtures(project(":core:alerts")))
     testImplementation(testFixtures(project(":core:favourites")))

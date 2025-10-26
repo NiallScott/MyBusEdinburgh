@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -121,6 +122,7 @@ internal fun FavouriteStopItem(
             .heightIn(
                 min = if (favouriteStop.services != null) 72.dp else 56.dp
             )
+            .safeDrawingPadding()
             .padding(
                 horizontal = paddingDouble,
                 vertical = paddingDefault

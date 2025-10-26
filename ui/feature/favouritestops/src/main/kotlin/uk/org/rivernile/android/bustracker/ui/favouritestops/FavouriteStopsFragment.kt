@@ -30,6 +30,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.ui.Modifier
 import androidx.fragment.app.Fragment
 import androidx.fragment.compose.content
 import dagger.hilt.android.AndroidEntryPoint
@@ -54,7 +60,10 @@ public class FavouriteStopsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View = content {
         MyBusTheme {
-            FavouriteStopsScreen()
+            FavouriteStopsScreen(
+                modifier = Modifier
+                    .consumeWindowInsets(WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical))
+            )
         }
     }
 

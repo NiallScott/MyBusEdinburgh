@@ -27,28 +27,46 @@
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.MutableWindowInsets
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.onConsumedWindowInsetsChanged
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -157,8 +175,11 @@ internal fun FavouriteStopsScreenWithState(
         when (state.content) {
             is UiContent.InProgress -> IndeterminateProgress(
                 modifier = Modifier
+                    .fillMaxSize()
+                    .safeDrawingPadding()
                     .padding(paddingDouble)
                     .nestedScroll(nestedScrollInterop)
+                    .verticalScroll(rememberScrollState())
             )
             is UiContent.Content -> Content(
                 favouriteStops = state.content.favouriteStops,
@@ -174,12 +195,15 @@ internal fun FavouriteStopsScreenWithState(
                 onShowOnMapClick = onShowOnMapClick,
                 modifier = Modifier
                     .fillMaxSize()
-                    .nestedScroll(nestedScrollInterop),
+                    .nestedScroll(nestedScrollInterop)
             )
             is UiContent.Empty -> EmptyError(
                 modifier = Modifier
+                    .fillMaxSize()
+                    .safeDrawingPadding()
                     .padding(paddingDouble)
                     .nestedScroll(nestedScrollInterop)
+                    .verticalScroll(rememberScrollState())
             )
         }
     }
@@ -196,14 +220,20 @@ internal fun FavouriteStopsScreenWithState(
 private fun IndeterminateProgress(
     modifier: Modifier = Modifier
 ) {
-    CircularProgressIndicator(
-        modifier = modifier
-            .semantics {
-                testTag = TEST_TAG_CONTENT_PROGRESS
-            }
-    )
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier
+                .semantics {
+                    testTag = TEST_TAG_CONTENT_PROGRESS
+                }
+        )
+    }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun Content(
     favouriteStops: ImmutableList<UiFavouriteStop>,
@@ -219,14 +249,23 @@ private fun Content(
     onShowOnMapClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val safeDrawingInsets = WindowInsets.safeDrawing
+    val insetsForContentPadding = remember { MutableWindowInsets() }
+
     LazyColumn(
         modifier = modifier
+            .onConsumedWindowInsetsChanged { consumedInsets ->
+                insetsForContentPadding.insets = safeDrawingInsets
+                    .exclude(consumedInsets)
+                    .only(WindowInsetsSides.Vertical)
+            }
+            .consumeWindowInsets(insetsForContentPadding)
             .semantics {
                 testTag = TEST_TAG_CONTENT_POPULATED
             },
-        contentPadding = PaddingValues(
-            vertical = dimensionResource(Rcore.dimen.padding_default)
-        )
+        contentPadding = insetsForContentPadding
+            .asPaddingValues()
+            .toPaddingValuesWithListVerticalPadding()
     ) {
         items(
             items = favouriteStops,
@@ -261,6 +300,7 @@ private fun EmptyError(
             .semantics {
                 testTag = TEST_TAG_CONTENT_EMPTY_ERROR
             },
+        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
@@ -314,6 +354,19 @@ private fun LaunchAction(
 
         onActionLaunched()
     }
+}
+
+@Composable
+private fun PaddingValues.toPaddingValuesWithListVerticalPadding(): PaddingValues {
+    val paddingDefault = dimensionResource(Rcore.dimen.padding_default)
+    val layoutDirection = LocalLayoutDirection.current
+
+    return PaddingValues(
+        start = calculateStartPadding(layoutDirection),
+        top = calculateTopPadding() + paddingDefault,
+        end = calculateEndPadding(layoutDirection),
+        bottom = calculateBottomPadding() + paddingDefault
+    )
 }
 
 @Preview(

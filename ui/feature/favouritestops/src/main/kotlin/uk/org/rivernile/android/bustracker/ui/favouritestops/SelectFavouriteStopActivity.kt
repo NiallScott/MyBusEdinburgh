@@ -30,10 +30,12 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -69,7 +71,7 @@ import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
  * @see FavouriteStopsFragment
  */
 @AndroidEntryPoint
-public class SelectFavouriteStopActivity : ComponentActivity() {
+public class SelectFavouriteStopActivity : AppCompatActivity() {
 
     private companion object {
 
@@ -134,10 +136,13 @@ private fun SelectFavouriteStopScreen(
         },
         contentWindowInsets = WindowInsets.safeDrawing
     ) { innerPadding ->
+        val topPadding = PaddingValues(top = innerPadding.calculateTopPadding())
+
         screenContent(
             Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(topPadding)
+                .consumeWindowInsets(topPadding)
         )
     }
 }
