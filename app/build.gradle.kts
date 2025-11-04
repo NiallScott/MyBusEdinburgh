@@ -71,8 +71,8 @@ android {
             dimension = "city"
 
             applicationId = "uk.org.rivernile.edinburghbustracker.android"
-            versionCode = 19
-            versionName = "3.2"
+            versionCode = 20
+            versionName = "3.2.1"
             setProperty("archivesBaseName", "MyBusEdinburgh-$versionName")
         }
     }
