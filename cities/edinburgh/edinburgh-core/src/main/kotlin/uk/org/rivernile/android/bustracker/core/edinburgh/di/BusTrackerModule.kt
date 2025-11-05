@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,6 +35,7 @@ import retrofit2.Retrofit
 import retrofit2.create
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.di.ForTracker
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.EdinburghTrackerEndpoint
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.HttpsInterceptor
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
 import uk.org.rivernile.android.bustracker.core.http.di.ForKotlinJsonSerialization
 import uk.org.rivernile.edinburghbustrackerapi.ApiKeyGenerator
@@ -78,12 +79,16 @@ internal interface BusTrackerModule {
 
         @Provides
         @ForTracker
-        fun provideOkhttpClient(okHttpClient: OkHttpClient): OkHttpClient =
+        fun provideOkhttpClient(
+            okHttpClient: OkHttpClient,
+            httpsInterceptor: HttpsInterceptor
+        ): OkHttpClient =
             okHttpClient.newBuilder()
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
                 .followRedirects(false)
+                .addInterceptor(httpsInterceptor)
                 .build()
     }
 }
