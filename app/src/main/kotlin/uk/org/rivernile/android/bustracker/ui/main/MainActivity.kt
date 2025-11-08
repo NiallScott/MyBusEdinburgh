@@ -79,11 +79,11 @@ import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.explore.ExploreFragment
 import uk.org.rivernile.android.bustracker.ui.favourites.FavouriteStopsFragment
 import uk.org.rivernile.android.bustracker.ui.favourites.addedit.AddEditFavouriteStopDialogFragment
-import uk.org.rivernile.android.bustracker.ui.favourites.remove.DeleteFavouriteDialogFragment
 import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment
 import uk.org.rivernile.android.bustracker.ui.HasScrollableContent
 import uk.org.rivernile.android.bustracker.ui.HasTabBar
 import uk.org.rivernile.android.bustracker.ui.news.NewsFragment
+import uk.org.rivernile.android.bustracker.ui.removefavouritestop.RemoveFavouriteStopDialogFragment
 import uk.org.rivernile.android.bustracker.ui.search.SearchFragment
 import uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity
 import uk.org.rivernile.android.bustracker.ui.turnongps.TurnOnGpsDialogFragment
@@ -295,8 +295,8 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun onShowConfirmFavouriteDeletion(stopCode: String) {
-        DeleteFavouriteDialogFragment
-            .newInstance(stopCode)
+        RemoveFavouriteStopDialogFragment
+            .newInstance(stopCode = stopCode)
             .show(supportFragmentManager, DIALOG_DELETE_FAVOURITE)
     }
 

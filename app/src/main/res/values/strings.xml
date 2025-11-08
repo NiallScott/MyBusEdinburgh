@@ -377,13 +377,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="addtimealertdialog_error_no_app_settings">Unable to show app settings</string>
 
     <!--
-    *********************************************
-    * Strings for DeleteFavouriteDialogFragment *
-    *********************************************
-    -->
-    <string name="deletefavouritedialog_title">Remove stop as a favourite?</string>
-
-    <!--
     **************************************************
     * Strings for DeleteProximityAlertDialogFragment *
     **************************************************

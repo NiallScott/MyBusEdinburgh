@@ -105,6 +105,7 @@ include(
     ":ui:feature:about",
     ":ui:feature:favouritestops",
     ":ui:feature:news",
+    ":ui:feature:removefavouritestop",
     ":ui:text-formatting",
     ":ui:ui-core",
     ":ui:widget:contentview",

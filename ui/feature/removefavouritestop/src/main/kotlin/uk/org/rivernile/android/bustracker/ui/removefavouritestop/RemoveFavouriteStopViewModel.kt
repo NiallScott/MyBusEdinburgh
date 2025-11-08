@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,58 +24,48 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.favourites.remove
+package uk.org.rivernile.android.bustracker.ui.removefavouritestop
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForViewModelCoroutineScope
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import javax.inject.Inject
 
 /**
- * This is the [ViewModel] for [DeleteFavouriteDialogFragment].
+ * This is the [ViewModel] for [RemoveFavouriteStopDialogFragment].
  *
- * @param savedStateHandle The saved state.
- * @param favouritesRepository Used to remove the favourite stop.
- * @param applicationCoroutineScope The application [CoroutineScope].
- * @param defaultDispatcher The default [CoroutineDispatcher].
+ * @param arguments Provides access to the arguments sent to this dialog.
+ * @param favouritesRepository Used to access favourite stops.
+ * @param defaultDispatcher The default [CoroutineDispatcher] for performing work on.
+ * @param applicationCoroutineScope The application [CoroutineScope], so that work is continued to
+ * be processed even after the dialog is dismissed. This is so the removal is not cancelled.
+ * @param viewModelCoroutineScope The [ViewModel] [CoroutineScope], injected for testing.
  * @author Niall Scott
  */
 @HiltViewModel
-class DeleteFavouriteDialogFragmentViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+internal class RemoveFavouriteStopViewModel @Inject constructor(
+    private val arguments: Arguments,
     private val favouritesRepository: FavouritesRepository,
+    @param:ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
     @param:ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
-    @param:ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
-) : ViewModel() {
-
-    companion object {
-
-        /**
-         * State key for stop code.
-         */
-        const val STATE_STOP_CODE = "stopCode"
-    }
-
-    /**
-     * This property contains the stop code for which the favourite stop should be removed.
-     */
-    private val stopCode: String? get() = savedStateHandle[STATE_STOP_CODE]
+    @ForViewModelCoroutineScope viewModelCoroutineScope: CoroutineScope
+) : ViewModel(viewModelCoroutineScope) {
 
     /**
      * This is called when the user has confirmed they wish to remove the favourite stop.
      */
-    fun onUserConfirmDeletion() {
-        stopCode?.ifEmpty { null }?.let {
+    fun onUserConfirmRemoval() {
+        arguments.stopCode?.ifEmpty { null }?.let { stopCode ->
             // Uses the application CoroutineScope as the Dialog dismisses immediately, and we need
             // this task to finish. Fire and forget is fine here.
             applicationCoroutineScope.launch(defaultDispatcher) {
-                favouritesRepository.removeFavouriteStop(it)
+                favouritesRepository.removeFavouriteStop(stopCode = stopCode)
             }
         }
     }

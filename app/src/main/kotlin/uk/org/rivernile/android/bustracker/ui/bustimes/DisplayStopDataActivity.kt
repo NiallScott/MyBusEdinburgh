@@ -53,12 +53,12 @@ import uk.org.rivernile.android.bustracker.ui.alerts.time.AddTimeAlertDialogFrag
 import uk.org.rivernile.android.bustracker.ui.alerts.time.DeleteTimeAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity
 import uk.org.rivernile.android.bustracker.ui.bustimes.details.StopDetailsFragment
+import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.favourites.addedit.AddEditFavouriteStopDialogFragment
-import uk.org.rivernile.android.bustracker.ui.favourites.remove.DeleteFavouriteDialogFragment
+import uk.org.rivernile.android.bustracker.ui.removefavouritestop.RemoveFavouriteStopDialogFragment
 import uk.org.rivernile.edinburghbustracker.android.BuildConfig
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.ActivityDisplayStopDataBinding
-import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import javax.inject.Inject
 import kotlin.math.abs
 import androidx.core.net.toUri
@@ -348,8 +348,8 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
      * @param stopCode The stop code to remove the favourite for.
      */
     private fun showRemoveFavourite(stopCode: String) {
-        DeleteFavouriteDialogFragment
-            .newInstance(stopCode)
+        RemoveFavouriteStopDialogFragment
+            .newInstance(stopCode = stopCode)
             .show(supportFragmentManager, DIALOG_REMOVE_FAVOURITE)
     }
 

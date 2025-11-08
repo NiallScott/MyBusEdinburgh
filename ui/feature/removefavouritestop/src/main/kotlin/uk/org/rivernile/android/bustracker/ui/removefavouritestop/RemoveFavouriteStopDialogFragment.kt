@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,47 +24,52 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.favourites.remove
+package uk.org.rivernile.android.bustracker.ui.removefavouritestop
 
+import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
+import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
-import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 
 /**
  * This [DialogFragment] will show an [AlertDialog] which asks the user to confirm if they wish to
- * delete the favourite stop or not.
+ * remove the favourite stop or not.
  *
  * @author Niall Scott
  */
 @AndroidEntryPoint
-class DeleteFavouriteDialogFragment : DialogFragment() {
+public class RemoveFavouriteStopDialogFragment : DialogFragment() {
 
-    companion object {
+    public companion object {
 
         /**
-         * Create a new instance of [DeleteFavouriteDialogFragment].
+         * Create a new instance of [RemoveFavouriteStopDialogFragment].
          *
-         * @param stopCode The stop code to delete the favourite for.
+         * @param stopCode The stop code to delete the favourite stop for.
          */
-        fun newInstance(stopCode: String) = DeleteFavouriteDialogFragment().apply {
-            arguments = Bundle().apply {
-                putString(DeleteFavouriteDialogFragmentViewModel.STATE_STOP_CODE, stopCode)
+        public fun newInstance(stopCode: String): RemoveFavouriteStopDialogFragment {
+            return RemoveFavouriteStopDialogFragment().apply {
+                arguments = bundleOf(
+                    ARG_STOP_CODE to stopCode
+                )
             }
         }
     }
 
-    private val viewModel by viewModels<DeleteFavouriteDialogFragmentViewModel>()
+    private val viewModel by viewModels<RemoveFavouriteStopViewModel>()
 
-    override fun onCreateDialog(savedInstanceState: Bundle?) =
-            MaterialAlertDialogBuilder(requireContext())
-                    .setTitle(R.string.deletefavouritedialog_title)
-                    .setPositiveButton(R.string.okay) { _, _ ->
-                        viewModel.onUserConfirmDeletion()
-                    }
-                    .setNegativeButton(R.string.cancel, null)
-                    .create()
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.deletefavouritestopdialog_title)
+            .setPositiveButton(Rcore.string.okay) { _, _ ->
+                viewModel.onUserConfirmRemoval()
+            }
+            .setNegativeButton(Rcore.string.cancel, null)
+            .create()
+    }
 }
