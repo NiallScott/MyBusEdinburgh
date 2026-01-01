@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,5 +21,26 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<manifest />
+ *
+ */
+
+package uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop
+
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
+
+/**
+ * Is the stop name valid?
+ *
+ * @param stopName The stop name to validate.
+ * @return `true` if the stop name is valid, otherwise `false`.
+ * @author Niall Scott
+ */
+@OptIn(ExperimentalContracts::class)
+internal fun isStopNameValid(stopName: String?): Boolean {
+    contract {
+        returns(true) implies (stopName != null)
+    }
+
+    return !stopName.isNullOrBlank()
+}

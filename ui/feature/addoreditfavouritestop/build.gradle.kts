@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,7 +33,7 @@ plugins {
 }
 
 android {
-    namespace = "uk.org.rivernile.android.bustracker.ui.textformatting"
+    namespace = "uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop"
 
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -53,11 +53,6 @@ android {
     buildFeatures {
         compose = true
     }
-
-    @Suppress("UnstableApiUsage")
-    testFixtures {
-        enable = true
-    }
 }
 
 kotlin {
@@ -67,6 +62,19 @@ kotlin {
 dependencies {
 
     implementation(project(":database:busstop-db-core"))
+    implementation(project(":core:busstops"))
+    implementation(project(":core:coroutines-android"))
+    implementation(project(":core:favourites-android"))
+    implementation(project(":ui:ui-core"))
+    implementation(project(":ui:text-formatting"))
+
+    // AndroidX
+    implementation(libs.androidx.core)
+    implementation(libs.androidx.fragment.compose)
+    implementation(libs.androidx.viewmodel.compose)
+
+    // Material Design
+    implementation(libs.material)
 
     // Hilt (dependency injection)
     implementation(libs.hilt.android)
@@ -74,14 +82,32 @@ dependencies {
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.runtime)
-    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.material.compose)
 
-    // Testing dependencies
-    androidTestImplementation(libs.androidx.test.core)
+    // Test dependencies
+    androidTestImplementation(testFixtures(project(":ui:text-formatting")))
+    androidTestImplementation(libs.androidx.compose.ui.test)
     androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.kotlin.test.junit)
 
-    testFixturesImplementation(platform(libs.androidx.compose.bom))
-    testFixturesImplementation(libs.androidx.compose.runtime)
+    // TODO: remove this when Compose UI Test targets a newer version of Espresso compatible with
+    //  Android 16.
+    constraints {
+        androidTestImplementation(libs.androidx.test.espresso) {
+            because("Compose UI Test brings in an old version of Espresso incompatible with " +
+                "Android 16.")
+        }
+    }
+
+    testImplementation(testFixtures(project(":core:busstops")))
+    testImplementation(testFixtures(project(":core:favourites")))
+    testImplementation(testFixtures(project(":database:busstop-db-core")))
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.turbine)
 }

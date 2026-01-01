@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -78,7 +78,6 @@ import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.explore.ExploreFragment
 import uk.org.rivernile.android.bustracker.ui.favourites.FavouriteStopsFragment
-import uk.org.rivernile.android.bustracker.ui.favourites.addedit.AddEditFavouriteStopDialogFragment
 import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment
 import uk.org.rivernile.android.bustracker.ui.HasScrollableContent
 import uk.org.rivernile.android.bustracker.ui.HasTabBar
@@ -93,6 +92,7 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.ActivityMainBind
 import javax.inject.Inject
 import androidx.core.net.toUri
 import androidx.core.view.ViewGroupCompat
+import uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop.AddOrEditFavouriteStopDialogFragment
 
 /**
  * This [android.app.Activity] is the root Activity of the app.
@@ -253,7 +253,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun onShowAddEditFavouriteStop(stopCode: String) {
-        AddEditFavouriteStopDialogFragment
+        AddOrEditFavouriteStopDialogFragment
             .newInstance(stopCode)
             .show(supportFragmentManager, DIALOG_ADD_FAVOURITE)
     }

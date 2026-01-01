@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -54,7 +54,6 @@ import uk.org.rivernile.android.bustracker.ui.alerts.time.DeleteTimeAlertDialogF
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity
 import uk.org.rivernile.android.bustracker.ui.bustimes.details.StopDetailsFragment
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
-import uk.org.rivernile.android.bustracker.ui.favourites.addedit.AddEditFavouriteStopDialogFragment
 import uk.org.rivernile.android.bustracker.ui.removefavouritestop.RemoveFavouriteStopDialogFragment
 import uk.org.rivernile.edinburghbustracker.android.BuildConfig
 import uk.org.rivernile.edinburghbustracker.android.R
@@ -63,6 +62,7 @@ import javax.inject.Inject
 import kotlin.math.abs
 import androidx.core.net.toUri
 import androidx.core.view.ViewGroupCompat
+import uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop.AddOrEditFavouriteStopDialogFragment
 
 /**
  * The purpose of this [AppCompatActivity] is to display to the user live departure times and
@@ -337,8 +337,8 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
      * @param stopCode The stop code to add the favourite for.
      */
     private fun showAddFavourite(stopCode: String) {
-        AddEditFavouriteStopDialogFragment
-            .newInstance(stopCode)
+        AddOrEditFavouriteStopDialogFragment
+            .newInstance(stopCode = stopCode)
             .show(supportFragmentManager, DIALOG_ADD_FAVOURITE)
     }
 

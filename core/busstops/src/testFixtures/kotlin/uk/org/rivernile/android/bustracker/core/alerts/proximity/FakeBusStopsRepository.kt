@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,12 +40,11 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopSearch
  * @author Niall Scott
  */
 class FakeBusStopsRepository(
+    private val onGetNameForStopFlow: (String) -> Flow<StopName?> = { throw NotImplementedError() },
     private val onGetStopLocation: (String) -> StopLocation? = { throw NotImplementedError() }
 ) : BusStopsRepository {
 
-    override fun getNameForStopFlow(stopCode: String): Flow<StopName?> {
-        throw NotImplementedError()
-    }
+    override fun getNameForStopFlow(stopCode: String) = onGetNameForStopFlow(stopCode)
 
     override fun getBusStopDetailsFlow(stopCode: String): Flow<StopDetails?> {
         throw NotImplementedError()
@@ -75,7 +74,7 @@ class FakeBusStopsRepository(
 
     override suspend fun getStopLocation(stopCode: String) = onGetStopLocation(stopCode)
 
-    override suspend fun getNameForStop(stopCode: String): StopName? {
+    override suspend fun getNameForStop(stopCode: String): StopName {
         throw NotImplementedError()
     }
 }

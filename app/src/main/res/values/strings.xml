@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -304,18 +304,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     **********************
     **********************
     -->
-
-    <!--
-    **************************************************
-    * Strings for AddEditFavouriteStopDialogFragment *
-    **************************************************
-    -->
-    <string name="addeditfavouritestopdialog_title_add">Add stop as favourite</string>
-    <string name="addeditfavouritestopdialog_title_edit">Edit favourite stop</string>
-    <string name="addeditfavouritestopdialog_blurb_add">Saving a stop as a favourite allows you to easily show arrival times for it later\n\nThe selected stop is %s</string>
-    <string name="addeditfavouritestopdialog_blurb_edit">Edit the name of the favourite stop %s</string>
-    <string name="addeditfavouritestopdialog_edit_name_hint">Name</string>
-    <string name="addeditfavouritestopdialog_button_add">Save</string>
 
     <!--
     ***********************************************

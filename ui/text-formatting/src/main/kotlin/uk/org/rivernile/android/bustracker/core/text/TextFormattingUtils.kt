@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,8 +37,13 @@ import javax.inject.Inject
  * @param context The application [Context].
  * @author Niall Scott
  */
-class TextFormattingUtils @Inject internal constructor(
-    private val context: Context) {
+@Deprecated(
+    message = "Please use StopNameFormatter instead.",
+    level = DeprecationLevel.WARNING
+)
+public class TextFormattingUtils @Inject internal constructor(
+    private val context: Context
+) {
 
     /**
      * Format a bus stop name [String] without including the stop code.
@@ -46,7 +51,7 @@ class TextFormattingUtils @Inject internal constructor(
      * @param stopName The stop name data.
      * @return The formatted stop name, excluding the stop code.
      */
-    fun formatBusStopName(stopName: StopName) =
+    public fun formatBusStopName(stopName: StopName): String =
         stopName
             .locality
             ?.ifEmpty { null }
@@ -61,7 +66,7 @@ class TextFormattingUtils @Inject internal constructor(
      * @param stopName The stop name data.
      * @return The formatted stop name, containing the stop code.
      */
-    fun formatBusStopNameWithStopCode(stopCode: String, stopName: StopName?) =
+    public fun formatBusStopNameWithStopCode(stopCode: String, stopName: StopName?): String =
         stopName?.let {
             it.locality
                 ?.ifEmpty { null }

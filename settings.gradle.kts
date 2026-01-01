@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -103,6 +103,7 @@ include(
     ":macrobenchmark:app-macrobenchmark",
     ":testutils",
     ":ui:feature:about",
+    ":ui:feature:addoreditfavouritestop",
     ":ui:feature:favouritestops",
     ":ui:feature:news",
     ":ui:feature:removefavouritestop",

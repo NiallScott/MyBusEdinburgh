@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -157,6 +157,7 @@ dependencies {
     implementation(project(":endpoint:tracker-endpoint"))
     implementation(project(":endpoint:internal-api-endpoint"))
     implementation(project(":ui:feature:about"))
+    implementation(project(":ui:feature:addoreditfavouritestop"))
     implementation(project(":ui:feature:favouritestops"))
     implementation(project(":ui:feature:news"))
     implementation(project(":ui:feature:removefavouritestop"))
