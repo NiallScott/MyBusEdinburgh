@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,43 +24,21 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.favouritestops
-
-import androidx.lifecycle.SavedStateHandle
-import dagger.hilt.android.scopes.ViewModelScoped
-import kotlinx.coroutines.flow.Flow
-import javax.inject.Inject
+package uk.org.rivernile.android.bustracker.ui.callbacks
 
 /**
- * This exposes the arguments which the favourite stops feature was initialised with.
+ * This listener is used to send callbacks from `Fragment`s to [android.app.Activity]s to confirm
+ * with the user that they wish to remove a given stop from their favourites.
  *
  * @author Niall Scott
  */
-internal interface Arguments {
+public interface OnShowConfirmFavouriteRemovalListener {
 
     /**
-     * Are we in shortcut mode?
+     * This is called when it should be confirmed with the user that they want to remove a
+     * favourite bus stop.
+     *
+     * @param stopCode The bus stop that the user may want to delete.
      */
-    val isShortcutMode: Boolean
-
-    /**
-     * A [Flow] which emits whether we are in shortcut mode or not.
-     */
-    val isShortcutModeFlow: Flow<Boolean>
-}
-
-internal const val ARG_IS_SHORTCUT_MODE = "isShortcutMode"
-
-@ViewModelScoped
-internal class RealArguments @Inject constructor(
-    private val savedState: SavedStateHandle
-) : Arguments {
-
-    override val isShortcutMode get() = savedState[ARG_IS_SHORTCUT_MODE] ?: false
-
-    override val isShortcutModeFlow = savedState
-        .getStateFlow(
-            key = ARG_IS_SHORTCUT_MODE,
-            initialValue = false
-        )
+    public fun onShowConfirmFavouriteRemoval(stopCode: String)
 }

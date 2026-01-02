@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -39,20 +40,31 @@ import androidx.compose.ui.Modifier
 import androidx.fragment.app.Fragment
 import androidx.fragment.compose.content
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddOrEditFavouriteStopListener
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddProximityAlertListener
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddArrivalAlertListener
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusStopMapWithStopCodeListener
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmRemoveProximityAlertListener
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmRemoveArrivalAlertListener
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmFavouriteRemovalListener
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 
 /**
  * This [Fragment] shows the user a list of their favourite stops.
  *
- * How this [Fragment] behaves depends on if the hosting [android.app.Activity] implements
- * [CreateShortcutCallbacks] or not. When a user selects a favourite stop, if this interface is
- * implemented, it asks this interface to create a shortcut. If this interface is not implemented,
- * it instead asks the hosting [android.app.Activity] to show the live times instead.
- *
  * @author Niall Scott
  */
 @AndroidEntryPoint
 public class FavouriteStopsFragment : Fragment() {
+
+    private var callbacks: Callbacks? = null
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        callbacks = context as? Callbacks
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -62,26 +74,68 @@ public class FavouriteStopsFragment : Fragment() {
         MyBusTheme {
             FavouriteStopsScreen(
                 modifier = Modifier
-                    .consumeWindowInsets(WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical))
+                    .consumeWindowInsets(WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical)),
+                onShowStopData = ::handleOnShowStopData,
+                onShowEditFavouriteStop = ::handleOnShowEditFavouriteStop,
+                onShowConfirmRemoveFavourite = ::handleOnShowConfirmRemoveFavourite,
+                onShowOnMap = ::handleOnShowOnMap,
+                onShowAddArrivalAlert = ::handleOnShowAddArrivalAlert,
+                onShowConfirmRemoveArrivalAlert = ::handleOnShowConfirmRemoveArrivalAlert,
+                onShowAddProximityAlert = ::handleOnShowAddProximityAlert,
+                onShowConfirmRemoveProximityAlert = ::handleOnShowConfirmRemoveProximityAlert
             )
         }
     }
 
-    /**
-     * Activities which host this [Fragment] in the create shortcut mode should implement this
-     * interface. When this is the case, this [Fragment] will run in create shortcut mode, and pass
-     * create shortcut events through this interface back to the [android.app.Activity] when the
-     * user has selected a stop.
-     */
-    internal interface CreateShortcutCallbacks {
+    override fun onDetach() {
+        super.onDetach()
 
-        /**
-         * This is called when the user has selected a stop and a shortcut should be created for it.
-         *
-         * @param stopCode The stop code to create a shortcut for.
-         * @param stopName The user's name for the stop at the time they requested the shortcut be
-         * created.
-         */
-        fun onCreateShortcut(stopCode: String, stopName: String)
+        callbacks = null
     }
+
+    private fun handleOnShowStopData(stopCode: String) {
+        callbacks?.onShowBusTimes(stopCode)
+    }
+
+    private fun handleOnShowEditFavouriteStop(stopCode: String) {
+        callbacks?.onShowAddOrEditFavouriteStop(stopCode)
+    }
+
+    private fun handleOnShowConfirmRemoveFavourite(stopCode: String) {
+        callbacks?.onShowConfirmFavouriteRemoval(stopCode)
+    }
+
+    private fun handleOnShowOnMap(stopCode: String) {
+        callbacks?.onShowBusStopMapWithStopCode(stopCode)
+    }
+
+    private fun handleOnShowAddArrivalAlert(stopCode: String) {
+        callbacks?.onShowAddArrivalAlert(stopCode, null)
+    }
+
+    private fun handleOnShowConfirmRemoveArrivalAlert(stopCode: String) {
+        callbacks?.onShowConfirmRemoveArrivalAlert(stopCode)
+    }
+
+    private fun handleOnShowAddProximityAlert(stopCode: String) {
+        callbacks?.onShowAddProximityAlert(stopCode)
+    }
+
+    private fun handleOnShowConfirmRemoveProximityAlert(stopCode: String) {
+        callbacks?.onShowConfirmRemoveProximityAlert(stopCode)
+    }
+
+    /**
+     * Activities which host this [Fragment] in the normal (NOT create shortcut) mode should
+     * implement this interface.
+     */
+    public interface Callbacks :
+        OnShowAddOrEditFavouriteStopListener,
+        OnShowConfirmFavouriteRemovalListener,
+        OnShowConfirmRemoveProximityAlertListener,
+        OnShowConfirmRemoveArrivalAlertListener,
+        OnShowAddProximityAlertListener,
+        OnShowAddArrivalAlertListener,
+        OnShowBusStopMapWithStopCodeListener,
+        OnShowBusTimesListener
 }

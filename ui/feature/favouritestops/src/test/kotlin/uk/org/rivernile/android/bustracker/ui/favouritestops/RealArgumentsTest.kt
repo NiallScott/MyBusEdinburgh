@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,7 +41,27 @@ import kotlin.test.assertTrue
 class RealArgumentsTest {
 
     @Test
-    fun isShortcutModeEmitsFalseByDefault() = runTest {
+    fun isShortcutModeReturnsFalseByDefault() {
+        val arguments = createArguments()
+
+        assertFalse(arguments.isShortcutMode)
+    }
+
+    @Test
+    fun isShortcutModeReturnsTrueWhenTrueSetInSavedState() {
+        val arguments = createArguments(
+            savedState = SavedStateHandle(
+                initialState = mapOf(
+                    ARG_IS_SHORTCUT_MODE to true
+                )
+            )
+        )
+
+        assertTrue(arguments.isShortcutMode)
+    }
+
+    @Test
+    fun isShortcutModeFlowEmitsFalseByDefault() = runTest {
         val arguments = createArguments()
 
         arguments.isShortcutModeFlow.test {
@@ -51,7 +71,7 @@ class RealArgumentsTest {
     }
 
     @Test
-    fun isShortcutModeEmitsValueSetInSavedState() = runTest {
+    fun isShortcutModeFlowEmitsValueSetInSavedState() = runTest {
         val arguments = createArguments(
             savedState = SavedStateHandle(
                 initialState = mapOf(

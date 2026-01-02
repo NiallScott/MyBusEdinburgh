@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,18 +27,17 @@
 package uk.org.rivernile.android.bustracker.ui.callbacks
 
 /**
- * This listener is used to send callbacks from [androidx.fragment.app.Fragment]s to
- * [android.app.Activity]s when the user wishes to be taken to the system location preferences.
+ * This listener is used to send callbacks from `Fragment`s to [android.app.Activity]s when the user
+ * wishes to add a new favourite stop or edit an existing favourite stop.
  *
  * @author Niall Scott
  */
-interface OnShowSystemLocationPreferencesListener {
+public interface OnShowAddOrEditFavouriteStopListener {
 
     /**
-     * This is called when the user wishes to be taken to the system location preferences.
+     * This is called when the user wants to add or edit a favourite stop.
      *
-     * @return `true` when the system location preferences is started, otherwise `false` in the
-     * event of an error.
+     * @param stopCode The stop code of the stop to add or edit.
      */
-    fun onShowSystemLocationPreferences(): Boolean
+    public fun onShowAddOrEditFavouriteStop(stopCode: String)
 }

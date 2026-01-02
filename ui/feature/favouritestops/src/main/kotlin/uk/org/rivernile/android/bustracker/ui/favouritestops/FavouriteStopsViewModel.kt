@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -44,6 +44,7 @@ import javax.inject.Inject
 /**
  * This is the [ViewModel] for the favourite stops screen.
  *
+ * @param arguments The arguments the UI was invoked with.
  * @param state Where any transient state is held.
  * @param uiFavouriteStopsRetriever Used to retrieve [UiFavouriteStop]s.
  * @param defaultCoroutineDispatcher The default [CoroutineDispatcher].
@@ -52,6 +53,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 internal class FavouriteStopsViewModel @Inject constructor(
+    private val arguments: Arguments,
     private val state: State,
     private val uiFavouriteStopsRetriever: UiFavouriteStopsRetriever,
     @ForDefaultDispatcher defaultCoroutineDispatcher: CoroutineDispatcher,
@@ -73,9 +75,17 @@ internal class FavouriteStopsViewModel @Inject constructor(
      * This is called when a favourite stop has been clicked.
      *
      * @param stopCode The code of the clicked favourite stop.
+     * @param savedName The name the stop is saved as.
      */
-    fun onItemClicked(stopCode: String) {
-        state.action = UiAction.ShowStopData(stopCode = stopCode)
+    fun onItemClicked(stopCode: String, savedName: String) {
+        if (arguments.isShortcutMode) {
+            state.action = UiAction.AddShortcut(
+                stopCode = stopCode,
+                savedName = savedName
+            )
+        } else {
+            state.action = UiAction.ShowStopData(stopCode = stopCode)
+        }
     }
 
     /**
@@ -84,14 +94,18 @@ internal class FavouriteStopsViewModel @Inject constructor(
      * @param stopCode The code of the favourite stop for which a dropdown should be shown.
      */
     fun onItemOpenDropdownClicked(stopCode: String) {
-        state.selectedStopCode = stopCode
+        if (!arguments.isShortcutMode) {
+            state.selectedStopCode = stopCode
+        }
     }
 
     /**
      * This is called when the dropdown menu has been dismissed.
      */
     fun onDropdownMenuDismissed() {
-        dismissDropdownMenu()
+        if (!arguments.isShortcutMode) {
+            dismissDropdownMenu()
+        }
     }
 
     /**
@@ -100,8 +114,10 @@ internal class FavouriteStopsViewModel @Inject constructor(
      * @param stopCode The code of the stop which is to be edited.
      */
     fun onEditFavouriteNameClicked(stopCode: String) {
-        state.action = UiAction.ShowEditFavouriteStop(stopCode = stopCode)
-        dismissDropdownMenu()
+        if (!arguments.isShortcutMode) {
+            state.action = UiAction.ShowEditFavouriteStop(stopCode = stopCode)
+            dismissDropdownMenu()
+        }
     }
 
     /**
@@ -110,8 +126,10 @@ internal class FavouriteStopsViewModel @Inject constructor(
      * @param stopCode The code of the stop which is to removed.
      */
     fun onRemoveFavouriteClicked(stopCode: String) {
-        state.action = UiAction.ShowConfirmRemoveFavourite(stopCode = stopCode)
-        dismissDropdownMenu()
+        if (!arguments.isShortcutMode) {
+            state.action = UiAction.ShowConfirmRemoveFavourite(stopCode = stopCode)
+            dismissDropdownMenu()
+        }
     }
 
     /**
@@ -120,8 +138,10 @@ internal class FavouriteStopsViewModel @Inject constructor(
      * @param stopCode The code of the stop for which an arrival alert is to be added.
      */
     fun onAddArrivalAlertClicked(stopCode: String) {
-        state.action = UiAction.ShowAddArrivalAlert(stopCode = stopCode)
-        dismissDropdownMenu()
+        if (!arguments.isShortcutMode) {
+            state.action = UiAction.ShowAddArrivalAlert(stopCode = stopCode)
+            dismissDropdownMenu()
+        }
     }
 
     /**
@@ -130,8 +150,10 @@ internal class FavouriteStopsViewModel @Inject constructor(
      * @param stopCode The code of the stop for which an arrival alert is to be removed.
      */
     fun onRemoveArrivalAlertClicked(stopCode: String) {
-        state.action = UiAction.ShowConfirmRemoveArrivalAlert(stopCode = stopCode)
-        dismissDropdownMenu()
+        if (!arguments.isShortcutMode) {
+            state.action = UiAction.ShowConfirmRemoveArrivalAlert(stopCode = stopCode)
+            dismissDropdownMenu()
+        }
     }
 
     /**
@@ -140,8 +162,10 @@ internal class FavouriteStopsViewModel @Inject constructor(
      * @param stopCode The code of the stop for which a proximity alert is to be added.
      */
     fun onAddProximityAlertClicked(stopCode: String) {
-        state.action = UiAction.ShowAddProximityAlert(stopCode = stopCode)
-        dismissDropdownMenu()
+        if (!arguments.isShortcutMode) {
+            state.action = UiAction.ShowAddProximityAlert(stopCode = stopCode)
+            dismissDropdownMenu()
+        }
     }
 
     /**
@@ -150,8 +174,10 @@ internal class FavouriteStopsViewModel @Inject constructor(
      * @param stopCode The code of the stop for which a proximity alert is to be removed.
      */
     fun onRemoveProximityAlertClicked(stopCode: String) {
-        state.action = UiAction.ShowConfirmRemoveProximityAlert(stopCode = stopCode)
-        dismissDropdownMenu()
+        if (!arguments.isShortcutMode) {
+            state.action = UiAction.ShowConfirmRemoveProximityAlert(stopCode = stopCode)
+            dismissDropdownMenu()
+        }
     }
 
     /**
@@ -160,8 +186,10 @@ internal class FavouriteStopsViewModel @Inject constructor(
      * @param stopCode The stop code for which the map is to be shown.
      */
     fun onShowOnMapClicked(stopCode: String) {
-        state.action = UiAction.ShowOnMap(stopCode = stopCode)
-        dismissDropdownMenu()
+        if (!arguments.isShortcutMode) {
+            state.action = UiAction.ShowOnMap(stopCode = stopCode)
+            dismissDropdownMenu()
+        }
     }
 
     /**

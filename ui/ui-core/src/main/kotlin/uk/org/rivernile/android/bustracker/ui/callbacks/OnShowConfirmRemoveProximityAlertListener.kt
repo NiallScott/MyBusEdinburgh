@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,17 +27,18 @@
 package uk.org.rivernile.android.bustracker.ui.callbacks
 
 /**
- * This listener is used to send callbacks from [androidx.fragment.app.Fragment]s to
- * [android.app.Activity]s when the user wishes to add a new favourite stop.
+ * This listener is used to send callbacks from `Fragment`s to [android.app.Activity]s to confirm
+ * with the user that they wish to remove an active proximity alert.
  *
  * @author Niall Scott
  */
-interface OnShowAddEditFavouriteStopListener {
+public interface OnShowConfirmRemoveProximityAlertListener {
 
     /**
-     * This is called when the user wants to add or edit a favourite stop.
+     * This is called when it should be confirmed with the user that they want to remove an active
+     * proximity alert.
      *
-     * @param stopCode The stop code of the stop to add or edit.
+     * @param stopCode The stop code to remove the proximity alert for.
      */
-    fun onShowAddEditFavouriteStop(stopCode: String)
+    public fun onShowConfirmRemoveProximityAlert(stopCode: String)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,20 +24,16 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.callbacks
+package uk.org.rivernile.android.bustracker.ui.favouritestops
 
 /**
- * This listener is used to send callbacks from [androidx.fragment.app.Fragment] to
- * [android.app.Activity]s when the user wishes to view a bus stop on the map.
+ * A data class which represents a favourite shortcut.
  *
+ * @property stopCode The stop code of the shortcut.
+ * @property name The name of the shortcut.
  * @author Niall Scott
  */
-interface OnShowBusStopMapWithStopCodeListener {
-
-    /**
-     * This is called when the user wants to view the stop map centered on a specific stop.
-     *
-     * @param stopCode The stopCode that the map should center on.
-     */
-    fun onShowBusStopMapWithStopCode(stopCode: String)
-}
+internal data class UiFavouriteShortcut(
+    val stopCode: String,
+    val name: String
+)

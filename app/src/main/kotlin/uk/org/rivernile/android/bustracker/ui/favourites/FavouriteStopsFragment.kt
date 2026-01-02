@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,14 +43,14 @@ import androidx.fragment.app.viewModels
 import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
-import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddEditFavouriteStopListener
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddOrEditFavouriteStopListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddProximityAlertListener
-import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddTimeAlertListener
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddArrivalAlertListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusStopMapWithStopCodeListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener
-import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteProximityAlertListener
-import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteTimeAlertListener
-import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmFavouriteDeletionListener
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmRemoveProximityAlertListener
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmRemoveArrivalAlertListener
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmFavouriteRemovalListener
 import uk.org.rivernile.android.bustracker.ui.HasScrollableContent
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentFavouriteStopsBinding
@@ -323,7 +323,7 @@ class FavouriteStopsFragment : Fragment(), HasScrollableContent {
      * @param stopCode The favourite stop to edit.
      */
     private fun handleShowEditFavouriteStop(stopCode: String) {
-        callbacks?.onShowAddEditFavouriteStop(stopCode)
+        callbacks?.onShowAddOrEditFavouriteStop(stopCode)
     }
 
     /**
@@ -332,7 +332,7 @@ class FavouriteStopsFragment : Fragment(), HasScrollableContent {
      * @param stopCode The stop to confirm deletion for.
      */
     private fun handleShowConfirmDeleteFavouriteStop(stopCode: String) {
-        callbacks?.onShowConfirmFavouriteDeletion(stopCode)
+        callbacks?.onShowConfirmFavouriteRemoval(stopCode)
     }
 
     /**
@@ -350,7 +350,7 @@ class FavouriteStopsFragment : Fragment(), HasScrollableContent {
      * @param stopCode The stop to add an arrival alert for.
      */
     private fun handleAddArrivalAlert(stopCode: String) {
-        callbacks?.onShowAddTimeAlert(stopCode, null)
+        callbacks?.onShowAddArrivalAlert(stopCode, null)
     }
 
     /**
@@ -360,7 +360,7 @@ class FavouriteStopsFragment : Fragment(), HasScrollableContent {
      * @param stopCode The stop to confirm arrival alert deletion for.
      */
     private fun handleConfirmDeleteArrivalAlert(stopCode: String) {
-        callbacks?.onShowConfirmDeleteTimeAlert(stopCode)
+        callbacks?.onShowConfirmRemoveArrivalAlert(stopCode)
     }
 
     /**
@@ -379,7 +379,7 @@ class FavouriteStopsFragment : Fragment(), HasScrollableContent {
      * @param stopCode The stop to confirm proximity alert deletion for.
      */
     private fun handleConfirmDeleteProximityAlert(stopCode: String) {
-        callbacks?.onShowConfirmDeleteProximityAlert(stopCode)
+        callbacks?.onShowConfirmRemoveProximityAlert(stopCode)
     }
 
     private val favouriteItemClickListener = object : OnFavouriteItemClickListener {
@@ -440,12 +440,12 @@ class FavouriteStopsFragment : Fragment(), HasScrollableContent {
      * implement this interface.
      */
     interface Callbacks :
-            OnShowAddEditFavouriteStopListener,
-            OnShowConfirmFavouriteDeletionListener,
-            OnShowConfirmDeleteProximityAlertListener,
-            OnShowConfirmDeleteTimeAlertListener,
+            OnShowAddOrEditFavouriteStopListener,
+            OnShowConfirmFavouriteRemovalListener,
+            OnShowConfirmRemoveProximityAlertListener,
+            OnShowConfirmRemoveArrivalAlertListener,
             OnShowAddProximityAlertListener,
-            OnShowAddTimeAlertListener,
+            OnShowAddArrivalAlertListener,
             OnShowBusStopMapWithStopCodeListener,
             OnShowBusTimesListener
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -105,5 +105,16 @@ internal sealed interface UiAction {
      */
     data class ShowConfirmRemoveProximityAlert(
         val stopCode: String
+    ) : UiAction
+
+    /**
+     * A shortcut should be added for a favourite stop.
+     *
+     * @property stopCode The code of the stop to add a shortcut for.
+     * @property savedName The name of the stop which will have a shortcut created for.
+     */
+    data class AddShortcut(
+        val stopCode: String,
+        val savedName: String
     ) : UiAction
 }

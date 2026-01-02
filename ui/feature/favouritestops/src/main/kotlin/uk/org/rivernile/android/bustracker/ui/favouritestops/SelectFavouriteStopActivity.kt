@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -62,13 +62,13 @@ import kotlinx.collections.immutable.persistentListOf
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
+import javax.inject.Inject
 
 /**
  * This [android.app.Activity] displays the user's saved favourite stops and allows them to select
  * a stop which will go on to be displayed on the device home screen.
  *
  * @author Niall Scott
- * @see FavouriteStopsFragment
  */
 @AndroidEntryPoint
 public class SelectFavouriteStopActivity : AppCompatActivity() {
@@ -77,6 +77,9 @@ public class SelectFavouriteStopActivity : AppCompatActivity() {
 
         private const val LOG_TAG = "SelectFavouriteStopActivity"
     }
+
+    @Inject
+    internal lateinit var shortcutResultIntentFactory: ShortcutResultIntentFactory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,7 +100,8 @@ public class SelectFavouriteStopActivity : AppCompatActivity() {
             MyBusTheme {
                 SelectFavouriteStopScreen { modifier ->
                     FavouriteStopsScreen(
-                        modifier = modifier
+                        modifier = modifier,
+                        onAddShortcut = ::handleOnAddShortcut
                     )
                 }
             }
@@ -115,6 +119,14 @@ public class SelectFavouriteStopActivity : AppCompatActivity() {
             .apply {
                 this[DEFAULT_ARGS_KEY] = defaultArgs
             }
+    }
+
+    private fun handleOnAddShortcut(shortcut: UiFavouriteShortcut) {
+        setResult(
+            RESULT_OK,
+            shortcutResultIntentFactory.createShortcutResultIntent(shortcut)
+        )
+        finish()
     }
 }
 
@@ -254,7 +266,7 @@ private fun SelectFavouriteStopScreenPreview() {
                     )
                 ),
                 modifier = modifier,
-                onItemClicked = { },
+                onItemClicked = { _, _ -> },
                 onOpenDropdownClicked = { },
                 onDropdownMenuDismissed = { },
                 onEditFavouriteNameClick = { },

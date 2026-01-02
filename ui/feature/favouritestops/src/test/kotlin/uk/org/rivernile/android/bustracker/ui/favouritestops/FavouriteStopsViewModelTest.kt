@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,6 +38,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * Tests for [FavouriteStopsViewModel].
@@ -228,16 +229,19 @@ class FavouriteStopsViewModelTest {
     }
 
     @Test
-    fun onItemClickedSetsShowStopDataAction() = runTest {
+    fun onItemClickedSetsShowStopDataActionWhenNotInShortcutMode() = runTest {
         val itemTracker = ItemTracker<UiAction?>()
         val viewModel = createViewModel(
+            arguments = FakeArguments(
+                onIsShortcutMode = { false }
+            ),
             state = FakeState(
                 onActionFlow = { emptyFlow() },
                 onSetAction = itemTracker
             )
         )
 
-        viewModel.onItemClicked("123456")
+        viewModel.onItemClicked("123456", "Saved Name")
 
         assertEquals(
             listOf(
@@ -248,9 +252,38 @@ class FavouriteStopsViewModelTest {
     }
 
     @Test
-    fun onItemOpenDropdownClickedSetsSelectedStopCode() = runTest {
+    fun onItemClickedSetsAddShortcutActionWhenInShortcutMode() = runTest {
+        val itemTracker = ItemTracker<UiAction?>()
+        val viewModel = createViewModel(
+            arguments = FakeArguments(
+                onIsShortcutMode = { true }
+            ),
+            state = FakeState(
+                onActionFlow = { emptyFlow() },
+                onSetAction = itemTracker
+            )
+        )
+
+        viewModel.onItemClicked("123456", "Saved Name")
+
+        assertEquals(
+            listOf(
+                UiAction.AddShortcut(
+                    stopCode = "123456",
+                    savedName = "Saved Name"
+                )
+            ),
+            itemTracker.items
+        )
+    }
+
+    @Test
+    fun onItemOpenDropdownClickedSetsSelectedStopCodeWhenNotInShortcutMode() = runTest {
         val itemTracker = ItemTracker<String?>()
         val viewModel = createViewModel(
+            arguments = FakeArguments(
+                onIsShortcutMode = { false }
+            ),
             state = FakeState(
                 onActionFlow = { emptyFlow() },
                 onSetSelectedStopCode = itemTracker
@@ -263,9 +296,30 @@ class FavouriteStopsViewModelTest {
     }
 
     @Test
-    fun onDropdownMenuDismissedSetsSelectedStopCodeToNull() = runTest {
+    fun onItemOpenDropdownClickedDoesNothingWhenInShortcutMode() = runTest {
         val itemTracker = ItemTracker<String?>()
         val viewModel = createViewModel(
+            arguments = FakeArguments(
+                onIsShortcutMode = { true }
+            ),
+            state = FakeState(
+                onActionFlow = { emptyFlow() },
+                onSetSelectedStopCode = itemTracker
+            )
+        )
+
+        viewModel.onItemOpenDropdownClicked("123456")
+
+        assertTrue(itemTracker.items.isEmpty())
+    }
+
+    @Test
+    fun onDropdownMenuDismissedSetsSelectedStopCodeToNullWhenNotInShortcutMode() = runTest {
+        val itemTracker = ItemTracker<String?>()
+        val viewModel = createViewModel(
+            arguments = FakeArguments(
+                onIsShortcutMode = { false }
+            ),
             state = FakeState(
                 onActionFlow = { emptyFlow() },
                 onSetSelectedStopCode = itemTracker
@@ -278,10 +332,31 @@ class FavouriteStopsViewModelTest {
     }
 
     @Test
+    fun onDropdownMenuDismissedDoesNothingWhenInShortcutMode() = runTest {
+        val itemTracker = ItemTracker<String?>()
+        val viewModel = createViewModel(
+            arguments = FakeArguments(
+                onIsShortcutMode = { true }
+            ),
+            state = FakeState(
+                onActionFlow = { emptyFlow() },
+                onSetSelectedStopCode = itemTracker
+            )
+        )
+
+        viewModel.onDropdownMenuDismissed()
+
+        assertTrue(itemTracker.items.isEmpty())
+    }
+
+    @Test
     fun onEditFavouriteNameClickedSetsShowEditActionAndDismissesDropdownMenu() = runTest {
         val actionTracker = ItemTracker<UiAction?>()
         val selectedStopCodeTracker = ItemTracker<String?>()
         val viewModel = createViewModel(
+            arguments = FakeArguments(
+                onIsShortcutMode = { false }
+            ),
             state = FakeState(
                 onActionFlow = { emptyFlow() },
                 onSetAction = actionTracker,
@@ -301,10 +376,31 @@ class FavouriteStopsViewModelTest {
     }
 
     @Test
+    fun onEditFavouriteNameClickedDoesNotingWhenInShortcutMode() = runTest {
+        val actionTracker = ItemTracker<UiAction?>()
+        val viewModel = createViewModel(
+            arguments = FakeArguments(
+                onIsShortcutMode = { true }
+            ),
+            state = FakeState(
+                onActionFlow = { emptyFlow() },
+                onSetAction = actionTracker
+            )
+        )
+
+        viewModel.onEditFavouriteNameClicked("123456")
+
+        assertTrue(actionTracker.items.isEmpty())
+    }
+
+    @Test
     fun onRemoveFavouriteClickedSetsShowConfirmRemoveActionAndDismissesDropdownMenu() = runTest {
         val actionTracker = ItemTracker<UiAction?>()
         val selectedStopCodeTracker = ItemTracker<String?>()
         val viewModel = createViewModel(
+            arguments = FakeArguments(
+                onIsShortcutMode = { false }
+            ),
             state = FakeState(
                 onActionFlow = { emptyFlow() },
                 onSetAction = actionTracker,
@@ -324,10 +420,31 @@ class FavouriteStopsViewModelTest {
     }
 
     @Test
+    fun onRemoveFavouriteClickedDoesNothingWhenInShortcutMode() = runTest {
+        val actionTracker = ItemTracker<UiAction?>()
+        val viewModel = createViewModel(
+            arguments = FakeArguments(
+                onIsShortcutMode = { true }
+            ),
+            state = FakeState(
+                onActionFlow = { emptyFlow() },
+                onSetAction = actionTracker
+            )
+        )
+
+        viewModel.onRemoveFavouriteClicked("123456")
+
+        assertTrue(actionTracker.items.isEmpty())
+    }
+
+    @Test
     fun onAddArrivalAlertClickedSetsShowAddArrivalAlertActionAndDismissesDropdownMenu() = runTest {
         val actionTracker = ItemTracker<UiAction?>()
         val selectedStopCodeTracker = ItemTracker<String?>()
         val viewModel = createViewModel(
+            arguments = FakeArguments(
+                onIsShortcutMode = { false }
+            ),
             state = FakeState(
                 onActionFlow = { emptyFlow() },
                 onSetAction = actionTracker,
@@ -347,11 +464,32 @@ class FavouriteStopsViewModelTest {
     }
 
     @Test
+    fun onAddArrivalAlertClickedDoesNothingWhenInShortcutMode() = runTest {
+        val actionTracker = ItemTracker<UiAction?>()
+        val viewModel = createViewModel(
+            arguments = FakeArguments(
+                onIsShortcutMode = { true }
+            ),
+            state = FakeState(
+                onActionFlow = { emptyFlow() },
+                onSetAction = actionTracker
+            )
+        )
+
+        viewModel.onAddArrivalAlertClicked("123456")
+
+        assertTrue(actionTracker.items.isEmpty())
+    }
+
+    @Test
     fun onRemoveArrivalAlertClickedSetsShowConfirmRemoveAlertActionAndDismissesDropdownMenu() =
         runTest {
             val actionTracker = ItemTracker<UiAction?>()
             val selectedStopCodeTracker = ItemTracker<String?>()
             val viewModel = createViewModel(
+                arguments = FakeArguments(
+                    onIsShortcutMode = { false }
+                ),
                 state = FakeState(
                     onActionFlow = { emptyFlow() },
                     onSetAction = actionTracker,
@@ -371,10 +509,31 @@ class FavouriteStopsViewModelTest {
         }
 
     @Test
+    fun onRemoveArrivalAlertClickedDoesNothingWhenInShortcutMode() = runTest {
+        val actionTracker = ItemTracker<UiAction?>()
+        val viewModel = createViewModel(
+            arguments = FakeArguments(
+                onIsShortcutMode = { true }
+            ),
+            state = FakeState(
+                onActionFlow = { emptyFlow() },
+                onSetAction = actionTracker
+            )
+        )
+
+        viewModel.onRemoveArrivalAlertClicked("123456")
+
+        assertTrue(actionTracker.items.isEmpty())
+    }
+
+    @Test
     fun onAddProxAlertClickedSetsShowAddProxAlertActionAndDismissesDropdownMenu() = runTest {
         val actionTracker = ItemTracker<UiAction?>()
         val selectedStopCodeTracker = ItemTracker<String?>()
         val viewModel = createViewModel(
+            arguments = FakeArguments(
+                onIsShortcutMode = { false }
+            ),
             state = FakeState(
                 onActionFlow = { emptyFlow() },
                 onSetAction = actionTracker,
@@ -394,11 +553,32 @@ class FavouriteStopsViewModelTest {
     }
 
     @Test
+    fun onAddProxAlertClickedDoesNothingWhenInShortcutMode() = runTest {
+        val actionTracker = ItemTracker<UiAction?>()
+        val viewModel = createViewModel(
+            arguments = FakeArguments(
+                onIsShortcutMode = { true }
+            ),
+            state = FakeState(
+                onActionFlow = { emptyFlow() },
+                onSetAction = actionTracker
+            )
+        )
+
+        viewModel.onAddProximityAlertClicked("123456")
+
+        assertTrue(actionTracker.items.isEmpty())
+    }
+
+    @Test
     fun onRemoveProxAlertClickedSetsShowConfirmRemoveAlertActionAndDismissesDropdownMenu() =
         runTest {
             val actionTracker = ItemTracker<UiAction?>()
             val selectedStopCodeTracker = ItemTracker<String?>()
             val viewModel = createViewModel(
+                arguments = FakeArguments(
+                    onIsShortcutMode = { false }
+                ),
                 state = FakeState(
                     onActionFlow = { emptyFlow() },
                     onSetAction = actionTracker,
@@ -418,10 +598,31 @@ class FavouriteStopsViewModelTest {
         }
 
     @Test
+    fun onRemoveProxAlertClickedDoesNothingWhenInShortcutMode() = runTest {
+        val actionTracker = ItemTracker<UiAction?>()
+        val viewModel = createViewModel(
+            arguments = FakeArguments(
+                onIsShortcutMode = { true }
+            ),
+            state = FakeState(
+                onActionFlow = { emptyFlow() },
+                onSetAction = actionTracker
+            )
+        )
+
+        viewModel.onRemoveProximityAlertClicked("123456")
+
+        assertTrue(actionTracker.items.isEmpty())
+    }
+
+    @Test
     fun onShowOnMapClickedSetsShowOnMapActionAndDismissesDropdownMenu() = runTest {
         val actionTracker = ItemTracker<UiAction?>()
         val selectedStopCodeTracker = ItemTracker<String?>()
         val viewModel = createViewModel(
+            arguments = FakeArguments(
+                onIsShortcutMode = { false }
+            ),
             state = FakeState(
                 onActionFlow = { emptyFlow() },
                 onSetAction = actionTracker,
@@ -441,6 +642,24 @@ class FavouriteStopsViewModelTest {
     }
 
     @Test
+    fun onShowOnMapClickedDoesNothingWhenInShortcutMode() = runTest {
+        val actionTracker = ItemTracker<UiAction?>()
+        val viewModel = createViewModel(
+            arguments = FakeArguments(
+                onIsShortcutMode = { true }
+            ),
+            state = FakeState(
+                onActionFlow = { emptyFlow() },
+                onSetAction = actionTracker
+            )
+        )
+
+        viewModel.onShowOnMapClicked("123456")
+
+        assertTrue(actionTracker.items.isEmpty())
+    }
+
+    @Test
     fun onActionLaunchedResetsActionToNull() = runTest {
         val actionTracker = ItemTracker<UiAction?>()
         val viewModel = createViewModel(
@@ -456,6 +675,7 @@ class FavouriteStopsViewModelTest {
     }
 
     private fun TestScope.createViewModel(
+        arguments: Arguments = FakeArguments(),
         state: State = FakeState(
             onActionFlow = { emptyFlow() }
         ),
@@ -464,6 +684,7 @@ class FavouriteStopsViewModelTest {
         )
     ): FavouriteStopsViewModel {
         return FavouriteStopsViewModel(
+            arguments = arguments,
             state = state,
             uiFavouriteStopsRetriever = uiFavouriteStopsRetriever,
             defaultCoroutineDispatcher = UnconfinedTestDispatcher(scheduler = testScheduler),

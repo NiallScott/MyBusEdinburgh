@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -99,12 +99,35 @@ internal const val TEST_TAG_EMPTY_ERROR_BODY_TEXT = "empty-error-body-text"
  *
  * @param modifier Anu [Modifier]s which should be applied.
  * @param viewModel An instance of [FavouriteStopsViewModel] to coordinate state.
+ * @param onShowStopData This is called when stop data should be shown.
+ * @param onShowEditFavouriteStop This is called when the UI to edit a favourite stop should be
+ * shown.
+ * @param onShowConfirmRemoveFavourite This is called when it should be confirmed with the user if
+ * their favourite stop should be removed.
+ * @param onShowOnMap This is called when the favourite stop should be shown on a map.
+ * @param onShowAddArrivalAlert This is called when the UI to add an arrival alert should be shown.
+ * @param onShowConfirmRemoveArrivalAlert This is called when it should be confirmed with the user
+ * if an arrival alert should be removed.
+ * @param onShowAddProximityAlert This is called when the UI to add a proximity alert should be
+ * shown.
+ * @param onShowConfirmRemoveProximityAlert This is called when it should be confirmed with the user
+ * if a proximity alert should be removed.
+ * @param onAddShortcut This is called when a shortcut should be added.
  * @author Niall Scott
  */
 @Composable
 internal fun FavouriteStopsScreen(
     modifier: Modifier = Modifier,
-    viewModel: FavouriteStopsViewModel = viewModel()
+    viewModel: FavouriteStopsViewModel = viewModel(),
+    onShowStopData: ((String) -> Unit)? = null,
+    onShowEditFavouriteStop: ((String) -> Unit)? = null,
+    onShowConfirmRemoveFavourite: ((String) -> Unit)? = null,
+    onShowOnMap: ((String) -> Unit)? = null,
+    onShowAddArrivalAlert: ((String) -> Unit)? = null,
+    onShowConfirmRemoveArrivalAlert: ((String) -> Unit)? = null,
+    onShowAddProximityAlert: ((String) -> Unit)? = null,
+    onShowConfirmRemoveProximityAlert: ((String) -> Unit)? = null,
+    onAddShortcut: ((UiFavouriteShortcut) -> Unit)? = null
 ) {
     val uiState by viewModel.uiStateFlow.collectAsStateWithLifecycle()
 
@@ -121,7 +144,16 @@ internal fun FavouriteStopsScreen(
         onRemoveProximityAlertClick = viewModel::onRemoveProximityAlertClicked,
         onShowOnMapClick = viewModel::onShowOnMapClicked,
         onActionLaunched = viewModel::onActionLaunched,
-        modifier = modifier
+        modifier = modifier,
+        onShowStopData = onShowStopData,
+        onShowEditFavouriteStop = onShowEditFavouriteStop,
+        onShowConfirmRemoveFavourite = onShowConfirmRemoveFavourite,
+        onShowOnMap = onShowOnMap,
+        onShowAddArrivalAlert = onShowAddArrivalAlert,
+        onShowConfirmRemoveArrivalAlert = onShowConfirmRemoveArrivalAlert,
+        onShowAddProximityAlert = onShowAddProximityAlert,
+        onShowConfirmRemoveProximityAlert = onShowConfirmRemoveProximityAlert,
+        onAddShortcut = onAddShortcut
     )
 }
 
@@ -146,12 +178,26 @@ internal fun FavouriteStopsScreen(
  * @param onShowOnMapClick A lambda to handle a favourite stop show on map item being clicked.
  * @param onActionLaunched A lambda to handle an action being launched.
  * @param modifier Any [Modifier]s which should be applied.
+ * @param onShowStopData This is called when stop data should be shown.
+ * @param onShowEditFavouriteStop This is called when the UI to edit a favourite stop should be
+ * shown.
+ * @param onShowConfirmRemoveFavourite This is called when it should be confirmed with the user if
+ * their favourite stop should be removed.
+ * @param onShowOnMap This is called when the favourite stop should be shown on a map.
+ * @param onShowAddArrivalAlert This is called when the UI to add an arrival alert should be shown.
+ * @param onShowConfirmRemoveArrivalAlert This is called when it should be confirmed with the user
+ * if an arrival alert should be removed.
+ * @param onShowAddProximityAlert This is called when the UI to add a proximity alert should be
+ * shown.
+ * @param onShowConfirmRemoveProximityAlert This is called when it should be confirmed with the user
+ * if a proximity alert should be removed.
+ * @param onAddShortcut This is called when a shortcut should be added.
  * @author Niall Scott
  */
 @Composable
 internal fun FavouriteStopsScreenWithState(
     state: UiState,
-    onItemClicked: (String) -> Unit,
+    onItemClicked: (String, String) -> Unit,
     onOpenDropdownClicked: (String) -> Unit,
     onDropdownMenuDismissed: () -> Unit,
     onEditFavouriteNameClick: (String) -> Unit,
@@ -162,7 +208,16 @@ internal fun FavouriteStopsScreenWithState(
     onRemoveProximityAlertClick: (String) -> Unit,
     onShowOnMapClick: (String) -> Unit,
     onActionLaunched: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onShowStopData: ((String) -> Unit)? = null,
+    onShowEditFavouriteStop: ((String) -> Unit)? = null,
+    onShowConfirmRemoveFavourite: ((String) -> Unit)? = null,
+    onShowOnMap: ((String) -> Unit)? = null,
+    onShowAddArrivalAlert: ((String) -> Unit)? = null,
+    onShowConfirmRemoveArrivalAlert: ((String) -> Unit)? = null,
+    onShowAddProximityAlert: ((String) -> Unit)? = null,
+    onShowConfirmRemoveProximityAlert: ((String) -> Unit)? = null,
+    onAddShortcut: ((UiFavouriteShortcut) -> Unit)? = null
 ) {
     val paddingDouble = dimensionResource(Rcore.dimen.padding_double)
 
@@ -211,7 +266,16 @@ internal fun FavouriteStopsScreenWithState(
     state.action?.let {
         LaunchAction(
             action = it,
-            onActionLaunched = onActionLaunched
+            onActionLaunched = onActionLaunched,
+            onShowStopData = onShowStopData,
+            onShowEditFavouriteStop = onShowEditFavouriteStop,
+            onShowConfirmRemoveFavourite = onShowConfirmRemoveFavourite,
+            onShowOnMap = onShowOnMap,
+            onShowAddArrivalAlert = onShowAddArrivalAlert,
+            onShowConfirmRemoveArrivalAlert = onShowConfirmRemoveArrivalAlert,
+            onShowAddProximityAlert = onShowAddProximityAlert,
+            onShowConfirmRemoveProximityAlert = onShowConfirmRemoveProximityAlert,
+            onAddShortcut = onAddShortcut
         )
     }
 }
@@ -237,7 +301,7 @@ private fun IndeterminateProgress(
 @Composable
 private fun Content(
     favouriteStops: ImmutableList<UiFavouriteStop>,
-    onItemClicked: (String) -> Unit,
+    onItemClicked: (String, String) -> Unit,
     onOpenDropdownClicked: (String) -> Unit,
     onDropdownMenuDismissed: () -> Unit,
     onEditFavouriteNameClick: (String) -> Unit,
@@ -273,7 +337,7 @@ private fun Content(
         ) {
             FavouriteStopItem(
                 favouriteStop = it,
-                onFavouriteClick = { onItemClicked(it.stopCode) },
+                onFavouriteClick = { onItemClicked(it.stopCode, it.savedName) },
                 onOpenDropdownClick = { onOpenDropdownClicked(it.stopCode) },
                 onDropdownMenuDismissed = onDropdownMenuDismissed,
                 onEditFavouriteNameClick = { onEditFavouriteNameClick(it.stopCode) },
@@ -338,18 +402,36 @@ private fun EmptyError(
 @Composable
 private fun LaunchAction(
     action: UiAction,
-    onActionLaunched: () -> Unit
+    onActionLaunched: () -> Unit,
+    onShowStopData: ((String) -> Unit)? = null,
+    onShowEditFavouriteStop: ((String) -> Unit)? = null,
+    onShowConfirmRemoveFavourite: ((String) -> Unit)? = null,
+    onShowOnMap: ((String) -> Unit)? = null,
+    onShowAddArrivalAlert: ((String) -> Unit)? = null,
+    onShowConfirmRemoveArrivalAlert: ((String) -> Unit)? = null,
+    onShowAddProximityAlert: ((String) -> Unit)? = null,
+    onShowConfirmRemoveProximityAlert: ((String) -> Unit)? = null,
+    onAddShortcut: ((UiFavouriteShortcut) -> Unit)? = null
 ) {
     LaunchedEffect(action) {
         when (action) {
-            is UiAction.ShowStopData -> { }
-            is UiAction.ShowEditFavouriteStop -> { }
-            is UiAction.ShowConfirmRemoveFavourite -> { }
-            is UiAction.ShowOnMap -> { }
-            is UiAction.ShowAddArrivalAlert -> { }
-            is UiAction.ShowConfirmRemoveArrivalAlert -> { }
-            is UiAction.ShowAddProximityAlert -> { }
-            is UiAction.ShowConfirmRemoveProximityAlert -> { }
+            is UiAction.ShowStopData -> onShowStopData?.invoke(action.stopCode)
+            is UiAction.ShowEditFavouriteStop -> onShowEditFavouriteStop?.invoke(action.stopCode)
+            is UiAction.ShowConfirmRemoveFavourite ->
+                onShowConfirmRemoveFavourite?.invoke(action.stopCode)
+            is UiAction.ShowOnMap -> onShowOnMap?.invoke(action.stopCode)
+            is UiAction.ShowAddArrivalAlert -> onShowAddArrivalAlert?.invoke(action.stopCode)
+            is UiAction.ShowConfirmRemoveArrivalAlert ->
+                onShowConfirmRemoveArrivalAlert?.invoke(action.stopCode)
+            is UiAction.ShowAddProximityAlert -> onShowAddProximityAlert?.invoke(action.stopCode)
+            is UiAction.ShowConfirmRemoveProximityAlert ->
+                onShowConfirmRemoveProximityAlert?.invoke(action.stopCode)
+            is UiAction.AddShortcut -> onAddShortcut?.invoke(
+                UiFavouriteShortcut(
+                    stopCode = action.stopCode,
+                    name = action.savedName
+                )
+            )
         }
 
         onActionLaunched()
@@ -391,7 +473,7 @@ private fun FavouriteStopsScreenPreview(
         FavouriteStopsScreenWithState(
             state = state,
             modifier = Modifier.fillMaxSize(),
-            onItemClicked = { },
+            onItemClicked = { _, _ -> },
             onOpenDropdownClicked = { },
             onDropdownMenuDismissed = { },
             onEditFavouriteNameClick = { },

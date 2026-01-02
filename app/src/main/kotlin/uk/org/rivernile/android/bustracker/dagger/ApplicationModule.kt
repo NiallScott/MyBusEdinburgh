@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -42,6 +42,8 @@ import uk.org.rivernile.android.bustracker.core.alerts.AppDeeplinkIntentFactory
 import uk.org.rivernile.android.bustracker.startup.AppThemeObserver
 import uk.org.rivernile.android.bustracker.startup.LegacyAppThemeObserver
 import uk.org.rivernile.android.bustracker.startup.V31AppThemeObserver
+import uk.org.rivernile.android.bustracker.ui.deeplinks.BusTimesIntentFactory
+import uk.org.rivernile.android.bustracker.ui.deeplinks.IntentFactory
 import javax.inject.Provider
 import javax.inject.Singleton
 
@@ -52,7 +54,7 @@ import javax.inject.Singleton
  */
 @InstallIn(SingletonComponent::class)
 @Module
-interface ApplicationModule {
+internal interface ApplicationModule {
 
     @Suppress("unused")
     @Binds
@@ -60,8 +62,13 @@ interface ApplicationModule {
 
     @Suppress("unused")
     @Binds
+    fun bindBusTimesIntentFactory(intentFactory: IntentFactory): BusTimesIntentFactory
+
+    @Suppress("unused")
+    @Binds
     fun bindDeeplinkIntentFactory(
-        appDeeplinkIntentFactory: AppDeeplinkIntentFactory): DeeplinkIntentFactory
+        appDeeplinkIntentFactory: AppDeeplinkIntentFactory
+    ): DeeplinkIntentFactory
 
     companion object {
 
@@ -80,7 +87,8 @@ interface ApplicationModule {
         @Provides
         fun provideAppThemeObserver(
             legacyAppThemeObserver: Provider<LegacyAppThemeObserver>,
-            v31AppThemeObserver: Provider<V31AppThemeObserver>): AppThemeObserver {
+            v31AppThemeObserver: Provider<V31AppThemeObserver>
+        ): AppThemeObserver {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 v31AppThemeObserver.get()
             } else {

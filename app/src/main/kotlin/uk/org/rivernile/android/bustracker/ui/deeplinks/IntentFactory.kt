@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,22 +24,27 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.callbacks
+package uk.org.rivernile.android.bustracker.ui.deeplinks
+
+import android.content.Context
+import android.content.Intent
+import dagger.hilt.android.qualifiers.ApplicationContext
+import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
+import javax.inject.Inject
 
 /**
- * This listener is used to send callbacks from [androidx.fragment.app.Fragment]s to
- * [android.app.Activity]s to confirm with the user that they wish to delete the active proximity
- * alert.
+ * The implementation of any [Intent] factories which exist in the app.
  *
+ * @param context The application [Context].
  * @author Niall Scott
  */
-interface OnShowConfirmDeleteProximityAlertListener {
+internal class IntentFactory @Inject constructor(
+    @param:ApplicationContext private val context: Context
+) : BusTimesIntentFactory {
 
-    /**
-     * This is called when it should be confirmed with the user that they want to delete the
-     * proximity alert.
-     *
-     * @param stopCode The stop code to remove the proximity alert for.
-     */
-    fun onShowConfirmDeleteProximityAlert(stopCode: String)
+    override fun createBusTimesIntent(stopCode: String): Intent {
+        return Intent(context, DisplayStopDataActivity::class.java)
+            .setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA)
+            .putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
+    }
 }

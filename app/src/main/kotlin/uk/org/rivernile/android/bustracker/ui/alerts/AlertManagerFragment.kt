@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,8 +45,8 @@ import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
-import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteProximityAlertListener
-import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteTimeAlertListener
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmRemoveProximityAlertListener
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmRemoveArrivalAlertListener
 import uk.org.rivernile.android.bustracker.ui.HasScrollableContent
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentAlertManagerBinding
@@ -191,7 +191,7 @@ class AlertManagerFragment : Fragment(), HasScrollableContent {
      * @param stopCode The stop code to remove the proximity alert for.
      */
     private fun showRemoveArrivalAlertDialog(stopCode: String) {
-        callbacks.onShowConfirmDeleteTimeAlert(stopCode)
+        callbacks.onShowConfirmRemoveArrivalAlert(stopCode)
     }
 
     /**
@@ -201,7 +201,7 @@ class AlertManagerFragment : Fragment(), HasScrollableContent {
      * @param stopCode The stop code to remove the proximity alert for.
      */
     private fun showRemoveProximityAlertDialog(stopCode: String) {
-        callbacks.onShowConfirmDeleteProximityAlert(stopCode)
+        callbacks.onShowConfirmRemoveProximityAlert(stopCode)
     }
 
     private val alertItemClickListener = object : OnAlertItemClickListener {
@@ -222,6 +222,6 @@ class AlertManagerFragment : Fragment(), HasScrollableContent {
      * Any [android.app.Activity] which host this [Fragment] must implement this interface to handle
      * navigation events.
      */
-    interface Callbacks : OnShowConfirmDeleteProximityAlertListener,
-            OnShowConfirmDeleteTimeAlertListener
+    interface Callbacks : OnShowConfirmRemoveProximityAlertListener,
+            OnShowConfirmRemoveArrivalAlertListener
 }

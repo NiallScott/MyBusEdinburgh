@@ -77,7 +77,6 @@ import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapFragment
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.explore.ExploreFragment
-import uk.org.rivernile.android.bustracker.ui.favourites.FavouriteStopsFragment
 import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment
 import uk.org.rivernile.android.bustracker.ui.HasScrollableContent
 import uk.org.rivernile.android.bustracker.ui.HasTabBar
@@ -93,6 +92,7 @@ import javax.inject.Inject
 import androidx.core.net.toUri
 import androidx.core.view.ViewGroupCompat
 import uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop.AddOrEditFavouriteStopDialogFragment
+import uk.org.rivernile.android.bustracker.ui.favouritestops.FavouriteStopsFragment
 
 /**
  * This [android.app.Activity] is the root Activity of the app.
@@ -252,7 +252,7 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    override fun onShowAddEditFavouriteStop(stopCode: String) {
+    override fun onShowAddOrEditFavouriteStop(stopCode: String) {
         AddOrEditFavouriteStopDialogFragment
             .newInstance(stopCode)
             .show(supportFragmentManager, DIALOG_ADD_FAVOURITE)
@@ -264,7 +264,7 @@ class MainActivity : AppCompatActivity(),
             .show(supportFragmentManager, DIALOG_ADD_PROX_ALERT)
     }
 
-    override fun onShowAddTimeAlert(stopCode: String, defaultServices: Array<String>?) {
+    override fun onShowAddArrivalAlert(stopCode: String, defaultServices: Array<String>?) {
         AddTimeAlertDialogFragment
             .newInstance(stopCode, defaultServices)
             .show(supportFragmentManager, DIALOG_ADD_TIME_ALERT)
@@ -282,19 +282,19 @@ class MainActivity : AppCompatActivity(),
             .let(this::startActivity)
     }
 
-    override fun onShowConfirmDeleteProximityAlert(stopCode: String) {
+    override fun onShowConfirmRemoveProximityAlert(stopCode: String) {
         DeleteProximityAlertDialogFragment
             .newInstance(stopCode)
             .show(supportFragmentManager, DIALOG_DELETE_PROX_ALERT)
     }
 
-    override fun onShowConfirmDeleteTimeAlert(stopCode: String) {
+    override fun onShowConfirmRemoveArrivalAlert(stopCode: String) {
         DeleteTimeAlertDialogFragment
             .newInstance(stopCode)
             .show(supportFragmentManager, DIALOG_DELETE_TIME_ALERT)
     }
 
-    override fun onShowConfirmFavouriteDeletion(stopCode: String) {
+    override fun onShowConfirmFavouriteRemoval(stopCode: String) {
         RemoveFavouriteStopDialogFragment
             .newInstance(stopCode = stopCode)
             .show(supportFragmentManager, DIALOG_DELETE_FAVOURITE)

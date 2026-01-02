@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,43 +24,25 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.favouritestops
+package uk.org.rivernile.android.bustracker.ui.favouritestops.di
 
-import androidx.lifecycle.SavedStateHandle
-import dagger.hilt.android.scopes.ViewModelScoped
-import kotlinx.coroutines.flow.Flow
-import javax.inject.Inject
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityComponent
+import uk.org.rivernile.android.bustracker.ui.favouritestops.ShortcutResultIntentFactory
+import uk.org.rivernile.android.bustracker.ui.favouritestops.ShortcutUtils
 
 /**
- * This exposes the arguments which the favourite stops feature was initialised with.
+ * A [Module] for supplying dependencies for
+ * [uk.org.rivernile.android.bustracker.ui.favouritestops.SelectFavouriteStopActivity].
  *
  * @author Niall Scott
  */
-internal interface Arguments {
+@InstallIn(ActivityComponent::class)
+@Module
+internal interface SelectFavouriteStopActivityModule {
 
-    /**
-     * Are we in shortcut mode?
-     */
-    val isShortcutMode: Boolean
-
-    /**
-     * A [Flow] which emits whether we are in shortcut mode or not.
-     */
-    val isShortcutModeFlow: Flow<Boolean>
-}
-
-internal const val ARG_IS_SHORTCUT_MODE = "isShortcutMode"
-
-@ViewModelScoped
-internal class RealArguments @Inject constructor(
-    private val savedState: SavedStateHandle
-) : Arguments {
-
-    override val isShortcutMode get() = savedState[ARG_IS_SHORTCUT_MODE] ?: false
-
-    override val isShortcutModeFlow = savedState
-        .getStateFlow(
-            key = ARG_IS_SHORTCUT_MODE,
-            initialValue = false
-        )
+    @Binds
+    fun bindShortcutResultIntentFactory(shortcutUtils: ShortcutUtils): ShortcutResultIntentFactory
 }

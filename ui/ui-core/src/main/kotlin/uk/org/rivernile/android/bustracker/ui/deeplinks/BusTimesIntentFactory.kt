@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,43 +24,22 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.favouritestops
+package uk.org.rivernile.android.bustracker.ui.deeplinks
 
-import androidx.lifecycle.SavedStateHandle
-import dagger.hilt.android.scopes.ViewModelScoped
-import kotlinx.coroutines.flow.Flow
-import javax.inject.Inject
+import android.content.Intent
 
 /**
- * This exposes the arguments which the favourite stops feature was initialised with.
+ * A factory which creates [Intent]s for deep-linking to bus times.
  *
  * @author Niall Scott
  */
-internal interface Arguments {
+public interface BusTimesIntentFactory {
 
     /**
-     * Are we in shortcut mode?
+     * Create a new [Intent] which deep-links to show bus times for a given [stopCode].
+     *
+     * @param stopCode The stop code to show times for.
+     * @return An [Intent] which deep-links to show times.
      */
-    val isShortcutMode: Boolean
-
-    /**
-     * A [Flow] which emits whether we are in shortcut mode or not.
-     */
-    val isShortcutModeFlow: Flow<Boolean>
-}
-
-internal const val ARG_IS_SHORTCUT_MODE = "isShortcutMode"
-
-@ViewModelScoped
-internal class RealArguments @Inject constructor(
-    private val savedState: SavedStateHandle
-) : Arguments {
-
-    override val isShortcutMode get() = savedState[ARG_IS_SHORTCUT_MODE] ?: false
-
-    override val isShortcutModeFlow = savedState
-        .getStateFlow(
-            key = ARG_IS_SHORTCUT_MODE,
-            initialValue = false
-        )
+    public fun createBusTimesIntent(stopCode: String): Intent
 }

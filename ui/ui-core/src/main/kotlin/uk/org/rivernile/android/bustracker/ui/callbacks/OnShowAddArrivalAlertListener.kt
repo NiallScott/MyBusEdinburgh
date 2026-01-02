@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,18 +27,19 @@
 package uk.org.rivernile.android.bustracker.ui.callbacks
 
 /**
- * This listener is used to send callbacks from [androidx.fragment.app.Fragment]s to
- * [android.app.Activity]s to confirm with the user that they wish to delete the active time alert.
+ * This listener is used to send callbacks from `Fragment`s to [android.app.Activity]s when the user
+ * wishes to add a new arrival alert.
  *
  * @author Niall Scott
  */
-interface OnShowConfirmDeleteTimeAlertListener {
+public interface OnShowAddArrivalAlertListener {
 
     /**
-     * This is called when it should be confirmed with the user that they want to delete the time
-     * alert.
+     * This is called when the user wants to view the interface to add a new arrival alert.
      *
-     * @param stopCode The stop code to remove the arrival alert for.
+     * @param stopCode The stopCode the arrival alert should be added for.
+     * @param defaultServices The services that should be selected by default. Set to `null` if no
+     * services should be selected.
      */
-    fun onShowConfirmDeleteTimeAlert(stopCode: String)
+    public fun onShowAddArrivalAlert(stopCode: String, defaultServices: Array<String>?)
 }
