@@ -25,7 +25,6 @@
  */
 
 import com.android.build.api.variant.ResValue
-import com.google.firebase.appdistribution.gradle.firebaseAppDistribution
 
 plugins {
     alias(libs.plugins.android.application)
@@ -42,13 +41,13 @@ plugins {
 android {
     namespace = "uk.org.rivernile.edinburghbustracker.android"
 
+    firebaseAppDistributionDefault {
+        artifactType = "APK"
+        groups = "testers"
+    }
+
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        firebaseAppDistribution {
-            artifactType = "APK"
-            groups = "testers"
-        }
     }
 
     signingConfigs {
@@ -169,6 +168,7 @@ dependencies {
     // Hilt (dependency injection)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    ksp(libs.kotlin.metadata)
 
     // AndroidX
     implementation(libs.androidx.core)
