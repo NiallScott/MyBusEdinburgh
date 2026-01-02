@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,7 +25,6 @@
  */
 
 import com.android.build.api.variant.ResValue
-import com.google.firebase.appdistribution.gradle.firebaseAppDistribution
 
 plugins {
     alias(libs.plugins.android.application)
@@ -42,13 +41,13 @@ plugins {
 android {
     namespace = "uk.org.rivernile.edinburghbustracker.android"
 
+    firebaseAppDistributionDefault {
+        artifactType = "APK"
+        groups = "testers"
+    }
+
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        firebaseAppDistribution {
-            artifactType = "APK"
-            groups = "testers"
-        }
     }
 
     signingConfigs {
@@ -166,6 +165,7 @@ dependencies {
     // Hilt (dependency injection)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    ksp(libs.kotlin.metadata)
 
     // AndroidX
     implementation(libs.androidx.core)

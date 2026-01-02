@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -90,10 +90,8 @@ class FileDownloader @Inject internal constructor(
                     val response = okHttpClient.newCall(request).executeAsync()
 
                     if (response.isSuccessful) {
-                        response.body?.let {
-                            fileSink.writeAll(it.source())
-                            FileDownloadResponse.Success
-                        } ?: FileDownloadResponse.Error.ServerError
+                        fileSink.writeAll(response.body.source())
+                        FileDownloadResponse.Success
                     } else {
                         FileDownloadResponse.Error.ServerError
                     }
