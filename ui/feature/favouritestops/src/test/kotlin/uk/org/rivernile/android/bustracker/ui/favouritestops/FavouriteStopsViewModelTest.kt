@@ -36,6 +36,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import uk.org.rivernile.android.bustracker.core.shortcuts.FakeShortcutsRepository
+import uk.org.rivernile.android.bustracker.core.shortcuts.FavouriteStopShortcut
+import uk.org.rivernile.android.bustracker.core.shortcuts.ShortcutsRepository
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -438,6 +441,57 @@ class FavouriteStopsViewModelTest {
     }
 
     @Test
+    fun onAddShortcutClickedAddsShortcutAndDismissesDropdownMenu() = runTest {
+        val addShortcutTracker = ItemTracker<FavouriteStopShortcut>()
+        val selectedStopCodeTracker = ItemTracker<String?>()
+        val viewModel = createViewModel(
+            arguments = FakeArguments(
+                onIsShortcutMode = { false }
+            ),
+            state = FakeState(
+                onActionFlow = { emptyFlow() },
+                onSetSelectedStopCode = selectedStopCodeTracker
+            ),
+            shortcutsRepository = FakeShortcutsRepository(
+                onPinFavouriteShortcut = addShortcutTracker
+            )
+        )
+
+        viewModel.onAddShortcutClicked("123456", "Saved Name")
+
+        assertEquals(
+            listOf(
+                FavouriteStopShortcut(
+                    stopCode = "123456",
+                    displayName = "Saved Name"
+                )
+            ),
+            addShortcutTracker.items
+        )
+        assertEquals(listOf(null), selectedStopCodeTracker.items)
+    }
+
+    @Test
+    fun onAddShortcutClickedDoesNothingWhenInShortcutMode() = runTest {
+        val addShortcutTracker = ItemTracker<FavouriteStopShortcut>()
+        val viewModel = createViewModel(
+            arguments = FakeArguments(
+                onIsShortcutMode = { true }
+            ),
+            state = FakeState(
+                onActionFlow = { emptyFlow() }
+            ),
+            shortcutsRepository = FakeShortcutsRepository(
+                onPinFavouriteShortcut = addShortcutTracker
+            )
+        )
+
+        viewModel.onAddShortcutClicked("123456", "Saved Name")
+
+        assertTrue(addShortcutTracker.items.isEmpty())
+    }
+
+    @Test
     fun onAddArrivalAlertClickedSetsShowAddArrivalAlertActionAndDismissesDropdownMenu() = runTest {
         val actionTracker = ItemTracker<UiAction?>()
         val selectedStopCodeTracker = ItemTracker<String?>()
@@ -681,12 +735,14 @@ class FavouriteStopsViewModelTest {
         ),
         uiFavouriteStopsRetriever: UiFavouriteStopsRetriever = FakeUiFavouriteStopsRetriever(
             onAllFavouriteStopsFlow = { emptyFlow() }
-        )
+        ),
+        shortcutsRepository: ShortcutsRepository = FakeShortcutsRepository()
     ): FavouriteStopsViewModel {
         return FavouriteStopsViewModel(
             arguments = arguments,
             state = state,
             uiFavouriteStopsRetriever = uiFavouriteStopsRetriever,
+            shortcutsRepository = shortcutsRepository,
             defaultCoroutineDispatcher = UnconfinedTestDispatcher(scheduler = testScheduler),
             viewModelCoroutineScope = backgroundScope
         )

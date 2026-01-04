@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,28 +24,27 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.features
+package uk.org.rivernile.android.bustracker.core.shortcuts
 
 /**
- * A fake [FeatureRepository] for testing.
+ * This controls the usage of shortcuts in the application.
  *
  * @author Niall Scott
  */
-class FakeFeatureRepository(
-    private val onHasStopMapUiFeature: () -> Boolean = { throw NotImplementedError() },
-    private val onHasArrivalAlertFeature: () -> Boolean = { throw NotImplementedError() },
-    private val onHasProximityAlertFeature: () -> Boolean = { throw NotImplementedError() },
-    private val onHasCameraFeature: () -> Boolean = { throw NotImplementedError() },
-    private val onHasPinShortcutFeature: () -> Boolean = { throw NotImplementedError() }
-) : FeatureRepository {
+public interface ShortcutsRepository {
 
-    override val hasStopMapUiFeature get() = onHasStopMapUiFeature()
+    /**
+     * Attempt to pin a user's favourite stop as a shortcut.
+     *
+     * @param shortcut The data required for the shortcut.
+     */
+    public fun pinFavouriteStopShortcut(shortcut: FavouriteStopShortcut)
 
-    override val hasArrivalAlertFeature get() = onHasArrivalAlertFeature()
-
-    override val hasProximityAlertFeature get() = onHasProximityAlertFeature()
-
-    override val hasCameraFeature get() = onHasCameraFeature()
-
-    override val hasPinShortcutFeature get() = onHasPinShortcutFeature()
+    /**
+     * Attempt to update a user's already pinned favourite stop shortcut. This could be used, for
+     * example, if the user changes the name of the favourite.
+     *
+     * @param shortcut The data required for the shortcut.
+     */
+    public fun updateFavouriteStopShortcut(shortcut: FavouriteStopShortcut)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,28 +24,32 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.features
+package uk.org.rivernile.android.bustracker.core.shortcuts.di
+
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import uk.org.rivernile.android.bustracker.core.shortcuts.AndroidShortcutsRepository
+import uk.org.rivernile.android.bustracker.core.shortcuts.RealAndroidShortcutsRepository
+import uk.org.rivernile.android.bustracker.core.shortcuts.ShortcutsRepository
 
 /**
- * A fake [FeatureRepository] for testing.
+ * A [Module] for providing shortcuts dependencies.
  *
  * @author Niall Scott
  */
-class FakeFeatureRepository(
-    private val onHasStopMapUiFeature: () -> Boolean = { throw NotImplementedError() },
-    private val onHasArrivalAlertFeature: () -> Boolean = { throw NotImplementedError() },
-    private val onHasProximityAlertFeature: () -> Boolean = { throw NotImplementedError() },
-    private val onHasCameraFeature: () -> Boolean = { throw NotImplementedError() },
-    private val onHasPinShortcutFeature: () -> Boolean = { throw NotImplementedError() }
-) : FeatureRepository {
+@InstallIn(SingletonComponent::class)
+@Module
+internal interface AndroidShortcutsModule {
 
-    override val hasStopMapUiFeature get() = onHasStopMapUiFeature()
+    @Binds
+    fun bindShortcutsRepository(
+        realAndroidShortcutsRepository: RealAndroidShortcutsRepository
+    ): ShortcutsRepository
 
-    override val hasArrivalAlertFeature get() = onHasArrivalAlertFeature()
-
-    override val hasProximityAlertFeature get() = onHasProximityAlertFeature()
-
-    override val hasCameraFeature get() = onHasCameraFeature()
-
-    override val hasPinShortcutFeature get() = onHasPinShortcutFeature()
+    @Binds
+    fun bindAndroidShortcutsRepository(
+        realAndroidShortcutsRepository: RealAndroidShortcutsRepository
+    ): AndroidShortcutsRepository
 }

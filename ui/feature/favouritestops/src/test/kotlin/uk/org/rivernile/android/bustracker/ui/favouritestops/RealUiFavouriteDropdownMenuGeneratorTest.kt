@@ -61,7 +61,8 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { true },
                 onHasProximityAlertFeature = { true },
-                onHasStopMapUiFeature = { true }
+                onHasStopMapUiFeature = { true },
+                onHasPinShortcutFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
                 onArrivalAlertStopCodesFlow = { flowOf(null) },
@@ -87,7 +88,8 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { true },
                 onHasProximityAlertFeature = { true },
-                onHasStopMapUiFeature = { true }
+                onHasStopMapUiFeature = { true },
+                onHasPinShortcutFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
                 onArrivalAlertStopCodesFlow = { flowOf(null) },
@@ -98,6 +100,48 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
         generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
             assertNull(awaitItem())
             awaitComplete()
+        }
+    }
+
+    @Test
+    fun getDropdownMenuItemsForStopsFlowWhenHasPinShortcutFeatureDisabled() = runTest {
+        val generator = createUiFavouriteDropdownItemsGenerator(
+            arguments = FakeArguments(
+                onIsShortcutModeFlow = { flowOf(false) }
+            ),
+            state = FakeState(
+                onSelectedStopCodeFlow = { flowOf(null) }
+            ),
+            featureRepository = FakeFeatureRepository(
+                onHasArrivalAlertFeature = { false },
+                onHasProximityAlertFeature = { true },
+                onHasStopMapUiFeature = { true },
+                onHasPinShortcutFeature = { false }
+            ),
+            alertsRepository = FakeAlertsRepository(
+                onArrivalAlertStopCodesFlow = {
+                    fail("Not expecting to get the arrival alerts stop codes Flow.")
+                },
+                onProximityAlertStopCodesFlow = { flowOf(null) }
+            )
+        )
+
+        generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
+            assertEquals(
+                mapOf(
+                    "123456" to UiFavouriteDropdownMenu(
+                        isShown = false,
+                        isShortcutItemShown = false,
+                        arrivalAlertDropdownItem = null,
+                        proximityAlertDropdownItem = UiProximityAlertDropdownItem(
+                            hasProximityAlert = false
+                        ),
+                        isStopMapItemShown = true
+                    )
+                ),
+                awaitItem()
+            )
+            ensureAllEventsConsumed()
         }
     }
 
@@ -113,7 +157,8 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { false },
                 onHasProximityAlertFeature = { true },
-                onHasStopMapUiFeature = { true }
+                onHasStopMapUiFeature = { true },
+                onHasPinShortcutFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
                 onArrivalAlertStopCodesFlow = {
@@ -128,6 +173,7 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 mapOf(
                     "123456" to UiFavouriteDropdownMenu(
                         isShown = false,
+                        isShortcutItemShown = true,
                         arrivalAlertDropdownItem = null,
                         proximityAlertDropdownItem = UiProximityAlertDropdownItem(
                             hasProximityAlert = false
@@ -153,7 +199,8 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { true },
                 onHasProximityAlertFeature = { false },
-                onHasStopMapUiFeature = { true }
+                onHasStopMapUiFeature = { true },
+                onHasPinShortcutFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
                 onArrivalAlertStopCodesFlow = { flowOf(null) },
@@ -168,6 +215,7 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 mapOf(
                     "123456" to UiFavouriteDropdownMenu(
                         isShown = false,
+                        isShortcutItemShown = true,
                         arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
                             hasArrivalAlert = false
                         ),
@@ -193,7 +241,8 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { true },
                 onHasProximityAlertFeature = { true },
-                onHasStopMapUiFeature = { false }
+                onHasStopMapUiFeature = { false },
+                onHasPinShortcutFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
                 onArrivalAlertStopCodesFlow = { flowOf(null) },
@@ -206,6 +255,7 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 mapOf(
                     "123456" to UiFavouriteDropdownMenu(
                         isShown = false,
+                        isShortcutItemShown = true,
                         arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
                             hasArrivalAlert = false
                         ),
@@ -233,7 +283,8 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { true },
                 onHasProximityAlertFeature = { true },
-                onHasStopMapUiFeature = { true }
+                onHasStopMapUiFeature = { true },
+                onHasPinShortcutFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
                 onArrivalAlertStopCodesFlow = { flowOf(null) },
@@ -246,6 +297,7 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 mapOf(
                     "123456" to UiFavouriteDropdownMenu(
                         isShown = false,
+                        isShortcutItemShown = true,
                         arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
                             hasArrivalAlert = false
                         ),
@@ -273,7 +325,8 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { true },
                 onHasProximityAlertFeature = { true },
-                onHasStopMapUiFeature = { true }
+                onHasStopMapUiFeature = { true },
+                onHasPinShortcutFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
                 onArrivalAlertStopCodesFlow = { flowOf(emptySet()) },
@@ -286,6 +339,7 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 mapOf(
                     "123456" to UiFavouriteDropdownMenu(
                         isShown = false,
+                        isShortcutItemShown = true,
                         arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
                             hasArrivalAlert = false
                         ),
@@ -313,7 +367,8 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { true },
                 onHasProximityAlertFeature = { true },
-                onHasStopMapUiFeature = { true }
+                onHasStopMapUiFeature = { true },
+                onHasPinShortcutFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
                 onArrivalAlertStopCodesFlow = { flowOf(setOf("987654")) },
@@ -326,6 +381,7 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 mapOf(
                     "123456" to UiFavouriteDropdownMenu(
                         isShown = false,
+                        isShortcutItemShown = true,
                         arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
                             hasArrivalAlert = false
                         ),
@@ -353,7 +409,8 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { true },
                 onHasProximityAlertFeature = { true },
-                onHasStopMapUiFeature = { true }
+                onHasStopMapUiFeature = { true },
+                onHasPinShortcutFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
                 onArrivalAlertStopCodesFlow = { flowOf(setOf("123456")) },
@@ -366,6 +423,7 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 mapOf(
                     "123456" to UiFavouriteDropdownMenu(
                         isShown = false,
+                        isShortcutItemShown = true,
                         arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
                             hasArrivalAlert = true
                         ),
@@ -393,7 +451,8 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { true },
                 onHasProximityAlertFeature = { true },
-                onHasStopMapUiFeature = { true }
+                onHasStopMapUiFeature = { true },
+                onHasPinShortcutFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
                 onArrivalAlertStopCodesFlow = { flowOf(setOf("123456")) },
@@ -406,6 +465,7 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 mapOf(
                     "123456" to UiFavouriteDropdownMenu(
                         isShown = false,
+                        isShortcutItemShown = true,
                         arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
                             hasArrivalAlert = true
                         ),
@@ -433,7 +493,8 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { true },
                 onHasProximityAlertFeature = { true },
-                onHasStopMapUiFeature = { true }
+                onHasStopMapUiFeature = { true },
+                onHasPinShortcutFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
                 onArrivalAlertStopCodesFlow = { flowOf(setOf("123456")) },
@@ -446,6 +507,7 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 mapOf(
                     "123456" to UiFavouriteDropdownMenu(
                         isShown = true,
+                        isShortcutItemShown = true,
                         arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
                             hasArrivalAlert = true
                         ),

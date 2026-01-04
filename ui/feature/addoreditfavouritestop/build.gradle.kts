@@ -65,6 +65,7 @@ dependencies {
     implementation(project(":core:busstops"))
     implementation(project(":core:coroutines-android"))
     implementation(project(":core:favourites-android"))
+    implementation(project(":core:shortcuts-android"))
     implementation(project(":ui:ui-core"))
     implementation(project(":ui:text-formatting"))
 
@@ -105,6 +106,7 @@ dependencies {
 
     testImplementation(testFixtures(project(":core:busstops")))
     testImplementation(testFixtures(project(":core:favourites")))
+    testImplementation(testFixtures(project(":core:shortcuts")))
     testImplementation(testFixtures(project(":database:busstop-db-core")))
     testImplementation(libs.coroutines.test)
     testImplementation(libs.junit)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,10 +25,55 @@
  */
 
 plugins {
-    alias(libs.plugins.kotlin.jvm)
-    `java-test-fixtures`
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
+}
+
+android {
+    namespace = "uk.org.rivernile.android.bustracker.core.shortcuts"
+
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    flavorDimensions += "city"
+
+    productFlavors {
+        create("edinburgh") {
+            dimension = "city"
+        }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+        }
+
+        debug {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
+    }
 }
 
 kotlin {
     explicitApi()
+}
+
+dependencies {
+
+    api(project(":core:shortcuts"))
+    implementation(project(":ui:ui-core"))
+
+    // AndroidX
+    implementation(libs.androidx.core)
+
+    // Hilt (dependency injection)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+
+    // Testing dependencies
+    androidTestImplementation(libs.androidx.test.runner)
 }

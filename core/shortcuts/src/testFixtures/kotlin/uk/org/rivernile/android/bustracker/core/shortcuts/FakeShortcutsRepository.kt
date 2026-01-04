@@ -24,16 +24,25 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.favouritestops
+package uk.org.rivernile.android.bustracker.core.shortcuts
 
 /**
- * A data class which represents a favourite shortcut.
+ * A fake [ShortcutsRepository] for testing.
  *
- * @property stopCode The stop code of the shortcut.
- * @property name The name of the shortcut.
  * @author Niall Scott
  */
-internal data class UiFavouriteShortcut(
-    val stopCode: String,
-    val name: String
-)
+class FakeShortcutsRepository(
+    private val onPinFavouriteShortcut: (FavouriteStopShortcut) -> Unit =
+        { throw NotImplementedError() },
+    private val onUpdateFavouriteShortcut: (FavouriteStopShortcut) -> Unit =
+        { throw NotImplementedError() }
+) : ShortcutsRepository {
+
+    override fun pinFavouriteStopShortcut(shortcut: FavouriteStopShortcut) {
+        onPinFavouriteShortcut(shortcut)
+    }
+
+    override fun updateFavouriteStopShortcut(shortcut: FavouriteStopShortcut) {
+        onUpdateFavouriteShortcut(shortcut)
+    }
+}

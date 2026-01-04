@@ -88,6 +88,8 @@ include(
     ":core:servicepoints",
     ":core:servicestops",
     ":core:servicestops-android",
+    ":core:shortcuts",
+    ":core:shortcuts-android",
     ":core:time",
     ":core:time-android",
     ":core:work-android",

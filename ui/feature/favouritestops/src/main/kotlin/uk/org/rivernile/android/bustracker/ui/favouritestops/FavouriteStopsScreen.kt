@@ -82,6 +82,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import uk.org.rivernile.android.bustracker.core.shortcuts.FavouriteStopShortcut
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.text.PrimaryErrorText
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
@@ -127,7 +128,7 @@ internal fun FavouriteStopsScreen(
     onShowConfirmRemoveArrivalAlert: ((String) -> Unit)? = null,
     onShowAddProximityAlert: ((String) -> Unit)? = null,
     onShowConfirmRemoveProximityAlert: ((String) -> Unit)? = null,
-    onAddShortcut: ((UiFavouriteShortcut) -> Unit)? = null
+    onAddShortcut: ((FavouriteStopShortcut) -> Unit)? = null
 ) {
     val uiState by viewModel.uiStateFlow.collectAsStateWithLifecycle()
 
@@ -140,6 +141,7 @@ internal fun FavouriteStopsScreen(
         onRemoveFavouriteClick = viewModel::onRemoveFavouriteClicked,
         onAddArrivalAlertClick = viewModel::onAddArrivalAlertClicked,
         onRemoveArrivalAlertClick = viewModel::onRemoveArrivalAlertClicked,
+        onAddShortcutClick = viewModel::onAddShortcutClicked,
         onAddProximityAlertClick = viewModel::onAddProximityAlertClicked,
         onRemoveProximityAlertClick = viewModel::onRemoveProximityAlertClicked,
         onShowOnMapClick = viewModel::onShowOnMapClicked,
@@ -167,6 +169,7 @@ internal fun FavouriteStopsScreen(
  * @param onDropdownMenuDismissed A lambda to handle the favourite stop dropdown being dismissed.
  * @param onEditFavouriteNameClick A lambda to handle a favourite stop edit item being clicked.
  * @param onRemoveFavouriteClick A lambda to handle a favourite stop remove item being clicked.
+ * @param onAddShortcutClick A lambda to handle a favourite stop add shortcut item being clicked.
  * @param onAddArrivalAlertClick A lambda to handle a favourite stop add arrival alert being
  * clicked.
  * @param onRemoveArrivalAlertClick A lambda to handle a favourite stop remove arrival alert being
@@ -202,6 +205,7 @@ internal fun FavouriteStopsScreenWithState(
     onDropdownMenuDismissed: () -> Unit,
     onEditFavouriteNameClick: (String) -> Unit,
     onRemoveFavouriteClick: (String) -> Unit,
+    onAddShortcutClick: (String, String) -> Unit,
     onAddArrivalAlertClick: (String) -> Unit,
     onRemoveArrivalAlertClick: (String) -> Unit,
     onAddProximityAlertClick: (String) -> Unit,
@@ -217,7 +221,7 @@ internal fun FavouriteStopsScreenWithState(
     onShowConfirmRemoveArrivalAlert: ((String) -> Unit)? = null,
     onShowAddProximityAlert: ((String) -> Unit)? = null,
     onShowConfirmRemoveProximityAlert: ((String) -> Unit)? = null,
-    onAddShortcut: ((UiFavouriteShortcut) -> Unit)? = null
+    onAddShortcut: ((FavouriteStopShortcut) -> Unit)? = null
 ) {
     val paddingDouble = dimensionResource(Rcore.dimen.padding_double)
 
@@ -243,6 +247,7 @@ internal fun FavouriteStopsScreenWithState(
                 onDropdownMenuDismissed = onDropdownMenuDismissed,
                 onEditFavouriteNameClick = onEditFavouriteNameClick,
                 onRemoveFavouriteClick = onRemoveFavouriteClick,
+                onAddShortcutClick = onAddShortcutClick,
                 onAddArrivalAlertClick = onAddArrivalAlertClick,
                 onRemoveArrivalAlertClick = onRemoveArrivalAlertClick,
                 onAddProximityAlertClick = onAddProximityAlertClick,
@@ -306,6 +311,7 @@ private fun Content(
     onDropdownMenuDismissed: () -> Unit,
     onEditFavouriteNameClick: (String) -> Unit,
     onRemoveFavouriteClick: (String) -> Unit,
+    onAddShortcutClick: (String, String) -> Unit,
     onAddArrivalAlertClick: (String) -> Unit,
     onRemoveArrivalAlertClick: (String) -> Unit,
     onAddProximityAlertClick: (String) -> Unit,
@@ -342,6 +348,7 @@ private fun Content(
                 onDropdownMenuDismissed = onDropdownMenuDismissed,
                 onEditFavouriteNameClick = { onEditFavouriteNameClick(it.stopCode) },
                 onRemoveFavouriteClick = { onRemoveFavouriteClick(it.stopCode) },
+                onAddShortcutClick = { onAddShortcutClick(it.stopCode, it.savedName) },
                 onAddArrivalAlertClick = { onAddArrivalAlertClick(it.stopCode) },
                 onRemoveArrivalAlertClick = { onRemoveArrivalAlertClick(it.stopCode) },
                 onAddProximityAlertClick = { onAddProximityAlertClick(it.stopCode) },
@@ -411,7 +418,7 @@ private fun LaunchAction(
     onShowConfirmRemoveArrivalAlert: ((String) -> Unit)? = null,
     onShowAddProximityAlert: ((String) -> Unit)? = null,
     onShowConfirmRemoveProximityAlert: ((String) -> Unit)? = null,
-    onAddShortcut: ((UiFavouriteShortcut) -> Unit)? = null
+    onAddShortcut: ((FavouriteStopShortcut) -> Unit)? = null
 ) {
     LaunchedEffect(action) {
         when (action) {
@@ -427,9 +434,9 @@ private fun LaunchAction(
             is UiAction.ShowConfirmRemoveProximityAlert ->
                 onShowConfirmRemoveProximityAlert?.invoke(action.stopCode)
             is UiAction.AddShortcut -> onAddShortcut?.invoke(
-                UiFavouriteShortcut(
+                FavouriteStopShortcut(
                     stopCode = action.stopCode,
-                    name = action.savedName
+                    displayName = action.savedName
                 )
             )
         }
@@ -478,6 +485,7 @@ private fun FavouriteStopsScreenPreview(
             onDropdownMenuDismissed = { },
             onEditFavouriteNameClick = { },
             onRemoveFavouriteClick = { },
+            onAddShortcutClick = { _, _ -> },
             onAddArrivalAlertClick = { },
             onRemoveArrivalAlertClick = { },
             onAddProximityAlertClick = { },

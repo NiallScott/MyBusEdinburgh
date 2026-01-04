@@ -59,6 +59,8 @@ import androidx.lifecycle.viewmodel.MutableCreationExtras
 import androidx.savedstate.SavedState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.collections.immutable.persistentListOf
+import uk.org.rivernile.android.bustracker.core.shortcuts.AndroidShortcutsRepository
+import uk.org.rivernile.android.bustracker.core.shortcuts.FavouriteStopShortcut
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
@@ -79,7 +81,7 @@ public class SelectFavouriteStopActivity : AppCompatActivity() {
     }
 
     @Inject
-    internal lateinit var shortcutResultIntentFactory: ShortcutResultIntentFactory
+    internal lateinit var shortcutsRepository: AndroidShortcutsRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -121,10 +123,10 @@ public class SelectFavouriteStopActivity : AppCompatActivity() {
             }
     }
 
-    private fun handleOnAddShortcut(shortcut: UiFavouriteShortcut) {
+    private fun handleOnAddShortcut(shortcut: FavouriteStopShortcut) {
         setResult(
             RESULT_OK,
-            shortcutResultIntentFactory.createShortcutResultIntent(shortcut)
+            shortcutsRepository.createPinFavouriteStopShortcutResultIntent(shortcut)
         )
         finish()
     }
@@ -271,6 +273,7 @@ private fun SelectFavouriteStopScreenPreview() {
                 onDropdownMenuDismissed = { },
                 onEditFavouriteNameClick = { },
                 onRemoveFavouriteClick = { },
+                onAddShortcutClick = { _, _ -> },
                 onAddArrivalAlertClick = { },
                 onRemoveArrivalAlertClick = { },
                 onAddProximityAlertClick = { },

@@ -30,6 +30,7 @@ package uk.org.rivernile.android.bustracker.ui.favouritestops
  * A dropdown menu for a favourite stop item.
  *
  * @property isShown Is the menu being shown?
+ * @property isShortcutItemShown Is the shortcut feature supported?
  * @property arrivalAlertDropdownItem Properties related to the arrival alert dropdown item. `null`
  * denotes that the item should not be shown.
  * @property proximityAlertDropdownItem Properties related to the proximity alert dropdown item.
@@ -39,6 +40,7 @@ package uk.org.rivernile.android.bustracker.ui.favouritestops
  */
 internal data class UiFavouriteDropdownMenu(
     val isShown: Boolean = false,
+    val isShortcutItemShown: Boolean = false,
     val arrivalAlertDropdownItem: UiArrivalAlertDropdownItem? = null,
     val proximityAlertDropdownItem: UiProximityAlertDropdownItem? = null,
     val isStopMapItemShown: Boolean = false

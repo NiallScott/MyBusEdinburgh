@@ -33,6 +33,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import kotlinx.collections.immutable.persistentListOf
 import org.junit.Rule
+import uk.org.rivernile.android.bustracker.core.shortcuts.FavouriteStopShortcut
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -519,7 +520,7 @@ class FavouriteStopsScreenKtTest {
 
     @Test
     fun addShortcutActionCallsLambdaThenMarksActionAsLaunched() {
-        val actionTracker = Tracker<UiFavouriteShortcut>()
+        val actionTracker = Tracker<FavouriteStopShortcut>()
         val actionLaunchedCounter = InvocationCounter()
         composeTestRule.setContent {
             MyBusTheme {
@@ -539,9 +540,9 @@ class FavouriteStopsScreenKtTest {
 
         assertEquals(
             listOf(
-                UiFavouriteShortcut(
+                FavouriteStopShortcut(
                     stopCode = "123456",
-                    name = "Saved Name"
+                    displayName = "Saved Name"
                 )
             ),
             actionTracker.observedValues
@@ -557,6 +558,7 @@ class FavouriteStopsScreenKtTest {
         onDropdownMenuDismissed: () -> Unit = { throw NotImplementedError() },
         onEditFavouriteNameClick: (String) -> Unit = { throw NotImplementedError() },
         onRemoveFavouriteClick: (String) -> Unit = { throw NotImplementedError() },
+        onAddShortcutClick: (String, String) -> Unit = { _, _ -> throw NotImplementedError() },
         onAddArrivalAlertClick: (String) -> Unit = { throw NotImplementedError() },
         onRemoveArrivalAlertClick: (String) -> Unit = { throw NotImplementedError() },
         onAddProximityAlertClick: (String) -> Unit = { throw NotImplementedError() },
@@ -571,7 +573,7 @@ class FavouriteStopsScreenKtTest {
         onShowConfirmRemoveArrivalAlert: ((String) -> Unit)? = { throw NotImplementedError() },
         onShowAddProximityAlert: ((String) -> Unit)? = { throw NotImplementedError() },
         onShowConfirmRemoveProximityAlert: ((String) -> Unit)? = { throw NotImplementedError() },
-        onAddShortcut: ((UiFavouriteShortcut) -> Unit)? = { throw NotImplementedError() }
+        onAddShortcut: ((FavouriteStopShortcut) -> Unit)? = { throw NotImplementedError() }
     ) {
         FavouriteStopsScreenWithState(
             state = state,
@@ -580,6 +582,7 @@ class FavouriteStopsScreenKtTest {
             onDropdownMenuDismissed = onDropdownMenuDismissed,
             onEditFavouriteNameClick = onEditFavouriteNameClick,
             onRemoveFavouriteClick = onRemoveFavouriteClick,
+            onAddShortcutClick = onAddShortcutClick,
             onAddArrivalAlertClick = onAddArrivalAlertClick,
             onRemoveArrivalAlertClick = onRemoveArrivalAlertClick,
             onAddProximityAlertClick = onAddProximityAlertClick,

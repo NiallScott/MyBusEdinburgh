@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.favouritestops
+package uk.org.rivernile.android.bustracker.core.shortcuts
 
 import android.content.Context
 import android.content.Intent
@@ -36,46 +36,61 @@ import uk.org.rivernile.android.bustracker.ui.deeplinks.BusTimesIntentFactory
 import javax.inject.Inject
 
 /**
- * A factory which creates [Intent]s suitable for supplying as the result of requesting to create a
- * shortcut for a favourite stop.
+ * This provides Android-specific extensions to [ShortcutsRepository].
  *
  * @author Niall Scott
  */
-internal interface ShortcutResultIntentFactory {
+public interface AndroidShortcutsRepository : ShortcutsRepository {
 
     /**
-     * Create an [Intent] suitable for supplying as the result of requesting to create a shortcut
-     * for a favourite stop.
+     * Create an [Intent] which can be given as an [android.app.Activity] result when the Activity
+     * was started with the [Intent.ACTION_CREATE_SHORTCUT] action.
      *
-     * @param shortcut The shortcut data.
+     * @param shortcut The data required for the shortcut.
+     * @return The [Intent] to return back to the calling Activity.
      */
-    fun createShortcutResultIntent(shortcut: UiFavouriteShortcut): Intent
+    public fun createPinFavouriteStopShortcutResultIntent(shortcut: FavouriteStopShortcut): Intent
 }
 
-/**
- * The implementation for anything shortcut related within the favourites feature.
- *
- * @param context The application [Context].
- * @param busTimesIntentFactory A [BusTimesIntentFactory] to create the deep-link [Intent] to show
- * bus times.
- */
-internal class ShortcutUtils @Inject constructor(
+internal class RealAndroidShortcutsRepository @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val busTimesIntentFactory: BusTimesIntentFactory
-) : ShortcutResultIntentFactory {
+) : AndroidShortcutsRepository {
 
-    override fun createShortcutResultIntent(shortcut: UiFavouriteShortcut): Intent {
+    override fun createPinFavouriteStopShortcutResultIntent(shortcut: FavouriteStopShortcut): Intent {
+        return ShortcutManagerCompat
+            .createShortcutResultIntent(
+                context,
+                createFavouriteShortcutInfo(shortcut)
+            )
+    }
+
+    override fun pinFavouriteStopShortcut(shortcut: FavouriteStopShortcut) {
+        ShortcutManagerCompat
+            .requestPinShortcut(
+                context,
+                createFavouriteShortcutInfo(shortcut),
+                null
+            )
+    }
+
+    override fun updateFavouriteStopShortcut(shortcut: FavouriteStopShortcut) {
+        ShortcutManagerCompat
+            .updateShortcuts(
+                context,
+                listOf(createFavouriteShortcutInfo(shortcut))
+            )
+    }
+
+    private fun createFavouriteShortcutInfo(shortcut: FavouriteStopShortcut): ShortcutInfoCompat {
         val busTimesIntent = busTimesIntentFactory.createBusTimesIntent(shortcut.stopCode)
 
         return ShortcutInfoCompat
             .Builder(context, shortcut.stopCode)
             .setIntent(busTimesIntent)
-            .setShortLabel(shortcut.name)
-            .setLongLabel(shortcut.name)
+            .setShortLabel(shortcut.displayName)
+            .setLongLabel(shortcut.displayName)
             .setIcon(IconCompat.createWithResource(context, R.drawable.appicon_favourite))
             .build()
-            .let {
-                ShortcutManagerCompat.createShortcutResultIntent(context, it)
-            }
     }
 }

@@ -77,6 +77,7 @@ internal class RealUiFavouriteDropdownMenuGenerator @Inject constructor(
     private val hasArrivalAlertFeature by lazy { featureRepository.hasArrivalAlertFeature }
     private val hasProximityAlertFeature by lazy { featureRepository.hasProximityAlertFeature }
     private val hasStopMapFeature by lazy { featureRepository.hasStopMapUiFeature }
+    private val hasShortcutFeature by lazy { featureRepository.hasPinShortcutFeature }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getDropdownMenuItemsForStopsFlow(
@@ -170,6 +171,7 @@ internal class RealUiFavouriteDropdownMenuGenerator @Inject constructor(
             .associateWith { stopCode ->
                 UiFavouriteDropdownMenu(
                     isShown = stopCode == selectedStopCode,
+                    isShortcutItemShown = hasShortcutFeature,
                     arrivalAlertDropdownItem = createUiArrivalAlertDropdownItem(
                         stopCode = stopCode,
                         arrivalAlertStopCodes = arrivalAlertStopCodes

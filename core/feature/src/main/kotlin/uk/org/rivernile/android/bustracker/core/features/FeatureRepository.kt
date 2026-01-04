@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,25 +31,30 @@ package uk.org.rivernile.android.bustracker.core.features
  *
  * @author Niall Scott
  */
-interface FeatureRepository {
+public interface FeatureRepository {
 
     /**
      * Is the stop map UI feature available?
      */
-    val hasStopMapUiFeature: Boolean
+    public val hasStopMapUiFeature: Boolean
 
     /**
      * Is the time alert feature enabled?
      */
-    val hasArrivalAlertFeature: Boolean
+    public val hasArrivalAlertFeature: Boolean
 
     /**
      * Is the proximity alert feature available?
      */
-    val hasProximityAlertFeature: Boolean
+    public val hasProximityAlertFeature: Boolean
 
     /**
      * Is the camera feature available?
      */
-    val hasCameraFeature: Boolean
+    public val hasCameraFeature: Boolean
+
+    /**
+     * Is the pin shortcut feature available?
+     */
+    public val hasPinShortcutFeature: Boolean
 }

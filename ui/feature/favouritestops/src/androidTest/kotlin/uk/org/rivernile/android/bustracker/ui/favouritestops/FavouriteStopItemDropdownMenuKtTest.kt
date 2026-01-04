@@ -107,6 +107,53 @@ class FavouriteStopItemDropdownMenuKtTest {
     }
 
     @Test
+    fun addShortcutMenuItemDoesNotExistWhenIsStopMapItemShownIsFalse() {
+        composeTestRule.setContent {
+            MyBusTheme {
+                FavouriteStopItemDropdownMenuWithDefaults(
+                    menu = UiFavouriteDropdownMenu(
+                        isShown = true,
+                        isShortcutItemShown = false
+                    )
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_MENU_ITEM_ADD_SHORTCUT)
+            .assertDoesNotExist()
+    }
+
+    @Test
+    fun addShortcutMenuItemShowsCorrectTextAndFiresClickHandler() {
+        val itemClickedCounter = ItemClickedCounter()
+        composeTestRule.setContent {
+            MyBusTheme {
+                FavouriteStopItemDropdownMenuWithDefaults(
+                    menu = UiFavouriteDropdownMenu(
+                        isShown = true,
+                        isShortcutItemShown = true
+                    ),
+                    onAddShortcutClick = itemClickedCounter
+                )
+            }
+        }
+        val expectedText = composeTestRule
+            .activity
+            .getString(R.string.favouritestops_menu_add_shortcut)
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_MENU_ITEM_ADD_SHORTCUT)
+            .apply {
+                assertExists()
+                assertTextEquals(expectedText)
+                assertIsEnabled()
+                performClick()
+            }
+        assertEquals(1, itemClickedCounter.count)
+    }
+
+    @Test
     fun addArrivalAlertMenuItemDoesNotExistWhenMenuItemIsNull() {
         composeTestRule.setContent {
             MyBusTheme {
@@ -383,6 +430,7 @@ class FavouriteStopItemDropdownMenuKtTest {
         onDropdownMenuDismissed: () -> Unit = { throw NotImplementedError() },
         onEditFavouriteNameClick: () -> Unit = { throw NotImplementedError() },
         onRemoveFavouriteClick: () -> Unit = { throw NotImplementedError() },
+        onAddShortcutClick: () -> Unit = { throw NotImplementedError() },
         onAddArrivalAlertClick: () -> Unit = { throw NotImplementedError() },
         onRemoveArrivalAlertClick: () -> Unit = { throw NotImplementedError() },
         onAddProximityAlertClick: () -> Unit = { throw NotImplementedError() },
@@ -397,6 +445,7 @@ class FavouriteStopItemDropdownMenuKtTest {
                 onDropdownMenuDismissed = onDropdownMenuDismissed,
                 onEditFavouriteNameClick = onEditFavouriteNameClick,
                 onRemoveFavouriteClick = onRemoveFavouriteClick,
+                onAddShortcutClick = onAddShortcutClick,
                 onAddArrivalAlertClick = onAddArrivalAlertClick,
                 onRemoveArrivalAlertClick = onRemoveArrivalAlertClick,
                 onAddProximityAlertClick = onAddProximityAlertClick,

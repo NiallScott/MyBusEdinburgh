@@ -37,6 +37,9 @@ import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.favourites.FakeFavouritesRepository
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
+import uk.org.rivernile.android.bustracker.core.shortcuts.FakeShortcutsRepository
+import uk.org.rivernile.android.bustracker.core.shortcuts.FavouriteStopShortcut
+import uk.org.rivernile.android.bustracker.core.shortcuts.ShortcutsRepository
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
@@ -284,6 +287,7 @@ class AddOrEditFavouriteStopViewModelTest {
     @Test
     fun onAddButtonClickedAddsOrUpdatesFavouriteStop() = runTest {
         val addedOrUpdatedFavouriteStops = mutableListOf<FavouriteStop>()
+        val updatedShortcuts = mutableListOf<FavouriteStopShortcut>()
         val viewModel = createViewModel(
             arguments = FakeArguments(
                 onGetStopCode = { "123456" }
@@ -299,6 +303,11 @@ class AddOrEditFavouriteStopViewModelTest {
                 onAddOrUpdateFavouriteStop = {
                     addedOrUpdatedFavouriteStops += it
                 }
+            ),
+            shortcutsRepository = FakeShortcutsRepository(
+                onUpdateFavouriteShortcut = {
+                    updatedShortcuts += it
+                }
             )
         )
 
@@ -312,6 +321,15 @@ class AddOrEditFavouriteStopViewModelTest {
                 )
             ),
             addedOrUpdatedFavouriteStops
+        )
+        assertEquals(
+            listOf(
+                FavouriteStopShortcut(
+                    stopCode = "123456",
+                    displayName = "Stop Name"
+                )
+            ),
+            updatedShortcuts
         )
     }
 
@@ -440,6 +458,7 @@ class AddOrEditFavouriteStopViewModelTest {
     @Test
     fun onKeyboardActionButtonPressedAddsOrUpdatesFavouriteStop() = runTest {
         val addedOrUpdatedFavouriteStops = mutableListOf<FavouriteStop>()
+        val updatedShortcuts = mutableListOf<FavouriteStopShortcut>()
         val actions = mutableListOf<UiAction?>()
         val viewModel = createViewModel(
             arguments = FakeArguments(
@@ -459,6 +478,11 @@ class AddOrEditFavouriteStopViewModelTest {
                 onAddOrUpdateFavouriteStop = {
                     addedOrUpdatedFavouriteStops += it
                 }
+            ),
+            shortcutsRepository = FakeShortcutsRepository(
+                onUpdateFavouriteShortcut = {
+                    updatedShortcuts += it
+                }
             )
         )
 
@@ -472,6 +496,15 @@ class AddOrEditFavouriteStopViewModelTest {
                 )
             ),
             addedOrUpdatedFavouriteStops
+        )
+        assertEquals(
+            listOf(
+                FavouriteStopShortcut(
+                    stopCode = "123456",
+                    displayName = "Stop Name"
+                )
+            ),
+            updatedShortcuts
         )
         assertEquals(
             listOf<UiAction?>(
@@ -508,13 +541,15 @@ class AddOrEditFavouriteStopViewModelTest {
         arguments: Arguments = FakeArguments(),
         state: State = FakeState(),
         uiContentFetcher: UiContentFetcher = FakeUiContentFetcher(),
-        favouritesRepository: FavouritesRepository = FakeFavouritesRepository()
+        favouritesRepository: FavouritesRepository = FakeFavouritesRepository(),
+        shortcutsRepository: ShortcutsRepository = FakeShortcutsRepository()
     ): AddOrEditFavouriteStopViewModel {
         return AddOrEditFavouriteStopViewModel(
             arguments = arguments,
             state = state,
             uiContentFetcher = uiContentFetcher,
             favouritesRepository = favouritesRepository,
+            shortcutsRepository = shortcutsRepository,
             defaultCoroutineDispatcher = UnconfinedTestDispatcher(scheduler = testScheduler),
             applicationCoroutineScope = this,
             viewModelCoroutineScope = backgroundScope

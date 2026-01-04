@@ -75,6 +75,7 @@ dependencies {
     implementation(project(":core:feature"))
     implementation(project(":core:services-android"))
     implementation(project(":core:servicestops-android"))
+    implementation(project(":core:shortcuts-android"))
     implementation(project(":ui:ui-core"))
 
     // AndroidX
@@ -120,6 +121,7 @@ dependencies {
     testImplementation(testFixtures(project(":core:feature")))
     testImplementation(testFixtures(project(":core:services")))
     testImplementation(testFixtures(project(":core:servicestops")))
+    testImplementation(testFixtures(project(":core:shortcuts")))
     testImplementation(libs.coroutines.test)
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)

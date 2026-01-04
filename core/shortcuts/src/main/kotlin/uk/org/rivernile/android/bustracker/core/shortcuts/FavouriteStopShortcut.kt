@@ -24,25 +24,16 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.favouritestops.di
-
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ActivityComponent
-import uk.org.rivernile.android.bustracker.ui.favouritestops.ShortcutResultIntentFactory
-import uk.org.rivernile.android.bustracker.ui.favouritestops.ShortcutUtils
+package uk.org.rivernile.android.bustracker.core.shortcuts
 
 /**
- * A [Module] for supplying dependencies for
- * [uk.org.rivernile.android.bustracker.ui.favouritestops.SelectFavouriteStopActivity].
+ * This represents the data required for a favourite stop shortcut.
  *
+ * @property stopCode The code of the stop the shortcut should represent.
+ * @property displayName The name of the shortcut to display to users.
  * @author Niall Scott
  */
-@InstallIn(ActivityComponent::class)
-@Module
-internal interface SelectFavouriteStopActivityModule {
-
-    @Binds
-    fun bindShortcutResultIntentFactory(shortcutUtils: ShortcutUtils): ShortcutResultIntentFactory
-}
+public data class FavouriteStopShortcut(
+    val stopCode: String,
+    val displayName: String
+)

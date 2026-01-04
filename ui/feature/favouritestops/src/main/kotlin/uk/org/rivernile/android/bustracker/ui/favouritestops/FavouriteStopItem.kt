@@ -84,6 +84,8 @@ internal const val TEST_TAG_DROPDOWN_MENU = "dropdown-menu"
  * their favourite stop.
  * @param onRemoveFavouriteClick This is called when the user clicks on the menu item to remove a
  * favourite stop.
+ * @param onAddShortcutClick This is called when the user clicks on the menu item to add a shortcut
+ * for a favourite stop.
  * @param onAddArrivalAlertClick This is called when the user clicks on the menu item to add an
  * arrival alert.
  * @param onRemoveArrivalAlertClick This is called when the user clicks on the menu item to remove
@@ -105,6 +107,7 @@ internal fun FavouriteStopItem(
     onDropdownMenuDismissed: () -> Unit,
     onEditFavouriteNameClick: () -> Unit,
     onRemoveFavouriteClick: () -> Unit,
+    onAddShortcutClick: () -> Unit,
     onAddArrivalAlertClick: () -> Unit,
     onRemoveArrivalAlertClick: () -> Unit,
     onAddProximityAlertClick: () -> Unit,
@@ -146,6 +149,7 @@ internal fun FavouriteStopItem(
                 onDropdownMenuDismissed = onDropdownMenuDismissed,
                 onEditFavouriteNameClick = onEditFavouriteNameClick,
                 onRemoveFavouriteClick = onRemoveFavouriteClick,
+                onAddShortcutClick = onAddShortcutClick,
                 onAddArrivalAlertClick = onAddArrivalAlertClick,
                 onRemoveArrivalAlertClick = onRemoveArrivalAlertClick,
                 onAddProximityAlertClick = onAddProximityAlertClick,
@@ -233,6 +237,7 @@ private fun DropdownMenuBox(
     onDropdownMenuDismissed: () -> Unit,
     onEditFavouriteNameClick: () -> Unit,
     onRemoveFavouriteClick: () -> Unit,
+    onAddShortcutClick: () -> Unit,
     onAddArrivalAlertClick: () -> Unit,
     onRemoveArrivalAlertClick: () -> Unit,
     onAddProximityAlertClick: () -> Unit,
@@ -253,6 +258,7 @@ private fun DropdownMenuBox(
             onDropdownMenuDismissed = onDropdownMenuDismissed,
             onEditFavouriteNameClick = onEditFavouriteNameClick,
             onRemoveFavouriteClick = onRemoveFavouriteClick,
+            onAddShortcutClick = onAddShortcutClick,
             onAddArrivalAlertClick = onAddArrivalAlertClick,
             onRemoveArrivalAlertClick = onRemoveArrivalAlertClick,
             onAddProximityAlertClick = onAddProximityAlertClick,
@@ -316,6 +322,7 @@ private fun FavouriteStopItemPreview(
             onDropdownMenuDismissed = { },
             onEditFavouriteNameClick = { },
             onRemoveFavouriteClick = { },
+            onAddShortcutClick = { },
             onAddArrivalAlertClick = { },
             onRemoveArrivalAlertClick = { },
             onAddProximityAlertClick = { },

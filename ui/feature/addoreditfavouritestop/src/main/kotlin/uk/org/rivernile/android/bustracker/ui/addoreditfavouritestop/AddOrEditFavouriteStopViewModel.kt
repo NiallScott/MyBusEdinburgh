@@ -41,6 +41,8 @@ import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatch
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForViewModelCoroutineScope
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
+import uk.org.rivernile.android.bustracker.core.shortcuts.FavouriteStopShortcut
+import uk.org.rivernile.android.bustracker.core.shortcuts.ShortcutsRepository
 import javax.inject.Inject
 
 /**
@@ -50,6 +52,7 @@ import javax.inject.Inject
  * @param state Any [State] to be held for this UI.
  * @param uiContentFetcher Used to fetch the [UiContent] to show.
  * @param favouritesRepository Used to add or save changes to favourite stops.
+ * @param shortcutsRepository Used to control shortcuts.
  * @param defaultCoroutineDispatcher The default [CoroutineDispatcher].
  * @param applicationCoroutineScope The application [CoroutineScope].
  * @param viewModelCoroutineScope The [ViewModel] [CoroutineScope].
@@ -61,6 +64,7 @@ internal class AddOrEditFavouriteStopViewModel @Inject constructor(
     private val state: State,
     private val uiContentFetcher: UiContentFetcher,
     private val favouritesRepository: FavouritesRepository,
+    private val shortcutsRepository: ShortcutsRepository,
     @param:ForDefaultDispatcher private val defaultCoroutineDispatcher: CoroutineDispatcher,
     @param:ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
     @ForViewModelCoroutineScope viewModelCoroutineScope: CoroutineScope
@@ -129,6 +133,10 @@ internal class AddOrEditFavouriteStopViewModel @Inject constructor(
             stopCode = stopCode,
             stopName = stopNameText
         )
+        val favouriteStopShortcut = FavouriteStopShortcut(
+            stopCode = stopCode,
+            displayName = stopNameText
+        )
 
         applicationCoroutineScope.launch(defaultCoroutineDispatcher) {
             // This is launched in application scope as the Dialog is dismissed right away when the
@@ -136,6 +144,7 @@ internal class AddOrEditFavouriteStopViewModel @Inject constructor(
             // would be immediately cancelled. Besides, once the Dialog is dismissed, the user
             // doesn't have the opportunity to cancel the operation anyway.
             favouritesRepository.addOrUpdateFavouriteStop(favouriteStop = favouriteStop)
+            shortcutsRepository.updateFavouriteStopShortcut(favouriteStopShortcut)
         }
     }
 }

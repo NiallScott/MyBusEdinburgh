@@ -39,6 +39,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForViewModelCoroutineScope
+import uk.org.rivernile.android.bustracker.core.shortcuts.FavouriteStopShortcut
+import uk.org.rivernile.android.bustracker.core.shortcuts.ShortcutsRepository
 import javax.inject.Inject
 
 /**
@@ -47,6 +49,7 @@ import javax.inject.Inject
  * @param arguments The arguments the UI was invoked with.
  * @param state Where any transient state is held.
  * @param uiFavouriteStopsRetriever Used to retrieve [UiFavouriteStop]s.
+ * @param shortcutsRepository Used to manage application shortcuts.
  * @param defaultCoroutineDispatcher The default [CoroutineDispatcher].
  * @param viewModelCoroutineScope The [CoroutineScope] that the view model should use.
  * @author Niall Scott
@@ -56,6 +59,7 @@ internal class FavouriteStopsViewModel @Inject constructor(
     private val arguments: Arguments,
     private val state: State,
     private val uiFavouriteStopsRetriever: UiFavouriteStopsRetriever,
+    private val shortcutsRepository: ShortcutsRepository,
     @ForDefaultDispatcher defaultCoroutineDispatcher: CoroutineDispatcher,
     @ForViewModelCoroutineScope viewModelCoroutineScope: CoroutineScope
 ) : ViewModel(viewModelCoroutineScope) {
@@ -128,6 +132,26 @@ internal class FavouriteStopsViewModel @Inject constructor(
     fun onRemoveFavouriteClicked(stopCode: String) {
         if (!arguments.isShortcutMode) {
             state.action = UiAction.ShowConfirmRemoveFavourite(stopCode = stopCode)
+            dismissDropdownMenu()
+        }
+    }
+
+    /**
+     * This is called when the add shortcut favourite dropdown item has been clicked.
+     *
+     * @param stopCode The stop code of the clicked favourite.
+     * @param savedName The name the stop is saved as.
+     */
+    fun onAddShortcutClicked(stopCode: String, savedName: String) {
+        if (!arguments.isShortcutMode) {
+            // Just to clear up the confusion: this method is called when we are not in shortcut
+            // mode as this is the way to create shortcuts when we are not in shortcut mode.
+            shortcutsRepository.pinFavouriteStopShortcut(
+                shortcut = FavouriteStopShortcut(
+                    stopCode = stopCode,
+                    displayName = savedName
+                )
+            )
             dismissDropdownMenu()
         }
     }

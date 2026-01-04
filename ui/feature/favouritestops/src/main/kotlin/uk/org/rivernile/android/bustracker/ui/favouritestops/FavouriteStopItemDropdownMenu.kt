@@ -53,6 +53,7 @@ internal const val TEST_TAG_MENU_ITEM_REMOVE_ARRIVAL_ALERT = "menu-item-remove-a
 internal const val TEST_TAG_MENU_ITEM_ADD_PROXIMITY_ALERT = "menu-item-add-proximity-alert"
 internal const val TEST_TAG_MENU_ITEM_REMOVE_PROXIMITY_ALERT = "menu-item-remove-proximity-alert"
 internal const val TEST_TAG_MENU_ITEM_SHOW_ON_MAP = "menu-item-show-on-map"
+internal const val TEST_TAG_MENU_ITEM_ADD_SHORTCUT = "menu-item-add-shortcut"
 
 /**
  * A composable which shows a dropdown menu of items to perform against the favourite stop.
@@ -63,6 +64,8 @@ internal const val TEST_TAG_MENU_ITEM_SHOW_ON_MAP = "menu-item-show-on-map"
  * their favourite stop.
  * @param onRemoveFavouriteClick This is called when the user clicks on the menu item to remove a
  * favourite stop.
+ * @param onAddShortcutClick This is called when the user clicks on the menu item to add the
+ * favourite stop as a shortcut.
  * @param onAddArrivalAlertClick This is called when the user clicks on the menu item to add an
  * arrival alert.
  * @param onRemoveArrivalAlertClick This is called when the user clicks on the menu item to remove
@@ -82,6 +85,7 @@ internal fun FavouriteStopItemDropdownMenu(
     onDropdownMenuDismissed: () -> Unit,
     onEditFavouriteNameClick: () -> Unit,
     onRemoveFavouriteClick: () -> Unit,
+    onAddShortcutClick: () -> Unit,
     onAddArrivalAlertClick: () -> Unit,
     onRemoveArrivalAlertClick: () -> Unit,
     onAddProximityAlertClick: () -> Unit,
@@ -101,6 +105,12 @@ internal fun FavouriteStopItemDropdownMenu(
         RemoveFavouriteMenuItem(
             onClick = onRemoveFavouriteClick
         )
+
+        if (menu.isShortcutItemShown) {
+            AddShortcutMenuItem(
+                onClick = onAddShortcutClick
+            )
+        }
 
         menu.arrivalAlertDropdownItem?.let { arrivalAlertDropdownItem ->
             if (arrivalAlertDropdownItem.hasArrivalAlert) {
@@ -162,6 +172,22 @@ private fun RemoveFavouriteMenuItem(
         modifier = modifier
             .semantics {
                 testTag = TEST_TAG_MENU_ITEM_REMOVE_FAVOURITE
+            }
+    )
+}
+
+@Composable
+private fun AddShortcutMenuItem(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    FavouriteDropdownMenuItem(
+        textStringResId = R.string.favouritestops_menu_add_shortcut,
+        iconResId = R.drawable.ic_apps,
+        onClick = onClick,
+        modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_MENU_ITEM_ADD_SHORTCUT
             }
     )
 }
@@ -298,6 +324,7 @@ private fun FavouriteStopItemDropdownMenuPreview(
                 onDropdownMenuDismissed = { },
                 onEditFavouriteNameClick = { },
                 onRemoveFavouriteClick = { },
+                onAddShortcutClick = { },
                 onAddArrivalAlertClick = { },
                 onRemoveArrivalAlertClick = { },
                 onAddProximityAlertClick = { },
@@ -313,6 +340,7 @@ private class UiFavouriteDropdownMenuProvider : PreviewParameterProvider<UiFavou
     override val values = sequenceOf(
         UiFavouriteDropdownMenu(
             isShown = true,
+            isShortcutItemShown = true,
             arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
                 hasArrivalAlert = false
             ),
@@ -323,6 +351,7 @@ private class UiFavouriteDropdownMenuProvider : PreviewParameterProvider<UiFavou
         ),
         UiFavouriteDropdownMenu(
             isShown = true,
+            isShortcutItemShown = true,
             arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
                 hasArrivalAlert = true
             ),

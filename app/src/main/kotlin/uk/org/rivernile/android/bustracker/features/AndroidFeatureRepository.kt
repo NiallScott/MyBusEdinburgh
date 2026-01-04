@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.features
 
 import android.content.Context
 import android.content.pm.PackageManager
+import androidx.core.content.pm.ShortcutManagerCompat
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
@@ -62,4 +63,7 @@ class AndroidFeatureRepository @Inject constructor(
 
     override val hasCameraFeature get() =
         packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
+
+    override val hasPinShortcutFeature get() =
+        ShortcutManagerCompat.isRequestPinShortcutSupported(context)
 }
