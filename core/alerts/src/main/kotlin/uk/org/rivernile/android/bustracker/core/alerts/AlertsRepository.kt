@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -164,9 +164,19 @@ public interface AlertsRepository {
     public val arrivalAlertCountFlow: Flow<Int>
 
     /**
+     * A [Flow] which emits all the stop codes which have arrival alerts set.
+     */
+    public val arrivalAlertStopCodesFlow: Flow<Set<String>?>
+
+    /**
      * A [Flow] which emits all [ProximityAlert]s.
      */
     public val allProximityAlertsFlow: Flow<List<ProximityAlert>?>
+
+    /**
+     * A [Flow] which emits all the stop codes which have proximity alerts set.
+     */
+    public val proximityAlertStopCodesFlow: Flow<Set<String>?>
 
     /**
      * Get a [Flow] which emits a [List] of all the currently set user alerts.
@@ -278,6 +288,14 @@ internal class RealAlertsRepository @Inject constructor(
             .arrivalAlertCountFlow
             .distinctUntilChanged()
 
+    override val arrivalAlertStopCodesFlow get() =
+        alertsDao
+            .arrivalAlertStopCodesFlow
+            .map {
+                it?.toSet()
+            }
+            .distinctUntilChanged()
+
     override val allProximityAlertsFlow: Flow<List<ProximityAlert>?> get() =
         alertsDao
             .allProximityAlertsFlow
@@ -285,6 +303,14 @@ internal class RealAlertsRepository @Inject constructor(
             .map { alertEntities ->
                 alertEntities?.map { it.toProximityAlert() }
             }
+
+    override val proximityAlertStopCodesFlow get() =
+        alertsDao
+            .proximityAlertStopCodesFlow
+            .map {
+                it?.toSet()
+            }
+            .distinctUntilChanged()
 
     override val allAlertsFlow: Flow<List<Alert>?> get() =
         alertsDao

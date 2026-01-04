@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,8 +26,12 @@
 
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import javax.inject.Inject
@@ -47,7 +51,6 @@ internal interface UiFavouriteStopsRetriever {
 }
 
 internal class RealUiFavouriteStopsRetriever @Inject constructor(
-    private val arguments: Arguments,
     private val favouriteStopsRetriever: FavouriteStopsRetriever,
     private val servicesRepository: ServicesRepository,
     private val dropdownMenuGenerator: UiFavouriteDropdownMenuGenerator
@@ -55,25 +58,50 @@ internal class RealUiFavouriteStopsRetriever @Inject constructor(
 
     override val allFavouriteStopsFlow get() =
         combine(
-            arguments.isShortcutModeFlow,
-            favouriteStopsRetriever.allFavouriteStopsFlow,
+            _allFavouriteStopsFlow,
             servicesRepository.getColoursForServicesFlow(),
-            dropdownMenuGenerator.uiFavouriteDropdownItemsForStopFlow,
             ::createUiFavouriteStops
         )
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val _allFavouriteStopsFlow get() = favouriteStopsRetriever
+        .allFavouriteStopsFlow
+        .flatMapLatest(::getFavouritesWithDropdownMenusFlow)
+
     private fun createUiFavouriteStops(
-        isShortcutMode: Boolean,
-        favouriteStops: List<FavouriteStopWithServices>?,
-        serviceColours: Map<String, ServiceColours>?,
-        dropdownMenu: Pair<String, UiFavouriteDropdownMenu>?
+        favouriteStopsWithDropdownMenus: FavouritesWithDropdownMenus?,
+        serviceColours: Map<String, ServiceColours>?
     ): List<UiFavouriteStop>? {
-        return favouriteStops
+        return favouriteStopsWithDropdownMenus
+            ?.favouriteStops
             ?.ifEmpty { null }
             ?.toUiFavouriteStops(
-                isShortcutMode = isShortcutMode,
                 serviceColours = serviceColours,
-                dropdownMenu = dropdownMenu
+                dropdownMenus = favouriteStopsWithDropdownMenus.dropdownMenus
             )
     }
+
+    private fun getFavouritesWithDropdownMenusFlow(
+        favouriteStops: List<FavouriteStopWithServices>?
+    ): Flow<FavouritesWithDropdownMenus?> {
+        val stopCodes = favouriteStops?.map { it.stopCode }?.toSet()
+
+        return if (!stopCodes.isNullOrEmpty()) {
+            dropdownMenuGenerator
+                .getDropdownMenuItemsForStopsFlow(stopCodes)
+                .map {
+                    FavouritesWithDropdownMenus(
+                        favouriteStops = favouriteStops,
+                        dropdownMenus = it
+                    )
+                }
+        } else {
+            flowOf(null)
+        }
+    }
+
+    private data class FavouritesWithDropdownMenus(
+        val favouriteStops: List<FavouriteStopWithServices>,
+        val dropdownMenus: Map<String, UiFavouriteDropdownMenu>?
+    )
 }

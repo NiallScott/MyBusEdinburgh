@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,8 @@
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
 import android.content.res.Configuration
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.DropdownMenu
@@ -37,17 +39,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
+
+internal const val TEST_TAG_MENU_ITEM_EDIT_FAVOURITE_NAME = "menu-item-edit-favourite-name"
+internal const val TEST_TAG_MENU_ITEM_REMOVE_FAVOURITE = "menu-item-remove-favourite"
+internal const val TEST_TAG_MENU_ITEM_ADD_ARRIVAL_ALERT = "menu-item-add-arrival-alert"
+internal const val TEST_TAG_MENU_ITEM_REMOVE_ARRIVAL_ALERT = "menu-item-remove-arrival-alert"
+internal const val TEST_TAG_MENU_ITEM_ADD_PROXIMITY_ALERT = "menu-item-add-proximity-alert"
+internal const val TEST_TAG_MENU_ITEM_REMOVE_PROXIMITY_ALERT = "menu-item-remove-proximity-alert"
+internal const val TEST_TAG_MENU_ITEM_SHOW_ON_MAP = "menu-item-show-on-map"
 
 /**
  * A composable which shows a dropdown menu of items to perform against the favourite stop.
  *
- * @param items The items to show in the dropdown menu.
+ * @param menu The menu data.
  * @param onDropdownMenuDismissed This is called when the dropdown menu has been dismissed.
  * @param onEditFavouriteNameClick This is called when the user clicks on the menu item to edit
  * their favourite stop.
@@ -68,7 +78,7 @@ import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
  */
 @Composable
 internal fun FavouriteStopItemDropdownMenu(
-    items: ImmutableList<UiFavouriteDropdownItem>,
+    menu: UiFavouriteDropdownMenu,
     onDropdownMenuDismissed: () -> Unit,
     onEditFavouriteNameClick: () -> Unit,
     onRemoveFavouriteClick: () -> Unit,
@@ -80,43 +90,46 @@ internal fun FavouriteStopItemDropdownMenu(
     modifier: Modifier = Modifier
 ) {
     DropdownMenu(
-        expanded = true,
+        expanded = menu.isShown,
         onDismissRequest = onDropdownMenuDismissed,
         modifier = modifier
     ) {
-        items.forEach { item ->
-            when (item) {
-                is UiFavouriteDropdownItem.EditFavouriteName ->
-                    EditFavouriteNameMenuItem(
-                        onClick = onEditFavouriteNameClick
-                    )
-                is UiFavouriteDropdownItem.RemoveFavourite ->
-                    RemoveFavouriteMenuItem(
-                        onClick = onRemoveFavouriteClick
-                    )
-                is UiFavouriteDropdownItem.AddArrivalAlert ->
-                    AddArrivalAlertMenuItem(
-                        enabled = item.isEnabled,
-                        onClick = onAddArrivalAlertClick
-                    )
-                is UiFavouriteDropdownItem.RemoveArrivalAlert ->
-                    RemoveArrivalAlertMenuItem(
-                        onClick = onRemoveArrivalAlertClick
-                    )
-                is UiFavouriteDropdownItem.AddProximityAlert ->
-                    AddProximityAlertMenuItem(
-                        enabled = item.isEnabled,
-                        onClick = onAddProximityAlertClick
-                    )
-                is UiFavouriteDropdownItem.RemoveProximityAlert ->
-                    RemoveProximityAlertMenuItem(
-                        onClick = onRemoveProximityAlertClick
-                    )
-                is UiFavouriteDropdownItem.ShowOnMap ->
-                    ShowOnMapMenuItem(
-                        onClick = onShowOnMapClick
-                    )
+        EditFavouriteNameMenuItem(
+            onClick = onEditFavouriteNameClick
+        )
+
+        RemoveFavouriteMenuItem(
+            onClick = onRemoveFavouriteClick
+        )
+
+        menu.arrivalAlertDropdownItem?.let { arrivalAlertDropdownItem ->
+            if (arrivalAlertDropdownItem.hasArrivalAlert) {
+                RemoveArrivalAlertMenuItem(
+                    onClick = onRemoveArrivalAlertClick
+                )
+            } else {
+                AddArrivalAlertMenuItem(
+                    onClick = onAddArrivalAlertClick
+                )
             }
+        }
+
+        menu.proximityAlertDropdownItem?.let { proximityAlertDropdownItem ->
+            if (proximityAlertDropdownItem.hasProximityAlert) {
+                RemoveProximityAlertMenuItem(
+                    onClick = onRemoveProximityAlertClick
+                )
+            } else {
+                AddProximityAlertMenuItem(
+                    onClick = onAddProximityAlertClick
+                )
+            }
+        }
+
+        if (menu.isStopMapItemShown) {
+            ShowOnMapMenuItem(
+                onClick = onShowOnMapClick
+            )
         }
     }
 }
@@ -126,20 +139,14 @@ private fun EditFavouriteNameMenuItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    DropdownMenuItem(
-        text = {
-            Text(
-                text = stringResource(R.string.favouritestops_menu_edit)
-            )
-        },
+    FavouriteDropdownMenuItem(
+        textStringResId = R.string.favouritestops_menu_edit,
+        iconResId = R.drawable.ic_edit,
         onClick = onClick,
-        modifier = modifier,
-        leadingIcon = {
-            Icon(
-                painter = painterResource(R.drawable.ic_edit),
-                contentDescription = null
-            )
-        }
+        modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_MENU_ITEM_EDIT_FAVOURITE_NAME
+            }
     )
 }
 
@@ -148,44 +155,30 @@ private fun RemoveFavouriteMenuItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    DropdownMenuItem(
-        text = {
-            Text(
-                text = stringResource(R.string.favouritestops_menu_delete)
-            )
-        },
+    FavouriteDropdownMenuItem(
+        textStringResId = R.string.favouritestops_menu_delete,
+        iconResId = R.drawable.ic_delete,
         onClick = onClick,
-        modifier = modifier,
-        leadingIcon = {
-            Icon(
-                painter = painterResource(R.drawable.ic_delete),
-                contentDescription = null
-            )
-        }
+        modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_MENU_ITEM_REMOVE_FAVOURITE
+            }
     )
 }
 
 @Composable
 private fun AddArrivalAlertMenuItem(
-    enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    DropdownMenuItem(
-        text = {
-            Text(
-                text = stringResource(R.string.favouritestops_menu_time_add)
-            )
-        },
+    FavouriteDropdownMenuItem(
+        textStringResId = R.string.favouritestops_menu_time_add,
+        iconResId = R.drawable.ic_alarm_add,
         onClick = onClick,
-        modifier = modifier,
-        leadingIcon = {
-            Icon(
-                painterResource(R.drawable.ic_alarm_add),
-                contentDescription = null
-            )
-        },
-        enabled = enabled
+        modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_MENU_ITEM_ADD_ARRIVAL_ALERT
+            }
     )
 }
 
@@ -194,44 +187,30 @@ private fun RemoveArrivalAlertMenuItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    DropdownMenuItem(
-        text = {
-            Text(
-                text = stringResource(R.string.favouritestops_menu_time_rem)
-            )
-        },
+    FavouriteDropdownMenuItem(
+        textStringResId = R.string.favouritestops_menu_time_rem,
+        iconResId = R.drawable.ic_alarm_off,
         onClick = onClick,
-        modifier = modifier,
-        leadingIcon = {
-            Icon(
-                painterResource(R.drawable.ic_alarm_off),
-                contentDescription = null
-            )
-        }
+        modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_MENU_ITEM_REMOVE_ARRIVAL_ALERT
+            }
     )
 }
 
 @Composable
 private fun AddProximityAlertMenuItem(
-    enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    DropdownMenuItem(
-        text = {
-            Text(
-                text = stringResource(R.string.favouritestops_menu_prox_add)
-            )
-        },
+    FavouriteDropdownMenuItem(
+        textStringResId = R.string.favouritestops_menu_prox_add,
+        iconResId = R.drawable.ic_location_on,
         onClick = onClick,
-        modifier = modifier,
-        leadingIcon = {
-            Icon(
-                painterResource(R.drawable.ic_location_on),
-                contentDescription = null
-            )
-        },
-        enabled = enabled
+        modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_MENU_ITEM_ADD_PROXIMITY_ALERT
+            }
     )
 }
 
@@ -240,20 +219,14 @@ private fun RemoveProximityAlertMenuItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    DropdownMenuItem(
-        text = {
-            Text(
-                text = stringResource(R.string.favouritestops_menu_prox_rem)
-            )
-        },
+    FavouriteDropdownMenuItem(
+        textStringResId = R.string.favouritestops_menu_prox_rem,
+        iconResId = R.drawable.ic_location_off,
         onClick = onClick,
-        modifier = modifier,
-        leadingIcon = {
-            Icon(
-                painterResource(R.drawable.ic_location_off),
-                contentDescription = null
-            )
-        }
+        modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_MENU_ITEM_REMOVE_PROXIMITY_ALERT
+            }
     )
 }
 
@@ -262,17 +235,35 @@ private fun ShowOnMapMenuItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    FavouriteDropdownMenuItem(
+        textStringResId = R.string.favouritestops_menu_showonmap,
+        iconResId = R.drawable.ic_map,
+        onClick = onClick,
+        modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_MENU_ITEM_SHOW_ON_MAP
+            }
+    )
+}
+
+@Composable
+private fun FavouriteDropdownMenuItem(
+    @StringRes textStringResId: Int,
+    @DrawableRes iconResId: Int,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     DropdownMenuItem(
         text = {
             Text(
-                text = stringResource(R.string.favouritestops_menu_showonmap)
+                text = stringResource(textStringResId)
             )
         },
         onClick = onClick,
         modifier = modifier,
         leadingIcon = {
             Icon(
-                painterResource(R.drawable.ic_map),
+                painterResource(iconResId),
                 contentDescription = null
             )
         }
@@ -295,15 +286,15 @@ private fun ShowOnMapMenuItem(
 )
 @Composable
 private fun FavouriteStopItemDropdownMenuPreview(
-    @PreviewParameter(UiFavouriteDropdownItemsProvider::class)
-    items: ImmutableList<UiFavouriteDropdownItem>
+    @PreviewParameter(UiFavouriteDropdownMenuProvider::class)
+    menu: UiFavouriteDropdownMenu
 ) {
     MyBusTheme {
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
             FavouriteStopItemDropdownMenu(
-                items = items,
+                menu = menu,
                 onDropdownMenuDismissed = { },
                 onEditFavouriteNameClick = { },
                 onRemoveFavouriteClick = { },
@@ -317,27 +308,28 @@ private fun FavouriteStopItemDropdownMenuPreview(
     }
 }
 
-private class UiFavouriteDropdownItemsProvider
-    : PreviewParameterProvider<ImmutableList<UiFavouriteDropdownItem>> {
+private class UiFavouriteDropdownMenuProvider : PreviewParameterProvider<UiFavouriteDropdownMenu> {
 
     override val values = sequenceOf(
-        persistentListOf(
-            UiFavouriteDropdownItem.EditFavouriteName,
-            UiFavouriteDropdownItem.RemoveFavourite,
-            UiFavouriteDropdownItem.AddArrivalAlert(
-                isEnabled = true
+        UiFavouriteDropdownMenu(
+            isShown = true,
+            arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
+                hasArrivalAlert = false
             ),
-            UiFavouriteDropdownItem.AddProximityAlert(
-                isEnabled = true
+            proximityAlertDropdownItem = UiProximityAlertDropdownItem(
+                hasProximityAlert = false
             ),
-            UiFavouriteDropdownItem.ShowOnMap
+            isStopMapItemShown = true
         ),
-        persistentListOf(
-            UiFavouriteDropdownItem.EditFavouriteName,
-            UiFavouriteDropdownItem.RemoveFavourite,
-            UiFavouriteDropdownItem.RemoveArrivalAlert,
-            UiFavouriteDropdownItem.RemoveProximityAlert,
-            UiFavouriteDropdownItem.ShowOnMap
+        UiFavouriteDropdownMenu(
+            isShown = true,
+            arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
+                hasArrivalAlert = true
+            ),
+            proximityAlertDropdownItem = UiProximityAlertDropdownItem(
+                hasProximityAlert = true
+            ),
+            isStopMapItemShown = true
         )
     )
 }

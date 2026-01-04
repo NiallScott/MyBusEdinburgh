@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -259,7 +259,7 @@ class FavouriteStopItemKtTest {
     }
 
     @Test
-    fun dropdownMenuIsNotShownWhenDropdownMenuIsNull() {
+    fun dropdownMenuIsNotComposedWhenDropdownMenuIsNull() {
         composeTestRule.setContent {
             MyBusTheme {
                 FavouriteStopItemWithDefaults(
@@ -282,7 +282,7 @@ class FavouriteStopItemKtTest {
     }
 
     @Test
-    fun dropdownMenuIsNotShownWhenDropdownMenuItemsIsNull() {
+    fun dropdownMenuIsComposedWhenDropdownMenuIsNotNull() {
         composeTestRule.setContent {
             MyBusTheme {
                 FavouriteStopItemWithDefaults(
@@ -290,35 +290,7 @@ class FavouriteStopItemKtTest {
                         stopCode = "123456",
                         savedName = "Saved Name",
                         services = null,
-                        dropdownMenu = UiFavouriteDropdownMenu()
-                    )
-                )
-            }
-        }
-
-        composeTestRule
-            .onNodeWithTag(
-                testTag = TEST_TAG_DROPDOWN_MENU,
-                useUnmergedTree = true
-            )
-            .assertDoesNotExist()
-    }
-
-    @Test
-    fun dropdownMenuIsShownWhenDropdownMenuItemsIsNotNull() {
-        composeTestRule.setContent {
-            MyBusTheme {
-                FavouriteStopItemWithDefaults(
-                    favouriteStop = UiFavouriteStop(
-                        stopCode = "123456",
-                        savedName = "Saved Name",
-                        services = null,
-                        dropdownMenu = UiFavouriteDropdownMenu(
-                            items = persistentListOf(
-                                UiFavouriteDropdownItem.EditFavouriteName,
-                                UiFavouriteDropdownItem.RemoveFavourite
-                            )
-                        )
+                        dropdownMenu = UiFavouriteDropdownMenu(isShown = true)
                     )
                 )
             }

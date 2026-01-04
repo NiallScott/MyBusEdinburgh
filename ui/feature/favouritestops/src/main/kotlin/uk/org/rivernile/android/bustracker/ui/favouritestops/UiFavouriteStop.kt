@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -52,29 +52,23 @@ internal data class UiFavouriteStop(
 /**
  * Map this [List] of [FavouriteStopWithServices] to a [List] of [UiFavouriteStop].
  *
- * @param isShortcutMode Are we in shortcut mode?
  * @param serviceColours A [Map] of service names to [ServiceColours].
- * @param dropdownMenu A [Pair] of stop code to [UiFavouriteDropdownMenu], describing a dropdown
- * menu for a stop if available.
+ * @param dropdownMenus A mapping of stop codes to [UiFavouriteDropdownMenu]s, used to populate the
+ * dropdown menu for each [UiFavouriteStop].
  * @return This [List] of [FavouriteStopWithServices] mapped to a [List] of [UiFavouriteStop]s.
  */
 internal fun List<FavouriteStopWithServices>.toUiFavouriteStops(
-    isShortcutMode: Boolean,
     serviceColours: Map<String, ServiceColours>?,
-    dropdownMenu: Pair<String, UiFavouriteDropdownMenu>?
+    dropdownMenus: Map<String, UiFavouriteDropdownMenu>?
 ) = map { favouriteStop ->
     favouriteStop
         .toUiFavouriteStop(
-            isShortcutMode = isShortcutMode,
             serviceColours = serviceColours,
-            dropdownMenu = dropdownMenu?.let { menu ->
-                menu.second.takeIf { favouriteStop.stopCode == menu.first }
-            }
+            dropdownMenu = dropdownMenus?.get(favouriteStop.stopCode)
         )
 }
 
 private fun FavouriteStopWithServices.toUiFavouriteStop(
-    isShortcutMode: Boolean,
     serviceColours: Map<String, ServiceColours>?,
     dropdownMenu: UiFavouriteDropdownMenu?
 ): UiFavouriteStop {
@@ -87,7 +81,7 @@ private fun FavouriteStopWithServices.toUiFavouriteStop(
                 toUiServiceName(it, serviceColours?.get(it))
             }
             ?.toImmutableList(),
-        dropdownMenu = if (!isShortcutMode) dropdownMenu ?: UiFavouriteDropdownMenu() else null
+        dropdownMenu = dropdownMenu
     )
 }
 

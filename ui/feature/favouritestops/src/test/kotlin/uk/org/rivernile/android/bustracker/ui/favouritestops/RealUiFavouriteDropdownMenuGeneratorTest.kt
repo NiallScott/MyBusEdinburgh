@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,8 +27,10 @@
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
 import app.cash.turbine.test
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.alerts.FakeAlertsRepository
@@ -37,47 +39,76 @@ import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.fail
 
 /**
  * Tests for [RealUiFavouriteDropdownMenuGenerator].
  *
  * @author Niall Scott
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class RealUiFavouriteDropdownMenuGeneratorTest {
 
     @Test
-    fun uiFavouriteDropdownItemsForStopFlowEmitsNullWhenSelectedStopIsNull() = runTest {
+    fun getDropdownMenuItemsForStopsFlowWhenStopsIsEmptyEmitsNull() = runTest {
         val generator = createUiFavouriteDropdownItemsGenerator(
+            arguments = FakeArguments(
+                onIsShortcutModeFlow = { flowOf(false) }
+            ),
             state = FakeState(
                 onSelectedStopCodeFlow = { flowOf(null) }
+            ),
+            featureRepository = FakeFeatureRepository(
+                onHasArrivalAlertFeature = { true },
+                onHasProximityAlertFeature = { true },
+                onHasStopMapUiFeature = { true }
+            ),
+            alertsRepository = FakeAlertsRepository(
+                onArrivalAlertStopCodesFlow = { flowOf(null) },
+                onProximityAlertStopCodesFlow = { flowOf(null) }
             )
         )
 
-        generator.uiFavouriteDropdownItemsForStopFlow.test {
+        generator.getDropdownMenuItemsForStopsFlow(emptySet()).test {
             assertNull(awaitItem())
             awaitComplete()
         }
     }
 
     @Test
-    fun uiFavouriteDropdownItemsForStopFlowEmitsNullWhenSelectedStopIsEmpty() = runTest {
+    fun getDropdownMenuItemsForStopsFlowWhenInShortcutModeEmitsNull() = runTest {
         val generator = createUiFavouriteDropdownItemsGenerator(
+            arguments = FakeArguments(
+                onIsShortcutModeFlow = { flowOf(true) }
+            ),
             state = FakeState(
-                onSelectedStopCodeFlow = { flowOf("") }
+                onSelectedStopCodeFlow = { flowOf(null) }
+            ),
+            featureRepository = FakeFeatureRepository(
+                onHasArrivalAlertFeature = { true },
+                onHasProximityAlertFeature = { true },
+                onHasStopMapUiFeature = { true }
+            ),
+            alertsRepository = FakeAlertsRepository(
+                onArrivalAlertStopCodesFlow = { flowOf(null) },
+                onProximityAlertStopCodesFlow = { flowOf(null) }
             )
         )
 
-        generator.uiFavouriteDropdownItemsForStopFlow.test {
+        generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
             assertNull(awaitItem())
             awaitComplete()
         }
     }
 
     @Test
-    fun uiFavouriteDropdownItemsForStopFlowWithArrivalAlertDisabled() = runTest {
+    fun getDropdownMenuItemsForStopsFlowWhenArrivalAlertsDisabled() = runTest {
         val generator = createUiFavouriteDropdownItemsGenerator(
+            arguments = FakeArguments(
+                onIsShortcutModeFlow = { flowOf(false) }
+            ),
             state = FakeState(
-                onSelectedStopCodeFlow = { flowOf("123456") }
+                onSelectedStopCodeFlow = { flowOf(null) }
             ),
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { false },
@@ -85,45 +116,39 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onHasStopMapUiFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
-                onHasProximityAlertFlow = {
-                    assertEquals("123456", it)
-                    flowOf(true)
-                }
+                onArrivalAlertStopCodesFlow = {
+                    fail("Not expecting to get the arrival alerts stop codes Flow.")
+                },
+                onProximityAlertStopCodesFlow = { flowOf(null) }
             )
         )
 
-        generator.uiFavouriteDropdownItemsForStopFlow.test {
+        generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
             assertEquals(
-                "123456" to UiFavouriteDropdownMenu(
-                    items = persistentListOf(
-                        UiFavouriteDropdownItem.EditFavouriteName,
-                        UiFavouriteDropdownItem.RemoveFavourite,
-                        UiFavouriteDropdownItem.AddProximityAlert(isEnabled = false),
-                        UiFavouriteDropdownItem.ShowOnMap
+                mapOf(
+                    "123456" to UiFavouriteDropdownMenu(
+                        isShown = false,
+                        arrivalAlertDropdownItem = null,
+                        proximityAlertDropdownItem = UiProximityAlertDropdownItem(
+                            hasProximityAlert = false
+                        ),
+                        isStopMapItemShown = true
                     )
                 ),
                 awaitItem()
             )
-            assertEquals(
-                "123456" to UiFavouriteDropdownMenu(
-                    items = persistentListOf(
-                        UiFavouriteDropdownItem.EditFavouriteName,
-                        UiFavouriteDropdownItem.RemoveFavourite,
-                        UiFavouriteDropdownItem.RemoveProximityAlert,
-                        UiFavouriteDropdownItem.ShowOnMap
-                    )
-                ),
-                awaitItem()
-            )
-            awaitComplete()
+            ensureAllEventsConsumed()
         }
     }
 
     @Test
-    fun uiFavouriteDropdownItemsForStopFlowWithProximityAlertDisabled() = runTest {
+    fun getDropdownMenuItemsForStopsFlowWhenProximityAlertsDisabled() = runTest {
         val generator = createUiFavouriteDropdownItemsGenerator(
+            arguments = FakeArguments(
+                onIsShortcutModeFlow = { flowOf(false) }
+            ),
             state = FakeState(
-                onSelectedStopCodeFlow = { flowOf("123456") }
+                onSelectedStopCodeFlow = { flowOf(null) }
             ),
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { true },
@@ -131,45 +156,39 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onHasStopMapUiFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
-                onHasArrivalAlertFlow = {
-                    assertEquals("123456", it)
-                    flowOf(true)
+                onArrivalAlertStopCodesFlow = { flowOf(null) },
+                onProximityAlertStopCodesFlow = {
+                    fail("Not expecting to get the arrival alerts stop codes Flow.")
                 }
             )
         )
 
-        generator.uiFavouriteDropdownItemsForStopFlow.test {
+        generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
             assertEquals(
-                "123456" to UiFavouriteDropdownMenu(
-                    items = persistentListOf(
-                        UiFavouriteDropdownItem.EditFavouriteName,
-                        UiFavouriteDropdownItem.RemoveFavourite,
-                        UiFavouriteDropdownItem.AddArrivalAlert(isEnabled = false),
-                        UiFavouriteDropdownItem.ShowOnMap
+                mapOf(
+                    "123456" to UiFavouriteDropdownMenu(
+                        isShown = false,
+                        arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
+                            hasArrivalAlert = false
+                        ),
+                        proximityAlertDropdownItem = null,
+                        isStopMapItemShown = true
                     )
                 ),
                 awaitItem()
             )
-            assertEquals(
-                "123456" to UiFavouriteDropdownMenu(
-                    items = persistentListOf(
-                        UiFavouriteDropdownItem.EditFavouriteName,
-                        UiFavouriteDropdownItem.RemoveFavourite,
-                        UiFavouriteDropdownItem.RemoveArrivalAlert,
-                        UiFavouriteDropdownItem.ShowOnMap
-                    )
-                ),
-                awaitItem()
-            )
-            awaitComplete()
+            ensureAllEventsConsumed()
         }
     }
 
     @Test
-    fun uiFavouriteDropdownItemsForStopFlowWithStopMapDisabled() = runTest {
+    fun getDropdownMenuItemsForStopsFlowWhenStopMapFeatureDisabled() = runTest {
         val generator = createUiFavouriteDropdownItemsGenerator(
+            arguments = FakeArguments(
+                onIsShortcutModeFlow = { flowOf(false) }
+            ),
             state = FakeState(
-                onSelectedStopCodeFlow = { flowOf("123456") }
+                onSelectedStopCodeFlow = { flowOf(null) }
             ),
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { true },
@@ -177,47 +196,237 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onHasStopMapUiFeature = { false }
             ),
             alertsRepository = FakeAlertsRepository(
-                onHasArrivalAlertFlow = {
-                    assertEquals("123456", it)
-                    flowOf(true)
-                },
-                onHasProximityAlertFlow = {
-                    assertEquals("123456", it)
-                    flowOf(true)
-                }
+                onArrivalAlertStopCodesFlow = { flowOf(null) },
+                onProximityAlertStopCodesFlow = { flowOf(null) }
             )
         )
 
-        generator.uiFavouriteDropdownItemsForStopFlow.test {
+        generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
             assertEquals(
-                "123456" to UiFavouriteDropdownMenu(
-                    items = persistentListOf(
-                        UiFavouriteDropdownItem.EditFavouriteName,
-                        UiFavouriteDropdownItem.RemoveFavourite,
-                        UiFavouriteDropdownItem.AddArrivalAlert(isEnabled = false),
-                        UiFavouriteDropdownItem.AddProximityAlert(isEnabled = false),
+                mapOf(
+                    "123456" to UiFavouriteDropdownMenu(
+                        isShown = false,
+                        arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
+                            hasArrivalAlert = false
+                        ),
+                        proximityAlertDropdownItem = UiProximityAlertDropdownItem(
+                            hasProximityAlert = false
+                        ),
+                        isStopMapItemShown = false
                     )
                 ),
                 awaitItem()
             )
-            assertEquals(
-                "123456" to UiFavouriteDropdownMenu(
-                    items = persistentListOf(
-                        UiFavouriteDropdownItem.EditFavouriteName,
-                        UiFavouriteDropdownItem.RemoveFavourite,
-                        UiFavouriteDropdownItem.RemoveArrivalAlert,
-                        UiFavouriteDropdownItem.RemoveProximityAlert,
-                    )
-                ),
-                awaitItem()
-            )
-            awaitComplete()
+            ensureAllEventsConsumed()
         }
     }
 
     @Test
-    fun uiFavouriteDropdownItemsForStopFlowWithAllFeaturesEnabled() = runTest {
+    fun getDropdownMenuItemsForStopsFlowWhenAlertsNull() = runTest {
         val generator = createUiFavouriteDropdownItemsGenerator(
+            arguments = FakeArguments(
+                onIsShortcutModeFlow = { flowOf(false) }
+            ),
+            state = FakeState(
+                onSelectedStopCodeFlow = { flowOf(null) }
+            ),
+            featureRepository = FakeFeatureRepository(
+                onHasArrivalAlertFeature = { true },
+                onHasProximityAlertFeature = { true },
+                onHasStopMapUiFeature = { true }
+            ),
+            alertsRepository = FakeAlertsRepository(
+                onArrivalAlertStopCodesFlow = { flowOf(null) },
+                onProximityAlertStopCodesFlow = { flowOf(null) }
+            )
+        )
+
+        generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
+            assertEquals(
+                mapOf(
+                    "123456" to UiFavouriteDropdownMenu(
+                        isShown = false,
+                        arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
+                            hasArrivalAlert = false
+                        ),
+                        proximityAlertDropdownItem = UiProximityAlertDropdownItem(
+                            hasProximityAlert = false
+                        ),
+                        isStopMapItemShown = true
+                    )
+                ),
+                awaitItem()
+            )
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun getDropdownMenuItemsForStopsFlowWhenAlertsEmpty() = runTest {
+        val generator = createUiFavouriteDropdownItemsGenerator(
+            arguments = FakeArguments(
+                onIsShortcutModeFlow = { flowOf(false) }
+            ),
+            state = FakeState(
+                onSelectedStopCodeFlow = { flowOf(null) }
+            ),
+            featureRepository = FakeFeatureRepository(
+                onHasArrivalAlertFeature = { true },
+                onHasProximityAlertFeature = { true },
+                onHasStopMapUiFeature = { true }
+            ),
+            alertsRepository = FakeAlertsRepository(
+                onArrivalAlertStopCodesFlow = { flowOf(emptySet()) },
+                onProximityAlertStopCodesFlow = { flowOf(emptySet()) }
+            )
+        )
+
+        generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
+            assertEquals(
+                mapOf(
+                    "123456" to UiFavouriteDropdownMenu(
+                        isShown = false,
+                        arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
+                            hasArrivalAlert = false
+                        ),
+                        proximityAlertDropdownItem = UiProximityAlertDropdownItem(
+                            hasProximityAlert = false
+                        ),
+                        isStopMapItemShown = true
+                    )
+                ),
+                awaitItem()
+            )
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun getDropdownMenuItemsForStopsFlowWhenAlertsDoNotContainStop() = runTest {
+        val generator = createUiFavouriteDropdownItemsGenerator(
+            arguments = FakeArguments(
+                onIsShortcutModeFlow = { flowOf(false) }
+            ),
+            state = FakeState(
+                onSelectedStopCodeFlow = { flowOf(null) }
+            ),
+            featureRepository = FakeFeatureRepository(
+                onHasArrivalAlertFeature = { true },
+                onHasProximityAlertFeature = { true },
+                onHasStopMapUiFeature = { true }
+            ),
+            alertsRepository = FakeAlertsRepository(
+                onArrivalAlertStopCodesFlow = { flowOf(setOf("987654")) },
+                onProximityAlertStopCodesFlow = { flowOf(setOf("987654")) }
+            )
+        )
+
+        generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
+            assertEquals(
+                mapOf(
+                    "123456" to UiFavouriteDropdownMenu(
+                        isShown = false,
+                        arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
+                            hasArrivalAlert = false
+                        ),
+                        proximityAlertDropdownItem = UiProximityAlertDropdownItem(
+                            hasProximityAlert = false
+                        ),
+                        isStopMapItemShown = true
+                    )
+                ),
+                awaitItem()
+            )
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun getDropdownMenuItemsForStopsFlowWhenAlertsContainStop() = runTest {
+        val generator = createUiFavouriteDropdownItemsGenerator(
+            arguments = FakeArguments(
+                onIsShortcutModeFlow = { flowOf(false) }
+            ),
+            state = FakeState(
+                onSelectedStopCodeFlow = { flowOf(null) }
+            ),
+            featureRepository = FakeFeatureRepository(
+                onHasArrivalAlertFeature = { true },
+                onHasProximityAlertFeature = { true },
+                onHasStopMapUiFeature = { true }
+            ),
+            alertsRepository = FakeAlertsRepository(
+                onArrivalAlertStopCodesFlow = { flowOf(setOf("123456")) },
+                onProximityAlertStopCodesFlow = { flowOf(setOf("123456")) }
+            )
+        )
+
+        generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
+            assertEquals(
+                mapOf(
+                    "123456" to UiFavouriteDropdownMenu(
+                        isShown = false,
+                        arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
+                            hasArrivalAlert = true
+                        ),
+                        proximityAlertDropdownItem = UiProximityAlertDropdownItem(
+                            hasProximityAlert = true
+                        ),
+                        isStopMapItemShown = true
+                    )
+                ),
+                awaitItem()
+            )
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun getDropdownMenuItemsForStopsFlowWhenSelectedStopDoesNotMatch() = runTest {
+        val generator = createUiFavouriteDropdownItemsGenerator(
+            arguments = FakeArguments(
+                onIsShortcutModeFlow = { flowOf(false) }
+            ),
+            state = FakeState(
+                onSelectedStopCodeFlow = { flowOf("987654") }
+            ),
+            featureRepository = FakeFeatureRepository(
+                onHasArrivalAlertFeature = { true },
+                onHasProximityAlertFeature = { true },
+                onHasStopMapUiFeature = { true }
+            ),
+            alertsRepository = FakeAlertsRepository(
+                onArrivalAlertStopCodesFlow = { flowOf(setOf("123456")) },
+                onProximityAlertStopCodesFlow = { flowOf(setOf("123456")) }
+            )
+        )
+
+        generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
+            assertEquals(
+                mapOf(
+                    "123456" to UiFavouriteDropdownMenu(
+                        isShown = false,
+                        arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
+                            hasArrivalAlert = true
+                        ),
+                        proximityAlertDropdownItem = UiProximityAlertDropdownItem(
+                            hasProximityAlert = true
+                        ),
+                        isStopMapItemShown = true
+                    )
+                ),
+                awaitItem()
+            )
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun getDropdownMenuItemsForStopsFlowWhenSelectedStopMatches() = runTest {
+        val generator = createUiFavouriteDropdownItemsGenerator(
+            arguments = FakeArguments(
+                onIsShortcutModeFlow = { flowOf(false) }
+            ),
             state = FakeState(
                 onSelectedStopCodeFlow = { flowOf("123456") }
             ),
@@ -227,55 +436,44 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onHasStopMapUiFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
-                onHasArrivalAlertFlow = {
-                    assertEquals("123456", it)
-                    flowOf(true)
-                },
-                onHasProximityAlertFlow = {
-                    assertEquals("123456", it)
-                    flowOf(true)
-                }
+                onArrivalAlertStopCodesFlow = { flowOf(setOf("123456")) },
+                onProximityAlertStopCodesFlow = { flowOf(setOf("123456")) }
             )
         )
 
-        generator.uiFavouriteDropdownItemsForStopFlow.test {
+        generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
             assertEquals(
-                "123456" to UiFavouriteDropdownMenu(
-                    items = persistentListOf(
-                        UiFavouriteDropdownItem.EditFavouriteName,
-                        UiFavouriteDropdownItem.RemoveFavourite,
-                        UiFavouriteDropdownItem.AddArrivalAlert(isEnabled = false),
-                        UiFavouriteDropdownItem.AddProximityAlert(isEnabled = false),
-                        UiFavouriteDropdownItem.ShowOnMap
+                mapOf(
+                    "123456" to UiFavouriteDropdownMenu(
+                        isShown = true,
+                        arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
+                            hasArrivalAlert = true
+                        ),
+                        proximityAlertDropdownItem = UiProximityAlertDropdownItem(
+                            hasProximityAlert = true
+                        ),
+                        isStopMapItemShown = true
                     )
                 ),
                 awaitItem()
             )
-            assertEquals(
-                "123456" to UiFavouriteDropdownMenu(
-                    items = persistentListOf(
-                        UiFavouriteDropdownItem.EditFavouriteName,
-                        UiFavouriteDropdownItem.RemoveFavourite,
-                        UiFavouriteDropdownItem.RemoveArrivalAlert,
-                        UiFavouriteDropdownItem.RemoveProximityAlert,
-                        UiFavouriteDropdownItem.ShowOnMap
-                    )
-                ),
-                awaitItem()
-            )
-            awaitComplete()
+            ensureAllEventsConsumed()
         }
     }
 
-    private fun createUiFavouriteDropdownItemsGenerator(
+    private fun TestScope.createUiFavouriteDropdownItemsGenerator(
+        arguments: Arguments = FakeArguments(),
         state: State = FakeState(),
         featureRepository: FeatureRepository = FakeFeatureRepository(),
         alertsRepository: AlertsRepository = FakeAlertsRepository()
     ): RealUiFavouriteDropdownMenuGenerator {
         return RealUiFavouriteDropdownMenuGenerator(
+            arguments = arguments,
             state = state,
             featureRepository = featureRepository,
-            alertsRepository = alertsRepository
+            alertsRepository = alertsRepository,
+            defaultCoroutineDispatcher = UnconfinedTestDispatcher(testScheduler),
+            viewModelCoroutineScope = backgroundScope
         )
     }
 }

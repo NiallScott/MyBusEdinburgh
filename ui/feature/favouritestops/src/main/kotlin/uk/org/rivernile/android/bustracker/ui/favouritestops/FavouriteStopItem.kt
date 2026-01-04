@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -248,23 +248,21 @@ private fun DropdownMenuBox(
             onClick = onOpenDropdownClick
         )
 
-        dropdownMenu.items?.let { dropdownItems ->
-            FavouriteStopItemDropdownMenu(
-                items = dropdownItems,
-                onDropdownMenuDismissed = onDropdownMenuDismissed,
-                onEditFavouriteNameClick = onEditFavouriteNameClick,
-                onRemoveFavouriteClick = onRemoveFavouriteClick,
-                onAddArrivalAlertClick = onAddArrivalAlertClick,
-                onRemoveArrivalAlertClick = onRemoveArrivalAlertClick,
-                onAddProximityAlertClick = onAddProximityAlertClick,
-                onRemoveProximityAlertClick = onRemoveProximityAlertClick,
-                onShowOnMapClick = onShowOnMapClick,
-                modifier = Modifier
-                    .semantics {
-                        testTag = TEST_TAG_DROPDOWN_MENU
-                    }
-            )
-        }
+        FavouriteStopItemDropdownMenu(
+            menu = dropdownMenu,
+            onDropdownMenuDismissed = onDropdownMenuDismissed,
+            onEditFavouriteNameClick = onEditFavouriteNameClick,
+            onRemoveFavouriteClick = onRemoveFavouriteClick,
+            onAddArrivalAlertClick = onAddArrivalAlertClick,
+            onRemoveArrivalAlertClick = onRemoveArrivalAlertClick,
+            onAddProximityAlertClick = onAddProximityAlertClick,
+            onRemoveProximityAlertClick = onRemoveProximityAlertClick,
+            onShowOnMapClick = onShowOnMapClick,
+            modifier = Modifier
+                .semantics {
+                    testTag = TEST_TAG_DROPDOWN_MENU
+                }
+        )
     }
 }
 

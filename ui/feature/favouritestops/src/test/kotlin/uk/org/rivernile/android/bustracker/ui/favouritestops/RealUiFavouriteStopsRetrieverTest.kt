@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -49,17 +49,11 @@ class RealUiFavouriteStopsRetrieverTest {
     @Test
     fun allFavouriteStopsFlowWithNullFavouriteStopsEmitsNull() = runTest {
         val retriever = createUiFavouriteStopsRetriever(
-            arguments = FakeArguments(
-                onIsShortcutModeFlow = { flowOf(false) }
-            ),
             favouriteStopsRetriever = FakeFavouriteStopsRetriever(
                 onAllFavouriteStopsFlow = { flowOf(null) }
             ),
             servicesRepository = FakeServicesRepository(
                 onGetColoursForServicesFlow = { flowOf(null) }
-            ),
-            dropdownMenuGenerator = FakeUiFavouriteDropdownMenuGenerator(
-                onUiFavouriteDropdownItemsForStopFlow = { flowOf(null) }
             )
         )
 
@@ -72,17 +66,11 @@ class RealUiFavouriteStopsRetrieverTest {
     @Test
     fun allFavouriteStopsFlowWithEmptyFavouriteStopsEmitsNull() = runTest {
         val retriever = createUiFavouriteStopsRetriever(
-            arguments = FakeArguments(
-                onIsShortcutModeFlow = { flowOf(false) }
-            ),
             favouriteStopsRetriever = FakeFavouriteStopsRetriever(
                 onAllFavouriteStopsFlow = { flowOf(emptyList()) }
             ),
             servicesRepository = FakeServicesRepository(
                 onGetColoursForServicesFlow = { flowOf(null) }
-            ),
-            dropdownMenuGenerator = FakeUiFavouriteDropdownMenuGenerator(
-                onUiFavouriteDropdownItemsForStopFlow = { flowOf(null) }
             )
         )
 
@@ -93,29 +81,114 @@ class RealUiFavouriteStopsRetrieverTest {
     }
 
     @Test
-    fun allFavouriteStopsFlowWithNoShortcutMode() = runTest {
+    fun allFavouriteStopsFlowWithPopulatedStopsButNullColoursEmitsFavourites() = runTest {
         val retriever = createUiFavouriteStopsRetriever(
-            arguments = FakeArguments(
-                onIsShortcutModeFlow = { flowOf(false) }
-            ),
             favouriteStopsRetriever = FakeFavouriteStopsRetriever(
                 onAllFavouriteStopsFlow = {
                     flowOf(
                         listOf(
                             FavouriteStopWithServices(
-                                stopCode = "100",
-                                savedName = "Saved Name 1",
-                                services = listOf("1", "2", "3")
+                                stopCode = "123456",
+                                savedName = "Saved Name",
+                                services = listOf("1", "2")
+                            )
+                        )
+                    )
+                }
+            ),
+            servicesRepository = FakeServicesRepository(
+                onGetColoursForServicesFlow = { flowOf(null) }
+            ),
+            dropdownMenuGenerator = FakeUiFavouriteDropdownMenuGenerator(
+                onGetDropdownMenuItemsForStopsFlow = { flowOf(null) }
+            )
+        )
+
+        retriever.allFavouriteStopsFlow.test {
+            assertEquals(
+                listOf(
+                    UiFavouriteStop(
+                        stopCode = "123456",
+                        savedName = "Saved Name",
+                        services = persistentListOf(
+                            UiServiceName(
+                                serviceName = "1",
+                                colours = null
                             ),
+                            UiServiceName(
+                                serviceName = "2",
+                                colours = null
+                            )
+                        ),
+                        dropdownMenu = null
+                    )
+                ),
+                awaitItem()
+            )
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun allFavouriteStopsFlowWithPopulatedFavouritesButEmptyColoursEmitsFavourites() = runTest {
+        val retriever = createUiFavouriteStopsRetriever(
+            favouriteStopsRetriever = FakeFavouriteStopsRetriever(
+                onAllFavouriteStopsFlow = {
+                    flowOf(
+                        listOf(
                             FavouriteStopWithServices(
-                                stopCode = "200",
-                                savedName = "Saved Name 2",
-                                services = null
+                                stopCode = "123456",
+                                savedName = "Saved Name",
+                                services = listOf("1", "2")
+                            )
+                        )
+                    )
+                }
+            ),
+            servicesRepository = FakeServicesRepository(
+                onGetColoursForServicesFlow = { flowOf(emptyMap()) }
+            ),
+            dropdownMenuGenerator = FakeUiFavouriteDropdownMenuGenerator(
+                onGetDropdownMenuItemsForStopsFlow = { flowOf(null) }
+            )
+        )
+
+        retriever.allFavouriteStopsFlow.test {
+            assertEquals(
+                listOf(
+                    UiFavouriteStop(
+                        stopCode = "123456",
+                        savedName = "Saved Name",
+                        services = persistentListOf(
+                            UiServiceName(
+                                serviceName = "1",
+                                colours = null
                             ),
+                            UiServiceName(
+                                serviceName = "2",
+                                colours = null
+                            )
+                        ),
+                        dropdownMenu = null
+                    )
+                ),
+                awaitItem()
+            )
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun allFavouriteStopsFlowWithPopulatedFavouritesAndColorsEmitsFavourites() = runTest {
+        val retriever = createUiFavouriteStopsRetriever(
+            favouriteStopsRetriever = FakeFavouriteStopsRetriever(
+                onAllFavouriteStopsFlow = {
+                    flowOf(
+                        listOf(
                             FavouriteStopWithServices(
-                                stopCode = "300",
-                                savedName = "Saved Name 3",
-                                services = listOf("3", "4", "5")
+                                stopCode = "123456",
+                                savedName = "Saved Name",
+                                services = listOf("1", "2")
                             )
                         )
                     )
@@ -124,34 +197,15 @@ class RealUiFavouriteStopsRetrieverTest {
             servicesRepository = FakeServicesRepository(
                 onGetColoursForServicesFlow = {
                     flowOf(
-                        mapOf(
-                            "1" to ServiceColours(
-                                primaryColour = 1000,
-                                colourOnPrimary = 1001
-                            ),
-                            "3" to ServiceColours(
-                                primaryColour = 2000,
-                                colourOnPrimary = 2001
-                            ),
-                            "5" to ServiceColours(
-                                primaryColour = 3000,
-                                colourOnPrimary = 3001
-                            )
-                        )
+                        mapOf("1" to ServiceColours(
+                            primaryColour = 100,
+                            colourOnPrimary = 101
+                        ))
                     )
                 }
             ),
             dropdownMenuGenerator = FakeUiFavouriteDropdownMenuGenerator(
-                onUiFavouriteDropdownItemsForStopFlow = {
-                    flowOf(
-                        "200" to UiFavouriteDropdownMenu(
-                            items = persistentListOf(
-                                UiFavouriteDropdownItem.EditFavouriteName,
-                                UiFavouriteDropdownItem.RemoveFavourite
-                            )
-                        )
-                    )
-                }
+                onGetDropdownMenuItemsForStopsFlow = { flowOf(null) }
             )
         )
 
@@ -159,65 +213,62 @@ class RealUiFavouriteStopsRetrieverTest {
             assertEquals(
                 listOf(
                     UiFavouriteStop(
-                        stopCode = "100",
-                        savedName = "Saved Name 1",
+                        stopCode = "123456",
+                        savedName = "Saved Name",
                         services = persistentListOf(
                             UiServiceName(
                                 serviceName = "1",
                                 colours = UiServiceColours(
-                                    backgroundColour = 1000,
-                                    textColour = 1001
+                                    backgroundColour = 100,
+                                    textColour = 101
                                 )
                             ),
                             UiServiceName(
                                 serviceName = "2",
                                 colours = null
-                            ),
-                            UiServiceName(
-                                serviceName = "3",
-                                colours = UiServiceColours(
-                                    backgroundColour = 2000,
-                                    textColour = 2001
-                                )
                             )
                         ),
-                        dropdownMenu = UiFavouriteDropdownMenu()
-                    ),
-                    UiFavouriteStop(
-                        stopCode = "200",
-                        savedName = "Saved Name 2",
-                        services = null,
-                        dropdownMenu = UiFavouriteDropdownMenu(
-                            items = persistentListOf(
-                                UiFavouriteDropdownItem.EditFavouriteName,
-                                UiFavouriteDropdownItem.RemoveFavourite
+                        dropdownMenu = null
+                    )
+                ),
+                awaitItem()
+            )
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun allFavouriteStopsFlowWithPopulatedFavouritesButEmptyDropdownEmitsFavourites() = runTest {
+        val retriever = createUiFavouriteStopsRetriever(
+            favouriteStopsRetriever = FakeFavouriteStopsRetriever(
+                onAllFavouriteStopsFlow = {
+                    flowOf(
+                        listOf(
+                            FavouriteStopWithServices(
+                                stopCode = "123456",
+                                savedName = "Saved Name",
+                                services = null
                             )
                         )
-                    ),
+                    )
+                }
+            ),
+            servicesRepository = FakeServicesRepository(
+                onGetColoursForServicesFlow = { flowOf(null) }
+            ),
+            dropdownMenuGenerator = FakeUiFavouriteDropdownMenuGenerator(
+                onGetDropdownMenuItemsForStopsFlow = { flowOf(null) }
+            )
+        )
+
+        retriever.allFavouriteStopsFlow.test {
+            assertEquals(
+                listOf(
                     UiFavouriteStop(
-                        stopCode = "300",
-                        savedName = "Saved Name 3",
-                        services = persistentListOf(
-                            UiServiceName(
-                                serviceName = "3",
-                                colours = UiServiceColours(
-                                    backgroundColour = 2000,
-                                    textColour = 2001
-                                )
-                            ),
-                            UiServiceName(
-                                serviceName = "4",
-                                colours = null
-                            ),
-                            UiServiceName(
-                                serviceName = "5",
-                                colours = UiServiceColours(
-                                    backgroundColour = 3000,
-                                    textColour = 3001
-                                )
-                            )
-                        ),
-                        dropdownMenu = UiFavouriteDropdownMenu()
+                        stopCode = "123456",
+                        savedName = "Saved Name",
+                        services = null,
+                        dropdownMenu = null
                     )
                 ),
                 awaitItem()
@@ -227,56 +278,32 @@ class RealUiFavouriteStopsRetrieverTest {
     }
 
     @Test
-    fun allFavouriteStopsFlowWithShortcutMode() = runTest {
+    fun allFavouriteStopsFlowWithPopulatedFavouritesAndDropdownMenusEmitsFavourites() = runTest {
         val retriever = createUiFavouriteStopsRetriever(
-            arguments = FakeArguments(
-                onIsShortcutModeFlow = { flowOf(true) }
-            ),
             favouriteStopsRetriever = FakeFavouriteStopsRetriever(
                 onAllFavouriteStopsFlow = {
                     flowOf(
                         listOf(
                             FavouriteStopWithServices(
-                                stopCode = "100",
-                                savedName = "Saved Name 1",
-                                services = listOf("1", "2", "3")
-                            ),
-                            FavouriteStopWithServices(
-                                stopCode = "200",
-                                savedName = "Saved Name 2",
+                                stopCode = "123456",
+                                savedName = "Saved Name",
                                 services = null
-                            ),
-                            FavouriteStopWithServices(
-                                stopCode = "300",
-                                savedName = "Saved Name 3",
-                                services = listOf("3", "4", "5")
                             )
                         )
                     )
                 }
             ),
             servicesRepository = FakeServicesRepository(
-                onGetColoursForServicesFlow = {
+                onGetColoursForServicesFlow = { flowOf(null) }
+            ),
+            dropdownMenuGenerator = FakeUiFavouriteDropdownMenuGenerator(
+                onGetDropdownMenuItemsForStopsFlow = {
                     flowOf(
                         mapOf(
-                            "1" to ServiceColours(
-                                primaryColour = 1000,
-                                colourOnPrimary = 1001
-                            ),
-                            "3" to ServiceColours(
-                                primaryColour = 2000,
-                                colourOnPrimary = 2001
-                            ),
-                            "5" to ServiceColours(
-                                primaryColour = 3000,
-                                colourOnPrimary = 3001
-                            )
+                            "123456" to UiFavouriteDropdownMenu()
                         )
                     )
                 }
-            ),
-            dropdownMenuGenerator = FakeUiFavouriteDropdownMenuGenerator(
-                onUiFavouriteDropdownItemsForStopFlow = { flowOf(null) }
             )
         )
 
@@ -284,60 +311,10 @@ class RealUiFavouriteStopsRetrieverTest {
             assertEquals(
                 listOf(
                     UiFavouriteStop(
-                        stopCode = "100",
-                        savedName = "Saved Name 1",
-                        services = persistentListOf(
-                            UiServiceName(
-                                serviceName = "1",
-                                colours = UiServiceColours(
-                                    backgroundColour = 1000,
-                                    textColour = 1001
-                                )
-                            ),
-                            UiServiceName(
-                                serviceName = "2",
-                                colours = null
-                            ),
-                            UiServiceName(
-                                serviceName = "3",
-                                colours = UiServiceColours(
-                                    backgroundColour = 2000,
-                                    textColour = 2001
-                                )
-                            )
-                        ),
-                        dropdownMenu = null
-                    ),
-                    UiFavouriteStop(
-                        stopCode = "200",
-                        savedName = "Saved Name 2",
+                        stopCode = "123456",
+                        savedName = "Saved Name",
                         services = null,
-                        dropdownMenu = null
-                    ),
-                    UiFavouriteStop(
-                        stopCode = "300",
-                        savedName = "Saved Name 3",
-                        services = persistentListOf(
-                            UiServiceName(
-                                serviceName = "3",
-                                colours = UiServiceColours(
-                                    backgroundColour = 2000,
-                                    textColour = 2001
-                                )
-                            ),
-                            UiServiceName(
-                                serviceName = "4",
-                                colours = null
-                            ),
-                            UiServiceName(
-                                serviceName = "5",
-                                colours = UiServiceColours(
-                                    backgroundColour = 3000,
-                                    textColour = 3001
-                                )
-                            )
-                        ),
-                        dropdownMenu = null
+                        dropdownMenu = UiFavouriteDropdownMenu()
                     )
                 ),
                 awaitItem()
@@ -347,14 +324,12 @@ class RealUiFavouriteStopsRetrieverTest {
     }
 
     private fun createUiFavouriteStopsRetriever(
-        arguments: Arguments = FakeArguments(),
         favouriteStopsRetriever: FavouriteStopsRetriever = FakeFavouriteStopsRetriever(),
         servicesRepository: ServicesRepository = FakeServicesRepository(),
         dropdownMenuGenerator: UiFavouriteDropdownMenuGenerator =
             FakeUiFavouriteDropdownMenuGenerator()
     ): RealUiFavouriteStopsRetriever {
         return RealUiFavouriteStopsRetriever(
-            arguments = arguments,
             favouriteStopsRetriever = favouriteStopsRetriever,
             servicesRepository = servicesRepository,
             dropdownMenuGenerator = dropdownMenuGenerator

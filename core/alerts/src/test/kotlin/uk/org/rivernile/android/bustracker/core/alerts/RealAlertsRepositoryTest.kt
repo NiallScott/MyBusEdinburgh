@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -384,6 +384,28 @@ class RealAlertsRepositoryTest {
     }
 
     @Test
+    fun arrivalAlertStopCodesFlowEmitsDistinctValues() = runTest {
+        val repository = createAlertsRepository(
+            alertsDao = FakeAlertsDao(
+                onArrivalAlertStopCodesFlow = {
+                    intervalFlowOf(
+                        initialDelay = 0L,
+                        interval = 10L,
+                        listOf("123", "456"),
+                        listOf("123", "456"),
+                        listOf("123", "789")
+                    )
+                }
+            )
+        )
+
+        repository.arrivalAlertStopCodesFlow.test {
+            assertEquals(setOf("123", "456"), awaitItem())
+            assertEquals(setOf("123", "789"), awaitItem())
+        }
+    }
+
+    @Test
     fun allProximityAlertsFlowEmitsDistinctValues() = runTest {
         val alert1 = ProximityAlertEntity(1, 1L, "1", 1)
         val alert2 = ProximityAlertEntity(2, 2L, "2", 2)
@@ -413,6 +435,28 @@ class RealAlertsRepositoryTest {
             assertEquals(listOf(expected1, expected2, expected3), awaitItem())
             assertEquals(listOf(expected2), awaitItem())
             awaitComplete()
+        }
+    }
+
+    @Test
+    fun proximityAlertStopCodesFlowEmitsDistinctValues() = runTest {
+        val repository = createAlertsRepository(
+            alertsDao = FakeAlertsDao(
+                onProximityAlertStopCodesFlow = {
+                    intervalFlowOf(
+                        initialDelay = 0L,
+                        interval = 10L,
+                        listOf("123", "456"),
+                        listOf("123", "456"),
+                        listOf("123", "789")
+                    )
+                }
+            )
+        )
+
+        repository.proximityAlertStopCodesFlow.test {
+            assertEquals(setOf("123", "456"), awaitItem())
+            assertEquals(setOf("123", "789"), awaitItem())
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,17 +26,21 @@
 
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
+import dagger.hilt.android.scopes.ViewModelScoped
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.shareIn
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForViewModelCoroutineScope
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import javax.inject.Inject
 
@@ -48,16 +52,26 @@ import javax.inject.Inject
 internal interface UiFavouriteDropdownMenuGenerator {
 
     /**
-     * This emits a [Pair] of [String] (the stop code) to [UiFavouriteDropdownMenu] for a selected
-     * stop. This may emit `null` when there is no selected stop.
+     * For the given [Set] of [stopCodes], return a [Flow] which emits a mapping of the supplied
+     * stop codes to its associated [UiFavouriteDropdownMenu], if available.
+     *
+     * @param stopCodes The stop codes to get [UiFavouriteDropdownMenu]s for.
+     * @return A [Flow] which emits a mapping of the supplied stop codes to its associated
+     * [UiFavouriteDropdownMenu], if available.
      */
-    val uiFavouriteDropdownItemsForStopFlow: Flow<Pair<String, UiFavouriteDropdownMenu>?>
+    fun getDropdownMenuItemsForStopsFlow(
+        stopCodes: Set<String>
+    ): Flow<Map<String, UiFavouriteDropdownMenu>?>
 }
 
+@ViewModelScoped
 internal class RealUiFavouriteDropdownMenuGenerator @Inject constructor(
+    private val arguments: Arguments,
     private val state: State,
     private val featureRepository: FeatureRepository,
-    private val alertsRepository: AlertsRepository
+    private val alertsRepository: AlertsRepository,
+    @param:ForDefaultDispatcher private val defaultCoroutineDispatcher: CoroutineDispatcher,
+    @param:ForViewModelCoroutineScope private val viewModelCoroutineScope: CoroutineScope
 ) : UiFavouriteDropdownMenuGenerator {
 
     private val hasArrivalAlertFeature by lazy { featureRepository.hasArrivalAlertFeature }
@@ -65,89 +79,133 @@ internal class RealUiFavouriteDropdownMenuGenerator @Inject constructor(
     private val hasStopMapFeature by lazy { featureRepository.hasStopMapUiFeature }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override val uiFavouriteDropdownItemsForStopFlow get() = state
-        .selectedStopCodeFlow
-        .flatMapLatest(::loadDropdownItemsForStopCode)
-
-    private fun loadDropdownItemsForStopCode(
-        stopCode: String?
-    ): Flow<Pair<String, UiFavouriteDropdownMenu>?> {
-        return stopCode?.ifBlank { null }?.let {
-            createUiFavouriteDropdownItemsForStopFlow(it)
-                .map { items ->
-                    stopCode to UiFavouriteDropdownMenu(
-                        items = items
+    override fun getDropdownMenuItemsForStopsFlow(
+        stopCodes: Set<String>
+    ): Flow<Map<String, UiFavouriteDropdownMenu>?> {
+        return if (stopCodes.isNotEmpty()) {
+            arguments
+                .isShortcutModeFlow
+                .flatMapLatest {
+                    getDropdownMenuItemsForStopsFlow(
+                        stopCodes = stopCodes,
+                        isShortcutMode = it
                     )
                 }
-                .distinctUntilChanged()
-                .onStart {
-                    emit(createDefault(stopCode = it))
-                }
-        } ?: flowOf(null)
-    }
-
-    private fun createUiFavouriteDropdownItemsForStopFlow(stopCode: String) =
-        combine(
-            getHasArrivalAlertFlow(stopCode),
-            getHasProximityAlertFlow(stopCode)
-        ) { hasArrivalAlert, hasProximityAlert ->
-            createUiFavouriteDropdownItems(
-                isLoading = false,
-                hasArrivalAlert = hasArrivalAlert,
-                hasProximityAlert = hasProximityAlert
-            )
-        }
-
-    private fun getHasArrivalAlertFlow(stopCode: String): Flow<Boolean?> {
-        return if (hasArrivalAlertFeature) {
-            alertsRepository.hasArrivalAlertFlow(stopCode)
         } else {
             flowOf(null)
         }
     }
 
-    private fun getHasProximityAlertFlow(stopCode: String): Flow<Boolean?> {
-        return if (hasProximityAlertFeature) {
-            alertsRepository.hasProximityAlertFlow(stopCode)
+    private fun getDropdownMenuItemsForStopsFlow(
+        stopCodes: Set<String>,
+        isShortcutMode: Boolean
+    ): Flow<Map<String, UiFavouriteDropdownMenu>?> {
+        return if (!isShortcutMode) {
+            combine(
+                state.selectedStopCodeFlow,
+                arrivalAlertStopCodes,
+                proximityAlertStopCodes
+            ) { selectedStopCode, arrivalAlertStopCodes, proximityAlertStopCodes ->
+                createDropdownMenusForStops(
+                    stopCodes = stopCodes,
+                    arrivalAlertStopCodes = arrivalAlertStopCodes,
+                    proximityAlertStopCodes = proximityAlertStopCodes,
+                    selectedStopCode = selectedStopCode
+                )
+            }
         } else {
             flowOf(null)
         }
     }
 
-    private fun createUiFavouriteDropdownItems(
-        isLoading: Boolean,
-        hasArrivalAlert: Boolean?,
-        hasProximityAlert: Boolean?
-    ): ImmutableList<UiFavouriteDropdownItem> {
-        return buildList {
-            this += UiFavouriteDropdownItem.EditFavouriteName
-            this += UiFavouriteDropdownItem.RemoveFavourite
-
-            when (hasArrivalAlert) {
-                true -> this += UiFavouriteDropdownItem.RemoveArrivalAlert
-                false -> this += UiFavouriteDropdownItem.AddArrivalAlert(isEnabled = !isLoading)
-                null -> Unit // null indicates feature not available, so do not add.
-            }
-
-            when (hasProximityAlert) {
-                true -> this += UiFavouriteDropdownItem.RemoveProximityAlert
-                false -> this += UiFavouriteDropdownItem.AddProximityAlert(isEnabled = !isLoading)
-                null -> Unit // null indicates feature not available, so do not add.
-            }
-
-            if (hasStopMapFeature) {
-                this += UiFavouriteDropdownItem.ShowOnMap
-            }
-        }.toImmutableList()
-    }
-
-    private fun createDefault(stopCode: String): Pair<String, UiFavouriteDropdownMenu> {
-        return stopCode to UiFavouriteDropdownMenu(
-            items = createUiFavouriteDropdownItems(
-                isLoading = true,
-                hasArrivalAlert = if (hasArrivalAlertFeature) false else null,
-                hasProximityAlert = if (hasProximityAlertFeature) false else null
-            )
+    private val arrivalAlertStopCodes = _arrivalAlertStopCodes
+        .shareIn(
+            scope = viewModelCoroutineScope,
+            started = SharingStarted.WhileSubscribed(
+                stopTimeoutMillis = 1000L,
+                replayExpirationMillis = 0L
+            ),
+            replay = 1
         )
+
+    private val proximityAlertStopCodes = _proximityAlertStopCodes
+        .shareIn(
+            scope = viewModelCoroutineScope,
+            started = SharingStarted.WhileSubscribed(
+                stopTimeoutMillis = 1000L,
+                replayExpirationMillis = 0L
+            ),
+            replay = 1
+        )
+
+    private val _arrivalAlertStopCodes: Flow<Set<String>?> get() {
+        return if (hasArrivalAlertFeature) {
+            alertsRepository
+                .arrivalAlertStopCodesFlow
+                .distinctUntilChanged()
+                .flowOn(defaultCoroutineDispatcher)
+        } else {
+            flowOf(null)
+        }
+    }
+
+    private val _proximityAlertStopCodes: Flow<Set<String>?> get() {
+        return if (hasProximityAlertFeature) {
+            alertsRepository
+                .proximityAlertStopCodesFlow
+                .distinctUntilChanged()
+                .flowOn(defaultCoroutineDispatcher)
+        } else {
+            flowOf(null)
+        }
+    }
+
+    private fun createDropdownMenusForStops(
+        stopCodes: Set<String>,
+        arrivalAlertStopCodes: Set<String>?,
+        proximityAlertStopCodes: Set<String>?,
+        selectedStopCode: String?
+    ): Map<String, UiFavouriteDropdownMenu> {
+        return stopCodes
+            .associateWith { stopCode ->
+                UiFavouriteDropdownMenu(
+                    isShown = stopCode == selectedStopCode,
+                    arrivalAlertDropdownItem = createUiArrivalAlertDropdownItem(
+                        stopCode = stopCode,
+                        arrivalAlertStopCodes = arrivalAlertStopCodes
+                    ),
+                    proximityAlertDropdownItem = createUiProximityAlertDropdownItem(
+                        stopCode = stopCode,
+                        proximityAlertStopCodes = proximityAlertStopCodes
+                    ),
+                    isStopMapItemShown = hasStopMapFeature
+                )
+            }
+    }
+
+    private fun createUiArrivalAlertDropdownItem(
+        stopCode: String,
+        arrivalAlertStopCodes: Set<String>?
+    ): UiArrivalAlertDropdownItem? {
+        return if (hasArrivalAlertFeature) {
+            UiArrivalAlertDropdownItem(
+                hasArrivalAlert = arrivalAlertStopCodes?.contains(stopCode) ?: false
+            )
+        } else {
+            null
+        }
+    }
+
+    private fun createUiProximityAlertDropdownItem(
+        stopCode: String,
+        proximityAlertStopCodes: Set<String>?
+    ): UiProximityAlertDropdownItem? {
+        return if (hasProximityAlertFeature) {
+            UiProximityAlertDropdownItem(
+                hasProximityAlert = proximityAlertStopCodes?.contains(stopCode) ?: false
+            )
+        } else {
+            null
+        }
     }
 }

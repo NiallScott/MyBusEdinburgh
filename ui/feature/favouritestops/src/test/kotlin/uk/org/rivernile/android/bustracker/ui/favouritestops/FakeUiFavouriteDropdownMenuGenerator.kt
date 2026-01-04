@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,10 +34,10 @@ import kotlinx.coroutines.flow.Flow
  * @author Niall Scott
  */
 internal class FakeUiFavouriteDropdownMenuGenerator(
-    private val onUiFavouriteDropdownItemsForStopFlow:
-        () -> Flow<Pair<String, UiFavouriteDropdownMenu>?> = { throw NotImplementedError() }
+    private val onGetDropdownMenuItemsForStopsFlow:
+        () -> Flow<Map<String, UiFavouriteDropdownMenu>?> = { throw NotImplementedError() }
 ) : UiFavouriteDropdownMenuGenerator {
 
-    override val uiFavouriteDropdownItemsForStopFlow get() =
-        onUiFavouriteDropdownItemsForStopFlow()
+    override fun getDropdownMenuItemsForStopsFlow(stopCodes: Set<String>) =
+        onGetDropdownMenuItemsForStopsFlow()
 }

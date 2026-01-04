@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -138,9 +138,19 @@ interface AlertsDao {
     suspend fun getArrivalAlertCount(): Int
 
     /**
+     * A [Flow] which emits all the stop codes which have arrival alerts set.
+     */
+    val arrivalAlertStopCodesFlow: Flow<List<String>?>
+
+    /**
      * A [Flow] which emits the number of active arrival alerts.
      */
     val arrivalAlertCountFlow: Flow<Int>
+
+    /**
+     * A [Flow] which emits all the stop codes which have proximity alerts set.
+     */
+    val proximityAlertStopCodesFlow: Flow<List<String>?>
 
     /**
      * A [Flow] which emits all active proximity alerts.

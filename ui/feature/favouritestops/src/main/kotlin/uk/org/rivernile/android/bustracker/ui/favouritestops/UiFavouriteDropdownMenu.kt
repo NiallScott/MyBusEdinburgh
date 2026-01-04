@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,14 +26,40 @@
 
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
-import kotlinx.collections.immutable.ImmutableList
-
 /**
  * A dropdown menu for a favourite stop item.
  *
- * @property items The items to display in the dropdown menu.
+ * @property isShown Is the menu being shown?
+ * @property arrivalAlertDropdownItem Properties related to the arrival alert dropdown item. `null`
+ * denotes that the item should not be shown.
+ * @property proximityAlertDropdownItem Properties related to the proximity alert dropdown item.
+ * `null` denotes that the item should not be shown.
+ * @property isStopMapItemShown Is the stop map available?
  * @author Niall Scott
  */
 internal data class UiFavouriteDropdownMenu(
-    val items: ImmutableList<UiFavouriteDropdownItem>? = null
+    val isShown: Boolean = false,
+    val arrivalAlertDropdownItem: UiArrivalAlertDropdownItem? = null,
+    val proximityAlertDropdownItem: UiProximityAlertDropdownItem? = null,
+    val isStopMapItemShown: Boolean = false
+)
+
+/**
+ * Attributed data for the arrival alert dropdown item.
+ *
+ * @property hasArrivalAlert Is an arrival alert set for the stop this item represents?
+ * @author Niall Scott
+ */
+internal data class UiArrivalAlertDropdownItem(
+    val hasArrivalAlert: Boolean = false
+)
+
+/**
+ * Attributed data for the proximity alert dropdown item.
+ *
+ * @property hasProximityAlert Is a proximity alert set for the stop this item represents?
+ * @author Niall Scott
+ */
+internal data class UiProximityAlertDropdownItem(
+    val hasProximityAlert: Boolean = false
 )

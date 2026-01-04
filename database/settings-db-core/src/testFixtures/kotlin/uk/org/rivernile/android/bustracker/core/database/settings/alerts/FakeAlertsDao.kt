@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -56,7 +56,11 @@ class FakeAlertsDao(
     private val onGetAllArrivalAlertStopCodes: () -> List<String>? =
         { throw NotImplementedError() },
     private val onGetArrivalAlertCount: () -> Int = { throw NotImplementedError() },
+    private val onArrivalAlertStopCodesFlow: () -> Flow<List<String>?> =
+        { throw NotImplementedError() },
     private val onArrivalAlertCountFlow: () -> Flow<Int> = { throw NotImplementedError() },
+    private val onProximityAlertStopCodesFlow: () -> Flow<List<String>?> =
+        { throw NotImplementedError() },
     private val onAllProximityAlertsFlow: () -> Flow<List<ProximityAlertEntity>?> =
         { throw NotImplementedError() },
     private val onGetProximityAlertCount: () -> Int = { throw NotImplementedError() }
@@ -108,7 +112,11 @@ class FakeAlertsDao(
 
     override suspend fun getArrivalAlertCount() = onGetArrivalAlertCount()
 
+    override val arrivalAlertStopCodesFlow get() = onArrivalAlertStopCodesFlow()
+
     override val arrivalAlertCountFlow get() = onArrivalAlertCountFlow()
+
+    override val proximityAlertStopCodesFlow get() = onProximityAlertStopCodesFlow()
 
     override val allProximityAlertsFlow get() = onAllProximityAlertsFlow()
 

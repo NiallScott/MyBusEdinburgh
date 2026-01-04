@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -44,9 +44,8 @@ class UiFavouriteStopKtTest {
     @Test
     fun toUiFavouriteStopsWithEmptyListMapsToEmptyList() {
         val result = emptyList<FavouriteStopWithServices>().toUiFavouriteStops(
-            isShortcutMode = false,
             serviceColours = null,
-            dropdownMenu = null
+            dropdownMenus = null
         )
 
         assertTrue(result.isEmpty())
@@ -66,14 +65,13 @@ class UiFavouriteStopKtTest {
                 stopCode = "123456",
                 savedName = "Saved name",
                 services = null,
-                dropdownMenu = UiFavouriteDropdownMenu()
+                dropdownMenu = null
             )
         )
 
         val result = favouriteStops.toUiFavouriteStops(
-            isShortcutMode = false,
             serviceColours = null,
-            dropdownMenu = null
+            dropdownMenus = null
         )
 
         assertEquals(expected, result)
@@ -93,14 +91,13 @@ class UiFavouriteStopKtTest {
                 stopCode = "123456",
                 savedName = "Saved name",
                 services = null,
-                dropdownMenu = UiFavouriteDropdownMenu()
+                dropdownMenu = null
             )
         )
 
         val result = favouriteStops.toUiFavouriteStops(
-            isShortcutMode = false,
             serviceColours = null,
-            dropdownMenu = null
+            dropdownMenus = null
         )
 
         assertEquals(expected, result)
@@ -133,14 +130,13 @@ class UiFavouriteStopKtTest {
                         colours = null
                     )
                 ),
-                dropdownMenu = UiFavouriteDropdownMenu()
+                dropdownMenu = null
             )
         )
 
         val result = favouriteStops.toUiFavouriteStops(
-            isShortcutMode = false,
             serviceColours = null,
-            dropdownMenu = null
+            dropdownMenus = null
         )
 
         assertEquals(expected, result)
@@ -173,14 +169,13 @@ class UiFavouriteStopKtTest {
                         colours = null
                     )
                 ),
-                dropdownMenu = UiFavouriteDropdownMenu()
+                dropdownMenu = null
             )
         )
 
         val result = favouriteStops.toUiFavouriteStops(
-            isShortcutMode = false,
             serviceColours = emptyMap(),
-            dropdownMenu = null
+            dropdownMenus = null
         )
 
         assertEquals(expected, result)
@@ -219,12 +214,11 @@ class UiFavouriteStopKtTest {
                         )
                     )
                 ),
-                dropdownMenu = UiFavouriteDropdownMenu()
+                dropdownMenu = null
             )
         )
 
         val result = favouriteStops.toUiFavouriteStops(
-            isShortcutMode = false,
             serviceColours = mapOf(
                 "1" to ServiceColours(
                     primaryColour = 100,
@@ -235,14 +229,68 @@ class UiFavouriteStopKtTest {
                     colourOnPrimary = 400
                 )
             ),
-            dropdownMenu = null
+            dropdownMenus = null
         )
 
         assertEquals(expected, result)
     }
 
     @Test
-    fun toUiFavouriteStopsMapsWithNotShortcutModeAndDropdownForUnrecognisedStop() {
+    fun toUiFavouriteStopsDoesNotIncludeDropdownMenuWhenMapIsEmpty() {
+        val favouriteStops = listOf(
+            FavouriteStopWithServices(
+                stopCode = "123456",
+                savedName = "Saved name",
+                services = null
+            )
+        )
+        val expected = listOf(
+            UiFavouriteStop(
+                stopCode = "123456",
+                savedName = "Saved name",
+                services = null,
+                dropdownMenu = null
+            )
+        )
+
+        val result = favouriteStops.toUiFavouriteStops(
+            serviceColours = null,
+            dropdownMenus = emptyMap()
+        )
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun toUiFavouriteStopsDoesNotIncludeDropdownMenuWhenMapContainsUnrecognisedItem() {
+        val favouriteStops = listOf(
+            FavouriteStopWithServices(
+                stopCode = "123456",
+                savedName = "Saved name",
+                services = null
+            )
+        )
+        val expected = listOf(
+            UiFavouriteStop(
+                stopCode = "123456",
+                savedName = "Saved name",
+                services = null,
+                dropdownMenu = null
+            )
+        )
+
+        val result = favouriteStops.toUiFavouriteStops(
+            serviceColours = null,
+            dropdownMenus = mapOf(
+                "987654" to UiFavouriteDropdownMenu()
+            )
+        )
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun toUiFavouriteStopsIncludesDropdownMenuWhenMapContainsExpectedStop() {
         val favouriteStops = listOf(
             FavouriteStopWithServices(
                 stopCode = "123456",
@@ -260,109 +308,9 @@ class UiFavouriteStopKtTest {
         )
 
         val result = favouriteStops.toUiFavouriteStops(
-            isShortcutMode = false,
             serviceColours = null,
-            dropdownMenu = "987654" to UiFavouriteDropdownMenu(
-                items = persistentListOf(
-                    UiFavouriteDropdownItem.EditFavouriteName,
-                    UiFavouriteDropdownItem.RemoveFavourite
-                )
-            )
-        )
-
-        assertEquals(expected, result)
-    }
-
-    @Test
-    fun toUiFavouriteStopsMapsWithNotShortcutModeAndDropdownMenuForRecognisedStop() {
-        val favouriteStops = listOf(
-            FavouriteStopWithServices(
-                stopCode = "123456",
-                savedName = "Saved name",
-                services = null
-            )
-        )
-        val expected = listOf(
-            UiFavouriteStop(
-                stopCode = "123456",
-                savedName = "Saved name",
-                services = null,
-                dropdownMenu = UiFavouriteDropdownMenu(
-                    items = persistentListOf(
-                        UiFavouriteDropdownItem.EditFavouriteName,
-                        UiFavouriteDropdownItem.RemoveFavourite
-                    )
-                )
-            )
-        )
-
-        val result = favouriteStops.toUiFavouriteStops(
-            isShortcutMode = false,
-            serviceColours = null,
-            dropdownMenu = "123456" to UiFavouriteDropdownMenu(
-                items = persistentListOf(
-                    UiFavouriteDropdownItem.EditFavouriteName,
-                    UiFavouriteDropdownItem.RemoveFavourite
-                )
-            )
-        )
-
-        assertEquals(expected, result)
-    }
-
-    @Test
-    fun toUiFavouriteStopsMapsWithShortcutModeAndNullDropdownItem() {
-        val favouriteStops = listOf(
-            FavouriteStopWithServices(
-                stopCode = "123456",
-                savedName = "Saved name",
-                services = null
-            )
-        )
-        val expected = listOf(
-            UiFavouriteStop(
-                stopCode = "123456",
-                savedName = "Saved name",
-                services = null,
-                dropdownMenu = null
-            )
-        )
-
-        val result = favouriteStops.toUiFavouriteStops(
-            isShortcutMode = true,
-            serviceColours = null,
-            dropdownMenu = null
-        )
-
-        assertEquals(expected, result)
-    }
-
-    @Test
-    fun toUiFavouriteStopsMapsWithShortcutModeAndNonNullDropdownItem() {
-        val favouriteStops = listOf(
-            FavouriteStopWithServices(
-                stopCode = "123456",
-                savedName = "Saved name",
-                services = null
-            )
-        )
-        val expected = listOf(
-            UiFavouriteStop(
-                stopCode = "123456",
-                savedName = "Saved name",
-                services = null,
-                dropdownMenu = null
-            )
-        )
-
-        val result = favouriteStops.toUiFavouriteStops(
-            isShortcutMode = true,
-            serviceColours = null,
-            dropdownMenu = "123456" to UiFavouriteDropdownMenu(
-                items = persistentListOf(
-                    UiFavouriteDropdownItem.EditFavouriteName,
-                    UiFavouriteDropdownItem.RemoveFavourite
-                )
+            dropdownMenus = mapOf(
+                "123456" to UiFavouriteDropdownMenu()
             )
         )
 
