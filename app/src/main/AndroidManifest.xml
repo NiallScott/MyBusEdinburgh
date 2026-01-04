@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -101,22 +101,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity-alias>
-
-        <!-- SelectFavouriteStopActivity, to let the user choose a favourite stop to show as a home
-             screen shortcut. -->
-        <activity
-            android:name="uk.org.rivernile.android.bustracker.ui.favourites.SelectFavouriteStopActivity"
-            android:label="@string/favouriteshortcut_title"
-            android:icon="@drawable/appicon_favourite"
-            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity"
-            android:exported="true">
-            <!-- This signifies that this Activity can add shortcuts to the
-                 home screen, and launch this Activity when the user wants to
-                 create a shortcut. -->
-            <intent-filter>
-                <action android:name="android.intent.action.CREATE_SHORTCUT" />
-            </intent-filter>
-        </activity>
 
         <!-- DisplayStopDataActivity, to show bus times. -->
         <activity
