@@ -38,6 +38,7 @@ jobs:
           -Pandroid.experimental.androidTest.numManagedDeviceShards=1
           -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=1
           -Pmybus.edinburgh.apiKey=${{ secrets.EDINBURGH_API_KEY }}
+          -Pmybus.edinburgh.bustracker.apiKey=${{ secrets.EDINBURGH_BUS_TRACKER_API_KEY }}
           -Pmybus.edinburgh.debug.mapsKey=${{ secrets.EDINBURGH_GOOGLE_MAPS_API_KEY }}
           -Pmybus.keystore.debug.file=${{ steps.write-debug-keystore.outputs.keystore-path }}
           -Pmybus.keystore.debug.storePassword=${{ secrets.KEYSTORE_PASSWORD_DEBUG }}

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,9 +26,13 @@
 
 package uk.org.rivernile.android.bustracker.core.log
 
+import android.util.Log
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import uk.org.rivernile.android.bustracker.core.logging.BuildConfig
 import javax.inject.Inject
 import javax.inject.Singleton
+
+private const val LOG_TAG = "ExceptionLogger"
 
 /**
  * This is the Crashlytics-specific implementation of [ExceptionLogger].
@@ -43,5 +47,9 @@ internal class CrashlyticsExceptionLogger @Inject constructor(
 
     override fun log(throwable: Throwable) {
         crashlytics.recordException(throwable)
+
+        if (BuildConfig.DEBUG) {
+            Log.w(LOG_TAG, "Received exception.", throwable)
+        }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 
-import java.util.Date
+import kotlin.time.Instant
 
 /**
  * A `Vehicle` is a vehicle that is part of a service which has real-time tracking information
@@ -36,28 +36,18 @@ import java.util.Date
  * @property departureTime The expected time of departure of the vehicle from the departure point.
  * @property departureMinutes At the instant the data was loaded, how many minutes are left until
  * the vehicle's departure?
- * @property terminus The terminus of the vehicle, if known.
- * @property journeyId An ID that represents the journey of the vehicle, if known.
  * @property isEstimatedTime `true` if the time is an estimate` or `false` if the vehicle is being
  * live tracked.
- * @property isDelayed `true` if the vehicle has a delay marker on it.
  * @property isDiverted `true` if the vehicle has been diverted from its published route.
- * @property isTerminus `true` if the current departure point is the route terminus.
- * @property isPartRoute `true` if the vehicle is only travelling along part of its published route.
  * @author Niall Scott
  */
-data class Vehicle(
+public data class Vehicle(
     val destination: String?,
-    val departureTime: Date,
+    val departureTime: Instant,
     val departureMinutes: Int,
-    val terminus: String?,
-    val journeyId: String?,
     val isEstimatedTime: Boolean,
-    val isDelayed: Boolean,
-    val isDiverted: Boolean,
-    val isTerminus: Boolean,
-    val isPartRoute: Boolean
+    val isDiverted: Boolean
 ): Comparable<Vehicle> {
 
-    override fun compareTo(other: Vehicle) = departureTime.compareTo(other.departureTime)
+    override fun compareTo(other: Vehicle): Int = departureTime.compareTo(other.departureTime)
 }

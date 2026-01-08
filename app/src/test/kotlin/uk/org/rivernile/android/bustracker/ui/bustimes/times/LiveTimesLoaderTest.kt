@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -98,7 +98,7 @@ class LiveTimesLoaderTest {
 
     @Test
     fun loadLiveTimesFlowWithPopulatedStopCodeLoadsLiveTimes() = runTest {
-        val stop = UiStop("123456", null, emptyList())
+        val stop = UiStop("123456", emptyList())
         whenever(arguments.stopCodeFlow)
             .thenReturn(flowOf("123456"))
         whenever(refreshController.refreshTriggerFlow)
@@ -120,8 +120,8 @@ class LiveTimesLoaderTest {
 
     @Test
     fun loadLiveTimesFlowWithStopCodeChangeCausesReload() = runTest {
-        val stop1 = UiStop("123456", null, emptyList())
-        val stop2 = UiStop("246813", null, emptyList())
+        val stop1 = UiStop("123456", emptyList())
+        val stop2 = UiStop("246813", emptyList())
         whenever(arguments.stopCodeFlow)
             .thenReturn(intervalFlowOf(0L, 10L, "123456", "246813"))
         whenever(refreshController.refreshTriggerFlow)
@@ -150,7 +150,7 @@ class LiveTimesLoaderTest {
 
     @Test
     fun loadLiveTimesFlowWithNumberOfDepartureChangeCausesReload() = runTest {
-        val stop = UiStop("123456", null, emptyList())
+        val stop = UiStop("123456", emptyList())
         whenever(arguments.stopCodeFlow)
             .thenReturn(flowOf("123456"))
         whenever(refreshController.refreshTriggerFlow)
@@ -179,7 +179,7 @@ class LiveTimesLoaderTest {
 
     @Test
     fun loadLiveTimesFlowWitRefreshCausesReload() = runTest {
-        val stop = UiStop("123456", null, emptyList())
+        val stop = UiStop("123456", emptyList())
         val loadFlow1 = flowOf(UiResult.Error(123L, ErrorType.NO_CONNECTIVITY))
         val loadFlow2 = flowOf(UiResult.Success(123L, stop))
         whenever(arguments.stopCodeFlow)

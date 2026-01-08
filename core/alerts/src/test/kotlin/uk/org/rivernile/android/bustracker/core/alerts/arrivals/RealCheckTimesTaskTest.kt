@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,11 +39,12 @@ import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Live
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Stop
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Vehicle
-import java.util.Date
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.fail
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 /**
  * Unit tests for [RealCheckTimesTask].
@@ -556,40 +557,28 @@ class RealCheckTimesTaskTest {
 
     private fun createVehicle(departureMinutes: Int) =
         Vehicle(
-            "a",
-            Date(),
-            departureMinutes,
-            null,
-            null,
+            destination = "a",
+            departureTime = Clock.System.now(),
+            departureMinutes = departureMinutes,
             isEstimatedTime = false,
-            isDelayed = false,
-            isDiverted = false,
-            isTerminus = false,
-            isPartRoute = false
+            isDiverted = false
         )
 
     private fun createService(serviceName: String, vehicles: List<Vehicle>) =
         Service(
-            serviceName,
-            vehicles,
-            null,
-            null,
-            isDisrupted = false,
-            isDiverted = false
+            serviceName = serviceName,
+            vehicles = vehicles
         )
 
     private fun createStop(stopCode: String, services: List<Service>) =
         Stop(
-            stopCode,
-            null,
-            services,
-            false
+            stopCode = stopCode,
+            services = services
         )
 
     private fun createLiveTimes(stops: Map<String, Stop>) =
         LiveTimes(
-            stops,
-            123L,
-            false
+            stops = stops,
+            receiveTime = Instant.fromEpochMilliseconds(123L),
         )
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,11 +35,10 @@ import retrofit2.Retrofit
 import retrofit2.create
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.di.ForTracker
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.EdinburghTrackerEndpoint
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.HttpsInterceptor
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.HeadersInterceptor
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.EdinburghOpenApi
 import uk.org.rivernile.android.bustracker.core.http.di.ForKotlinJsonSerialization
-import uk.org.rivernile.edinburghbustrackerapi.ApiKeyGenerator
-import uk.org.rivernile.edinburghbustrackerapi.EdinburghBusTrackerApi
 import java.util.concurrent.TimeUnit
 
 /**
@@ -57,12 +56,13 @@ internal interface BusTrackerModule {
     companion object {
 
         @Provides
-        fun provideApiKeyGenerator(@ForBusTrackerApiKey apiKey: String): ApiKeyGenerator =
-            ApiKeyGenerator(apiKey)
+        fun provideEdinburghBusTrackerApi(@ForTracker retrofit: Retrofit): EdinburghOpenApi =
+            retrofit.create()
 
         @Provides
-        fun provideEdinburghBusTrackerApi(@ForTracker retrofit: Retrofit): EdinburghBusTrackerApi =
-            retrofit.create()
+        @ForTracker
+        fun provideTrackerBaseUrl(): String =
+            "https://apim-public.trapezegroupazure.co.uk/edinburgh-cec-openapi/generic/v1.2/"
 
         @Provides
         @ForTracker
@@ -81,14 +81,14 @@ internal interface BusTrackerModule {
         @ForTracker
         fun provideOkhttpClient(
             okHttpClient: OkHttpClient,
-            httpsInterceptor: HttpsInterceptor
+            headersInterceptor: HeadersInterceptor
         ): OkHttpClient =
             okHttpClient.newBuilder()
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
                 .followRedirects(false)
-                .addInterceptor(httpsInterceptor)
+                .addInterceptor(headersInterceptor)
                 .build()
     }
 }

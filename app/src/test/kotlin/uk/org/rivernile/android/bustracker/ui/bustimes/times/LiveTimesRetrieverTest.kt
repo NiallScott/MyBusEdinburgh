@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,6 +46,7 @@ import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Instant
 
 /**
  * Tests for [LiveTimesRetriever].
@@ -124,8 +125,7 @@ class LiveTimesRetrieverTest {
         val successResult = LiveTimesResult.Success(
             LiveTimes(
                 emptyMap(),
-                123L,
-                false
+                Instant.fromEpochMilliseconds(123L)
             )
         )
         val errorUiResult = UiResult.Error(123L, ErrorType.NO_DATA)
@@ -160,13 +160,10 @@ class LiveTimesRetrieverTest {
                 mapOf(
                     "123456" to Stop(
                         "123456",
-                        "Stop name",
                         emptyList(),
-                        false
                     )
                 ),
-                123L,
-                false
+                Instant.fromEpochMilliseconds(123L)
             )
         )
         val errorUiResult = UiResult.Error(123L, ErrorType.NO_DATA)
@@ -201,22 +198,15 @@ class LiveTimesRetrieverTest {
                 mapOf(
                     "123456" to Stop(
                         "123456",
-                        "Stop name",
                         listOf(
                             Service(
                                 "1",
-                                emptyList(),
-                                null,
-                                null,
-                                isDisrupted = false,
-                                isDiverted = false
+                                emptyList()
                             )
-                        ),
-                        false
+                        )
                     )
                 ),
-                123L,
-                false
+                Instant.fromEpochMilliseconds(123L)
             )
         )
         val serviceColoursFlow = flowOf<Map<String, ServiceColours>?>(null)
@@ -224,7 +214,6 @@ class LiveTimesRetrieverTest {
             123L,
             UiStop(
                 "123456",
-                "Stop name",
                 listOf(
                     UiService(
                         "1",
@@ -264,21 +253,15 @@ class LiveTimesRetrieverTest {
                 mapOf(
                     "123456" to Stop(
                         "123456",
-                        "Stop name",
                         listOf(
                             Service(
                                 "1",
-                                emptyList(),
-                                null,
-                                null,
-                                isDisrupted = false,
-                                isDiverted = false
+                                emptyList()
                             )
                         ),
-                        false)
+                    )
                 ),
-                123L,
-                false
+                Instant.fromEpochMilliseconds(123L)
             )
         )
         val serviceColoursFlow = flowOf<Map<String, ServiceColours>?>(emptyMap())
@@ -286,7 +269,6 @@ class LiveTimesRetrieverTest {
             123L,
             UiStop(
                 "123456",
-                "Stop name",
                 listOf(
                     UiService(
                         "1",
@@ -326,22 +308,15 @@ class LiveTimesRetrieverTest {
                 mapOf(
                     "123456" to Stop(
                         "123456",
-                        "Stop name",
                         listOf(
                             Service(
                                 "1",
-                                emptyList(),
-                                null,
-                                null,
-                                isDisrupted = false,
-                                isDiverted = false
+                                emptyList()
                             )
-                        ),
-                        false
+                        )
                     )
                 ),
-                123L,
-                false
+                Instant.fromEpochMilliseconds(123L)
             )
         )
         val serviceColours = mapOf("1" to ServiceColours(1, 10))
@@ -350,7 +325,6 @@ class LiveTimesRetrieverTest {
             123L,
             UiStop(
                 "123456",
-                "Stop name",
                 listOf(
                     UiService(
                         "1",
@@ -391,38 +365,23 @@ class LiveTimesRetrieverTest {
                 mapOf(
                     "123456" to Stop(
                         "123456",
-                        "Stop name",
                         listOf(
                             Service(
                                 "1",
-                                emptyList(),
-                                null,
-                                null,
-                                isDisrupted = false,
-                                isDiverted = false
+                                emptyList()
                             ),
                             Service(
                                 "2",
-                                emptyList(),
-                                null,
-                                null,
-                                isDisrupted = false,
-                                isDiverted = false
+                                emptyList()
                             ),
                             Service(
                                 "3",
-                                emptyList(),
-                                null,
-                                null,
-                                isDisrupted = false,
-                                isDiverted = false
+                                emptyList()
                             )
-                        ),
-                        false
+                        )
                     )
                 ),
-                123L,
-                false
+                Instant.fromEpochMilliseconds(123L)
             )
         )
         val serviceColours = mapOf(
@@ -435,7 +394,6 @@ class LiveTimesRetrieverTest {
             123L,
             UiStop(
                 "123456",
-                "Stop name",
                 listOf(
                     UiService(
                         "1",
@@ -485,22 +443,15 @@ class LiveTimesRetrieverTest {
                 mapOf(
                     "123456" to Stop(
                         "123456",
-                        "Stop name",
                         listOf(
                             Service(
                                 "1",
-                                emptyList(),
-                                null,
-                                null,
-                                isDisrupted = false,
-                                isDiverted = false
+                                emptyList()
                             )
-                        ),
-                        false
+                        )
                     )
                 ),
-                123L,
-                false
+                Instant.fromEpochMilliseconds(123L)
             )
         )
         val serviceColours1 = mapOf("1" to ServiceColours(1, 10))
@@ -510,7 +461,6 @@ class LiveTimesRetrieverTest {
             123L,
             UiStop(
                 "123456",
-                "Stop name",
                 listOf(
                     UiService(
                         "1",
@@ -524,7 +474,6 @@ class LiveTimesRetrieverTest {
             123L,
             UiStop(
                 "123456",
-                "Stop name",
                 listOf(
                     UiService(
                         "1",

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,14 +32,14 @@ package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
  *
  * @author Niall Scott
  */
-sealed interface LiveTimesResponse {
+public sealed interface LiveTimesResponse {
 
     /**
      * The response is successful.
      *
      * @property liveTimes The [LiveTimes].
      */
-    data class Success(
+    public data class Success(
         val liveTimes: LiveTimes
     ) : LiveTimesResponse
 
@@ -47,19 +47,19 @@ sealed interface LiveTimesResponse {
      * This sealed interface and its descendants encapsulate error responses from requesting live
      * times.
      */
-    sealed interface Error : LiveTimesResponse {
+    public sealed interface Error : LiveTimesResponse {
 
         /**
          * This response was not successful due to no connectivity.
          */
-        data object NoConnectivity : Error
+        public data object NoConnectivity : Error
 
         /**
          * This response was not successful due to an Io error.
          *
          * @param throwable The Io error.
          */
-        data class Io(
+        public data class Io(
             val throwable: Throwable
         ) : Error
 
@@ -67,29 +67,29 @@ sealed interface LiveTimesResponse {
          * This sealed interface and its descendants encapsulate possible server errors from
          * requesting live times.
          */
-        sealed interface ServerError : Error {
+        public sealed interface ServerError : Error {
 
             /**
              * There was an authentication error against the server.
              */
-            data object Authentication : ServerError
+            public data object Authentication : ServerError
 
             /**
              * The server is reporting it is down for maintenance.
              */
-            data object Maintenance : ServerError
+            public data object Maintenance : ServerError
 
             /**
              * The server is reporting it is currently overloaded.
              */
-            data object SystemOverloaded : ServerError
+            public data object SystemOverloaded : ServerError
 
             /**
              * There was some other error which we don't handle.
              *
              * @property error A string which describes the error.
              */
-            data class Other(
+            public data class Other(
                 val error: String? = null
             ) : ServerError
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,11 +30,10 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.times
  * This is the representation of a stop for the purposes of UI binding.
  *
  * @property stopCode The stop code this data relates to.
- * @property name The name of the stop.
  * @property services The [List] of [UiService]s for this stop.
  * @author Niall Scott
  */
 data class UiStop(
-        val stopCode: String,
-        val name: String?,
-        val services: List<UiService>)
+    val stopCode: String,
+    val services: List<UiService>
+)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,55 +26,39 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
+import okhttp3.CacheControl
+import okhttp3.Interceptor
+import okhttp3.Request
+import okhttp3.Response
+import uk.org.rivernile.android.bustracker.core.edinburgh.di.ForBusTrackerApiKey
+import javax.inject.Inject
+
+private const val HEADER_SUBSCRIPTION_KEY = "Ocp-Apim-Subscription-Key"
 
 /**
- * Tests for [ServiceNameFixer].
+ * This interceptor adds on the necessary headers for requests to the Edinburgh Bus Tracker (Novus)
+ * API.
  *
+ * @param apiKey The API key to access the service.
  * @author Niall Scott
  */
-class ServiceNameFixerTest {
+internal class HeadersInterceptor @Inject constructor(
+    @param:ForBusTrackerApiKey private val apiKey: String
+) : Interceptor {
 
-    companion object {
+    private val noCache = CacheControl
+        .Builder()
+        .noCache()
+        .build()
 
-        private const val SERVICE_TRAM = "TRAM"
+    override fun intercept(chain: Interceptor.Chain): Response {
+        return chain.proceed(chain.request().getModifiedRequest())
     }
 
-    private lateinit var serviceNameFixer: ServiceNameFixer
-
-    @BeforeTest
-    fun setUp() {
-        serviceNameFixer = ServiceNameFixer()
-    }
-
-    @Test
-    fun correctServiceNameWithNullServiceNameReturnsNull() {
-        val result = serviceNameFixer.correctServiceName(null)
-
-        assertNull(result)
-    }
-
-    @Test
-    fun correctServiceNameWithRandomServiceNameReturnsServiceName() {
-        val result = serviceNameFixer.correctServiceName("Random")
-
-        assertEquals("Random", result)
-    }
-
-    @Test
-    fun correctServiceNameWithService50ReturnsTram() {
-        val result = serviceNameFixer.correctServiceName("50")
-
-        assertEquals(SERVICE_TRAM, result)
-    }
-
-    @Test
-    fun correctServiceNameWithServiceT50ReturnsTram() {
-        val result = serviceNameFixer.correctServiceName("T50")
-
-        assertEquals(SERVICE_TRAM, result)
+    private fun Request.getModifiedRequest(): Request {
+        return newBuilder()
+            .cacheControl(noCache)
+            .addHeader(HEADER_SUBSCRIPTION_KEY, apiKey)
+            .build()
     }
 }

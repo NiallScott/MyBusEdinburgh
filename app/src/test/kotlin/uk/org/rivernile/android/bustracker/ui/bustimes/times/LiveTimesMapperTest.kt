@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,10 +34,11 @@ import uk.org.rivernile.android.bustracker.core.livetimes.LiveTimesResult
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
-import java.util.Date
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 /**
  * Tests for [LiveTimesMapper].
@@ -46,7 +47,7 @@ import kotlin.test.assertEquals
  */
 class LiveTimesMapperTest {
 
-    private val date = Date()
+    private val date = Clock.System.now()
 
     private lateinit var mapper: LiveTimesMapper
 
@@ -141,8 +142,7 @@ class LiveTimesMapperTest {
         val liveTimesResult = LiveTimesResult.Success(
             LiveTimes(
                 emptyMap(),
-                123L,
-                false
+                Instant.fromEpochMilliseconds(123L)
             )
         )
         val expected = UiResult.Error(123L, ErrorType.NO_DATA)
@@ -159,13 +159,10 @@ class LiveTimesMapperTest {
                 mapOf(
                     "123456" to Stop(
                         "123456",
-                        "Stop name",
-                        emptyList(),
-                        false
+                        emptyList()
                     )
                 ),
-                123L,
-                false
+                Instant.fromEpochMilliseconds(123L)
             )
         )
         val expected = UiResult.Error(123L, ErrorType.NO_DATA)
@@ -182,22 +179,15 @@ class LiveTimesMapperTest {
                 mapOf(
                     "123456" to Stop(
                         "123456",
-                        "Stop name",
                         listOf(
                             Service(
                                 "1",
-                                emptyList(),
-                                null,
-                                null,
-                                isDisrupted = false,
-                                isDiverted = false
+                                emptyList()
                             )
-                        ),
-                        false
+                        )
                     )
                 ),
-                123L,
-                false
+                Instant.fromEpochMilliseconds(123L)
             )
         )
         val expected = UiResult.Error(123L, ErrorType.NO_DATA)
@@ -214,29 +204,21 @@ class LiveTimesMapperTest {
                 mapOf(
                     "123456" to Stop(
                         "123456",
-                        "Stop name",
                         listOf(
                             Service(
                                 "1",
-                                listOf(createVehicle()),
-                                null,
-                                null,
-                                isDisrupted = false,
-                                isDiverted = false
+                                listOf(createVehicle())
                             )
-                        ),
-                        false
+                        )
                     )
                 ),
-                123L,
-                false
+                Instant.fromEpochMilliseconds(123L)
             )
         )
         val expected = UiResult.Success(
             123L,
             UiStop(
                 "123456",
-                "Stop name",
                 listOf(
                     UiService(
                         "1",
@@ -259,29 +241,21 @@ class LiveTimesMapperTest {
                 mapOf(
                     "123456" to Stop(
                         "123456",
-                        "Stop name",
                         listOf(
                             Service(
                                 "1",
-                                listOf(createVehicle()),
-                                null,
-                                null,
-                                isDisrupted = false,
-                                isDiverted = false
+                                listOf(createVehicle())
                             )
-                        ),
-                        false
+                        )
                     )
                 ),
-                123L,
-                false
+                Instant.fromEpochMilliseconds(123L)
             )
         )
         val expected = UiResult.Success(
             123L,
             UiStop(
                 "123456",
-                "Stop name",
                 listOf(
                     UiService(
                         "1",
@@ -305,45 +279,29 @@ class LiveTimesMapperTest {
                 mapOf(
                     "123456" to Stop(
                         "123456",
-                        "Stop name",
                         listOf(
                             Service(
                                 "1",
-                                listOf(createVehicle()),
-                                null,
-                                null,
-                                isDisrupted = false,
-                                isDiverted = false
+                                listOf(createVehicle())
                             ),
                             Service(
                                 "2",
-                                listOf(createVehicle()),
-                                null,
-                                null,
-                                isDisrupted = false,
-                                isDiverted = false
+                                listOf(createVehicle())
                             ),
                             Service(
                                 "3",
-                                listOf(createVehicle()),
-                                null,
-                                null,
-                                isDisrupted = false,
-                                isDiverted = false
+                                listOf(createVehicle())
                             )
-                        ),
-                        false
+                        )
                     )
                 ),
-                123L,
-                false
+                Instant.fromEpochMilliseconds(123L)
             )
         )
         val expected = UiResult.Success(
             123L,
             UiStop(
                 "123456",
-                "Stop name",
                 listOf(
                     UiService(
                         "1",
@@ -374,23 +332,18 @@ class LiveTimesMapperTest {
     }
 
     private fun createVehicle() = Vehicle(
-        null,
-        date,
-        2,
-        null,
-        null,
+        destination = null,
+        departureTime = date,
+        departureMinutes = 2,
         isEstimatedTime = false,
-        isDelayed = false,
         isDiverted = false,
-        isTerminus = false,
-        isPartRoute = false
     )
 
     private fun createUiVehicle() = UiVehicle(
-        null,
-        false,
-        date,
-        2,
-        false
+        destination = null,
+        isDiverted = false,
+        departureTime = date,
+        departureMinutes = 2,
+        isEstimatedTime = false
     )
 }

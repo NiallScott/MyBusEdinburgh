@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,8 @@
 package uk.org.rivernile.android.bustracker.core.time
 
 import javax.inject.Inject
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 /**
  * This class is a proxy through to framework time methods to allow easy mocking of time in unit
@@ -40,6 +42,11 @@ public interface TimeUtils {
      * The current wall time in milliseconds since the UNIX epoch.
      */
     public val currentTimeMills: Long
+
+    /**
+     * Get the [Instant] for the current time.
+     */
+    public val now: Instant
 }
 
 /**
@@ -48,4 +55,6 @@ public interface TimeUtils {
 internal class RealTimeUtils @Inject constructor() : TimeUtils {
 
     override val currentTimeMills get() = System.currentTimeMillis()
+
+    override val now get() = Clock.System.now()
 }

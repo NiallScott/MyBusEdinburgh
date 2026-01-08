@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -89,12 +89,12 @@ class LiveTimesMapper @Inject constructor() {
                 val stop = mapStopToUiStop(it, serviceColours)
 
                 if (stop.services.isNotEmpty()) {
-                    UiResult.Success(liveTimes.receiveTime, stop)
+                    UiResult.Success(liveTimes.receiveTime.toEpochMilliseconds(), stop)
                 } else {
-                    createNoDataError(liveTimes.receiveTime)
+                    createNoDataError(liveTimes.receiveTime.toEpochMilliseconds())
                 }
             }
-            ?: createNoDataError(liveTimes.receiveTime)
+            ?: createNoDataError(liveTimes.receiveTime.toEpochMilliseconds())
     }
 
     /**
@@ -107,7 +107,6 @@ class LiveTimesMapper @Inject constructor() {
     private fun mapStopToUiStop(stop: Stop, serviceColours: Map<String, ServiceColours>?) =
         UiStop(
             stop.stopCode,
-            stop.stopName,
             stop.services.mapNotNull {
                 mapServiceToUiService(it, serviceColours)
             }

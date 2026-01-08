@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,10 +27,10 @@
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
 import uk.org.rivernile.android.bustracker.core.livetimes.IsNightServiceDetector
-import java.util.Date
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Clock
 
 /**
  * Tests for [LiveTimesTransformations].
@@ -140,7 +140,7 @@ class LiveTimesTransformationsTest {
     @Test
     fun sortServicesSortedByTimeMovesServiceWithEmptyVehiclesToEnd() {
         val transformations = createLiveTimesTransformations()
-        val date = Date()
+        val date = Clock.System.now()
         val services = listOf(
             UiService(
                 "1",
@@ -215,7 +215,7 @@ class LiveTimesTransformationsTest {
     @Test
     fun sortServicesSortedByTimeSortsAsExpected() {
         val transformations = createLiveTimesTransformations()
-        val date = Date()
+        val date = Clock.System.now()
         val services = listOf(
             UiService(
                 "2",
@@ -315,7 +315,7 @@ class LiveTimesTransformationsTest {
     @Test
     fun applyExpansionsDoesNotAddCollapsedServiceWithZeroVehicles() {
         val transformations = createLiveTimesTransformations()
-        val date = Date()
+        val date = Clock.System.now()
         val services = listOf(
             UiService(
                 "1",
@@ -386,7 +386,7 @@ class LiveTimesTransformationsTest {
     @Test
     fun applyExpansionsExpandsServices() {
         val transformations = createLiveTimesTransformations()
-        val date = Date()
+        val date = Clock.System.now()
         val services = listOf(
             UiService(
                 "1",
@@ -479,7 +479,7 @@ class LiveTimesTransformationsTest {
     @Test
     fun applyExpansionsExpandsServicesWhenAllExpanded() {
         val transformations = createLiveTimesTransformations()
-        val date = Date()
+        val date = Clock.System.now()
         val services = listOf(
             UiService(
                 "1",

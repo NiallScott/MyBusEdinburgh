@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,17 +32,9 @@ package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
  *
  * @property serviceName The display name of the service.
  * @property vehicles A [List] of [Vehicle]s for this service.
- * @property operator An optional operator name for the service.
- * @property routeDescription An optional textual description of the route.
- * @property isDisrupted `true` if the service is currently disrupted.
- * @property isDiverted `true` if the service is currently diverted from its published route.
  * @author Niall Scott
  */
-data class Service(
+public data class Service(
     val serviceName: String,
-    val vehicles: List<Vehicle>,
-    val operator: String?,
-    val routeDescription: String?,
-    val isDisrupted: Boolean,
-    val isDiverted: Boolean
+    val vehicles: List<Vehicle>
 )

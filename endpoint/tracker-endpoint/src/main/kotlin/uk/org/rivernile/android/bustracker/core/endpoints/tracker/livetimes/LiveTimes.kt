@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,17 +26,30 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 
+import kotlin.time.Instant
+
 /**
  * `LiveTimes` maps unique stop codes to [Stop] instances. It also returns data that is global to
  * the live times request.
  *
  * @property stops A [Map] of stop code to the stop result.
  * @property receiveTime The time this data was received at.
- * @property hasGlobalDisruption `true` if there is a global disruption on the network.
  * @author Niall Scott
  */
-data class LiveTimes(
+public data class LiveTimes(
     val stops: Map<String, Stop>,
-    val receiveTime: Long,
-    val hasGlobalDisruption: Boolean
+    val receiveTime: Instant
 )
+
+/**
+ * Create an empty [LiveTimes] object.
+ *
+ * @param receiveTime The time the data was received at.
+ * @return A [LiveTimes] object with empty data.
+ */
+public fun emptyLiveTimes(receiveTime: Instant): LiveTimes {
+    return LiveTimes(
+        stops = emptyMap(),
+        receiveTime = receiveTime
+    )
+}

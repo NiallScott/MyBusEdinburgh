@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,7 +32,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.edinburgh.BuildConfig
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.di.ForTracker
 import uk.org.rivernile.android.bustracker.core.http.di.ForUserAgentAppName
 import uk.org.rivernile.android.bustracker.core.services.AndroidServiceColourProvider
 import uk.org.rivernile.android.bustracker.core.services.ServiceColourProvider
@@ -53,10 +52,6 @@ internal interface EdinburghModule {
     ): ServiceColourProvider
 
     companion object {
-
-        @Provides
-        @ForTracker
-        fun provideTrackerBaseUrl(): String = "https://ws.mybustracker.co.uk/"
 
         @Provides
         @ForBusTrackerApiKey

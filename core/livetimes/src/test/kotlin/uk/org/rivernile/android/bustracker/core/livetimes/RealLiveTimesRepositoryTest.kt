@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,6 +36,7 @@ import uk.org.rivernile.android.bustracker.core.time.FakeTimeUtils
 import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Instant
 
 /**
  * Tests for [LiveTimesRepository].
@@ -48,8 +49,7 @@ class RealLiveTimesRepositoryTest {
     fun getLiveTimesFlowEmitsExpectedValues() = runTest {
         val liveTimes = LiveTimes(
             stops = emptyMap(),
-            receiveTime = 123L,
-            hasGlobalDisruption = false
+            receiveTime = Instant.fromEpochMilliseconds(123L)
         )
         val response = LiveTimesResponse.Success(liveTimes)
         val expected = LiveTimesResult.Success(liveTimes)

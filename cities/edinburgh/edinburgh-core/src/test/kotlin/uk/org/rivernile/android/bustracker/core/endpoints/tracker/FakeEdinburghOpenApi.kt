@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,31 +26,22 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 
-import javax.inject.Inject
+import retrofit2.Response
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.EdinburghOpenApi
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.JsonStopEvents
 
 /**
- * This class is used by the Edinburgh mapper classes to fix service names to be properly user
- * displayable, if required.
+ * A fake [EdinburghOpenApi] for testing.
  *
  * @author Niall Scott
  */
-internal class ServiceNameFixer @Inject constructor() {
+internal class FakeEdinburghOpenApi(
+    private val onGetStopEvents: (String, Int) -> Response<JsonStopEvents> =
+        { _, _ -> throw NotImplementedError() }
+) : EdinburghOpenApi {
 
-    companion object {
-
-        private const val SERVICE_TRAM = "TRAM"
-    }
-
-    /**
-     * Given a service name, fix it if required. If it does not require fixing, the same service
-     * name will be returned.
-     *
-     * @param serviceName The service name to fix.
-     * @return The fixed service name, or the input if it did not require fixing.
-     */
-    fun correctServiceName(serviceName: String?) = when (serviceName) {
-        "50" -> SERVICE_TRAM
-        "T50" -> SERVICE_TRAM
-        else -> serviceName
-    }
+    override suspend fun getStopEvents(
+        smsCode: String,
+        numberOfDepartures: Int
+    ) = onGetStopEvents(smsCode, numberOfDepartures)
 }

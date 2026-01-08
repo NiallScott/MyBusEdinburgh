@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,7 +33,7 @@ import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Live
  *
  * @author Niall Scott
  */
-interface TrackerEndpoint {
+public interface TrackerEndpoint {
 
     /**
      * Get live departure times.
@@ -42,7 +42,7 @@ interface TrackerEndpoint {
      * @param numberOfDepartures The number of departures per service to retrieve.
      * @return The [LiveTimesResponse] for this request.
      */
-    suspend fun getLiveTimes(stopCode: String, numberOfDepartures: Int): LiveTimesResponse
+    public suspend fun getLiveTimes(stopCode: String, numberOfDepartures: Int): LiveTimesResponse
 
     /**
      * Get live departure times.
@@ -50,5 +50,7 @@ interface TrackerEndpoint {
      * @param numberOfDepartures The number of departures per service to retrieve.
      * @return The [LiveTimesResponse] for this request.
      */
-    suspend fun getLiveTimes(stopCodes: List<String>, numberOfDepartures: Int): LiveTimesResponse
+    public suspend fun getLiveTimes(
+        stopCodes: List<String>, numberOfDepartures: Int
+    ): LiveTimesResponse
 }

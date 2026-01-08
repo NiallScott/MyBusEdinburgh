@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,28 +26,27 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 
-import java.util.Calendar
-import java.util.Date
-import java.util.GregorianCalendar
-import java.util.Locale
-import javax.inject.Inject
+import retrofit2.Response
+import retrofit2.http.GET
+import retrofit2.http.Query
 
 /**
- * This class is used to calculate departure times.
+ * This interface defines RESTful interfaces to the Edinburgh open API.
  *
  * @author Niall Scott
  */
-internal class DepartureTimeCalculator @Inject constructor() {
+internal interface EdinburghOpenApi {
 
     /**
-     * Given the number of minutes until departure, calculate the time of departure, represented as
-     * a [Date] object.
+     * Get [JsonStopEvents].
      *
-     * @param minutes The number of minutes until departure.
-     * @return The time of departure, represented as a [Date] object.
+     * @param smsCode The stop code in SMS form.
+     * @param numberOfDepartures The number of visits per service to request.
+     * @return The [Response] from executing this API.
      */
-    fun calculateDepartureTime(minutes: Int): Date = GregorianCalendar(Locale.UK).let {
-        it.add(Calendar.MINUTE, minutes)
-        it.time
-    }
+    @GET("stops/StopEvents?eventType=departure&lookahead=60&timeFormat=UTC&doCountdown=true")
+    suspend fun getStopEvents(
+        @Query("smsCode") smsCode: String,
+        @Query("minVisitsPerService") numberOfDepartures: Int
+    ): Response<JsonStopEvents>
 }
