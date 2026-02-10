@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.migrations
 
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.CREATE_SERVICE_VIEW_STATEMENT
 import javax.inject.Inject
 
 /**
@@ -36,42 +37,47 @@ import javax.inject.Inject
  * The version 1 schema is as follows;
  *
  * ```
- * CREATE TABLE bus_stops (
- *     _id INTEGER PRIMARY KEY,
- *     stopCode TEXT,
- *     stopName TEXT,
- *     x REAL,
- *     y REAL,
- *     orientation INTEGER,
- *     locality TEXT)
+ * CREATE TABLE database_info (
+ *     id INTEGER PRIMARY KEY NOT NULL,
+ *     update_timestamp INTEGER NOT NULL)
  *
- * CREATE TABLE "database_info" (
- *     "_id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
- *     "current_topo_id" TEXT,
- *     "updateTS" LONG)
+ * CREATE TABLE operator (
+ *     id INTEGER PRIMARY KEY NOT NULL,
+ *     reference TEXT NOT NULL,
+ *     national_code TEXT,
+ *     name TEXT NOT NULL)
  *
- * CREATE TABLE "service" (
- *     "_id" INTEGER,
- *     "name" TEXT,
- *     "desc" TEXT)
+ * CREATE TABLE service (
+ *     id INTEGER PRIMARY KEY NOT NULL,
+ *     name TEXT NOT NULL,
+ *     operator_id INTEGER NOT NULL,
+ *     description TEXT NOT NULL,
+ *     colour_primary TEXT,
+ *     colour_on_primary TEXT)
  *
- * CREATE TABLE "service_colour" (
- *     "_id" INTEGER,
- *     "hex_colour" TEXT)
+ * CREATE TABLE service_stop (
+ *     id INTEGER PRIMARY KEY NOT NULL,
+ *     service_id INTEGER NOT NULL,
+ *     stop_id INTEGER NOT NULL)
  *
- * CREATE TABLE "service_point" (
- *     "_id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
- *     "service_id" INTEGER,
- *     "stop_id" INTEGER,
- *     "order_value" INTEGER,
- *     "chainage" INTEGER,
- *     "latitude" REAL,
- *     "longitude" REAL)
+ * CREATE TABLE service_point (
+ *     id INTEGER PRIMARY KEY NOT NULL,
+ *     service_id INTEGER NOT NULL,
+ *     stop_id INTEGER,
+ *     route_section INTEGER NOT NULL,
+ *     order_value INTEGER NOT NULL,
+ *     latitude REAL NOT NULL,
+ *     longitude REAL NOT NULL)
  *
- * CREATE TABLE service_stops (
- *     _id INTEGER PRIMARY KEY AUTOINCREMENT,
- *     stopCode TEXT,
- *     serviceName TEXT)
+ * CREATE TABLE stop (
+ *     id INTEGER PRIMARY KEY NOT NULL,
+ *     naptan_code TEXT NOT NULL,
+ *     atco_code TEXT NOT NULL,
+ *     name TEXT NOT NULL,
+ *     locality TEXT,
+ *     latitude REAL NOT NULL,
+ *     longitude REAL NOT NULL,
+ *     bearing TEXT)
  * ```
  *
  * @author Niall Scott
@@ -80,171 +86,26 @@ internal class Migration1To2 @Inject constructor() : Migration(1, 2) {
 
     override fun migrate(db: SupportSQLiteDatabase) {
         db.apply {
-            removeOldIndices()
-            removeOldViews()
-            migrateDatabaseInfo()
-            migrateBusStops()
-            migrateServices()
-            migrateServiceStops()
-            migrateServicePoints()
+            createIndices()
+            createViews()
         }
     }
 
-    /**
-     * Remove any old indices from the database.
-     */
-    private fun SupportSQLiteDatabase.removeOldIndices() {
-        execSQL("DROP INDEX IF EXISTS service_point_index")
+    private fun SupportSQLiteDatabase.createIndices() {
+        execSQL("CREATE INDEX IF NOT EXISTS `service_index` ON `service` (`name`, `operator_id`)")
+
+        execSQL("""
+            CREATE INDEX IF NOT EXISTS `service_point_index`
+            ON `service_point` (`service_id`, `route_section`, `order_value`)
+        """.trimIndent())
+
+        execSQL("CREATE INDEX IF NOT EXISTS `stop_naptan_code_index` ON `stop` (`naptan_code`)")
+        execSQL("CREATE INDEX IF NOT EXISTS `stop_atco_code_index` ON `stop` (`atco_code`)")
     }
 
-    /**
-     * Remove any old views from the database.
-     */
-    private fun SupportSQLiteDatabase.removeOldViews() {
-        execSQL("DROP VIEW IF EXISTS view_services")
-        execSQL("DROP VIEW IF EXISTS view_bus_stops")
-        execSQL("DROP VIEW IF EXISTS view_service_points")
-    }
-
-    /**
-     * Perform a migration of the `database_info` table.
-     */
-    private fun SupportSQLiteDatabase.migrateDatabaseInfo() {
+    private fun SupportSQLiteDatabase.createViews() {
         execSQL("""
-            CREATE TABLE IF NOT EXISTS `temp_database_info` (
-                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                `topologyId` TEXT, 
-                `updateTimestamp` INTEGER NOT NULL)
-        """.trimIndent())
-
-        execSQL("""
-            INSERT INTO temp_database_info (topologyId, updateTimestamp) 
-            SELECT current_topo_id, updateTS 
-            FROM database_info 
-            WHERE updateTS NOT NULL 
-            ORDER BY updateTS DESC 
-            LIMIT 1
-        """.trimIndent())
-
-        execSQL("DROP TABLE database_info")
-        execSQL("ALTER TABLE temp_database_info RENAME TO database_info")
-    }
-
-    /**
-     * Perform a migration of the `bus_stop` table.
-     */
-    private fun SupportSQLiteDatabase.migrateBusStops() {
-        execSQL("""
-            CREATE TABLE IF NOT EXISTS `temp_bus_stop` (
-                `id` INTEGER NOT NULL, 
-                `stopCode` TEXT NOT NULL, 
-                `stopName` TEXT NOT NULL, 
-                `latitude` REAL, 
-                `longitude` REAL, 
-                `orientation` INTEGER, 
-                `locality` TEXT, 
-                PRIMARY KEY(`id`))
-        """.trimIndent())
-
-        execSQL("""
-            INSERT INTO temp_bus_stop (
-                id, stopCode, stopName, latitude, longitude, orientation, locality)
-            SELECT DISTINCT _id, stopCode, stopName, x, y, orientation, locality 
-            FROM bus_stops 
-            WHERE _id NOT NULL 
-            AND stopCode NOT NULL 
-            AND stopName NOT NULL
-        """.trimIndent())
-
-        execSQL("DROP TABLE bus_stops")
-        execSQL("ALTER TABLE temp_bus_stop RENAME TO bus_stop")
-        execSQL("CREATE INDEX IF NOT EXISTS `bus_stop_index` ON `bus_stop` (`stopCode`)")
-    }
-
-    /**
-     * Perform a migration of the `service` table.
-     */
-    private fun SupportSQLiteDatabase.migrateServices() {
-        execSQL("""
-            CREATE TABLE IF NOT EXISTS `temp_service` (
-                `id` INTEGER NOT NULL, 
-                `name` TEXT NOT NULL, 
-                `description` TEXT, 
-                `hexColour` TEXT, 
-                PRIMARY KEY(`id`))
-        """.trimIndent())
-
-        execSQL("""
-            INSERT INTO temp_service (id, name, description, hexColour) 
-            SELECT service._id, name, desc, service_colour.hex_colour 
-            FROM service 
-            LEFT JOIN service_colour ON service._id = service_colour._id 
-            WHERE service._id NOT NULL 
-            AND name NOT NULL 
-            GROUP BY service._id
-        """.trimIndent())
-
-        execSQL("DROP TABLE service")
-        execSQL("DROP TABLE service_colour")
-        execSQL("ALTER TABLE temp_service RENAME TO service")
-        execSQL("CREATE INDEX IF NOT EXISTS `service_index` ON `service` (`name`)")
-    }
-
-    /**
-     * Perform a migration of the `service_stop` table.
-     */
-    private fun SupportSQLiteDatabase.migrateServiceStops() {
-        execSQL("""
-            CREATE TABLE IF NOT EXISTS `temp_service_stop` (
-                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                `stopCode` TEXT NOT NULL,
-                `serviceName` TEXT NOT NULL)
-        """.trimIndent())
-
-        execSQL("""
-            INSERT INTO temp_service_stop (stopCode, serviceName) 
-            SELECT stopCode, serviceName 
-            FROM service_stops 
-            WHERE stopCode NOT NULL 
-            AND serviceName NOT NULL
-        """.trimIndent())
-
-        execSQL("DROP TABLE service_stops")
-        execSQL("ALTER TABLE temp_service_stop RENAME TO service_stop")
-    }
-
-    /**
-     * Perform a migration of the `service_point` table.
-     */
-    private fun SupportSQLiteDatabase.migrateServicePoints() {
-        execSQL("""
-            CREATE TABLE IF NOT EXISTS `temp_service_point` (
-                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-                `serviceId` INTEGER NOT NULL, 
-                `stopId` INTEGER, 
-                `orderValue` INTEGER NOT NULL, 
-                `chainage` INTEGER NOT NULL, 
-                `latitude` REAL NOT NULL, 
-                `longitude` REAL NOT NULL)
-        """.trimIndent())
-
-        execSQL("""
-            INSERT INTO temp_service_point (
-                serviceId, stopId, orderValue, chainage, latitude, longitude) 
-            SELECT service_id, stop_id, order_value, chainage, latitude, longitude 
-            FROM service_point 
-            WHERE service_id NOT NULL 
-            AND order_value NOT NULL 
-            AND chainage NOT NULL 
-            AND latitude NOT NULL 
-            AND longitude NOT NULL
-        """.trimIndent())
-
-        execSQL("DROP TABLE service_point")
-        execSQL("ALTER TABLE temp_service_point RENAME TO service_point")
-        execSQL("""
-            CREATE INDEX IF NOT EXISTS `service_point_index` 
-            ON `service_point` (`serviceId`, `chainage`, `orderValue`)
+            CREATE VIEW IF NOT EXISTS `service_view` AS $CREATE_SERVICE_VIEW_STATEMENT
         """.trimIndent())
     }
 }

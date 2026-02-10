@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,11 +43,11 @@ internal class ProxyDatabaseDao @Inject constructor(
     private val database: BusStopDatabase
 ) : DatabaseDao {
 
-    override val topologyIdFlow get() = database.withFlowIfDatabaseIsOpenOrEmptyFlow {
-        databaseDao.topologyIdFlow
-    }
-
     override val databaseMetadataFlow get() = database.withFlowIfDatabaseIsOpenOrEmptyFlow {
         databaseDao.databaseMetadataFlow
     }
+
+    override suspend fun getDatabaseUpdateTimestamp() = database
+        .databaseDao
+        .getDatabaseUpdateTimestamp()
 }

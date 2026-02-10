@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,7 +34,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
+import uk.org.rivernile.android.bustracker.core.busstops.StopDetails
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toStopIdentifier
 import javax.inject.Inject
 
 /**
@@ -55,29 +59,31 @@ class StopMarkersRetriever @Inject constructor(
     companion object {
 
         private const val STATE_SELECTED_SERVICES = "selectedServices"
-        private const val STATE_SELECTED_STOP_CODE = "selectedStopCode"
+        private const val STATE_SELECTED_STOP_IDENTIFIER = "selectedStopIdentifier"
     }
 
     /**
      * A [Flow] which emits [List]s of [UiStopMarker]s for display on the map.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    val stopMarkersFlow: Flow<List<UiStopMarker>?> get() =
-        savedState.getStateFlow<Array<String>?>(STATE_SELECTED_SERVICES, null)
-            .flatMapLatest(this::loadBusStops)
-            .combine(serviceListingFlow, this::mapToUiStopMarkers)
+    val stopMarkersFlow: Flow<List<UiStopMarker>?> get() = savedState
+        .getStateFlow<List<ParcelableServiceDescriptor>?>(STATE_SELECTED_SERVICES, null)
+        .flatMapLatest(this::loadBusStops)
+        .combine(serviceListingFlow, this::mapToUiStopMarkers)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val serviceListingFlow get() =
-        savedState.getStateFlow<String?>(STATE_SELECTED_STOP_CODE, null)
-            .flatMapLatest(serviceListingRetriever::getServiceListingFlow)
+        savedState.getStateFlow<ParcelableStopIdentifier?>(STATE_SELECTED_STOP_IDENTIFIER, null)
+            .flatMapLatest {
+                serviceListingRetriever.getServiceListingFlow(it?.toStopIdentifier())
+            }
 
     /**
      * This is called when stops should be loaded.
      *
      * @param filteredServices Filtered services, if any.
      */
-    private fun loadBusStops(filteredServices: Array<String>?) =
+    private fun loadBusStops(filteredServices: List<ServiceDescriptor>?) =
         busStopsRepository.getStopDetailsWithServiceFilterFlow(filteredServices?.toSet())
 
     /**
@@ -92,7 +98,7 @@ class StopMarkersRetriever @Inject constructor(
         stopDetails: List<StopDetails>?,
         serviceListing: UiServiceListing?
     ) = stopDetails?.map { sd ->
-        val sl = serviceListing?.takeIf { it.stopCode == sd.stopCode }
+        val sl = serviceListing?.takeIf { it.stopIdentifier == sd.stopIdentifier }
 
         mapToUiStopMarker(sd, sl)
     }?.ifEmpty { null }
@@ -109,7 +115,7 @@ class StopMarkersRetriever @Inject constructor(
         stopDetails: StopDetails,
         serviceListing: UiServiceListing?
     ) = UiStopMarker(
-        stopDetails.stopCode,
+        stopDetails.stopIdentifier,
         stopDetails.stopName,
         LatLng(stopDetails.location.latitude, stopDetails.location.longitude),
         stopDetails.orientation,

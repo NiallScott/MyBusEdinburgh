@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.livetimes.IsNightServiceDetector
 import javax.inject.Inject
 
@@ -36,12 +37,17 @@ import javax.inject.Inject
  * @param isNightServiceDetector Detect whether the service is a night service or not. This is only
  * used when the user has set a preference to say they wish for night services to be filtered out
  * of the results.
+ * @param serviceNameComparator Used to sort services.
  * @author Niall Scott
  */
 class LiveTimesTransformations @Inject constructor(
     private val isNightServiceDetector: IsNightServiceDetector,
-    private val serviceComparator: Comparator<String>
+    serviceNameComparator: Comparator<String>
 ) {
+
+    private val uiServiceComparator = compareBy<UiService, String>(serviceNameComparator) {
+        it.serviceDescriptor.serviceName
+    }
 
     /**
      * Given a [List] of [UiService]s, remove night services if the user has set this preference,
@@ -58,7 +64,7 @@ class LiveTimesTransformations @Inject constructor(
     ): List<UiService> {
         return if (!showNightServices) {
             services.filterNot {
-                isNightServiceDetector.isNightService(it.serviceName)
+                isNightServiceDetector.isNightService(it.serviceDescriptor.serviceName)
             }
         } else {
             services
@@ -75,8 +81,6 @@ class LiveTimesTransformations @Inject constructor(
         services: List<UiService>,
         sortByTime: Boolean
     ): List<UiService> {
-        val uiServiceComparator = compareBy(serviceComparator, UiService::serviceName)
-
         return if (sortByTime) {
             val minutesComparator = compareBy<UiService> {
                 it.vehicles.firstOrNull()?.departureMinutes ?: Int.MAX_VALUE
@@ -99,15 +103,15 @@ class LiveTimesTransformations @Inject constructor(
      */
     fun applyExpansions(
         services: List<UiService>,
-        expandedServices: Set<String>
+        expandedServices: Set<ServiceDescriptor>
     ): List<UiLiveTimesItem> {
         val mappedServices = mutableListOf<UiLiveTimesItem>()
 
         services.forEach { service ->
-            val serviceName = service.serviceName
+            val serviceName = service.serviceDescriptor
             val serviceColours = service.serviceColours
 
-            if (expandedServices.contains(service.serviceName)) {
+            if (expandedServices.contains(service.serviceDescriptor)) {
                 service.vehicles.mapIndexedTo(mappedServices) { index, vehicle ->
                     UiLiveTimesItem(serviceName, serviceColours, vehicle, index, true)
                 }

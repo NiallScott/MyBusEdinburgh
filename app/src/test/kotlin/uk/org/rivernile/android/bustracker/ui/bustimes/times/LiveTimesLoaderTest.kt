@@ -37,6 +37,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import kotlin.test.BeforeTest
@@ -77,7 +78,7 @@ class LiveTimesLoaderTest {
 
     @Test
     fun loadLiveTimesFlowWithNullStopCodeYieldsNoStopCodeError() = runTest {
-        whenever(arguments.stopCodeFlow)
+        whenever(arguments.stopIdentifierFlow)
             .thenReturn(flowOf(null))
         whenever(refreshController.refreshTriggerFlow)
             .thenReturn(flowOf(Unit))
@@ -93,19 +94,19 @@ class LiveTimesLoaderTest {
             awaitComplete()
         }
         verify(liveTimesRetriever, never())
-                .getLiveTimesFlow(any(), any())
+            .getLiveTimesFlow(any(), any())
     }
 
     @Test
     fun loadLiveTimesFlowWithPopulatedStopCodeLoadsLiveTimes() = runTest {
-        val stop = UiStop("123456", emptyList())
-        whenever(arguments.stopCodeFlow)
-            .thenReturn(flowOf("123456"))
+        val stop = UiStop("123456".toNaptanStopIdentifier(), emptyList())
+        whenever(arguments.stopIdentifierFlow)
+            .thenReturn(flowOf("123456".toNaptanStopIdentifier()))
         whenever(refreshController.refreshTriggerFlow)
             .thenReturn(flowOf(Unit))
         whenever(preferenceRepository.liveTimesNumberOfDeparturesFlow)
             .thenReturn(flowOf(4))
-        whenever(liveTimesRetriever.getLiveTimesFlow("123456", 4))
+        whenever(liveTimesRetriever.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4))
             .thenReturn(flowOf(UiResult.Success(123L, stop)))
         val expected = mock<UiTransformedResult.Success>()
         whenever(liveTimesTransform
@@ -120,17 +121,24 @@ class LiveTimesLoaderTest {
 
     @Test
     fun loadLiveTimesFlowWithStopCodeChangeCausesReload() = runTest {
-        val stop1 = UiStop("123456", emptyList())
-        val stop2 = UiStop("246813", emptyList())
-        whenever(arguments.stopCodeFlow)
-            .thenReturn(intervalFlowOf(0L, 10L, "123456", "246813"))
+        val stop1 = UiStop("123456".toNaptanStopIdentifier(), emptyList())
+        val stop2 = UiStop("246813".toNaptanStopIdentifier(), emptyList())
+        whenever(arguments.stopIdentifierFlow)
+            .thenReturn(
+                intervalFlowOf(
+                    0L,
+                    10L,
+                    "123456".toNaptanStopIdentifier(),
+                    "246813".toNaptanStopIdentifier()
+                )
+            )
         whenever(refreshController.refreshTriggerFlow)
             .thenReturn(flowOf(Unit))
         whenever(preferenceRepository.liveTimesNumberOfDeparturesFlow)
             .thenReturn(flowOf(4))
-        whenever(liveTimesRetriever.getLiveTimesFlow("123456", 4))
+        whenever(liveTimesRetriever.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4))
             .thenReturn(flowOf(UiResult.Success(123L, stop1)))
-        whenever(liveTimesRetriever.getLiveTimesFlow("246813", 4))
+        whenever(liveTimesRetriever.getLiveTimesFlow("246813".toNaptanStopIdentifier(), 4))
             .thenReturn(flowOf(UiResult.Success(123L, stop2)))
         val expected1 = mock<UiTransformedResult.Success>()
         val expected2 = mock<UiTransformedResult.Success>()
@@ -150,16 +158,16 @@ class LiveTimesLoaderTest {
 
     @Test
     fun loadLiveTimesFlowWithNumberOfDepartureChangeCausesReload() = runTest {
-        val stop = UiStop("123456", emptyList())
-        whenever(arguments.stopCodeFlow)
-            .thenReturn(flowOf("123456"))
+        val stop = UiStop("123456".toNaptanStopIdentifier(), emptyList())
+        whenever(arguments.stopIdentifierFlow)
+            .thenReturn(flowOf("123456".toNaptanStopIdentifier()))
         whenever(refreshController.refreshTriggerFlow)
             .thenReturn(flowOf(Unit))
         whenever(preferenceRepository.liveTimesNumberOfDeparturesFlow)
             .thenReturn(intervalFlowOf(0L, 10L, 4, 2))
-        whenever(liveTimesRetriever.getLiveTimesFlow("123456", 4))
+        whenever(liveTimesRetriever.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4))
             .thenReturn(flowOf(UiResult.Error(123L, ErrorType.NO_CONNECTIVITY)))
-        whenever(liveTimesRetriever.getLiveTimesFlow("123456", 2))
+        whenever(liveTimesRetriever.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 2))
             .thenReturn(flowOf(UiResult.Success(123L, stop)))
         val expected1 = mock<UiTransformedResult.Error>()
         val expected2 = mock<UiTransformedResult.Success>()
@@ -179,16 +187,16 @@ class LiveTimesLoaderTest {
 
     @Test
     fun loadLiveTimesFlowWitRefreshCausesReload() = runTest {
-        val stop = UiStop("123456", emptyList())
+        val stop = UiStop("123456".toNaptanStopIdentifier(), emptyList())
         val loadFlow1 = flowOf(UiResult.Error(123L, ErrorType.NO_CONNECTIVITY))
         val loadFlow2 = flowOf(UiResult.Success(123L, stop))
-        whenever(arguments.stopCodeFlow)
-            .thenReturn(flowOf("123456"))
+        whenever(arguments.stopIdentifierFlow)
+            .thenReturn(flowOf("123456".toNaptanStopIdentifier()))
         whenever(refreshController.refreshTriggerFlow)
             .thenReturn(intervalFlowOf(0L, 10L, Unit, Unit))
         whenever(preferenceRepository.liveTimesNumberOfDeparturesFlow)
             .thenReturn(flowOf(4))
-        whenever(liveTimesRetriever.getLiveTimesFlow("123456", 4))
+        whenever(liveTimesRetriever.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4))
             .thenReturn(loadFlow1, loadFlow2)
         val expected1 = mock<UiTransformedResult.Error>()
         val expected2 = mock<UiTransformedResult.Success>()

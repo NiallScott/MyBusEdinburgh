@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,6 +32,8 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
 import uk.org.rivernile.edinburghbustracker.android.R
 
 /**
@@ -48,23 +50,27 @@ class DeleteFavouriteDialogFragment : DialogFragment() {
         /**
          * Create a new instance of [DeleteFavouriteDialogFragment].
          *
-         * @param stopCode The stop code to delete the favourite for.
+         * @param stopIdentifier The stop to delete the favourite for.
          */
-        fun newInstance(stopCode: String) = DeleteFavouriteDialogFragment().apply {
-            arguments = Bundle().apply {
-                putString(DeleteFavouriteDialogFragmentViewModel.STATE_STOP_CODE, stopCode)
+        fun newInstance(stopIdentifier: StopIdentifier) =
+            DeleteFavouriteDialogFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable(
+                        DeleteFavouriteDialogFragmentViewModel.STATE_STOP_IDENTIFIER,
+                        stopIdentifier.toParcelableStopIdentifier()
+                    )
+                }
             }
-        }
     }
 
     private val viewModel by viewModels<DeleteFavouriteDialogFragmentViewModel>()
 
     override fun onCreateDialog(savedInstanceState: Bundle?) =
-            MaterialAlertDialogBuilder(requireContext())
-                    .setTitle(R.string.deletefavouritedialog_title)
-                    .setPositiveButton(R.string.okay) { _, _ ->
-                        viewModel.onUserConfirmDeletion()
-                    }
-                    .setNegativeButton(R.string.cancel, null)
-                    .create()
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.deletefavouritedialog_title)
+            .setPositiveButton(R.string.okay) { _, _ ->
+                viewModel.onUserConfirmDeletion()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .create()
 }

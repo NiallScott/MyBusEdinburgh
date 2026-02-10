@@ -26,15 +26,17 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+
 /**
  * A `Stop` represents a single stop returned from the real-time system. It holds a [List] of
  * [Service]s which in turn hold a [List] of [Vehicle]s which hold the departure times.
  *
- * @property stopCode The unique identifier of the stop.
+ * @property stopIdentifier The unique identifier of the stop.
  * @property services The [List] of [Service]s for this stop.
  * @author Niall Scott
  */
 public data class Stop(
-    val stopCode: String,
+    val stopIdentifier: StopIdentifier,
     val services: List<Service>
 )

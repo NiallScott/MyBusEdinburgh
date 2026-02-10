@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -36,8 +37,8 @@ import androidx.room.PrimaryKey
  * @property id The ID of the item.
  * @property serviceId The ID of the service this point is for.
  * @property stopId The ID of the stop this point is for.
+ * @property routeSection An ID of the group of points this point belongs to.
  * @property orderValue Used to order the results for correct route generating.
- * @property chainage An ID of the group of points this point belongs to.
  * @property latitude The latitude of the point.
  * @property longitude The longitude of the point.
  * @author Niall Scott
@@ -47,15 +48,15 @@ import androidx.room.PrimaryKey
     indices = [
         Index(
             name = "service_point_index",
-            value = [ "serviceId", "chainage", "orderValue" ]
+            value = [ "service_id", "route_section", "order_value" ]
         )
     ])
 internal data class RoomServicePointEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int,
-    val serviceId: Int,
-    val stopId: Int?,
-    val orderValue: Int,
-    val chainage: Int,
+    @PrimaryKey val id: Int,
+    @ColumnInfo("service_id") val serviceId: Int,
+    @ColumnInfo("stop_id") val stopId: Int?,
+    @ColumnInfo("route_section") val routeSection: Int,
+    @ColumnInfo("order_value") val orderValue: Int,
     val latitude: Double,
     val longitude: Double
 )

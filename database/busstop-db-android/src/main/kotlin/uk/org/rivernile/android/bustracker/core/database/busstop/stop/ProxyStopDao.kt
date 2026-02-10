@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabase
 import uk.org.rivernile.android.bustracker.core.database.busstop.withFlowIfDatabaseIsOpenOrEmptyFlow
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -43,30 +44,31 @@ internal class ProxyStopDao @Inject constructor(
     private val database: BusStopDatabase
 ) : StopDao {
 
-    override fun getNameForStopFlow(stopCode: String) = database
+    override fun getNameForStopFlow(naptanStopCode: String) = database
         .withFlowIfDatabaseIsOpenOrEmptyFlow {
-            stopDao.getNameForStopFlow(stopCode)
+            stopDao.getNameForStopFlow(naptanStopCode)
         }
 
-    override fun getLocationForStopFlow(stopCode: String) = database
+    override fun getLocationForStopFlow(naptanStopCode: String) = database
         .withFlowIfDatabaseIsOpenOrEmptyFlow {
-            stopDao.getLocationForStopFlow(stopCode)
+            stopDao.getLocationForStopFlow(naptanStopCode)
         }
 
-    override fun getStopDetailsFlow(stopCode: String) = database
+    override fun getStopDetailsFlow(naptanStopCode: String) = database
         .withFlowIfDatabaseIsOpenOrEmptyFlow {
-            stopDao.getStopDetailsFlow(stopCode)
+            stopDao.getStopDetailsFlow(naptanStopCode)
         }
 
-    override fun getStopDetailsFlow(stopCodes: Set<String>) = database
+    override fun getStopDetailsFlow(naptanStopCodes: Set<String>) = database
         .withFlowIfDatabaseIsOpenOrEmptyFlow {
-            stopDao.getStopDetailsFlow(stopCodes)
+            stopDao.getStopDetailsFlow(naptanStopCodes)
         }
 
-    override fun getStopDetailsWithServiceFilterFlow(serviceFilter: Set<String>?) = database
-        .withFlowIfDatabaseIsOpenOrEmptyFlow {
-            stopDao.getStopDetailsWithServiceFilterFlow(serviceFilter)
-        }
+    override fun getStopDetailsWithServiceFilterFlow(serviceFilter: Set<ServiceDescriptor>?) =
+        database
+            .withFlowIfDatabaseIsOpenOrEmptyFlow {
+                stopDao.getStopDetailsWithServiceFilterFlow(serviceFilter)
+            }
 
     override fun getStopDetailsWithinSpanFlow(
         minLatitude: Double,
@@ -87,7 +89,7 @@ internal class ProxyStopDao @Inject constructor(
         minLongitude: Double,
         maxLatitude: Double,
         maxLongitude: Double,
-        serviceFilter: Set<String>
+        serviceFilter: Set<ServiceDescriptor>
     ) = database.withFlowIfDatabaseIsOpenOrEmptyFlow {
         stopDao.getStopDetailsWithinSpanFlow(
             minLatitude = minLatitude,

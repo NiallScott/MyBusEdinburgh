@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -48,7 +48,9 @@ import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertRequest
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopName
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopName
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.coroutines.FlowTestObserver
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
@@ -95,7 +97,7 @@ class AddProximityAlertDialogFragmentViewModelTest {
         val viewModel = createViewModel()
         val observer = viewModel.stopDetailsLiveData.test()
 
-        viewModel.stopCode = null
+        viewModel.stopIdentifier = null
         advanceUntilIdle()
 
         observer.assertValues(null)
@@ -104,56 +106,59 @@ class AddProximityAlertDialogFragmentViewModelTest {
     @Test
     fun stopDetailsLiveDataEmitsStopDetailsWithNullNameWhenRepositoryReturnsNullName() = runTest {
         givenPermissionsTrackerFlowHasDefaultPermissionState()
-        whenever(busStopsRepository.getNameForStopFlow("123456"))
+        whenever(busStopsRepository.getNameForStopFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(null))
         val viewModel = createViewModel()
         val observer = viewModel.stopDetailsLiveData.test()
 
-        viewModel.stopCode = "123456"
+        viewModel.stopIdentifier = "123456".toParcelableNaptanStopIdentifier()
         advanceUntilIdle()
 
-        observer.assertValues(null, StopDetails("123456", null))
+        observer.assertValues(null, StopDetails("123456".toNaptanStopIdentifier(), null))
     }
 
     @Test
     fun stopDetailsLiveDataEmitsStopDetailsWithNameWhenRepositoryReturnsName() = runTest {
         givenPermissionsTrackerFlowHasDefaultPermissionState()
-        whenever(busStopsRepository.getNameForStopFlow("123456"))
+        whenever(busStopsRepository.getNameForStopFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(FakeStopName("Name", "Locality")))
         val viewModel = createViewModel()
         val observer = viewModel.stopDetailsLiveData.test()
 
-        viewModel.stopCode = "123456"
+        viewModel.stopIdentifier = "123456".toParcelableNaptanStopIdentifier()
         advanceUntilIdle()
 
-        observer.assertValues(null, StopDetails("123456", FakeStopName("Name", "Locality")))
+        observer.assertValues(
+            null,
+            StopDetails("123456".toNaptanStopIdentifier(), FakeStopName("Name", "Locality"))
+        )
     }
 
     @Test
     fun stopDetailsLiveDataEmitsCorrectDataOnChanges() = runTest {
         givenPermissionsTrackerFlowHasDefaultPermissionState()
-        whenever(busStopsRepository.getNameForStopFlow("123456"))
+        whenever(busStopsRepository.getNameForStopFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flow {
                 emit(FakeStopName("Name", "Locality"))
                 delay(10L)
                 emit(FakeStopName("Name 2", null))
             })
-        whenever(busStopsRepository.getNameForStopFlow("987654"))
+        whenever(busStopsRepository.getNameForStopFlow("987654".toNaptanStopIdentifier()))
             .thenReturn(flowOf(FakeStopName("Name 3", "Locality 3")))
         val viewModel = createViewModel()
 
         val observer = viewModel.stopDetailsLiveData.test()
-        viewModel.stopCode = "123456"
+        viewModel.stopIdentifier = "123456".toParcelableNaptanStopIdentifier()
         advanceUntilIdle()
-        viewModel.stopCode = "987654"
+        viewModel.stopIdentifier = "987654".toParcelableNaptanStopIdentifier()
         advanceUntilIdle()
 
         observer.assertValues(
             null,
-            StopDetails("123456", FakeStopName("Name", "Locality")),
-            StopDetails("123456", FakeStopName("Name 2", null)),
+            StopDetails("123456".toNaptanStopIdentifier(), FakeStopName("Name", "Locality")),
+            StopDetails("123456".toNaptanStopIdentifier(), FakeStopName("Name 2", null)),
             null,
-            StopDetails("987654", FakeStopName("Name 3", "Locality 3"))
+            StopDetails("987654".toNaptanStopIdentifier(), FakeStopName("Name 3", "Locality 3"))
         )
     }
 
@@ -198,17 +203,17 @@ class AddProximityAlertDialogFragmentViewModelTest {
 
             flowOf(UiState.CONTENT)
         }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any())
-        whenever(busStopsRepository.getNameForStopFlow("123456"))
+        whenever(busStopsRepository.getNameForStopFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(null))
-        whenever(busStopsRepository.getNameForStopFlow("987654"))
+        whenever(busStopsRepository.getNameForStopFlow("987654".toNaptanStopIdentifier()))
             .thenReturn(flowOf(null))
         val viewModel = createViewModel()
 
         viewModel.uiStateLiveData.test()
         advanceUntilIdle()
-        viewModel.stopCode = "123456"
+        viewModel.stopIdentifier = "123456".toParcelableNaptanStopIdentifier()
         advanceUntilIdle()
-        viewModel.stopCode = "987654"
+        viewModel.stopIdentifier = "987654".toParcelableNaptanStopIdentifier()
         advanceUntilIdle()
         permissionsObserver.finish()
         backgroundLocationPermissionObserver.finish()
@@ -216,9 +221,9 @@ class AddProximityAlertDialogFragmentViewModelTest {
 
         stopDetailsObserver.assertValues(
             null,
-            StopDetails("123456", null),
+            StopDetails("123456".toNaptanStopIdentifier(), null),
             null,
-            StopDetails("987654", null)
+            StopDetails("987654".toNaptanStopIdentifier(), null)
         )
     }
 
@@ -452,20 +457,7 @@ class AddProximityAlertDialogFragmentViewModelTest {
     fun handleAddClickedDoesNotAddAlertWhenStopCodeIsNull() = runTest {
         givenPermissionsTrackerFlowHasDefaultPermissionState()
         val viewModel = createViewModel()
-        viewModel.stopCode = null
-
-        viewModel.handleAddClicked(250)
-        advanceUntilIdle()
-
-        verify(alertsRepository, never())
-            .addProximityAlert(any())
-    }
-
-    @Test
-    fun handleAddClickedDoesNotAddAlertWhenStopCodeIsEmpty() = runTest {
-        givenPermissionsTrackerFlowHasDefaultPermissionState()
-        val viewModel = createViewModel()
-        viewModel.stopCode = ""
+        viewModel.stopIdentifier = null
 
         viewModel.handleAddClicked(250)
         advanceUntilIdle()
@@ -478,13 +470,13 @@ class AddProximityAlertDialogFragmentViewModelTest {
     fun handleAddClickedAddsAlertWhenStopCodeIsPopulated() = runTest {
         givenPermissionsTrackerFlowHasDefaultPermissionState()
         val viewModel = createViewModel()
-        viewModel.stopCode = "123456"
+        viewModel.stopIdentifier = "123456".toParcelableNaptanStopIdentifier()
 
         viewModel.handleAddClicked(250)
         advanceUntilIdle()
 
         verify(alertsRepository)
-            .addProximityAlert(ProximityAlertRequest("123456", 250))
+            .addProximityAlert(ProximityAlertRequest("123456".toNaptanStopIdentifier(), 250))
     }
 
     private fun givenPermissionsTrackerFlowHasDefaultPermissionState() {

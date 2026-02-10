@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -62,16 +62,18 @@ internal class RealProximityAlertTracker @Inject constructor(
 ) : ProximityAlertTracker {
 
     override suspend fun trackProximityAlert(alert: ProximityAlert) {
-        busStopsRepository.getStopLocation(alert.stopCode)
+        busStopsRepository.getStopLocation(alert.stopIdentifier)
             ?.let {
-                val duration = alert.timeAdded + MAX_DURATION_MILLIS - timeUtils.currentTimeMills
+                val duration = alert.timeAdded.toEpochMilliseconds() +
+                    MAX_DURATION_MILLIS -
+                    timeUtils.currentTimeMills
 
                 if (duration > 0) {
                     geofencingManager.addGeofence(
                         alert.id,
                         it.latitude,
                         it.longitude,
-                        alert.distanceFrom.toFloat(),
+                        alert.distanceFromMeters.toFloat(),
                         duration
                     )
                 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,7 @@ package uk.org.rivernile.android.bustracker.core.alerts
 import kotlinx.coroutines.flow.Flow
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRequest
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertRequest
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
  * A fake [AlertsRepository] for testing.
@@ -42,7 +43,8 @@ class FakeAlertsRepository(
     private val onRemoveProximityAlertWithId: (Int) -> Unit = { throw NotImplementedError() },
     private val onRemoveAllProximityAlerts: () -> Unit = { throw NotImplementedError() },
     private val onGetAllArrivalAlerts: () -> List<ArrivalAlert>? = { throw NotImplementedError() },
-    private val onGetAllArrivalAlertStopCodes: () -> Set<String>? = { throw NotImplementedError() },
+    private val onGetAllArrivalAlertStops: () -> Set<StopIdentifier>? =
+        { throw NotImplementedError() },
     private val onGetProximityAlert: (Int) -> ProximityAlert? = { throw NotImplementedError() },
     private val onGetArrivalAlertCount: () -> Int = { throw NotImplementedError() },
     private val onGetProximityAlertCount: () -> Int = { throw NotImplementedError() },
@@ -60,7 +62,7 @@ class FakeAlertsRepository(
         throw NotImplementedError()
     }
 
-    override suspend fun removeArrivalAlert(stopCode: String) {
+    override suspend fun removeArrivalAlert(stopIdentifier: StopIdentifier) {
         throw NotImplementedError()
     }
 
@@ -72,7 +74,7 @@ class FakeAlertsRepository(
         onRemoveAllArrivalAlerts()
     }
 
-    override suspend fun removeProximityAlert(stopCode: String) {
+    override suspend fun removeProximityAlert(stopIdentifier: StopIdentifier) {
         throw NotImplementedError()
     }
 
@@ -86,15 +88,15 @@ class FakeAlertsRepository(
 
     override suspend fun getAllArrivalAlerts() = onGetAllArrivalAlerts()
 
-    override suspend fun getAllArrivalAlertStopCodes() = onGetAllArrivalAlertStopCodes()
+    override suspend fun getAllArrivalAlertStops() = onGetAllArrivalAlertStops()
 
     override suspend fun getProximityAlert(id: Int) = onGetProximityAlert(id)
 
-    override fun hasArrivalAlertFlow(stopCode: String): Flow<Boolean> {
+    override fun hasArrivalAlertFlow(stopIdentifier: StopIdentifier): Flow<Boolean> {
         throw NotImplementedError()
     }
 
-    override fun hasProximityAlertFlow(stopCode: String): Flow<Boolean> {
+    override fun hasProximityAlertFlow(stopIdentifier: StopIdentifier): Flow<Boolean> {
         throw NotImplementedError()
     }
 

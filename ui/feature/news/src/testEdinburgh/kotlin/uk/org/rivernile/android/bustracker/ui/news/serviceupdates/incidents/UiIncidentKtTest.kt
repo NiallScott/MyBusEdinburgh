@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -190,11 +190,11 @@ class UiIncidentKtTest {
 
     private val coloursForServices get() = mapOf(
         "1" to ServiceColours(
-            primaryColour = 1,
+            colourPrimary = 1,
             colourOnPrimary = 2
         ),
         "3" to ServiceColours(
-            primaryColour = 3,
+            colourPrimary = 3,
             colourOnPrimary = 4
         )
     )

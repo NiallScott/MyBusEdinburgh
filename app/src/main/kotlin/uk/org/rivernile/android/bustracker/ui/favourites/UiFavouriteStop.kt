@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,17 +26,19 @@
 
 package uk.org.rivernile.android.bustracker.ui.favourites
 
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 
 /**
  * This represents a single favourite stop shown on the UI.
  *
  * @property favouriteStop The saved favourite data for this stop.
- * @property services The service listing for this stop code.
+ * @property services The service listing for this stop.
  * @property isSelected Is this stop currently selected on the UI?
  * @author Niall Scott
  */
 data class UiFavouriteStop(
     val favouriteStop: FavouriteStop,
-    val services: List<String>?,
-    val isSelected: Boolean)
+    val services: List<ServiceDescriptor>?,
+    val isSelected: Boolean
+)

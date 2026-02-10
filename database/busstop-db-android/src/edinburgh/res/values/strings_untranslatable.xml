@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+  ~ Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
   ~
   ~ This software is provided 'as-is', without any express or implied
   ~ warranty.  In no event will the authors or contributors be held liable for
@@ -31,5 +31,5 @@
     * Application strings *
     ***********************
     -->
-    <string name="asset_db_version" translatable="false">1759118403008</string>
+    <string name="asset_db_version" translatable="false">1770551874303</string>
 </resources>

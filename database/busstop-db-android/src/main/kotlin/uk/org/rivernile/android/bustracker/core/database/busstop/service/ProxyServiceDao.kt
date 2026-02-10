@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.service
 
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabase
 import uk.org.rivernile.android.bustracker.core.database.busstop.withFlowIfDatabaseIsOpenOrEmptyFlow
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -48,22 +49,22 @@ internal class ProxyServiceDao @Inject constructor(
             serviceDao.allServiceNamesWithColourFlow
         }
 
-    override fun getServiceNamesWithColourFlow(stopCode: String) = database
+    override fun getServiceNamesWithColourFlow(stopNaptanCode: String) = database
         .withFlowIfDatabaseIsOpenOrEmptyFlow {
-            serviceDao.getServiceNamesWithColourFlow(stopCode)
+            serviceDao.getServiceNamesWithColourFlow(stopNaptanCode)
         }
 
     override val serviceCountFlow get() = database.withFlowIfDatabaseIsOpenOrEmptyFlow {
         serviceDao.serviceCountFlow
     }
 
-    override fun getColoursForServicesFlow(services: Set<String>?) = database
+    override fun getColoursForServicesFlow(services: Set<ServiceDescriptor>?) = database
         .withFlowIfDatabaseIsOpenOrEmptyFlow {
             serviceDao.getColoursForServicesFlow(services)
         }
 
-    override fun getServiceDetailsFlow(stopCode: String) = database
+    override fun getServiceDetailsFlow(naptanCode: String) = database
         .withFlowIfDatabaseIsOpenOrEmptyFlow {
-            serviceDao.getServiceDetailsFlow(stopCode)
+            serviceDao.getServiceDetailsFlow(naptanCode)
         }
 }

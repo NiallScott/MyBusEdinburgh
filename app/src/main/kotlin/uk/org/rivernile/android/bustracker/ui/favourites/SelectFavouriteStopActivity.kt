@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,6 +43,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.android.bustracker.ui.HasScrollableContent
 import uk.org.rivernile.edinburghbustracker.android.R
@@ -99,14 +101,17 @@ class SelectFavouriteStopActivity : AppCompatActivity(),
         }
     }
 
-    override fun onCreateShortcut(stopCode: String, stopName: String) {
+    override fun onCreateShortcut(stopIdentifier: StopIdentifier, stopName: String) {
         val busTimesIntent = Intent(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA)
             .setClass(this, DisplayStopDataActivity::class.java)
             .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            .putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
+            .putExtra(
+                DisplayStopDataActivity.EXTRA_STOP_CODE,
+                stopIdentifier.toNaptanStopCodeOrThrow()
+            )
 
         val result = ShortcutInfoCompat
-            .Builder(this, stopCode)
+            .Builder(this, stopIdentifier.toNaptanStopCodeOrThrow())
             .setIntent(busTimesIntent)
             .setShortLabel(stopName)
             .setLongLabel(stopName)
@@ -124,6 +129,14 @@ class SelectFavouriteStopActivity : AppCompatActivity(),
         override fun onFragmentResumed(fm: FragmentManager, f: Fragment) {
             viewBinding.appBarLayout.liftOnScrollTargetViewId =
                     (f as? HasScrollableContent)?.scrollableContentIdRes ?: View.NO_ID
+        }
+    }
+
+    private fun StopIdentifier.toNaptanStopCodeOrThrow(): String {
+        return if (this is NaptanStopIdentifier) {
+            naptanStopCode
+        } else {
+            throw UnsupportedOperationException("Only Naptan codes are supported for now.")
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,9 +35,9 @@ package uk.org.rivernile.android.bustracker.ui.alerts.time
 enum class UiState {
 
     /**
-     * There was no stop code set.
+     * There was no stop identifier set.
      */
-    ERROR_NO_STOP_CODE,
+    ERROR_NO_STOP_IDENTIFIER,
     /**
      * There are no known services for the stop.
      */

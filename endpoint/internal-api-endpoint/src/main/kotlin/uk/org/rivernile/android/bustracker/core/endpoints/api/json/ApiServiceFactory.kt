@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,21 +37,9 @@ import javax.net.SocketFactory
  * The purpose of this class is to provide instances of [ApiService] depending on the criteria
  * supplied in the parameters to the methods of this class.
  *
- * @param retrofit The base [Retrofit] instance to use for the [ApiService] instance.
- * @param okHttpClient The base [OkHttpClient] instance to use for the [ApiService] instance.
  * @author Niall Scott
  */
-internal class ApiServiceFactory @Inject constructor(
-    @param:ForInternalApi private val retrofit: Retrofit,
-    @param:ForInternalApi private val okHttpClient: OkHttpClient
-) {
-
-    /**
-     * An instance which goes over the default network route. This is lazily initialised.
-     */
-    private val defaultInstance: ApiService by lazy {
-        createApiService(retrofit)
-    }
+internal interface ApiServiceFactory {
 
     /**
      * Get the [ApiService] instance to use for calls to this service. Optionally, a [SocketFactory]
@@ -60,7 +48,19 @@ internal class ApiServiceFactory @Inject constructor(
      * @param socketFactory The optional [SocketFactory] instance to use for network calls.
      * @return The [ApiService] instance to use to contact the service.
      */
-    fun getApiInstance(socketFactory: SocketFactory? = null): ApiService {
+    fun getApiInstance(socketFactory: SocketFactory? = null): ApiService
+}
+
+internal class RealApiServiceFactory @Inject constructor(
+    @param:ForInternalApi private val retrofit: Retrofit,
+    @param:ForInternalApi private val okHttpClient: OkHttpClient
+) : ApiServiceFactory {
+
+    private val defaultInstance: ApiService by lazy {
+        retrofit.create()
+    }
+
+    override fun getApiInstance(socketFactory: SocketFactory?): ApiService {
         return socketFactory?.let { sf ->
             val newOkHttpClient = okHttpClient.newBuilder()
                 .socketFactory(sf)
@@ -68,15 +68,7 @@ internal class ApiServiceFactory @Inject constructor(
             val newRetrofit = retrofit.newBuilder()
                 .client(newOkHttpClient)
                 .build()
-            createApiService(newRetrofit)
+            newRetrofit.create()
         } ?: defaultInstance
     }
-
-    /**
-     * Given a [Retrofit] instance, create the [ApiService] instance for this.
-     *
-     * @param retrofit The [Retrofit] instance to use.
-     * @return A new [ApiService] instance, created from the provided [Retrofit] instance.
-     */
-    private fun createApiService(retrofit: Retrofit) = retrofit.create<ApiService>()
 }

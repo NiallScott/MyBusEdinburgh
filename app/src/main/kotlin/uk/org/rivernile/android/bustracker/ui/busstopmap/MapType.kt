@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -50,7 +50,7 @@ enum class MapType(val value: Int) {
          * @return The [MapType] associated with this value. Returns [MapType.NORMAL] when the value
          * is unknown.
          */
-        fun fromValue(value: Int) = values().firstOrNull {
+        fun fromValue(value: Int) = entries.firstOrNull {
             it.value == value
         } ?: NORMAL
     }

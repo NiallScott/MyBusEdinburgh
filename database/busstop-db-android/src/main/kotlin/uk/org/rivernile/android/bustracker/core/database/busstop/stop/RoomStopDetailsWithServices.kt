@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,21 +26,40 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 
+import androidx.room.ColumnInfo
 import androidx.room.Embedded
+import androidx.room.Junction
+import androidx.room.Relation
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.RoomServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.RoomServiceView
+import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.RoomServiceStopEntity
+import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
 
 /**
  *The Room specific implementation of [StopDetailsWithServices].
  *
- * @property stopCode See [StopDetailsWithServices.stopCode].
+ * @property id The ID of the stop.
+ * @property naptanStopIdentifier See [StopDetailsWithServices.naptanStopIdentifier].
  * @property stopName See [StopDetailsWithServices.stopName].
  * @property location See [StopDetailsWithServices.location].
  * @property orientation See [StopDetailsWithServices.orientation].
  * @author Niall Scott
  */
 internal data class RoomStopDetailsWithServices(
-    override val stopCode: String,
+    val id: Int,
+    @ColumnInfo("naptan_code") override val naptanStopIdentifier: NaptanStopIdentifier,
     @Embedded override val stopName: RoomStopName,
     @Embedded override val location: RoomStopLocation,
-    override val orientation: StopOrientation,
-    override val serviceListing: String?
+    @ColumnInfo("bearing") override val orientation: StopOrientation,
+    @Relation(
+        entity = RoomServiceView::class,
+        parentColumn = "id",
+        entityColumn = "id",
+        associateBy = Junction(
+            value = RoomServiceStopEntity::class,
+            parentColumn = "stop_id",
+            entityColumn = "service_id"
+        )
+    )
+    override val serviceListing: List<RoomServiceDescriptor>?
 ) : StopDetailsWithServices

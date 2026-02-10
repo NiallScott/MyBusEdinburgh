@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,6 +35,7 @@ import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Instant
 
 /**
  * Tests for [ProxyDatabaseDao].
@@ -44,41 +45,12 @@ import kotlin.test.assertTrue
 class ProxyDatabaseDaoTest {
 
     @Test
-    fun topologyIdFlowRespondsToDatabaseOpenStatus() = runTest {
-        val flows = ArrayDeque(
-            listOf(
-                flowOf("first"),
-                flowOf("second")
-            )
-        )
-        val dao = createProxyDatabaseDao(
-            database = FakeBusStopDatabase(
-                onDatabaseDao = {
-                    FakeDatabaseDao(
-                        onTopologyIdFlow = { flows.removeFirst() }
-                    )
-                },
-                onIsDatabaseOpenFlow = { intervalFlowOf(0L, 10L, true, false, true) }
-            )
-        )
-
-        dao.topologyIdFlow.test {
-            assertEquals("first", awaitItem())
-            assertEquals("second", awaitItem())
-            awaitComplete()
-        }
-        assertTrue(flows.isEmpty())
-    }
-
-    @Test
     fun databaseMetadataFlowRespondsToDatabaseOpenStatus() = runTest {
         val first = FakeDatabaseMetadata(
-            updateTimestamp = 1L,
-            topologyVersionId = "a"
+            updateTimestamp = Instant.fromEpochMilliseconds(1L)
         )
         val second = FakeDatabaseMetadata(
-            updateTimestamp = 2L,
-            topologyVersionId = "b"
+            updateTimestamp = Instant.fromEpochMilliseconds(2L)
         )
         val databaseMetadatas = ArrayDeque(listOf(first, second))
         val dao = createProxyDatabaseDao(
@@ -100,6 +72,26 @@ class ProxyDatabaseDaoTest {
             awaitComplete()
         }
         assertTrue(databaseMetadatas.isEmpty())
+    }
+
+    @Test
+    fun getDatabaseUpdateTimestampReturnsValueFromDao() = runTest {
+        val dao  = createProxyDatabaseDao(
+            database = FakeBusStopDatabase(
+                onDatabaseDao = {
+                    FakeDatabaseDao(
+                        onGetDatabaseUpdateTimestamp = { Instant.fromEpochMilliseconds(123L) }
+                    )
+                }
+            )
+        )
+
+        val result = dao.getDatabaseUpdateTimestamp()
+
+        assertEquals(
+            Instant.fromEpochMilliseconds(123L),
+            result
+        )
     }
 
     private fun createProxyDatabaseDao(

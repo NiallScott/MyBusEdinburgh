@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,6 +46,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toStopIdentifier
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
@@ -76,13 +79,17 @@ class AddEditFavouriteStopDialogFragmentViewModel @Inject constructor(
     companion object {
 
         /**
-         * State key for stop code.
+         * State key for stop identifier.
          */
-        const val STATE_STOP_CODE = "stopCode"
-        private const val STATE_PRE_POPULATED_STOP_CODE = "prePopulatedStopCode"
+        const val STATE_STOP_IDENTIFIER = "stopIdentifier"
+        private const val STATE_PRE_POPULATED_STOP_IDENTIFIER = "prePopulatedStopIdentifier"
     }
 
-    private val stopCodeFlow = savedState.getStateFlow<String?>(STATE_STOP_CODE, null)
+    private val parcelableStopIdentifierFlow = savedState
+        .getStateFlow<ParcelableStopIdentifier?>(STATE_STOP_IDENTIFIER, null)
+
+    private val stopIdentifierFlow get() = parcelableStopIdentifierFlow
+        .map { it?.toStopIdentifier() }
 
     private val stopNameFlow = MutableStateFlow<String?>(null)
 
@@ -96,10 +103,10 @@ class AddEditFavouriteStopDialogFragmentViewModel @Inject constructor(
         }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val uiStateFlow = stopCodeFlow
-            .flatMapLatest(fetcher::loadFavouriteStopAndDetails)
-            .flowOn(defaultDispatcher)
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), UiState.InProgress)
+    private val uiStateFlow = stopIdentifierFlow
+        .flatMapLatest(fetcher::loadFavouriteStopAndDetails)
+        .flowOn(defaultDispatcher)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), UiState.InProgress)
 
     /**
      * Emits the current [UiState].
@@ -142,8 +149,9 @@ class AddEditFavouriteStopDialogFragmentViewModel @Inject constructor(
      *
      * @return `true` if the stop name field should be pre-populated, otherwise `false`.
      */
-    private fun shouldPrePopulateName(state: UiState.Mode) =
-            state.stopCode != savedState[STATE_PRE_POPULATED_STOP_CODE]
+    private fun shouldPrePopulateName(state: UiState.Mode) = state
+        .stopIdentifier
+        .toParcelableStopIdentifier() != savedState[STATE_PRE_POPULATED_STOP_IDENTIFIER]
 
     /**
      * Get the stop name to use for the purpose of pre-populating the stop name field.
@@ -152,11 +160,13 @@ class AddEditFavouriteStopDialogFragmentViewModel @Inject constructor(
      * name should come from, and what its contents should be.
      */
     private fun getPrePopulatedName(state: UiState.Mode): Event<String> {
-        savedState[STATE_PRE_POPULATED_STOP_CODE] = state.stopCode
+        savedState[STATE_PRE_POPULATED_STOP_IDENTIFIER] = state
+            .stopIdentifier
+            .toParcelableStopIdentifier()
 
         return when (state) {
             is UiState.Mode.Add -> state.stopName?.let(textFormattingUtils::formatBusStopName)
-                    ?: state.stopCode
+                ?: state.stopIdentifier.toHumanReadableString()
             is UiState.Mode.Edit -> state.favouriteStop.stopName
         }.let(::Event)
     }
@@ -170,8 +180,9 @@ class AddEditFavouriteStopDialogFragmentViewModel @Inject constructor(
     private fun addFavouriteStop(mode: UiState.Mode.Add) {
         stopName?.ifEmpty { null }?.let { stopName ->
             val favouriteStop = FavouriteStop(
-                    stopCode = mode.stopCode,
-                    stopName = stopName)
+                stopIdentifier = mode.stopIdentifier,
+                stopName = stopName
+            )
 
             applicationCoroutineScope.launch(defaultDispatcher) {
                 // This is launched in application scope as the Dialog is dismissed right away when

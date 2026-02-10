@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import kotlin.test.BeforeTest
@@ -53,54 +57,34 @@ class UiStateCalculatorTest {
 
     @Test
     fun createUiStateFlowEmitsNoStopCodeWhenStopCodeIsNull() = runTest {
-        val stopCodeFlow = flowOf<String?>(null)
+        val stopIdentifierFlow = flowOf<StopIdentifier?>(null)
         val stopDetailsFlow = flowOf<StopDetails?>(null)
-        val availableServicesFlow = flowOf<List<String>?>(null)
+        val availableServicesFlow = flowOf<List<ServiceDescriptor>?>(null)
         val permissionsFlow = flowOf(PermissionsState())
 
         calculator
             .createUiStateFlow(
-                stopCodeFlow,
+                stopIdentifierFlow,
                 stopDetailsFlow,
                 availableServicesFlow,
                 permissionsFlow
             )
             .test {
-                assertEquals(UiState.ERROR_NO_STOP_CODE, awaitItem())
-                awaitComplete()
-            }
-    }
-
-    @Test
-    fun createUiStateFlowEmitsNoStopCodeWhenStopCodeIsEmpty() = runTest {
-        val stopCodeFlow = flowOf<String?>("")
-        val stopDetailsFlow = flowOf<StopDetails?>(null)
-        val availableServicesFlow = flowOf<List<String>?>(null)
-        val permissionsFlow = flowOf(PermissionsState())
-
-        calculator
-            .createUiStateFlow(
-                stopCodeFlow,
-                stopDetailsFlow,
-                availableServicesFlow,
-                permissionsFlow
-            )
-            .test {
-                assertEquals(UiState.ERROR_NO_STOP_CODE, awaitItem())
+                assertEquals(UiState.ERROR_NO_STOP_IDENTIFIER, awaitItem())
                 awaitComplete()
             }
     }
 
     @Test
     fun createUiStateFlowEmitsPermissionDeniedWhenPermissionIsDenied() = runTest {
-        val stopCodeFlow = flowOf<String?>("123456")
+        val stopIdentifierFlow = flowOf<StopIdentifier?>("123456".toNaptanStopIdentifier())
         val stopDetailsFlow = flowOf<StopDetails?>(null)
-        val availableServicesFlow = flowOf<List<String>?>(null)
+        val availableServicesFlow = flowOf<List<ServiceDescriptor>?>(null)
         val permissionsFlow = flowOf(PermissionsState(PermissionState.DENIED))
 
         calculator
             .createUiStateFlow(
-                stopCodeFlow,
+                stopIdentifierFlow,
                 stopDetailsFlow,
                 availableServicesFlow,
                 permissionsFlow
@@ -112,14 +96,14 @@ class UiStateCalculatorTest {
 
     @Test
     fun createUiStateFlowEmitsPermissionRequiredWhenPermissionIsUngranted() = runTest {
-        val stopCodeFlow = flowOf<String?>("123456")
+        val stopIdentifierFlow = flowOf<StopIdentifier?>("123456".toNaptanStopIdentifier())
         val stopDetailsFlow = flowOf<StopDetails?>(null)
-        val availableServicesFlow = flowOf<List<String>?>(null)
+        val availableServicesFlow = flowOf<List<ServiceDescriptor>?>(null)
         val permissionsFlow = flowOf(PermissionsState(PermissionState.UNGRANTED))
 
         calculator
             .createUiStateFlow(
-                stopCodeFlow,
+                stopIdentifierFlow,
                 stopDetailsFlow,
                 availableServicesFlow,
                 permissionsFlow
@@ -131,14 +115,14 @@ class UiStateCalculatorTest {
 
     @Test
     fun createUiStateFlowEmitsPermissionRequiredWhenPermissionIsShowRationale() = runTest {
-        val stopCodeFlow = flowOf<String?>("123456")
+        val stopIdentifierFlow = flowOf<StopIdentifier?>("123456".toNaptanStopIdentifier())
         val stopDetailsFlow = flowOf<StopDetails?>(null)
-        val availableServicesFlow = flowOf<List<String>?>(null)
+        val availableServicesFlow = flowOf<List<ServiceDescriptor>?>(null)
         val permissionsFlow = flowOf(PermissionsState(PermissionState.SHOW_RATIONALE))
 
         calculator
             .createUiStateFlow(
-                stopCodeFlow,
+                stopIdentifierFlow,
                 stopDetailsFlow,
                 availableServicesFlow,
                 permissionsFlow
@@ -151,14 +135,14 @@ class UiStateCalculatorTest {
 
     @Test
     fun createUiStateFlowEmitsProgressWhenStopDetailsIsNullAndAvailableServicesIsNull() = runTest {
-        val stopCodeFlow = flowOf<String?>("123456")
+        val stopIdentifierFlow = flowOf<StopIdentifier?>("123456".toNaptanStopIdentifier())
         val stopDetailsFlow = flowOf<StopDetails?>(null)
-        val availableServicesFlow = flowOf<List<String>?>(null)
+        val availableServicesFlow = flowOf<List<ServiceDescriptor>?>(null)
         val permissionsFlow = flowOf(PermissionsState(PermissionState.GRANTED))
 
         calculator
             .createUiStateFlow(
-                stopCodeFlow,
+                stopIdentifierFlow,
                 stopDetailsFlow,
                 availableServicesFlow,
                 permissionsFlow
@@ -172,14 +156,14 @@ class UiStateCalculatorTest {
     @Test
     fun createUiStateFlowEmitsProgressWhenStopDetailsIsNullAndAvailableServicesIsNotNull() =
             runTest {
-        val stopCodeFlow = flowOf<String?>("123456")
+        val stopIdentifierFlow = flowOf<StopIdentifier?>("123456".toNaptanStopIdentifier())
         val stopDetailsFlow = flowOf<StopDetails?>(null)
-        val availableServicesFlow = flowOf(listOf("1", "2", "3"))
+        val availableServicesFlow = flowOf(listOf(service1, service2, service3))
         val permissionsFlow = flowOf(PermissionsState(PermissionState.GRANTED))
 
         calculator
             .createUiStateFlow(
-                stopCodeFlow,
+                stopIdentifierFlow,
                 stopDetailsFlow,
                 availableServicesFlow,
                 permissionsFlow
@@ -193,14 +177,14 @@ class UiStateCalculatorTest {
     @Test
     fun createUiStateFlowEmitsProgressWhenStopDetailsIsNotNullAndAvailableServicesIsNull() =
             runTest {
-        val stopCodeFlow = flowOf<String?>("123456")
-        val stopDetailsFlow = flowOf(StopDetails("123456", null))
-        val availableServicesFlow = flowOf<List<String>?>(null)
+        val stopIdentifierFlow = flowOf<StopIdentifier?>("123456".toNaptanStopIdentifier())
+        val stopDetailsFlow = flowOf(StopDetails("123456".toNaptanStopIdentifier(), null))
+        val availableServicesFlow = flowOf<List<ServiceDescriptor>?>(null)
         val permissionsFlow = flowOf(PermissionsState(PermissionState.GRANTED))
 
         calculator
             .createUiStateFlow(
-                stopCodeFlow,
+                stopIdentifierFlow,
                 stopDetailsFlow,
                 availableServicesFlow,
                 permissionsFlow
@@ -213,14 +197,14 @@ class UiStateCalculatorTest {
 
     @Test
     fun createUiStateFlowEmitsNoServicesWhenServicesIsEmpty() = runTest {
-        val stopCodeFlow = flowOf<String?>("123456")
-        val stopDetailsFlow = flowOf(StopDetails("123456", null))
-        val availableServicesFlow = flowOf<List<String>?>(emptyList())
+        val stopIdentifierFlow = flowOf<StopIdentifier?>("123456".toNaptanStopIdentifier())
+        val stopDetailsFlow = flowOf(StopDetails("123456".toNaptanStopIdentifier(), null))
+        val availableServicesFlow = flowOf<List<ServiceDescriptor>?>(emptyList())
         val permissionsFlow = flowOf(PermissionsState(PermissionState.GRANTED))
 
         calculator
             .createUiStateFlow(
-                stopCodeFlow,
+                stopIdentifierFlow,
                 stopDetailsFlow,
                 availableServicesFlow,
                 permissionsFlow
@@ -233,14 +217,14 @@ class UiStateCalculatorTest {
 
     @Test
     fun createUiStateFlowEmitsContentWhenConditionsAreMet() = runTest {
-        val stopCodeFlow = flowOf<String?>("123456")
-        val stopDetailsFlow = flowOf(StopDetails("123456", null))
-        val availableServicesFlow = flowOf(listOf("1", "2", "3"))
+        val stopIdentifierFlow = flowOf<StopIdentifier?>("123456".toNaptanStopIdentifier())
+        val stopDetailsFlow = flowOf(StopDetails("123456".toNaptanStopIdentifier(), null))
+        val availableServicesFlow = flowOf(listOf(service1, service2, service3))
         val permissionsFlow = flowOf(PermissionsState(PermissionState.GRANTED))
 
         calculator
             .createUiStateFlow(
-                stopCodeFlow,
+                stopIdentifierFlow,
                 stopDetailsFlow,
                 availableServicesFlow,
                 permissionsFlow
@@ -253,14 +237,19 @@ class UiStateCalculatorTest {
 
     @Test
     fun createUiStateFlowEmitsCorrectItemsWithRepresentativeExample() = runTest {
-        val stopCodeFlow = intervalFlowOf(0L, 100L, null, "123456")
-        val stopDetailsFlow = intervalFlowOf(0L, 200L, null, StopDetails("123456", null))
+        val stopIdentifierFlow = intervalFlowOf(0L, 100L, null, "123456".toNaptanStopIdentifier())
+        val stopDetailsFlow = intervalFlowOf(
+            0L,
+            200L,
+            null,
+            StopDetails("123456".toNaptanStopIdentifier(), null)
+        )
         val availableServicesFlow = flow {
             emit(null)
             delay(300L)
             emit(emptyList())
             delay(100L)
-            emit(listOf("1", "2", "3"))
+            emit(listOf(service1, service2, service3))
         }
         val permissionFlow = intervalFlowOf(
             0L,
@@ -271,13 +260,13 @@ class UiStateCalculatorTest {
 
         calculator
             .createUiStateFlow(
-                stopCodeFlow,
+                stopIdentifierFlow,
                 stopDetailsFlow,
                 availableServicesFlow,
                 permissionFlow
             )
             .test {
-                assertEquals(UiState.ERROR_NO_STOP_CODE, awaitItem())
+                assertEquals(UiState.ERROR_NO_STOP_IDENTIFIER, awaitItem())
                 assertEquals(UiState.ERROR_PERMISSION_REQUIRED, awaitItem())
                 assertEquals(UiState.PROGRESS, awaitItem())
                 assertEquals(UiState.ERROR_NO_SERVICES, awaitItem())
@@ -285,4 +274,19 @@ class UiStateCalculatorTest {
                 awaitComplete()
             }
     }
+
+    private val service1 get() = FakeServiceDescriptor(
+        serviceName = "1",
+        operatorCode = "TEST1"
+    )
+
+    private val service2 get() = FakeServiceDescriptor(
+        serviceName = "2",
+        operatorCode = "TEST2"
+    )
+
+    private val service3 get() = FakeServiceDescriptor(
+        serviceName = "3",
+        operatorCode = "TEST3"
+    )
 }

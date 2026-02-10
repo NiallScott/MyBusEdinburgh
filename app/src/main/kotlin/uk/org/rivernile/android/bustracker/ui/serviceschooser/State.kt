@@ -31,6 +31,9 @@ import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableServiceDescriptor
 import javax.inject.Inject
 /**
  * This class manages stateful items within [ServicesChooserDialogFragmentViewModel].
@@ -48,7 +51,7 @@ class State @Inject constructor(
         private const val STATE_SELECTED_SERVICES = "selectedServices"
     }
 
-    private val selectedServicesFlowInternal: Flow<ArrayList<String>?>
+    private val selectedServicesFlowInternal: Flow<ArrayList<ParcelableServiceDescriptor>?>
 
     /**
      * This [Flow] emits the current [List] of selected service names.
@@ -66,8 +69,8 @@ class State @Inject constructor(
     /**
      * This field exposes the selected services.
      */
-    val selectedServices: ArrayList<String>? get() =
-        savedState.get<ArrayList<String>?>(STATE_SELECTED_SERVICES)
+    val selectedServices: ArrayList<ParcelableServiceDescriptor>? get() =
+        savedState.get<ArrayList<ParcelableServiceDescriptor>?>(STATE_SELECTED_SERVICES)
             ?.ifEmpty { null }
 
     init {
@@ -80,7 +83,7 @@ class State @Inject constructor(
             }
 
         selectedServicesFlowInternal = savedState
-            .getStateFlow<ArrayList<String>?>(
+            .getStateFlow<ArrayList<ParcelableServiceDescriptor>?>(
                 STATE_SELECTED_SERVICES,
                 defaultSelectedServices
             )
@@ -90,16 +93,16 @@ class State @Inject constructor(
      * This is called when a service has been clicked. If the service is already marked as selected,
      * it will be removed. If it's not marked as selected, it will be added.
      *
-     * @param serviceName The service which was clicked.
+     * @param serviceDescriptor The service which was clicked.
      */
-    fun onServiceClicked(serviceName: String) {
+    fun onServiceClicked(serviceDescriptor: ServiceDescriptor) {
         val selectedServices = savedState
-            .get<ArrayList<String>?>(STATE_SELECTED_SERVICES)
+            .get<ArrayList<ParcelableServiceDescriptor>?>(STATE_SELECTED_SERVICES)
             ?.toMutableSet()
             ?: mutableSetOf()
 
-        if (!selectedServices.add(serviceName)) {
-            selectedServices -= serviceName
+        if (!selectedServices.add(serviceDescriptor.toParcelableServiceDescriptor())) {
+            selectedServices -= serviceDescriptor.toParcelableServiceDescriptor()
         }
 
         savedState[STATE_SELECTED_SERVICES] = selectedServices

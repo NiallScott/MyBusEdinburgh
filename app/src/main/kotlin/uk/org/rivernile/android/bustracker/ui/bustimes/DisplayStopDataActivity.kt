@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -44,7 +44,6 @@ import androidx.viewpager2.widget.MarginPageTransformer
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragment
@@ -63,6 +62,10 @@ import javax.inject.Inject
 import kotlin.math.abs
 import androidx.core.net.toUri
 import androidx.core.view.ViewGroupCompat
+import uk.org.rivernile.android.bustracker.core.busstops.StopDetails
+import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 
 /**
  * The purpose of this [AppCompatActivity] is to display to the user live departure times and
@@ -119,10 +122,12 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
         enableEdgeToEdge()
 
         intent.let {
-            viewModel.stopCode = if (Intent.ACTION_VIEW == it.action) {
-                it.data?.getQueryParameter(DEEPLINK_QUERY_PARAMETER_STOP_CODE)
+            viewModel.stopIdentifier = if (Intent.ACTION_VIEW == it.action) {
+                it.data
+                    ?.getQueryParameter(DEEPLINK_QUERY_PARAMETER_STOP_CODE)
+                    ?.toNaptanStopIdentifier()
             } else {
-                it.getStringExtra(EXTRA_STOP_CODE)
+                it.getStringExtra(EXTRA_STOP_CODE)?.toNaptanStopIdentifier()
             }
         }
 
@@ -141,7 +146,7 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
         viewBinding.apply {
             val pagerAdapter = StopDataPagerAdapter(
                 this@DisplayStopDataActivity,
-                viewModel.stopCode
+                viewModel.stopIdentifier
             )
 
             viewPager.apply {
@@ -165,7 +170,7 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
             }
         }
 
-        viewModel.stopCodeLiveData.observe(this, this::handleStopCode)
+        viewModel.stopIdentifierLiveData.observe(this, this::handleStopIdentifier)
         viewModel.stopDetailsLiveData.observe(this, this::handleStopDetails)
         viewModel.isFavouriteLiveData.observe(this, this::configureFavouriteMenuItem)
         viewModel.hasArrivalAlertLiveData.observe(this, this::configureArrivalAlertMenuItem)
@@ -181,9 +186,9 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
         addMenuProvider(menuProvider)
     }
 
-    override fun showMapForStop(stopCode: String) {
+    override fun showMapForStop(stopIdentifier: StopIdentifier) {
         Intent(this, BusStopMapActivity::class.java)
-            .putExtra(BusStopMapActivity.EXTRA_STOP_CODE, stopCode)
+            .putExtra(BusStopMapActivity.EXTRA_STOP_CODE, stopIdentifier.toNaptanCodeOrThrow())
             .let(this::startActivity)
     }
 
@@ -209,15 +214,14 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
     /**
      * Handle a change to the stop code. This sets any UI which displays the stop code.
      *
-     * @param stopCode The stop code this instance is displaying.
+     * @param stopIdentifier The stop this instance is displaying.
      */
-    private fun handleStopCode(stopCode: String?) {
-        (stopCode?.ifEmpty { null }?.let {
-            stopCode
-        } ?: getString(R.string.displaystopdata_error_stop_code_missing)).let {
-            viewBinding.txtStopCode?.text = it
-            supportActionBar?.subtitle = it
-        }
+    private fun handleStopIdentifier(stopIdentifier: StopIdentifier?) {
+        val text = stopIdentifier?.toHumanReadableString()
+            ?: getString(R.string.displaystopdata_error_stop_code_missing)
+
+        viewBinding.txtStopCode?.text = text
+        supportActionBar?.subtitle = text
     }
 
     /**
@@ -334,66 +338,66 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
     /**
      * Show the 'Add favourite' UI.
      *
-     * @param stopCode The stop code to add the favourite for.
+     * @param stopIdentifier The stop to add the favourite for.
      */
-    private fun showAddFavourite(stopCode: String) {
+    private fun showAddFavourite(stopIdentifier: StopIdentifier) {
         AddEditFavouriteStopDialogFragment
-            .newInstance(stopCode)
+            .newInstance(stopIdentifier)
             .show(supportFragmentManager, DIALOG_ADD_FAVOURITE)
     }
 
     /**
      * Show the 'Remove favourite' UI.
      *
-     * @param stopCode The stop code to remove the favourite for.
+     * @param stopIdentifier The stop to remove the favourite for.
      */
-    private fun showRemoveFavourite(stopCode: String) {
+    private fun showRemoveFavourite(stopIdentifier: StopIdentifier) {
         DeleteFavouriteDialogFragment
-            .newInstance(stopCode)
+            .newInstance(stopIdentifier)
             .show(supportFragmentManager, DIALOG_REMOVE_FAVOURITE)
     }
 
     /**
      * Show the 'Add arrival alert' UI.
      *
-     * @param stopCode The stop code to add an arrival alert for.
+     * @param stopIdentifier The stop to add an arrival alert for.
      */
-    private fun showAddArrivalAlert(stopCode: String) {
+    private fun showAddArrivalAlert(stopIdentifier: StopIdentifier) {
         AddTimeAlertDialogFragment
-            .newInstance(stopCode)
+            .newInstance(stopIdentifier)
             .show(supportFragmentManager, DIALOG_ADD_ARRIVAL_ALERT)
     }
 
     /**
      * Show the 'Remove arrival alert' UI.
      *
-     * @param stopCode The stop code to remove the arrival alert for.
+     * @param stopIdentifier The stop to remove the arrival alert for.
      */
-    private fun showRemoveArrivalAlert(stopCode: String) {
+    private fun showRemoveArrivalAlert(stopIdentifier: StopIdentifier) {
         DeleteTimeAlertDialogFragment
-            .newInstance(stopCode)
+            .newInstance(stopIdentifier)
             .show(supportFragmentManager, DIALOG_REMOVE_ARRIVAL_ALERT)
     }
 
     /**
      * Show the 'Add proximity alert' UI.
      *
-     * @param stopCode The stop code to add a proximity alert for.
+     * @param stopIdentifier The stop to add a proximity alert for.
      */
-    private fun showAddProximityAlert(stopCode: String) {
+    private fun showAddProximityAlert(stopIdentifier: StopIdentifier) {
         AddProximityAlertDialogFragment
-            .newInstance(stopCode)
+            .newInstance(stopIdentifier)
             .show(supportFragmentManager, DIALOG_ADD_PROX_ALERT)
     }
 
     /**
      * Show the 'Remove proximity alert' UI.
      *
-     * @param stopCode The stop code to remove the proximity alert for.
+     * @param stopIdentifier The stop to remove the proximity alert for.
      */
-    private fun showRemoveProximityAlert(stopCode: String) {
+    private fun showRemoveProximityAlert(stopIdentifier: StopIdentifier) {
         DeleteProximityAlertDialogFragment
-            .newInstance(stopCode)
+            .newInstance(stopIdentifier)
             .show(supportFragmentManager, DIALOG_REMOVE_PROX_ALERT)
     }
 
@@ -481,6 +485,13 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
                 true
             }
             else -> false
+        }
+    }
+
+    private fun StopIdentifier.toNaptanCodeOrThrow(): String {
+        return when (this) {
+            is NaptanStopIdentifier -> naptanStopCode
+            else -> throw UnsupportedOperationException("Only Naptan codes are supported for now.")
         }
     }
 }

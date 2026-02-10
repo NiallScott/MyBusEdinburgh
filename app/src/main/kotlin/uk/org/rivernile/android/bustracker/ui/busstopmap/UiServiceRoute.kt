@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,15 +26,18 @@
 
 package uk.org.rivernile.android.bustracker.ui.busstopmap
 
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+
 /**
  * This class describes a route for a service, to be drawn on the map as a route line.
  *
- * @property serviceName The name of the service.
+ * @property serviceDescriptor The descriptor of the service.
  * @property serviceColour The colour of the service.
  * @property lines A [List] of [UiServiceLine]s which make up the route.
  * @author Niall Scott
  */
 data class UiServiceRoute(
-        val serviceName: String,
-        val serviceColour: Int?,
-        val lines: List<UiServiceLine>)
+    val serviceDescriptor: ServiceDescriptor,
+    val serviceColour: Int?,
+    val lines: List<UiServiceLine>
+)

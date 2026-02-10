@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,15 +31,15 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.stop
  *
  * @author Niall Scott
  */
-interface StopName {
+public interface StopName {
 
     /**
      * The name of the stop.
      */
-    val name: String
+    public val name: String
 
     /**
      * The locality of the stop, if available.
      */
-    val locality: String?
+    public val locality: String?
 }

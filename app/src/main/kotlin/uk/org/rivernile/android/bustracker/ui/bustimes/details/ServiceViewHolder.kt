@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -63,7 +63,7 @@ class ServiceViewHolder(
                 txtDescription.text = it.description
 
                 if (oldItem == null || oldItem.serviceColours != it.serviceColours) {
-                    val backgroundColour = it.serviceColours?.primaryColour ?: defaultBackground
+                    val backgroundColour = it.serviceColours?.colourPrimary ?: defaultBackground
                     val textColour = it.serviceColours?.colourOnPrimary ?: defaultTextColour
                     txtServiceName.backgroundTintList = ColorStateList.valueOf(backgroundColour)
                     txtServiceName.setTextColor(textColour)

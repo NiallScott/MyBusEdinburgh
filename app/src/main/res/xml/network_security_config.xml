@@ -30,9 +30,4 @@
             <certificates src="user" />
         </trust-anchors>
     </debug-overrides>
-
-    <domain-config
-        cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">edinb.us</domain>
-    </domain-config>
 </network-security-config>

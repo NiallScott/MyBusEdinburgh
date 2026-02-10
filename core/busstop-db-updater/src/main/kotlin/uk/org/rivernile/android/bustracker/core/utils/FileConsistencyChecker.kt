@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -50,15 +50,15 @@ internal class FileConsistencyChecker @Inject constructor(
      * Calculate the hash of a given file and compare it with the expected hash.
      *
      * @param file The [File] to calculate a hash for.
-     * @param expectedHash The hash to compare the calculated hash with.
+     * @param expectedSha256Hash The SHA-256 hash to compare the calculated hash with.
      * @return `true` if the hashes match, otherwise `false`.
      * @throws IOException When there was an issue reading the file.
      */
     @Throws(IOException::class)
-    suspend fun checkFileMatchesHash(file: File, expectedHash: String): Boolean {
-        val fileHash = calculateFileConsistencyHash(file)
+    suspend fun checkFileMatchesHash(file: File, expectedSha256Hash: String): Boolean {
+        val fileSha256Hash = calculateFileConsistencySha256Hash(file)
 
-        return fileHash == expectedHash
+        return expectedSha256Hash.equals(fileSha256Hash, ignoreCase = true)
     }
 
     /**
@@ -67,13 +67,13 @@ internal class FileConsistencyChecker @Inject constructor(
      *
      * @param file The file to run the MD5 checksum against.
      * @return The MD5 checksum string.
-     * @throws IOException When there was an issue readin the file.
+     * @throws IOException When there was an issue reading the file.
      */
     @Throws(IOException::class)
-    private suspend fun calculateFileConsistencyHash(file: File): String {
+    private suspend fun calculateFileConsistencySha256Hash(file: File): String {
         return withContext(ioDispatcher) {
             file.source().buffer().use { source ->
-                HashingSink.md5(blackholeSink()).use { sink ->
+                HashingSink.sha256(blackholeSink()).use { sink ->
                     source.readAll(sink)
                     sink.hash.hex()
                 }

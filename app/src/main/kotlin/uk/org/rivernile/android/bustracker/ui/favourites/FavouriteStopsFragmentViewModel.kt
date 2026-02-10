@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -47,6 +47,10 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toStopIdentifier
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
@@ -73,15 +77,15 @@ class FavouriteStopsFragmentViewModel @Inject constructor(
 
     companion object {
 
-        private const val STATE_SELECTED_STOP_CODE = "selectedStopCode"
+        private const val STATE_SELECTED_STOP_IDENTIFIER = "selectedStopIdentifier"
     }
 
-    private val selectedStopCodeFlow =
-            savedState.getStateFlow<String?>(STATE_SELECTED_STOP_CODE, null)
-    private var selectedStopCode
-        get() = selectedStopCodeFlow.value?.ifEmpty { null }
+    private val selectedStopIdentifierFlow =
+        savedState.getStateFlow<ParcelableStopIdentifier?>(STATE_SELECTED_STOP_IDENTIFIER, null)
+    private var selectedStopIdentifier: ParcelableStopIdentifier?
+        get() = selectedStopIdentifierFlow.value
         set(value) {
-            savedState[STATE_SELECTED_STOP_CODE] = value
+            savedState[STATE_SELECTED_STOP_IDENTIFIER] = value
         }
 
     /**
@@ -93,7 +97,10 @@ class FavouriteStopsFragmentViewModel @Inject constructor(
 
     private val favouritesFlow = favouriteStopsRetriever
         .allFavouriteStopsFlow
-        .combine(selectedStopCodeFlow, this::applySelectedState)
+        .combine(
+            selectedStopIdentifierFlow.map { it?.toStopIdentifier() },
+            this::applySelectedState
+        )
         .flowOn(defaultDispatcher)
         .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
@@ -112,17 +119,19 @@ class FavouriteStopsFragmentViewModel @Inject constructor(
     /**
      * This [LiveData] emits the current visibility state of the context menu.
      */
-    val showContextMenuLiveData = selectedStopCodeFlow.map {
-        !isCreateShortcutMode && it?.ifEmpty { null } != null
-    }.distinctUntilChanged().asLiveData(viewModelScope.coroutineContext)
+    val showContextMenuLiveData = selectedStopIdentifierFlow
+        .map { !isCreateShortcutMode && it != null }
+        .distinctUntilChanged()
+        .asLiveData(viewModelScope.coroutineContext)
 
     /**
      * This [LiveData] emits the name data for the currently selected stop.
      */
-    val selectedStopNameLiveData = selectedStopCodeFlow
-            .combine(favouritesFlow, this::getStopName)
-            .distinctUntilChanged()
-            .asLiveData(viewModelScope.coroutineContext + defaultDispatcher)
+    val selectedStopNameLiveData = selectedStopIdentifierFlow
+        .map { it?.toStopIdentifier() }
+        .combine(favouritesFlow, this::getStopName)
+        .distinctUntilChanged()
+        .asLiveData(viewModelScope.coroutineContext + defaultDispatcher)
 
     /**
      * This [LiveData] emits the visibility state of UI allowing the user to show the selected stop
@@ -144,14 +153,16 @@ class FavouriteStopsFragmentViewModel @Inject constructor(
             MutableLiveData(featureRepository.hasProximityAlertFeature)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val hasArrivalAlertFlow = selectedStopCodeFlow
-            .flatMapLatest(this::loadHasArrivalAlert)
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+    private val hasArrivalAlertFlow = selectedStopIdentifierFlow
+        .map { it?.toStopIdentifier() }
+        .flatMapLatest(this::loadHasArrivalAlert)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val hasProximityAlertFlow = selectedStopCodeFlow
-            .flatMapLatest(this::loadHasProximityAlert)
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+    private val hasProximityAlertFlow = selectedStopIdentifierFlow
+        .map { it?.toStopIdentifier() }
+        .flatMapLatest(this::loadHasProximityAlert)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     /**
      * This [LiveData] emits the enabled state of UI allowing the user to see or manipulate arrival
@@ -182,11 +193,11 @@ class FavouriteStopsFragmentViewModel @Inject constructor(
             .asLiveData(viewModelScope.coroutineContext)
 
     /**
-     * This [LiveData] emits a stop code whenever stop data should be shown (e.g. live times). This
-     * will not emit when [isCreateShortcutMode] is `true`.
+     * This [LiveData] emits a stop identifier whenever stop data should be shown (e.g. live times).
+     * This will not emit when [isCreateShortcutMode] is `true`.
      */
-    val showStopDataLiveData: LiveData<String> get() = showStopData
-    private val showStopData = SingleLiveEvent<String>()
+    val showStopDataLiveData: LiveData<StopIdentifier> get() = showStopData
+    private val showStopData = SingleLiveEvent<StopIdentifier>()
 
     /**
      * This [LiveData] emits a [FavouriteStop] whenever a shortcut should be created for a stop.
@@ -196,53 +207,54 @@ class FavouriteStopsFragmentViewModel @Inject constructor(
     private val createShortcut = SingleLiveEvent<FavouriteStop>()
 
     /**
-     * This [LiveData] emits a stop code whenever a favourite stop should be edited.
+     * This [LiveData] emits a stop identifier whenever a favourite stop should be edited.
      */
-    val showEditFavouriteStopLiveData: LiveData<String> get() = showEditFavouriteStop
-    private val showEditFavouriteStop = SingleLiveEvent<String>()
+    val showEditFavouriteStopLiveData: LiveData<StopIdentifier> get() = showEditFavouriteStop
+    private val showEditFavouriteStop = SingleLiveEvent<StopIdentifier>()
 
     /**
-     * This [LiveData] emits a stop code whenever the deletion of a favourite stop should be
+     * This [LiveData] emits a stop identifier whenever the deletion of a favourite stop should be
      * confirmed with the user.
      */
-    val showConfirmDeleteFavouriteLiveData: LiveData<String> get() = showConfirmDeleteFavourite
-    private val showConfirmDeleteFavourite = SingleLiveEvent<String>()
+    val showConfirmDeleteFavouriteLiveData: LiveData<StopIdentifier> get() =
+        showConfirmDeleteFavourite
+    private val showConfirmDeleteFavourite = SingleLiveEvent<StopIdentifier>()
 
     /**
-     * This [LiveData] emits a stop code whenever the stop should be shown on a map.
+     * This [LiveData] emits a stop identifier whenever the stop should be shown on a map.
      */
-    val showOnMapLiveData: LiveData<String> get() = showOnMap
-    private val showOnMap = SingleLiveEvent<String>()
+    val showOnMapLiveData: LiveData<StopIdentifier> get() = showOnMap
+    private val showOnMap = SingleLiveEvent<StopIdentifier>()
 
     /**
-     * This [LiveData] emits a stop code whenever UI should be presented to allow the user to add
-     * an arrival alert.
+     * This [LiveData] emits a stop identifier whenever UI should be presented to allow the user to
+     * add an arrival alert.
      */
-    val showAddArrivalAlertLiveData: LiveData<String> get() = showAddArrivalAlert
-    private val showAddArrivalAlert = SingleLiveEvent<String>()
+    val showAddArrivalAlertLiveData: LiveData<StopIdentifier> get() = showAddArrivalAlert
+    private val showAddArrivalAlert = SingleLiveEvent<StopIdentifier>()
 
     /**
-     * This [LiveData] emits a stop code whenever UI should be presented to allow the user to
+     * This [LiveData] emits a stop identifier whenever UI should be presented to allow the user to
      * confirm that they wish to remove an arrival alert.
      */
-    val showConfirmDeleteArrivalAlertLiveData: LiveData<String> get() =
+    val showConfirmDeleteArrivalAlertLiveData: LiveData<StopIdentifier> get() =
         showConfirmDeleteArrivalAlert
-    private val showConfirmDeleteArrivalAlert = SingleLiveEvent<String>()
+    private val showConfirmDeleteArrivalAlert = SingleLiveEvent<StopIdentifier>()
 
     /**
-     * This [LiveData] emits a stop code whenever UI should be presented to allow the user to add
-     * a proximity alert.
+     * This [LiveData] emits a stop identifier whenever UI should be presented to allow the user to
+     * add a proximity alert.
      */
-    val showAddProximityAlertLiveData: LiveData<String> get() = showAddProximityAlert
-    private val showAddProximityAlert = SingleLiveEvent<String>()
+    val showAddProximityAlertLiveData: LiveData<StopIdentifier> get() = showAddProximityAlert
+    private val showAddProximityAlert = SingleLiveEvent<StopIdentifier>()
 
     /**
-     * This [LiveData] emits a stop code whenever UI should be presented to allow the user to
+     * This [LiveData] emits a stop identifier whenever UI should be presented to allow the user to
      * confirm that they wish to remove a proximity alert.
      */
-    val showConfirmDeleteProximityAlertLiveData: LiveData<String> get() =
+    val showConfirmDeleteProximityAlertLiveData: LiveData<StopIdentifier> get() =
         showConfirmDeleteProximityAlert
-    private val showConfirmDeleteProximityAlert = SingleLiveEvent<String>()
+    private val showConfirmDeleteProximityAlert = SingleLiveEvent<StopIdentifier>()
 
     /**
      * This is called when the user has clicked on a favourite stop.
@@ -256,8 +268,8 @@ class FavouriteStopsFragmentViewModel @Inject constructor(
         if (isCreateShortcutMode) {
             createShortcut.value = favourite
         } else {
-            if (selectedStopCode == null) {
-                showStopData.value = favourite.stopCode
+            if (selectedStopIdentifier == null) {
+                showStopData.value = favourite.stopIdentifier
             }
         }
     }
@@ -266,15 +278,15 @@ class FavouriteStopsFragmentViewModel @Inject constructor(
      * This is called when the user has long clicked on a favourite stop.
      *
      * When [isCreateShortcutMode] is `false`, this will cause a context menu to be requested for
-     * the selected stop code. Otherwise, nothing will happen.
+     * the selected stop identifier. Otherwise, nothing will happen.
      *
-     * @param stopCode The stop which was long clicked.
+     * @param stopIdentifier The stop which was long clicked.
      * @return `true` if we've consumed the event and requested that the context menu be shown.
      * Otherwise, `false`.
      */
-    fun onFavouriteStopLongClicked(stopCode: String): Boolean {
-        return if (!isCreateShortcutMode && stopCode.isNotEmpty()) {
-            selectedStopCode = stopCode
+    fun onFavouriteStopLongClicked(stopIdentifier: StopIdentifier): Boolean {
+        return if (!isCreateShortcutMode) {
+            selectedStopIdentifier = stopIdentifier.toParcelableStopIdentifier()
 
             true
         } else {
@@ -296,8 +308,8 @@ class FavouriteStopsFragmentViewModel @Inject constructor(
      *
      * @return `true` if we handled the event. That is, there is a selected stop. Otherwise `false`.
      */
-    fun onEditFavouriteClicked() = selectedStopCode?.let {
-        showEditFavouriteStop.value = it
+    fun onEditFavouriteClicked() = selectedStopIdentifier?.let {
+        showEditFavouriteStop.value = it.toStopIdentifier()
         closeContextMenu()
         true
     } ?: false
@@ -308,8 +320,8 @@ class FavouriteStopsFragmentViewModel @Inject constructor(
      *
      * @return `true` if we handled the event. That is, there is a selected stop. Otherwise `false`.
      */
-    fun onDeleteFavouriteClicked() = selectedStopCode?.let {
-        showConfirmDeleteFavourite.value = it
+    fun onDeleteFavouriteClicked() = selectedStopIdentifier?.let {
+        showConfirmDeleteFavourite.value = it.toStopIdentifier()
         closeContextMenu()
         true
     } ?: false
@@ -320,8 +332,8 @@ class FavouriteStopsFragmentViewModel @Inject constructor(
      *
      * @return `true` if we handled the event. That is, there is a selected stop. Otherwise `false`.
      */
-    fun onShowOnMapClicked() = selectedStopCode?.let {
-        showOnMap.value = it
+    fun onShowOnMapClicked() = selectedStopIdentifier?.let {
+        showOnMap.value = it.toStopIdentifier()
         closeContextMenu()
         true
     } ?: false
@@ -338,10 +350,10 @@ class FavouriteStopsFragmentViewModel @Inject constructor(
      *
      * @return `true` if we handled the event. That is, there is a selected stop. Otherwise `false`.
      */
-    fun onProximityAlertClicked() = selectedStopCode?.let {
+    fun onProximityAlertClicked() = selectedStopIdentifier?.let {
         when (hasProximityAlertFlow.value) {
-            true -> showConfirmDeleteProximityAlert.value = it
-            false -> showAddProximityAlert.value = it
+            true -> showConfirmDeleteProximityAlert.value = it.toStopIdentifier()
+            false -> showAddProximityAlert.value = it.toStopIdentifier()
             else -> { }
         }
 
@@ -361,10 +373,10 @@ class FavouriteStopsFragmentViewModel @Inject constructor(
      *
      * @return `true` if we handled the event. That is, there is a selected stop. Otherwise `false`.
      */
-    fun onArrivalAlertClicked() = selectedStopCode?.let {
+    fun onArrivalAlertClicked() = selectedStopIdentifier?.let {
         when (hasArrivalAlertFlow.value) {
-            true -> showConfirmDeleteArrivalAlert.value = it
-            false -> showAddArrivalAlert.value = it
+            true -> showConfirmDeleteArrivalAlert.value = it.toStopIdentifier()
+            false -> showAddArrivalAlert.value = it.toStopIdentifier()
             else -> { }
         }
 
@@ -374,17 +386,18 @@ class FavouriteStopsFragmentViewModel @Inject constructor(
 
     /**
      * Given a [List] of [UiFavouriteStop]s, apply the correct selected state to all items in the
-     * [List] based upon the [selectedStopCode] value.
+     * [List] based upon the [selectedStopIdentifier] value.
      *
      * @param favouriteStops The [List] of favourite stops.
-     * @param selectedStopCode The currently selected stop code.
+     * @param selectedStopIdentifier The currently selected stop.
      * @return [favouriteStops] mapped with the correct selected state for all items.
      */
     private fun applySelectedState(
-            favouriteStops: List<UiFavouriteStop>?,
-            selectedStopCode: String?): List<UiFavouriteStop>? {
+        favouriteStops: List<UiFavouriteStop>?,
+        selectedStopIdentifier: StopIdentifier?
+    ): List<UiFavouriteStop>? {
         return favouriteStops?.map {
-            it.copy(isSelected = it.favouriteStop.stopCode == selectedStopCode)
+            it.copy(isSelected = it.favouriteStop.stopIdentifier == selectedStopIdentifier)
         }
     }
 
@@ -401,62 +414,66 @@ class FavouriteStopsFragmentViewModel @Inject constructor(
     }
 
     /**
-     * Load whether the given [stopCode] has an arrival alert set against it or not. If the
-     * [stopCode] is `null` or empty, the returned [kotlinx.coroutines.flow.Flow] emits `null`.
-     * `null` will also be emitted in lieu of a value while the status is loading.
+     * Load whether the given [stopIdentifier] has an arrival alert set against it or not. If the
+     * [stopIdentifier] is `null` or empty, the returned [kotlinx.coroutines.flow.Flow] emits
+     * `null`. `null` will also be emitted in lieu of a value while the status is loading.
      *
-     * @param stopCode The stop code to get the arrival alert status for.
-     * @return A [kotlinx.coroutines.flow.Flow] which emits whether the given stop code has an
+     * @param stopIdentifier The stop to get the arrival alert status for.
+     * @return A [kotlinx.coroutines.flow.Flow] which emits whether the given stop identifier has an
      * arrival alert set against it or not.
      */
-    private fun loadHasArrivalAlert(stopCode: String?) = stopCode?.ifEmpty { null }?.let {
+    private fun loadHasArrivalAlert(stopIdentifier: StopIdentifier?) = stopIdentifier?.let {
         alertsRepository.hasArrivalAlertFlow(it)
-                .flowOn(defaultDispatcher)
-                .onStart<Boolean?> { emit(null) }
+            .flowOn(defaultDispatcher)
+            .onStart<Boolean?> { emit(null) }
     } ?: flowOf(null)
 
     /**
-     * Load whether the given [stopCode] has a proximity alert set against it or not. If the
-     * [stopCode] is `null` or empty, the returned [kotlinx.coroutines.flow.Flow] emits `null`.
+     * Load whether the given [stopIdentifier] has a proximity alert set against it or not. If the
+     * [stopIdentifier] is `null`, the returned [kotlinx.coroutines.flow.Flow] emits `null`.
      * `null` will also be emitted in lieu of a value while the status is loading.
      *
-     * @param stopCode The stop code to get the proximity alert status for.
-     * @return A [kotlinx.coroutines.flow.Flow] which emits whether the given stop code has a
+     * @param stopIdentifier The stop to get the proximity alert status for.
+     * @return A [kotlinx.coroutines.flow.Flow] which emits whether the given stop identifier has a
      * proximity alert set against it or not.
      */
-    private fun loadHasProximityAlert(stopCode: String?) = stopCode?.ifEmpty { null }?.let {
+    private fun loadHasProximityAlert(stopIdentifier: StopIdentifier?) = stopIdentifier?.let {
         alertsRepository.hasProximityAlertFlow(it)
-                .flowOn(defaultDispatcher)
-                .onStart<Boolean?> { emit(null) }
+            .flowOn(defaultDispatcher)
+            .onStart<Boolean?> { emit(null) }
     }?: flowOf(null)
 
     /**
-     * Given a [stopCode] and a [List] of [UiFavouriteStop]s, get the currently set name for the
-     * favourite identified by the stop code. If this isn't found, `null` will be returned.
+     * Given a [stopIdentifier] and a [List] of [UiFavouriteStop]s, get the currently set name for
+     * the favourite identified by the stop identifier. If this isn't found, `null` will be
+     * returned.
      *
-     * @param stopCode The stop code to search for. If this is `null` or empty, this method will
+     * @param stopIdentifier The stop to search for. If this is `null` or empty, this method will
      * return `null`.
      * @param favourites The current [List] of [UiFavouriteStop]s to search within.
      */
-    private fun getStopName(stopCode: String?, favourites: List<UiFavouriteStop>?):
-            UiFavouriteName? {
-        return stopCode?.ifEmpty { null }?.let { sc ->
-            favourites?.firstOrNull { it.favouriteStop.stopCode == sc }
+    private fun getStopName(
+        stopIdentifier: StopIdentifier?,
+        favourites: List<UiFavouriteStop>?
+    ): UiFavouriteName? {
+        return stopIdentifier?.let { si ->
+            favourites?.firstOrNull { it.favouriteStop.stopIdentifier == si }
                 ?.let {
                     UiFavouriteName(
-                        sc,
+                        si,
                         FavouriteStopName(
                             it.favouriteStop.stopName,
-                            null)
+                            null
+                        )
                     )
             }
         }
     }
 
     /**
-     * Close the context menu by scrubbing out the currently set selected stop code.
+     * Close the context menu by scrubbing out the currently set selected stop identifier.
      */
     private fun closeContextMenu() {
-        selectedStopCode = null
+        selectedStopIdentifier = null
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,7 +38,7 @@ import org.junit.Rule
 import org.junit.Test
 import uk.org.rivernile.android.bustracker.core.database.OldDatabaseCreator
 import uk.org.rivernile.android.bustracker.core.database.settings.RoomSettingsDatabase
-import uk.org.rivernile.android.bustracker.core.database.settings.assertAlertTriggersExist
+import uk.org.rivernile.android.bustracker.core.database.settings.assertAlertTriggersExistUpToVersion4
 
 /**
  * Tests for [Migration2To4].
@@ -71,67 +71,65 @@ class Migration2To4Test {
     fun migrate2To4Empty() {
         oldDatabaseCreator.openDatabase(TEST_DB, openHelperCallback).close()
 
-        helper.runMigrationsAndValidate(TEST_DB, 4, true, Migration2To4()).apply {
-            assertAlertTriggersExist(this)
+        helper.runMigrationsAndValidate(TEST_DB, 4, true, Migration2To4()).use { database ->
+            database.assertAlertTriggersExistUpToVersion4()
 
-            query("SELECT * FROM active_alerts").apply {
-                assertEquals(0, count)
-                close()
+            database.query("SELECT * FROM active_alerts").use {
+                assertEquals(0, it.count)
             }
 
-            query("SELECT * FROM favourite_stops").apply {
-                assertEquals(0, count)
-                close()
+            database.query("SELECT * FROM favourite_stops").use {
+                assertEquals(0, it.count)
             }
         }
     }
 
     @Test
     fun migrate2To4WithData() {
-        oldDatabaseCreator.openDatabase(TEST_DB, openHelperCallback).apply {
-            execSQL("""
+        oldDatabaseCreator.openDatabase(TEST_DB, openHelperCallback).use { database ->
+            database.execSQL("""
                 INSERT INTO favourite_stops (_id, stopName)
                 VALUES ('111111', 'Stop 1')
             """.trimIndent())
 
-            execSQL("""
+            database.execSQL("""
                 INSERT INTO favourite_stops (_id, stopName)
                 VALUES ('222222', 'Stop 2')
             """.trimIndent())
 
-            execSQL("""
+            database.execSQL("""
                 INSERT INTO favourite_stops (_id, stopName)
                 VALUES ('333333', 'Stop 3')
             """.trimIndent())
 
             // Stop name is the same as '333333' to test there is no uniqueness on stop name.
-            execSQL("""
-                INSERT INTO favourite_stops (_id, stopName) 
+            database.execSQL("""
+                INSERT INTO favourite_stops (_id, stopName)
                 VALUES ('444444', 'Stop 3')
             """.trimIndent())
 
-            execSQL("""
+            database.execSQL("""
                 INSERT INTO active_alerts (
                     type, timeAdded, stopCode, distanceFrom, serviceNames, timeTrigger)
                 VALUES (
                     1, 100, '111111', 1, NULL, NULL)
             """.trimIndent())
 
-            execSQL("""
+            database.execSQL("""
                 INSERT INTO active_alerts (
                     type, timeAdded, stopCode, distanceFrom, serviceNames, timeTrigger)
                 VALUES (
                     1, 101, '222222', 2, NULL, NULL)
             """.trimIndent())
 
-            execSQL("""
+            database.execSQL("""
                 INSERT INTO active_alerts (
                     type, timeAdded, stopCode, distanceFrom, serviceNames, timeTrigger)
                 VALUES (
                     2, 102, '333333', NULL, '1,2,3', 1)
             """.trimIndent())
 
-            execSQL("""
+            database.execSQL("""
                 INSERT INTO active_alerts (
                     type, timeAdded, stopCode, distanceFrom, serviceNames, timeTrigger)
                 VALUES (
@@ -139,94 +137,87 @@ class Migration2To4Test {
             """.trimIndent())
         }
 
-        helper.runMigrationsAndValidate(TEST_DB, 4, true, Migration2To4()).apply {
-            assertAlertTriggersExist(this)
+        helper.runMigrationsAndValidate(TEST_DB, 4, true, Migration2To4()).use { database ->
+            database.assertAlertTriggersExistUpToVersion4()
 
-            query("SELECT * FROM favourite_stops ORDER BY stopCode ASC").apply {
-                assertEquals(4, count)
-                val stopCodeColumn = getColumnIndexOrThrow("stopCode")
-                val stopNameColumn = getColumnIndexOrThrow("stopName")
+            database.query("SELECT * FROM favourite_stops ORDER BY stopCode ASC").use {
+                assertEquals(4, it.count)
+                val stopCodeColumn = it.getColumnIndexOrThrow("stopCode")
+                val stopNameColumn = it.getColumnIndexOrThrow("stopName")
 
-                moveToFirst()
-                assertEquals("111111", getString(stopCodeColumn))
-                assertEquals("Stop 1", getString(stopNameColumn))
+                it.moveToFirst()
+                assertEquals("111111", it.getString(stopCodeColumn))
+                assertEquals("Stop 1", it.getString(stopNameColumn))
 
-                moveToNext()
-                assertEquals("222222", getString(stopCodeColumn))
-                assertEquals("Stop 2", getString(stopNameColumn))
+                it.moveToNext()
+                assertEquals("222222", it.getString(stopCodeColumn))
+                assertEquals("Stop 2", it.getString(stopNameColumn))
 
-                moveToNext()
-                assertEquals("333333", getString(stopCodeColumn))
-                assertEquals("Stop 3", getString(stopNameColumn))
+                it.moveToNext()
+                assertEquals("333333", it.getString(stopCodeColumn))
+                assertEquals("Stop 3", it.getString(stopNameColumn))
 
-                moveToNext()
-                assertEquals("444444", getString(stopCodeColumn))
-                assertEquals("Stop 3", getString(stopNameColumn))
-
-                close()
+                it.moveToNext()
+                assertEquals("444444", it.getString(stopCodeColumn))
+                assertEquals("Stop 3", it.getString(stopNameColumn))
             }
 
-            query("SELECT * FROM active_alerts ORDER BY id ASC").apply {
-                assertEquals(4, count)
-                val typeColumn = getColumnIndexOrThrow("type")
-                val timeAddedColumn = getColumnIndexOrThrow("timeAdded")
-                val stopCodeColumn = getColumnIndexOrThrow("stopCode")
-                val distanceFromColumn = getColumnIndexOrThrow("distanceFrom")
-                val serviceNamesColumn = getColumnIndexOrThrow("serviceNames")
-                val timeTriggerColumn = getColumnIndexOrThrow("timeTrigger")
+            database.query("SELECT * FROM active_alerts ORDER BY id ASC").use {
+                assertEquals(4, it.count)
+                val typeColumn = it.getColumnIndexOrThrow("type")
+                val timeAddedColumn = it.getColumnIndexOrThrow("timeAdded")
+                val stopCodeColumn = it.getColumnIndexOrThrow("stopCode")
+                val distanceFromColumn = it.getColumnIndexOrThrow("distanceFrom")
+                val serviceNamesColumn = it.getColumnIndexOrThrow("serviceNames")
+                val timeTriggerColumn = it.getColumnIndexOrThrow("timeTrigger")
 
-                moveToFirst()
-                assertEquals(1, getInt(typeColumn))
-                assertEquals(100L, getLong(timeAddedColumn))
-                assertEquals("111111", getString(stopCodeColumn))
-                assertEquals(1, getInt(distanceFromColumn))
-                assertTrue(isNull(serviceNamesColumn))
-                assertTrue(isNull(timeTriggerColumn))
+                it.moveToFirst()
+                assertEquals(1, it.getInt(typeColumn))
+                assertEquals(100L, it.getLong(timeAddedColumn))
+                assertEquals("111111", it.getString(stopCodeColumn))
+                assertEquals(1, it.getInt(distanceFromColumn))
+                assertTrue(it.isNull(serviceNamesColumn))
+                assertTrue(it.isNull(timeTriggerColumn))
 
-                moveToNext()
-                assertEquals(1, getInt(typeColumn))
-                assertEquals(101L, getLong(timeAddedColumn))
-                assertEquals("222222", getString(stopCodeColumn))
-                assertEquals(2, getInt(distanceFromColumn))
-                assertTrue(isNull(serviceNamesColumn))
-                assertTrue(isNull(timeTriggerColumn))
+                it.moveToNext()
+                assertEquals(1, it.getInt(typeColumn))
+                assertEquals(101L, it.getLong(timeAddedColumn))
+                assertEquals("222222", it.getString(stopCodeColumn))
+                assertEquals(2, it.getInt(distanceFromColumn))
+                assertTrue(it.isNull(serviceNamesColumn))
+                assertTrue(it.isNull(timeTriggerColumn))
 
-                moveToNext()
-                assertEquals(2, getInt(typeColumn))
-                assertEquals(102L, getLong(timeAddedColumn))
-                assertEquals("333333", getString(stopCodeColumn))
-                assertTrue(isNull(distanceFromColumn))
-                assertEquals("1,2,3", getString(serviceNamesColumn))
-                assertEquals(1, getInt(timeTriggerColumn))
+                it.moveToNext()
+                assertEquals(2, it.getInt(typeColumn))
+                assertEquals(102L, it.getLong(timeAddedColumn))
+                assertEquals("333333", it.getString(stopCodeColumn))
+                assertTrue(it.isNull(distanceFromColumn))
+                assertEquals("1,2,3", it.getString(serviceNamesColumn))
+                assertEquals(1, it.getInt(timeTriggerColumn))
 
-                moveToNext()
-                assertEquals(2, getInt(typeColumn))
-                assertEquals(103L, getLong(timeAddedColumn))
-                assertEquals("444444", getString(stopCodeColumn))
-                assertTrue(isNull(distanceFromColumn))
-                assertEquals("4", getString(serviceNamesColumn))
-                assertEquals(2, getInt(timeTriggerColumn))
-
-                close()
+                it.moveToNext()
+                assertEquals(2, it.getInt(typeColumn))
+                assertEquals(103L, it.getLong(timeAddedColumn))
+                assertEquals("444444", it.getString(stopCodeColumn))
+                assertTrue(it.isNull(distanceFromColumn))
+                assertEquals("4", it.getString(serviceNamesColumn))
+                assertEquals(2, it.getInt(timeTriggerColumn))
             }
         }
     }
 
     @Test
     fun migrate2To4WithNullStopCodeDoesNotGetMigrated() {
-        oldDatabaseCreator.openDatabase(TEST_DB, openHelperCallback).apply {
-            execSQL("""
-                INSERT INTO favourite_stops (_id, stopName) 
+        oldDatabaseCreator.openDatabase(TEST_DB, openHelperCallback).use { database ->
+            database.execSQL("""
+                INSERT INTO favourite_stops (_id, stopName)
                 VALUES (NULL, 'Stop name 1')
             """.trimIndent())
-
-            close()
         }
 
-        helper.runMigrationsAndValidate(TEST_DB, 4, true, Migration2To4()).apply {
-            query("SELECT * FROM favourite_stops").apply {
-                assertEquals(0, count)
-                close()
+        helper.runMigrationsAndValidate(TEST_DB, 4, true, Migration2To4()).use { database ->
+            database.query("SELECT * FROM favourite_stops").use {
+                assertEquals(0, it.count)
             }
         }
     }

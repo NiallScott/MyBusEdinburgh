@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint
 
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabase
 import uk.org.rivernile.android.bustracker.core.database.busstop.withFlowIfDatabaseIsOpenOrEmptyFlow
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -43,8 +44,8 @@ internal class ProxyServicePointDao @Inject constructor(
     private val database: BusStopDatabase
 ) : ServicePointDao {
 
-    override fun getServicePointsFlow(serviceNames: Set<String>?) = database
+    override fun getServicePointsFlow(services: Set<ServiceDescriptor>?) = database
         .withFlowIfDatabaseIsOpenOrEmptyFlow {
-            servicePointDao.getServicePointsFlow(serviceNames)
+            servicePointDao.getServicePointsFlow(services)
         }
 }

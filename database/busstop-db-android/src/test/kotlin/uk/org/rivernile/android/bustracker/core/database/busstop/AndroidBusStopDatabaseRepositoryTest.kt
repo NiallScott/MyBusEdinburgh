@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,6 +37,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Instant
 
 /**
  * Tests for [AndroidBusStopDatabaseRepository].
@@ -82,8 +83,7 @@ class AndroidBusStopDatabaseRepositoryTest {
     @Test
     fun databaseMetadataFlowReturnsFlowFromDatabaseInformationDao() = runTest {
         val databaseMetadata = FakeDatabaseMetadata(
-            updateTimestamp = 123L,
-            topologyVersionId = "abc123"
+            updateTimestamp = Instant.fromEpochMilliseconds(123L)
         )
         val repository = createRepository(
             databaseDao = FakeDatabaseDao(
@@ -98,16 +98,19 @@ class AndroidBusStopDatabaseRepositoryTest {
     }
 
     @Test
-    fun getTopologyVersionIdReturnsTopologyIdFromDao() = runTest {
+    fun getDatabaseUpdateTimestampReturnsValueFromDatabaseDao() = runTest {
         val repository = createRepository(
             databaseDao = FakeDatabaseDao(
-                onTopologyIdFlow = { flowOf("topoId") }
+                onGetDatabaseUpdateTimestamp = { Instant.fromEpochMilliseconds(123L) }
             )
         )
 
-        val result = repository.getTopologyVersionId()
+        val result = repository.getDatabaseUpdateTimestamp()
 
-        assertEquals("topoId", result)
+        assertEquals(
+            Instant.fromEpochMilliseconds(123L),
+            result
+        )
     }
 
     private fun createRepository(

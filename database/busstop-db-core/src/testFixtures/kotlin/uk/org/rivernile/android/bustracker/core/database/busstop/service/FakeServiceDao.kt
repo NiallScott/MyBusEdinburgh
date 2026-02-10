@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.service
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 
 /**
  * A fake implementation of [ServiceDao] to be used in testing.
@@ -41,23 +42,22 @@ class FakeServiceDao(
         (String) -> Flow<List<ServiceWithColour>?> = { emptyFlow() },
     private val onServiceCountFlow: () -> Flow<Int?> = { emptyFlow() },
     private val onGetColoursForServicesFlow:
-        (Set<String>?) -> Flow<Map<String, Int?>?> = { emptyFlow() },
+        (Set<ServiceDescriptor>?) -> Flow<Map<ServiceDescriptor, ServiceColours>?> =
+        { emptyFlow() },
     private val onGetServiceDetailsFlow:
         (String) -> Flow<List<ServiceDetails>?> = { emptyFlow() }
 ) : ServiceDao {
 
-    override val allServiceNamesWithColourFlow: Flow<List<ServiceWithColour>?>
-        get() = onAllServiceNamesWithColourFlow()
+    override val allServiceNamesWithColourFlow get() = onAllServiceNamesWithColourFlow()
 
-    override fun getServiceNamesWithColourFlow(stopCode: String) =
-        onGetServiceNamesWithColourFlow(stopCode)
+    override fun getServiceNamesWithColourFlow(stopNaptanCode: String) =
+        onGetServiceNamesWithColourFlow(stopNaptanCode)
 
-    override val serviceCountFlow: Flow<Int?>
-        get() = onServiceCountFlow()
+    override val serviceCountFlow get() = onServiceCountFlow()
 
-    override fun getColoursForServicesFlow(services: Set<String>?) =
+    override fun getColoursForServicesFlow(services: Set<ServiceDescriptor>?) =
         onGetColoursForServicesFlow(services)
 
-    override fun getServiceDetailsFlow(stopCode: String) =
-        onGetServiceDetailsFlow(stopCode)
+    override fun getServiceDetailsFlow(naptanCode: String) =
+        onGetServiceDetailsFlow(naptanCode)
 }

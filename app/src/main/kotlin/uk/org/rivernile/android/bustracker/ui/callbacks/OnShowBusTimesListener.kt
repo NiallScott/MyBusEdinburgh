@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.callbacks
 
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+
 /**
  * This listener is used to send callbacks from [androidx.fragment.app.Fragment] to
  * [android.app.Activity]s when the user wishes to view bus times.
@@ -37,7 +39,7 @@ interface OnShowBusTimesListener {
     /**
      * This is called when the user wishes to view bus stop times.
      *
-     * @param stopCode The bus stop to view times for.
+     * @param stopIdentifier The bus stop to view times for.
      */
-    fun onShowBusTimes(stopCode: String)
+    fun onShowBusTimes(stopIdentifier: StopIdentifier)
 }

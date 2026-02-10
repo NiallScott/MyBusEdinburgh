@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.callbacks
 
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+
 /**
  * This listener is used to send callbacks from [androidx.fragment.app.Fragment] to
  * [android.app.Activity]s when the user wishes to view a bus stop on the map.
@@ -37,7 +39,7 @@ interface OnShowBusStopMapWithStopCodeListener {
     /**
      * This is called when the user wants to view the stop map centered on a specific stop.
      *
-     * @param stopCode The stopCode that the map should center on.
+     * @param stopIdentifier The stop identifier that the map should center on.
      */
-    fun onShowBusStopMapWithStopCode(stopCode: String)
+    fun onShowBusStopMapWithStopCode(stopIdentifier: StopIdentifier)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,13 +29,14 @@ package uk.org.rivernile.android.bustracker.core.database.busstop
 import kotlinx.coroutines.flow.Flow
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseMetadata
 import java.io.File
+import kotlin.time.Instant
 
 /**
  * This repository is used to access the bus stop database.
  *
  * @author Niall Scott
  */
-interface BusStopDatabaseRepository {
+public interface BusStopDatabaseRepository {
 
     /**
      * Replace the current database with the given [File].
@@ -43,15 +44,17 @@ interface BusStopDatabaseRepository {
      * @param newDatabase The [File] to replace the current database with.
      * @return `true` if the database was replaced, otherwise return `false`.
      */
-    suspend fun replaceDatabase(newDatabase: File): Boolean
+    public suspend fun replaceDatabase(newDatabase: File): Boolean
 
     /**
      * A [Flow] which emits database metadata.
      */
-    val databaseMetadataFlow: Flow<DatabaseMetadata?>
+    public val databaseMetadataFlow: Flow<DatabaseMetadata?>
 
     /**
-     * Get the topology version ID.
+     * Get the database timestamp.
+     *
+     * @return The database timestamp.
      */
-    suspend fun getTopologyVersionId(): String?
+    public suspend fun getDatabaseUpdateTimestamp(): Instant?
 }

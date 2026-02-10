@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.callbacks
 
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+
 /**
  * This listener is used to send callbacks from [androidx.fragment.app.Fragment]s to
  * [android.app.Activity]s to confirm with the user that they wish to delete a given stop from their
@@ -39,7 +41,7 @@ interface OnShowConfirmFavouriteDeletionListener {
      * This is called when it should be confirmed with the user that they want to delete a
      * favourite bus stop.
      *
-     * @param stopCode The bus stop that the user may want to delete.
+     * @param stopIdentifier The bus stop that the user may want to delete.
      */
-    fun onShowConfirmFavouriteDeletion(stopCode: String)
+    fun onShowConfirmFavouriteDeletion(stopIdentifier: StopIdentifier)
 }

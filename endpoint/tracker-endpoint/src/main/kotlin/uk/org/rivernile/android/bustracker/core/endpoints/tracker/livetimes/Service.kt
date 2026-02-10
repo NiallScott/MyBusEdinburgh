@@ -26,15 +26,17 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+
 /**
  * A `Service` represents a single service that stops at a single stop. It holds a collection of
  * [Vehicle]s (or rather, live vehicle departures).
  *
- * @property serviceName The display name of the service.
+ * @property serviceDescriptor The descriptor of the service.
  * @property vehicles A [List] of [Vehicle]s for this service.
  * @author Niall Scott
  */
 public data class Service(
-    val serviceName: String,
+    val serviceDescriptor: ServiceDescriptor,
     val vehicles: List<Vehicle>
 )

@@ -29,6 +29,8 @@ package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 import kotlinx.datetime.TimeZone
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import kotlin.time.Instant
 
 /**
@@ -47,8 +49,7 @@ internal data class JsonStopEvents(
 /**
  * Map a [JsonStopEvents] to [LiveTimes].
  *
- * @param stopCode The requested stop code (SMS) of the live times. This is used instead of
- * `atcoCode` as this field is quite flaky.
+ * @param stopIdentifier The requested stop identifier of the live times.
  * @param numberOfDepartures The number of departures per service requested. This is used to
  * only display at most this number of services per service.
  * @param receiveTime The time the data was received from the server.
@@ -56,20 +57,20 @@ internal data class JsonStopEvents(
  * @return This [JsonStopEvents] mapped to a [LiveTimes].
  */
 internal fun JsonStopEvents.toLiveTimes(
-    stopCode: String,
+    stopIdentifier: StopIdentifier,
     numberOfDepartures: Int,
     receiveTime: Instant,
     timeZone: TimeZone
 ): LiveTimes {
     return if (time != null) {
         toStopOrNull(
-            stopCode = stopCode,
+            stopIdentifier = stopIdentifier,
             numberOfDepartures = numberOfDepartures,
             serverTime = time,
             timeZone = timeZone
         )?.let {
             LiveTimes(
-                stops = mapOf(stopCode to it),
+                stops = mapOf(stopIdentifier to it),
                 receiveTime = receiveTime
             )
         } ?: emptyLiveTimes(receiveTime)
@@ -79,7 +80,7 @@ internal fun JsonStopEvents.toLiveTimes(
 }
 
 private fun JsonStopEvents.toStopOrNull(
-    stopCode: String,
+    stopIdentifier: StopIdentifier,
     numberOfDepartures: Int,
     serverTime: Instant,
     timeZone: TimeZone
@@ -91,7 +92,7 @@ private fun JsonStopEvents.toStopOrNull(
             timeZone = timeZone
         )?.let {
             Stop(
-                stopCode = stopCode,
+                stopIdentifier = stopIdentifier,
                 services = it
             )
         }
@@ -103,25 +104,30 @@ private fun List<JsonStopEvent>.toServicesOrNull(
     timeZone: TimeZone
 ): List<Service>? {
     return if (isNotEmpty()) {
-        val serviceVehicles = mutableMapOf<String, MutableList<Vehicle>>()
+        val serviceVehicles = mutableMapOf<ServiceDescriptor, MutableList<Vehicle>>()
 
         forEach { event ->
-            val serviceName = event.publicServiceName?.normaliseServiceName()
+            val serviceName = event.publicServiceName
+            val operatorCode = event.operator
 
-            if (!serviceName.isNullOrEmpty()) {
+            if (!serviceName.isNullOrBlank() && !operatorCode.isNullOrBlank()) {
                 val vehicle = event.toVehicleOrNull(
                     serverTime = serverTime,
                     timeZone = timeZone
                 )
 
                 if (vehicle != null) {
-                    serviceVehicles.getOrPut(serviceName) { mutableListOf() } += vehicle
+                    val serviceDescriptor = ServiceDescriptor(
+                        serviceName = serviceName.normaliseServiceName(operatorCode),
+                        operatorCode = operatorCode
+                    )
+                    serviceVehicles.getOrPut(serviceDescriptor) { mutableListOf() } += vehicle
                 }
             }
         }
 
         serviceVehicles
-            .mapNotNull { (serviceName, vehicles) ->
+            .mapNotNull { (serviceDescriptor, vehicles) ->
                 if (vehicles.isNotEmpty()) {
                     val sortedVehicles = vehicles
                         .apply {
@@ -130,7 +136,7 @@ private fun List<JsonStopEvent>.toServicesOrNull(
                         .take(numberOfDepartures)
 
                     Service(
-                        serviceName = serviceName,
+                        serviceDescriptor = serviceDescriptor,
                         vehicles = sortedVehicles
                     )
                 } else {
@@ -143,9 +149,9 @@ private fun List<JsonStopEvent>.toServicesOrNull(
     }
 }
 
-private fun String.normaliseServiceName(): String {
-    return when (this) {
-        "T50" -> "TRAM"
+private fun String.normaliseServiceName(operatorCode: String): String {
+    return when {
+        this == "T50" && operatorCode == "EDT" -> "TRAM"
         else -> this
     }
 }

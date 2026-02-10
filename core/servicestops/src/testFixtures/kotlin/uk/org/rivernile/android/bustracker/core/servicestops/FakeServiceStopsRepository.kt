@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,8 @@
 package uk.org.rivernile.android.bustracker.core.servicestops
 
 import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
  * A fake [ServiceStopsRepository] for testing.
@@ -34,15 +36,16 @@ import kotlinx.coroutines.flow.Flow
  * @author Niall Scott
  */
 class FakeServiceStopsRepository(
-    private val onGetServicesForStopFlow: (String) -> Flow<List<String>?> =
+    private val onGetServicesForStopFlow: (StopIdentifier) -> Flow<List<ServiceDescriptor>?> =
         { throw NotImplementedError() },
-    private val onGetServicesForStopsFlow: (Set<String>) -> Flow<Map<String, List<String>>?> =
+    private val onGetServicesForStopsFlow:
+        (Set<StopIdentifier>) -> Flow<Map<StopIdentifier, List<ServiceDescriptor>>?> =
         { throw NotImplementedError() }
 ) : ServiceStopsRepository {
 
-    override fun getServicesForStopFlow(stopCode: String) =
-        onGetServicesForStopFlow(stopCode)
+    override fun getServicesForStopFlow(stopIdentifier: StopIdentifier) =
+        onGetServicesForStopFlow(stopIdentifier)
 
-    override fun getServicesForStopsFlow(stopCodes: Set<String>) =
-        onGetServicesForStopsFlow(stopCodes)
+    override fun getServicesForStopsFlow(stopIdentifiers: Set<StopIdentifier>) =
+        onGetServicesForStopsFlow(stopIdentifiers)
 }

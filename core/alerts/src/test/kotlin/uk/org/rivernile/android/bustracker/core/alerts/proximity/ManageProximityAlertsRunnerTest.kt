@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,11 +35,13 @@ import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.alerts.FakeAlertsRepository
 import uk.org.rivernile.android.bustracker.core.alerts.ProximityAlert
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.fail
+import kotlin.time.Instant
 
 /**
  * Tests for [ManageProximityAlertsRunner].
@@ -87,9 +89,9 @@ class ManageProximityAlertsRunnerTest {
 
     @Test
     fun initialAlertsAreTracked() = runTest {
-        val alert1 = ProximityAlert(1, 101L, "100001", 10)
-        val alert2 = ProximityAlert(2, 102L, "100002", 20)
-        val alert3 = ProximityAlert(3, 103L, "100003", 30)
+        val alert1 = ProximityAlert(1, 101L.toInstant(), "100001".toNaptanStopIdentifier(), 10)
+        val alert2 = ProximityAlert(2, 102L.toInstant(), "100002".toNaptanStopIdentifier(), 20)
+        val alert3 = ProximityAlert(3, 103L.toInstant(), "100003".toNaptanStopIdentifier(), 30)
         val alerts = listOf(alert1, alert2, alert3)
         val trackProximityAlertTracker = TrackProximityAlertTracker()
         val removedProximityAlertTracker = RemoveProximityAlertTracker()
@@ -118,9 +120,9 @@ class ManageProximityAlertsRunnerTest {
 
     @Test
     fun alertsChangedWithNoProximityAlertsRemovesAllTrackedAlerts() = runTest {
-        val alert1 = ProximityAlert(1, 101L, "100001", 10)
-        val alert2 = ProximityAlert(2, 102L, "100002", 20)
-        val alert3 = ProximityAlert(3, 103L, "100003", 30)
+        val alert1 = ProximityAlert(1, 101L.toInstant(), "100001".toNaptanStopIdentifier(), 10)
+        val alert2 = ProximityAlert(2, 102L.toInstant(), "100002".toNaptanStopIdentifier(), 20)
+        val alert3 = ProximityAlert(3, 103L.toInstant(), "100003".toNaptanStopIdentifier(), 30)
         val alerts = listOf(alert1, alert2, alert3)
         val removedProximityAlertTracker = RemoveProximityAlertTracker()
         val runner = createManageProximityAlertsRunner(
@@ -144,9 +146,9 @@ class ManageProximityAlertsRunnerTest {
 
     @Test
     fun alertsChangedWithRemovalRemovesTrackedAlert() = runTest {
-        val alert1 = ProximityAlert(1, 101L, "100001", 10)
-        val alert2 = ProximityAlert(2, 102L, "100002", 20)
-        val alert3 = ProximityAlert(3, 103L, "100003", 30)
+        val alert1 = ProximityAlert(1, 101L.toInstant(), "100001".toNaptanStopIdentifier(), 10)
+        val alert2 = ProximityAlert(2, 102L.toInstant(), "100002".toNaptanStopIdentifier(), 20)
+        val alert3 = ProximityAlert(3, 103L.toInstant(), "100003".toNaptanStopIdentifier(), 30)
         val alerts1 = listOf(alert1, alert2, alert3)
         val alerts2 = listOf(alert1, alert3)
         val removedProximityAlertTracker = RemoveProximityAlertTracker()
@@ -171,9 +173,9 @@ class ManageProximityAlertsRunnerTest {
 
     @Test
     fun alertsChangedWithAdditionAddsTrackedAlert() = runTest {
-        val alert1 = ProximityAlert(1, 101L, "100001", 10)
-        val alert2 = ProximityAlert(2, 102L, "100002", 20)
-        val alert3 = ProximityAlert(3, 103L, "100003", 30)
+        val alert1 = ProximityAlert(1, 101L.toInstant(), "100001".toNaptanStopIdentifier(), 10)
+        val alert2 = ProximityAlert(2, 102L.toInstant(), "100002".toNaptanStopIdentifier(), 20)
+        val alert3 = ProximityAlert(3, 103L.toInstant(), "100003".toNaptanStopIdentifier(), 30)
         val alerts1 = listOf(alert1, alert2)
         val alerts2 = listOf(alert1, alert2, alert3)
         val trackProximityAlertTracker = TrackProximityAlertTracker()
@@ -200,9 +202,9 @@ class ManageProximityAlertsRunnerTest {
 
     @Test
     fun allAlertsAreUntrackedWhenCoroutineIsCancelled() = runTest {
-        val alert1 = ProximityAlert(1, 101L, "100001", 10)
-        val alert2 = ProximityAlert(2, 102L, "100002", 20)
-        val alert3 = ProximityAlert(3, 103L, "100003", 30)
+        val alert1 = ProximityAlert(1, 101L.toInstant(), "100001".toNaptanStopIdentifier(), 10)
+        val alert2 = ProximityAlert(2, 102L.toInstant(), "100002".toNaptanStopIdentifier(), 20)
+        val alert3 = ProximityAlert(3, 103L.toInstant(), "100003".toNaptanStopIdentifier(), 30)
         val alerts = listOf(alert1, alert2, alert3)
         val removedProximityAlertTracker = RemoveProximityAlertTracker()
         val runner = createManageProximityAlertsRunner(
@@ -227,9 +229,9 @@ class ManageProximityAlertsRunnerTest {
 
     @Test
     fun allAlertsAreUntrackedWhenProximityAlertsFlowTerminates() = runTest {
-        val alert1 = ProximityAlert(1, 101L, "100001", 10)
-        val alert2 = ProximityAlert(2, 102L, "100002", 20)
-        val alert3 = ProximityAlert(3, 103L, "100003", 30)
+        val alert1 = ProximityAlert(1, 101L.toInstant(), "100001".toNaptanStopIdentifier(), 10)
+        val alert2 = ProximityAlert(2, 102L.toInstant(), "100002".toNaptanStopIdentifier(), 20)
+        val alert3 = ProximityAlert(3, 103L.toInstant(), "100003".toNaptanStopIdentifier(), 30)
         val alerts = listOf(alert1, alert2, alert3)
         val removedProximityAlertTracker = RemoveProximityAlertTracker()
         val runner = createManageProximityAlertsRunner(
@@ -280,4 +282,6 @@ class ManageProximityAlertsRunnerTest {
             _removedIds += p1
         }
     }
+
+    private fun Long.toInstant(): Instant = Instant.fromEpochMilliseconds(this)
 }

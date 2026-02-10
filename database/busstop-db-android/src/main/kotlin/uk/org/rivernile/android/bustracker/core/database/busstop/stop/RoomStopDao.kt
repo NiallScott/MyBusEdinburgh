@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,7 +29,15 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 import androidx.room.Dao
 import androidx.room.MapColumn
 import androidx.room.Query
+import androidx.room.RawQuery
+import androidx.room.RoomRawQuery
 import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.database.busstop.operator.RoomOperatorEntity
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.RoomServiceEntity
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.bindStatement
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.createPlaceholders
+import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.RoomServiceStopEntity
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 
 /**
  * This is the Room implementation of [StopDao].
@@ -40,68 +48,55 @@ import kotlinx.coroutines.flow.Flow
 internal abstract class RoomStopDao : StopDao {
 
     @Query("""
-        SELECT stopName AS name, locality 
-        FROM bus_stop 
-        WHERE stopCode = :stopCode 
+        SELECT name, locality
+        FROM stop
+        WHERE naptan_code = :naptanStopCode
         LIMIT 1
     """)
-    abstract override fun getNameForStopFlow(stopCode: String): Flow<RoomStopName?>
+    abstract override fun getNameForStopFlow(naptanStopCode: String): Flow<RoomStopName?>
 
     @Query("""
-        SELECT latitude, longitude 
-        FROM bus_stop 
-        WHERE stopCode = :stopCode 
-        AND latitude NOT NULL 
-        AND longitude NOT NULL 
+        SELECT latitude, longitude
+        FROM stop
+        WHERE naptan_code = :naptanStopCode
         LIMIT 1
     """)
-    abstract override fun getLocationForStopFlow(stopCode: String): Flow<RoomStopLocation?>
+    abstract override fun getLocationForStopFlow(naptanStopCode: String): Flow<RoomStopLocation?>
 
     @Query("""
-        SELECT stopCode, stopName AS name, locality, latitude, longitude, orientation 
-        FROM bus_stop 
-        WHERE stopCode = :stopCode 
-        AND latitude NOT NULL 
-        AND longitude NOT NULL 
+        SELECT naptan_code, name, locality, latitude, longitude, bearing
+        FROM stop
+        WHERE naptan_code = :naptanStopCode
         LIMIT 1
     """)
-    abstract override fun getStopDetailsFlow(stopCode: String): Flow<RoomStopDetails?>
+    abstract override fun getStopDetailsFlow(naptanStopCode: String): Flow<RoomStopDetails?>
 
     @Query("""
-        SELECT stopCode, stopName AS name, locality, latitude, longitude, orientation 
-        FROM bus_stop 
-        WHERE stopCode IN (:stopCodes) 
-        AND latitude NOT NULL 
-        AND longitude NOT NULL 
+        SELECT naptan_code, name, locality, latitude, longitude, bearing
+        FROM stop
+        WHERE naptan_code IN (:naptanStopCodes)
     """)
     abstract override fun getStopDetailsFlow(
-        stopCodes: Set<String>
-    ): Flow<Map<@MapColumn(columnName = "stopCode") String, RoomStopDetails>?>
+        naptanStopCodes: Set<String>
+    ): Flow<Map<@MapColumn(columnName = "naptan_code") String, RoomStopDetails>>
 
     override fun getStopDetailsWithServiceFilterFlow(
-        serviceFilter: Set<String>?
-    ): Flow<List<StopDetails>?> {
+        serviceFilter: Set<ServiceDescriptor>?
+    ): Flow<List<StopDetails>> {
         return serviceFilter
             ?.ifEmpty { null }
             ?.let {
-                getStopDetailsWithServiceFilterFlowInternal(it)
+                getStopDetailsWithServiceFilterFlowInternal(
+                    createGetStopDetailsWithServiceFilterRawQuery(it)
+                )
             }
             ?: allStopDetailsFlow
     }
 
     @Query("""
-        SELECT stopCode, stopName AS name, locality, latitude, longitude, orientation, (
-            SELECT group_concat(serviceName, ', ') 
-            FROM (
-                SELECT stopCode, serviceName 
-                FROM service_stop 
-                WHERE bus_stop.stopCode = service_stop.stopCode 
-                ORDER BY CASE WHEN serviceName GLOB '[^0-9.]*' THEN 
-                    serviceName ELSE cast(serviceName AS int) END
-            )
-        ) AS serviceListing
-        FROM bus_stop 
-        WHERE (latitude BETWEEN :minLatitude AND :maxLatitude) 
+        SELECT id, naptan_code, name, locality, latitude, longitude, bearing
+        FROM stop
+        WHERE (latitude BETWEEN :minLatitude AND :maxLatitude)
         AND (longitude BETWEEN :minLongitude AND :maxLongitude)
     """)
     abstract override fun getStopDetailsWithinSpanFlow(
@@ -109,74 +104,148 @@ internal abstract class RoomStopDao : StopDao {
         minLongitude: Double,
         maxLatitude: Double,
         maxLongitude: Double
-    ): Flow<List<RoomStopDetailsWithServices>?>
+    ): Flow<List<RoomStopDetailsWithServices>>
 
-    @Query("""
-        SELECT stopCode, stopName AS name, locality, latitude, longitude, orientation, (
-            SELECT group_concat(serviceName, ', ') 
-            FROM (
-                SELECT stopCode, serviceName 
-                FROM service_stop 
-                WHERE bus_stop.stopCode = service_stop.stopCode 
-                ORDER BY CASE WHEN serviceName GLOB '[^0-9.]*' THEN 
-                    serviceName ELSE cast(serviceName AS int) END
-            )
-        ) AS serviceListing
-        FROM bus_stop 
-        WHERE (latitude BETWEEN :minLatitude AND :maxLatitude) 
-        AND (longitude BETWEEN :minLongitude AND :maxLongitude)
-        AND stopCode IN (
-            SELECT DISTINCT stopCode 
-            FROM service_stop 
-            WHERE serviceName IN (:serviceFilter)
-        )
-    """)
-    abstract override fun getStopDetailsWithinSpanFlow(
+    override fun getStopDetailsWithinSpanFlow(
         minLatitude: Double,
         minLongitude: Double,
         maxLatitude: Double,
         maxLongitude: Double,
-        serviceFilter: Set<String>
-    ): Flow<List<RoomStopDetailsWithServices>?>
+        serviceFilter: Set<ServiceDescriptor>
+    ): Flow<List<RoomStopDetailsWithServices>> {
+        return getStopDetailsWithinSpanFlowInternal(
+            createGetStopDetailsWithinSpanRawQuery(
+                minLatitude = minLatitude,
+                minLongitude = minLongitude,
+                maxLatitude = maxLatitude,
+                maxLongitude = maxLongitude,
+                serviceFilter = serviceFilter
+            )
+        )
+    }
 
     @Query("""
-        SELECT stopCode, stopName AS name, locality, orientation, (
-            SELECT group_concat(serviceName, ', ') 
-            FROM (
-                SELECT stopCode, serviceName 
-                FROM service_stop 
-                WHERE bus_stop.stopCode = service_stop.stopCode 
-                ORDER BY CASE WHEN serviceName GLOB '[^0-9.]*' THEN 
-                    serviceName ELSE cast(serviceName AS int) END
-            )
-        ) AS serviceListing
-        FROM bus_stop 
-        WHERE stopCode LIKE '%' || :searchTerm || '%' 
-        OR stopName LIKE '%' || :searchTerm || '%' 
+        SELECT id, naptan_code, name, locality, bearing
+        FROM stop
+        WHERE naptan_code LIKE '%' || :searchTerm || '%'
+        OR atco_code LIKE '%' || :searchTerm || '%'
+        OR name LIKE '%' || :searchTerm || '%'
         OR locality LIKE '%' || :searchTerm || '%'
     """)
-    abstract override fun getStopSearchResultsFlow(searchTerm: String): Flow<List<RoomStopSearchResult>?>
+    abstract override fun getStopSearchResultsFlow(
+        searchTerm: String
+    ): Flow<List<RoomStopSearchResult>>
 
     @get:Query("""
-        SELECT stopCode, stopName AS name, locality, latitude, longitude, orientation 
-        FROM bus_stop 
-        WHERE latitude NOT NULL 
+        SELECT naptan_code, name, locality, latitude, longitude, bearing
+        FROM stop
+        WHERE latitude NOT NULL
         AND longitude NOT NULL
     """)
-    abstract val allStopDetailsFlow: Flow<List<RoomStopDetails>?>
+    abstract val allStopDetailsFlow: Flow<List<RoomStopDetails>>
 
-    @Query("""
-        SELECT stopCode, stopName AS name, locality, latitude, longitude, orientation 
-        FROM bus_stop 
-        WHERE stopCode IN (
-            SELECT stopCode 
-            FROM service_stop 
-            WHERE serviceName IN (:serviceFilter)
-        )
-        AND latitude NOT NULL 
-        AND longitude NOT NULL
-    """)
+    @RawQuery(
+        observedEntities = [
+            RoomOperatorEntity::class,
+            RoomServiceEntity::class,
+            RoomServiceStopEntity::class,
+            RoomStopEntity::class
+        ]
+    )
     abstract fun getStopDetailsWithServiceFilterFlowInternal(
-        serviceFilter: Set<String>
-    ): Flow<List<RoomStopDetails>?>
+        query: RoomRawQuery
+    ): Flow<List<RoomStopDetails>>
+
+    @RawQuery(
+        observedEntities = [
+            RoomOperatorEntity::class,
+            RoomServiceEntity::class,
+            RoomServiceStopEntity::class,
+            RoomStopEntity::class
+        ]
+    )
+    abstract fun getStopDetailsWithinSpanFlowInternal(
+        rawQuery: RoomRawQuery
+    ): Flow<List<RoomStopDetailsWithServices>>
+
+    private fun createGetStopDetailsWithServiceFilterRawQuery(
+        serviceFilter: Set<ServiceDescriptor>
+    ): RoomRawQuery {
+        val sqlQuery = buildString {
+            append("""
+                SELECT naptan_code, name, locality, latitude, longitude, bearing
+                FROM stop
+                WHERE id IN (
+                    SELECT stop_id
+                    FROM service_stop
+                    WHERE service_id IN (
+                        SELECT id
+                        FROM service_view
+                        WHERE (name, operator_code) IN (VALUES
+            """.trimIndent())
+
+            append(serviceFilter.createPlaceholders())
+
+            append("""
+                       )
+                    )
+                )
+            """.trimIndent())
+        }
+
+        return RoomRawQuery(
+            sql = sqlQuery,
+            onBindStatement = {
+                serviceFilter.forEachIndexed { index, serviceDescriptor ->
+                    val baseIndex = (index * 2) + 1
+                    it.bindText(baseIndex, serviceDescriptor.serviceName)
+                    it.bindText(baseIndex + 1, serviceDescriptor.operatorCode)
+                }
+            }
+        )
+    }
+
+    private fun createGetStopDetailsWithinSpanRawQuery(
+        minLatitude: Double,
+        minLongitude: Double,
+        maxLatitude: Double,
+        maxLongitude: Double,
+        serviceFilter: Set<ServiceDescriptor>
+    ): RoomRawQuery {
+        val sqlQuery = buildString {
+            append("""
+                SELECT id, naptan_code, name, locality, latitude, longitude, bearing
+                FROM stop
+                WHERE (latitude BETWEEN ? AND ?)
+                AND (longitude BETWEEN ? AND ?)
+                AND id IN (
+                    SELECT stop_id
+                    FROM service_stop
+                    WHERE service_id IN (
+                        SELECT id
+                        FROM service_view
+                        WHERE (name, operator_code) IN (VALUES
+            """.trimIndent())
+
+            append(serviceFilter.createPlaceholders())
+
+            append("""
+                       )
+                    )
+                )
+            """.trimIndent())
+        }
+
+        return RoomRawQuery(
+            sql = sqlQuery,
+            onBindStatement = {
+                it.bindDouble(1, minLatitude)
+                it.bindDouble(2, maxLatitude)
+                it.bindDouble(3, minLongitude)
+                it.bindDouble(4, maxLongitude)
+
+                serviceFilter.bindStatement(statement = it, offset = 4)
+            }
+        )
+    }
 }

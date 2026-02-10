@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.servicestop
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -33,13 +34,13 @@ import androidx.room.PrimaryKey
  * This Room [Entity] contains the mappings between stops and services.
  *
  * @property id The ID of the item.
- * @property stopCode The stop code.
- * @property serviceName The service name.
+ * @property serviceId The service ID.
+ * @property stopId The stop ID.
  * @author Niall Scott
  */
 @Entity(tableName = "service_stop")
 internal data class RoomServiceStopEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int,
-    val stopCode: String,
-    val serviceName: String
+    @PrimaryKey val id: Int,
+    @ColumnInfo("service_id") val serviceId: Int,
+    @ColumnInfo("stop_id") val stopId: Int
 )

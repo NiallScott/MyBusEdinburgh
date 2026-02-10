@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -191,7 +191,6 @@ private val UiAboutItem.titleStringRes: Int get() {
         is UiAboutItem.TwoLinesItem.AppVersion -> R.string.about_version
         is UiAboutItem.TwoLinesItem.Author -> R.string.about_author
         is UiAboutItem.TwoLinesItem.DatabaseVersion -> R.string.about_database_version
-        is UiAboutItem.TwoLinesItem.TopologyVersion -> R.string.about_topology_version
         is UiAboutItem.TwoLinesItem.Bluesky -> R.string.about_bluesky
         is UiAboutItem.TwoLinesItem.Website -> R.string.about_website
     }
@@ -213,9 +212,6 @@ private val UiAboutItem.TwoLinesItem.captionText: String @Composable get() {
                     LocalDateTimeFormatter.current.format(it)
                 )
             } ?: stringResource(id = R.string.about_database_version_loading)
-        }
-        is UiAboutItem.TwoLinesItem.TopologyVersion -> {
-            topologyId ?: stringResource(id = R.string.about_topology_version_loading)
         }
         is UiAboutItem.TwoLinesItem.Bluesky -> stringResource(id = R.string.app_bluesky)
         is UiAboutItem.TwoLinesItem.Website -> stringResource(id = R.string.app_website)

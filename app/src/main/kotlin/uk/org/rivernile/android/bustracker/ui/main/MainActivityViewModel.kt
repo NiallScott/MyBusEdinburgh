@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import javax.inject.Inject
@@ -62,8 +64,8 @@ class MainActivityViewModel @Inject constructor(
     /**
      * This [LiveData] emits when the stop details should be shown.
      */
-    val showStopLiveData: LiveData<String> get() = showStop
-    private val showStop = SingleLiveEvent<String>()
+    val showStopLiveData: LiveData<StopIdentifier> get() = showStop
+    private val showStop = SingleLiveEvent<StopIdentifier>()
 
     /**
      * This [LiveData] emits the current visibility status of the scan menu item.
@@ -146,7 +148,7 @@ class MainActivityViewModel @Inject constructor(
             result.stopCode
                 ?.ifBlank { null }
                 ?.let {
-                    showStop.value = it
+                    showStop.value = it.toNaptanStopIdentifier()
                 }
                 ?: showInvalidQrCodeError.call()
         }

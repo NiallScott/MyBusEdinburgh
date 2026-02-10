@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.callbacks
 
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+
 /**
  * This listener is used to send callbacks from [androidx.fragment.app.Fragment]s to
  * [android.app.Activity]s when the user wishes to add a new favourite stop.
@@ -37,7 +39,7 @@ interface OnShowAddEditFavouriteStopListener {
     /**
      * This is called when the user wants to add or edit a favourite stop.
      *
-     * @param stopCode The stop code of the stop to add or edit.
+     * @param stopIdentifier The stop identifier of the stop to add or edit.
      */
-    fun onShowAddEditFavouriteStop(stopCode: String)
+    fun onShowAddEditFavouriteStop(stopIdentifier: StopIdentifier)
 }

@@ -31,6 +31,8 @@ import kotlinx.datetime.LocalTime
 import kotlinx.datetime.Month
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Instant
@@ -55,7 +57,7 @@ class JsonStopEventsKtTest {
                 )
             )
         ).toLiveTimes(
-            stopCode = "123456",
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
             numberOfDepartures = 4,
             receiveTime = Instant.fromEpochMilliseconds(123L),
             timeZone = TimeZone.UTC
@@ -73,7 +75,7 @@ class JsonStopEventsKtTest {
             time = Instant.fromEpochMilliseconds(456L),
             events = null
         ).toLiveTimes(
-            stopCode = "123456",
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
             numberOfDepartures = 4,
             receiveTime = Instant.fromEpochMilliseconds(123L),
             timeZone = TimeZone.UTC
@@ -91,7 +93,7 @@ class JsonStopEventsKtTest {
             time = Instant.fromEpochMilliseconds(456L),
             events = emptyList()
         ).toLiveTimes(
-            stopCode = "123456",
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
             numberOfDepartures = 4,
             receiveTime = Instant.fromEpochMilliseconds(123L),
             timeZone = TimeZone.UTC
@@ -109,7 +111,7 @@ class JsonStopEventsKtTest {
             time = Instant.fromEpochMilliseconds(456L),
             events = listOf(JsonStopEvent())
         ).toLiveTimes(
-            stopCode = "123456",
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
             numberOfDepartures = 4,
             receiveTime = Instant.fromEpochMilliseconds(123L),
             timeZone = TimeZone.UTC
@@ -134,13 +136,14 @@ class JsonStopEventsKtTest {
             events = listOf(
                 JsonStopEvent(
                     publicServiceName = "1",
+                    operator = "TEST1",
                     destination = "Destination",
                     scheduledDepartureTime = LocalTime(hour = 12, minute = 40),
                     departureTime = null
                 )
             )
         ).toLiveTimes(
-            stopCode = "123456",
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
             numberOfDepartures = 4,
             receiveTime = Instant.fromEpochMilliseconds(123L),
             timeZone = TimeZone.UTC
@@ -149,11 +152,14 @@ class JsonStopEventsKtTest {
         assertEquals(
             LiveTimes(
                 stops = mapOf(
-                    "123456" to Stop(
-                        stopCode = "123456",
+                    "123456".toNaptanStopIdentifier() to Stop(
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         services = listOf(
                             Service(
-                                serviceName = "1",
+                                serviceDescriptor = FakeServiceDescriptor(
+                                    serviceName = "1",
+                                    operatorCode = "TEST1"
+                                ),
                                 vehicles = listOf(
                                     Vehicle(
                                         destination = "Destination",
@@ -192,31 +198,35 @@ class JsonStopEventsKtTest {
             events = listOf(
                 JsonStopEvent(
                     publicServiceName = "1",
+                    operator = "TEST1",
                     destination = "Destination",
                     scheduledDepartureTime = LocalTime(hour = 12, minute = 40),
                     departureTime = null
                 ),
                 JsonStopEvent(
                     publicServiceName = "1",
+                    operator = "TEST1",
                     destination = "Destination",
                     scheduledDepartureTime = LocalTime(hour = 12, minute = 39),
                     departureTime = null
                 ),
                 JsonStopEvent(
                     publicServiceName = "1",
+                    operator = "TEST1",
                     destination = "Destination",
                     scheduledDepartureTime = LocalTime(hour = 12, minute = 42),
                     departureTime = null
                 ),
                 JsonStopEvent(
                     publicServiceName = "1",
+                    operator = "TEST1",
                     destination = "Destination",
                     scheduledDepartureTime = LocalTime(hour = 12, minute = 41),
                     departureTime = null
                 )
             )
         ).toLiveTimes(
-            stopCode = "123456",
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
             numberOfDepartures = 2,
             receiveTime = Instant.fromEpochMilliseconds(123L),
             timeZone = TimeZone.UTC
@@ -225,11 +235,14 @@ class JsonStopEventsKtTest {
         assertEquals(
             LiveTimes(
                 stops = mapOf(
-                    "123456" to Stop(
-                        stopCode = "123456",
+                    "123456".toNaptanStopIdentifier() to Stop(
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         services = listOf(
                             Service(
-                                serviceName = "1",
+                                serviceDescriptor = FakeServiceDescriptor(
+                                    serviceName = "1",
+                                    operatorCode = "TEST1"
+                                ),
                                 vehicles = listOf(
                                     Vehicle(
                                         destination = "Destination",
@@ -279,39 +292,65 @@ class JsonStopEventsKtTest {
                 minute = 34
             ).toInstant(TimeZone.UTC),
             events = listOf(
+                // Service name is null
                 JsonStopEvent(
                     publicServiceName = null,
+                    operator = "TEST1",
                     destination = "Destination",
                     scheduledDepartureTime = LocalTime(hour = 12, minute = 40),
                     departureTime = null
                 ),
+                // Service name is empty
                 JsonStopEvent(
                     publicServiceName = "",
+                    operator = "TEST1",
                     destination = "Destination",
                     scheduledDepartureTime = LocalTime(hour = 12, minute = 40),
                     departureTime = null
                 ),
+                // Operator is null
                 JsonStopEvent(
                     publicServiceName = "1",
+                    operator = null,
+                    destination = "Destination",
+                    scheduledDepartureTime = LocalTime(hour = 12, minute = 40),
+                    departureTime = null
+                ),
+                // Operator is empty
+                JsonStopEvent(
+                    publicServiceName = "1",
+                    operator = "",
+                    destination = "Destination",
+                    scheduledDepartureTime = LocalTime(hour = 12, minute = 40),
+                    departureTime = null
+                ),
+                // Valid
+                JsonStopEvent(
+                    publicServiceName = "1",
+                    operator = "TEST1",
                     destination = "Destination",
                     scheduledDepartureTime = LocalTime(hour = 12, minute = 39),
                     departureTime = null
                 ),
+                // Invalid - no time available
                 JsonStopEvent(
                     publicServiceName = "1",
+                    operator = "TEST1",
                     destination = "Destination",
                     scheduledDepartureTime = null,
                     departureTime = null
                 ),
+                // Valid
                 JsonStopEvent(
                     publicServiceName = "1",
+                    operator = "TEST1",
                     destination = "Destination",
                     scheduledDepartureTime = LocalTime(hour = 12, minute = 41),
                     departureTime = null
                 )
             )
         ).toLiveTimes(
-            stopCode = "123456",
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
             numberOfDepartures = 4,
             receiveTime = Instant.fromEpochMilliseconds(123L),
             timeZone = TimeZone.UTC
@@ -320,11 +359,14 @@ class JsonStopEventsKtTest {
         assertEquals(
             LiveTimes(
                 stops = mapOf(
-                    "123456" to Stop(
-                        stopCode = "123456",
+                    "123456".toNaptanStopIdentifier() to Stop(
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         services = listOf(
                             Service(
-                                serviceName = "1",
+                                serviceDescriptor = FakeServiceDescriptor(
+                                    serviceName = "1",
+                                    operatorCode = "TEST1"
+                                ),
                                 vehicles = listOf(
                                     Vehicle(
                                         destination = "Destination",
@@ -376,43 +418,49 @@ class JsonStopEventsKtTest {
             events = listOf(
                 JsonStopEvent(
                     publicServiceName = "1",
+                    operator = "TEST1",
                     destination = "Destination",
                     scheduledDepartureTime = LocalTime(hour = 12, minute = 40),
                     departureTime = null
                 ),
                 JsonStopEvent(
                     publicServiceName = "2",
+                    operator = "TEST2",
                     destination = "Destination",
                     scheduledDepartureTime = LocalTime(hour = 12, minute = 41),
                     departureTime = null
                 ),
                 JsonStopEvent(
                     publicServiceName = "3",
+                    operator = "TEST3",
                     destination = "Destination",
                     scheduledDepartureTime = LocalTime(hour = 12, minute = 45),
                     departureTime = null
                 ),
                 JsonStopEvent(
                     publicServiceName = "1",
+                    operator = "TEST1",
                     destination = "Destination",
                     scheduledDepartureTime = LocalTime(hour = 12, minute = 42),
                     departureTime = null
                 ),
                 JsonStopEvent(
                     publicServiceName = "2",
+                    operator = "TEST2",
                     destination = "Destination",
                     scheduledDepartureTime = LocalTime(hour = 12, minute = 43),
                     departureTime = null
                 ),
                 JsonStopEvent(
                     publicServiceName = "1",
+                    operator = "TEST1",
                     destination = "Destination",
                     scheduledDepartureTime = LocalTime(hour = 12, minute = 44),
                     departureTime = null
                 )
             )
         ).toLiveTimes(
-            stopCode = "123456",
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
             numberOfDepartures = 4,
             receiveTime = Instant.fromEpochMilliseconds(123L),
             timeZone = TimeZone.UTC
@@ -421,11 +469,14 @@ class JsonStopEventsKtTest {
         assertEquals(
             LiveTimes(
                 stops = mapOf(
-                    "123456" to Stop(
-                        stopCode = "123456",
+                    "123456".toNaptanStopIdentifier() to Stop(
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         services = listOf(
                             Service(
-                                serviceName = "1",
+                                serviceDescriptor = FakeServiceDescriptor(
+                                    serviceName = "1",
+                                    operatorCode = "TEST1"
+                                ),
                                 vehicles = listOf(
                                     Vehicle(
                                         destination = "Destination",
@@ -469,7 +520,10 @@ class JsonStopEventsKtTest {
                                 )
                             ),
                             Service(
-                                serviceName = "2",
+                                serviceDescriptor = FakeServiceDescriptor(
+                                    serviceName = "2",
+                                    operatorCode = "TEST2"
+                                ),
                                 vehicles = listOf(
                                     Vehicle(
                                         destination = "Destination",
@@ -500,7 +554,10 @@ class JsonStopEventsKtTest {
                                 )
                             ),
                             Service(
-                                serviceName = "3",
+                                serviceDescriptor = FakeServiceDescriptor(
+                                    serviceName = "3",
+                                    operatorCode = "TEST3"
+                                ),
                                 vehicles = listOf(
                                     Vehicle(
                                         destination = "Destination",
@@ -527,7 +584,7 @@ class JsonStopEventsKtTest {
     }
 
     @Test
-    fun toLiveTimesConvertsT50ServiceToTram() {
+    fun toLiveTimesDoesNotConvertT50ServiceToTramWhenOperatorCodeIsNotEDT() {
         val result = JsonStopEvents(
             time = LocalDateTime(
                 year = 2026,
@@ -539,13 +596,14 @@ class JsonStopEventsKtTest {
             events = listOf(
                 JsonStopEvent(
                     publicServiceName = "T50",
+                    operator = "TEST1",
                     destination = "Destination",
                     scheduledDepartureTime = LocalTime(hour = 12, minute = 40),
                     departureTime = null
                 )
             )
         ).toLiveTimes(
-            stopCode = "123456",
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
             numberOfDepartures = 4,
             receiveTime = Instant.fromEpochMilliseconds(123L),
             timeZone = TimeZone.UTC
@@ -554,11 +612,76 @@ class JsonStopEventsKtTest {
         assertEquals(
             LiveTimes(
                 stops = mapOf(
-                    "123456" to Stop(
-                        stopCode = "123456",
+                    "123456".toNaptanStopIdentifier() to Stop(
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         services = listOf(
                             Service(
-                                serviceName = "TRAM",
+                                serviceDescriptor = FakeServiceDescriptor(
+                                    serviceName = "T50",
+                                    operatorCode = "TEST1"
+                                ),
+                                vehicles = listOf(
+                                    Vehicle(
+                                        destination = "Destination",
+                                        departureTime = LocalDateTime(
+                                            year = 2026,
+                                            month = Month.JANUARY,
+                                            day = 8,
+                                            hour = 12,
+                                            minute = 40
+                                        ).toInstant(TimeZone.UTC),
+                                        departureMinutes = 6,
+                                        isEstimatedTime = true,
+                                        isDiverted = false
+                                    )
+                                )
+                            )
+                        )
+                    )
+                ),
+                receiveTime = Instant.fromEpochMilliseconds(123L)
+            ),
+            result
+        )
+    }
+
+    @Test
+    fun toLiveTimesConvertsT50ServiceToTramWhenOperatorCodeIsEDT() {
+        val result = JsonStopEvents(
+            time = LocalDateTime(
+                year = 2026,
+                month = Month.JANUARY,
+                day = 8,
+                hour = 12,
+                minute = 34
+            ).toInstant(TimeZone.UTC),
+            events = listOf(
+                JsonStopEvent(
+                    publicServiceName = "T50",
+                    operator = "EDT",
+                    destination = "Destination",
+                    scheduledDepartureTime = LocalTime(hour = 12, minute = 40),
+                    departureTime = null
+                )
+            )
+        ).toLiveTimes(
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            numberOfDepartures = 4,
+            receiveTime = Instant.fromEpochMilliseconds(123L),
+            timeZone = TimeZone.UTC
+        )
+
+        assertEquals(
+            LiveTimes(
+                stops = mapOf(
+                    "123456".toNaptanStopIdentifier() to Stop(
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
+                        services = listOf(
+                            Service(
+                                serviceDescriptor = FakeServiceDescriptor(
+                                    serviceName = "TRAM",
+                                    operatorCode = "EDT"
+                                ),
                                 vehicles = listOf(
                                     Vehicle(
                                         destination = "Destination",

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -56,6 +56,10 @@ android {
     }
 }
 
+kotlin {
+    explicitApi()
+}
+
 ksp {
     /*
      * This is used to export the Room schema out to a JSON file in the module's "schemas"
@@ -68,6 +72,7 @@ ksp {
 
 dependencies {
 
+    implementation(project(":core:core-domain"))
     implementation(project(":database:settings-db-core"))
 
     // Kotlin
@@ -82,12 +87,17 @@ dependencies {
     ksp(libs.androidx.room.compiler)
 
     // Test dependencies
+    androidTestImplementation(testFixtures(project(":core:core-domain")))
     androidTestImplementation(project(":database:database-test-android"))
+    androidTestImplementation(testFixtures(project(":database:settings-db-core")))
     androidTestImplementation(libs.androidx.room.test)
     androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.coroutines.test)
     androidTestImplementation(libs.kotlin.test.junit)
 
+    testImplementation(testFixtures(project(":core:core-domain")))
+    testImplementation(testFixtures(project(":database:settings-db-core")))
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)
 }

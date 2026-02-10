@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -71,6 +71,10 @@ android {
     }
 }
 
+kotlin {
+    explicitApi()
+}
+
 ksp {
     /*
      * This is used to export the Room schema out to a JSON file in the module's "schemas"
@@ -83,6 +87,7 @@ ksp {
 
 dependencies {
 
+    implementation(project(":core:core-domain"))
     implementation(project(":core:coroutines"))
     implementation(project(":core:logging"))
     api(project(":database:busstop-db-core"))
@@ -113,6 +118,7 @@ dependencies {
     androidTestImplementation(libs.turbine)
 
     testImplementation(project(":testutils"))
+    testImplementation(testFixtures(project(":core:core-domain")))
     testImplementation(testFixtures(project(":database:busstop-db-core")))
     testImplementation(libs.coroutines.test)
     testImplementation(libs.junit)

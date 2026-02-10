@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,8 @@ package uk.org.rivernile.android.bustracker.core.alerts
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import uk.org.rivernile.android.bustracker.core.domain.toAtcoStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.features.FakeFeatureRepository
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity
@@ -44,18 +46,36 @@ import kotlin.test.assertNull
  */
 class AppDeeplinkIntentFactoryTest {
 
+    @Test(expected = UnsupportedOperationException::class)
+    fun createShowBusTimesIntentThrowsExceptionWhenIdentifierIsAtco() {
+        val factory = createAppDeeplinkIntentFactory()
+
+        factory.createShowBusTimesIntent("123456".toAtcoStopIdentifier())
+    }
+
     @Test
     fun createShowBusTimesIntentCreatesExpectedIntent() {
         val factory = createAppDeeplinkIntentFactory()
         val context = ApplicationProvider.getApplicationContext<Context>()
 
-        val result = factory.createShowBusTimesIntent("123456")
+        val result = factory.createShowBusTimesIntent("123456".toNaptanStopIdentifier())
 
         val componentName = result.component
         assertEquals(context.packageName, componentName?.packageName)
         assertEquals(DisplayStopDataActivity::class.java.name, componentName?.className)
         assertEquals(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA, result.action)
         assertEquals("123456", result.getStringExtra(DisplayStopDataActivity.EXTRA_STOP_CODE))
+    }
+
+    @Test(expected = UnsupportedOperationException::class)
+    fun createShowStopOnMapIntentThrowsExceptionWhenIdentifierIsAtco() {
+        val factory = createAppDeeplinkIntentFactory(
+            featureRepository = FakeFeatureRepository(
+                onHasStopMapUiFeature = { true }
+            )
+        )
+
+        factory.createShowStopOnMapIntent("123456".toAtcoStopIdentifier())
     }
 
     @Test
@@ -66,7 +86,7 @@ class AppDeeplinkIntentFactoryTest {
             )
         )
 
-        val result = factory.createShowStopOnMapIntent("123456")
+        val result = factory.createShowStopOnMapIntent("123456".toNaptanStopIdentifier())
 
         assertNull(result)
     }
@@ -80,7 +100,7 @@ class AppDeeplinkIntentFactoryTest {
         )
         val context = ApplicationProvider.getApplicationContext<Context>()
 
-        val result = factory.createShowStopOnMapIntent("123456")
+        val result = factory.createShowStopOnMapIntent("123456".toNaptanStopIdentifier())
 
         val componentName = result?.component
         assertEquals(context.packageName, componentName?.packageName)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -362,90 +362,6 @@ class AboutItemKtTest {
     @Test
     fun databaseVersionAboutItemDoesNotHandleClicks() {
         val item = UiAboutItem.TwoLinesItem.DatabaseVersion(Date(123L))
-        val itemClickedTracker = ItemClickedTracker()
-
-        composeTestRule.setContent {
-            MyBusThemeWithCompositionLocals {
-                AboutItem(
-                    item = item,
-                    onItemClicked = itemClickedTracker
-                )
-            }
-        }
-
-        composeTestRule
-            .onNodeWithTag(
-                testTag = TEST_TAG_TITLE,
-                useUnmergedTree = true
-            )
-            .onParent()
-            .apply {
-                assertIsNotEnabled()
-                performClick()
-            }
-
-        assertTrue(itemClickedTracker.invocations.isEmpty())
-    }
-
-    @Test
-    fun topologyVersionAboutItemDisplaysCorrectTextWhenNotLoaded() {
-        val item = UiAboutItem.TwoLinesItem.TopologyVersion(topologyId = null)
-
-        composeTestRule.setContent {
-            MyBusThemeWithCompositionLocals {
-                AboutItem(
-                    item = item,
-                    onItemClicked = { }
-                )
-            }
-        }
-
-        composeTestRule
-            .onNodeWithTag(
-                testTag = TEST_TAG_TITLE,
-                useUnmergedTree = true
-            )
-            .assertTextEquals(composeTestRule.activity.getString(R.string.about_topology_version))
-        composeTestRule
-            .onNodeWithTag(
-                testTag = TEST_TAG_CAPTION,
-                useUnmergedTree = true
-            )
-            .assertTextEquals(
-                composeTestRule.activity.getString(R.string.about_topology_version_loading)
-            )
-    }
-
-    @Test
-    fun topologyVersionAboutItemDisplaysCorrectTextWhenLoaded() {
-        val item = UiAboutItem.TwoLinesItem.TopologyVersion(topologyId = "abc123")
-
-        composeTestRule.setContent {
-            MyBusThemeWithCompositionLocals {
-                AboutItem(
-                    item = item,
-                    onItemClicked = { }
-                )
-            }
-        }
-
-        composeTestRule
-            .onNodeWithTag(
-                testTag = TEST_TAG_TITLE,
-                useUnmergedTree = true
-            )
-            .assertTextEquals(composeTestRule.activity.getString(R.string.about_topology_version))
-        composeTestRule
-            .onNodeWithTag(
-                testTag = TEST_TAG_CAPTION,
-                useUnmergedTree = true
-            )
-            .assertTextEquals("abc123")
-    }
-
-    @Test
-    fun topologyVersionAboutItemDoesNotHandleClicks() {
-        val item = UiAboutItem.TwoLinesItem.TopologyVersion("abc123")
         val itemClickedTracker = ItemClickedTracker()
 
         composeTestRule.setContent {

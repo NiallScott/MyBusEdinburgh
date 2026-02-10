@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.ui.callbacks
 
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+
 /**
  * This listener is used to send callbacks from [androidx.fragment.app.Fragment]s to
  * [android.app.Activity]s when the user wishes to add a new time alert.
@@ -37,9 +40,12 @@ interface OnShowAddTimeAlertListener {
     /**
      * This is called when the user wants to view the interface to add a new time alert.
      *
-     * @param stopCode The stopCode the time alert should be added for.
+     * @param stopIdentifier The stop identifier the time alert should be added for.
      * @param defaultServices The services that should be selected by default. Set to `null` if no
      * services should be selected.
      */
-    fun onShowAddTimeAlert(stopCode: String, defaultServices: Array<String>?)
+    fun onShowAddTimeAlert(
+        stopIdentifier: StopIdentifier,
+        defaultServices: List<ServiceDescriptor>?
+    )
 }

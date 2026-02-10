@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,7 +33,7 @@ import javax.net.SocketFactory
  *
  * @author Niall Scott
  */
-interface ApiEndpoint {
+public interface ApiEndpoint {
 
     /**
      * Get the database version.
@@ -41,5 +41,7 @@ interface ApiEndpoint {
      * @param socketFactory An optional [SocketFactory] to perform the request with.
      * @return The result of performing this request.
      */
-    suspend fun getDatabaseVersion(socketFactory: SocketFactory? = null): DatabaseVersionResponse
+    public suspend fun getDatabaseVersion(
+        socketFactory: SocketFactory? = null
+    ): DatabaseVersionResponse
 }

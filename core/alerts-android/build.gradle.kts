@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -59,6 +59,7 @@ dependencies {
 
     api(project(":core:alerts"))
     implementation(project(":core:busstops-android"))
+    implementation(project(":core:core-domain"))
     implementation(project(":core:coroutines-android"))
     implementation(project(":core:logging"))
     implementation(project(":core:permission-android"))

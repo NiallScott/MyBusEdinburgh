@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,6 +32,8 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
 import uk.org.rivernile.edinburghbustracker.android.R
 
 /**
@@ -48,13 +50,17 @@ class DeleteProximityAlertDialogFragment : DialogFragment() {
         /**
          * Create a new instance of [DeleteProximityAlertDialogFragment].
          *
-         * @param stopCode The stop code to delete the proximity alert for.
+         * @param stopIdentifier The stop to delete the proximity alert for.
          */
-        fun newInstance(stopCode: String) = DeleteProximityAlertDialogFragment().apply {
-            arguments = Bundle().apply {
-                putString(DeleteProximityAlertDialogFragmentViewModel.STATE_STOP_CODE, stopCode)
+        fun newInstance(stopIdentifier: StopIdentifier) =
+            DeleteProximityAlertDialogFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable(
+                        DeleteProximityAlertDialogFragmentViewModel.STATE_STOP_IDENTIFIER,
+                        stopIdentifier.toParcelableStopIdentifier()
+                    )
+                }
             }
-        }
     }
 
     private val viewModel by viewModels<DeleteProximityAlertDialogFragmentViewModel>()

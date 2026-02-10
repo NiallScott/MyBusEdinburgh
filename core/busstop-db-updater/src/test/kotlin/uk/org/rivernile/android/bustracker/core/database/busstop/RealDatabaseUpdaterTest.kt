@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -76,7 +76,11 @@ class RealDatabaseUpdaterTest {
     @Mock
     private lateinit var downloadFile: File
 
-    private val databaseVersion = DatabaseVersion("MBE", "abc123", "http://host/db.db", "xyz789")
+    private val databaseVersion = DatabaseVersion(
+        timestampInSeconds = 123L,
+        databaseUrl = "http://host/db.db",
+        sha256Checksum = "xyz789"
+    )
 
     @Test
     fun returnsFalseWhenTheTemporaryFileCouldNotBeCreated() = runTest {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,20 +26,22 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 
+import androidx.room.ColumnInfo
 import androidx.room.Embedded
+import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
 
 /**
  * The Room specific implementation of [StopDetails].
  *
- * @property stopCode See [StopDetails.stopCode].
+ * @property naptanStopIdentifier See [StopDetails.naptanStopIdentifier].
  * @property stopName See [StopDetails.stopName].
  * @property location See [StopDetails.location].
  * @property orientation See [StopDetails.orientation].
  * @author Niall Scott
  */
 internal data class RoomStopDetails(
-    override val stopCode: String,
+    @ColumnInfo("naptan_code") override val naptanStopIdentifier: NaptanStopIdentifier,
     @Embedded override val stopName: RoomStopName,
     @Embedded override val location: RoomStopLocation,
-    override val orientation: StopOrientation
+    @ColumnInfo("bearing") override val orientation: StopOrientation
 ) : StopDetails

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,15 +35,16 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.database.settings.RoomSettingsDatabase
 import uk.org.rivernile.android.bustracker.core.database.settings.SettingsDatabaseCallback
-import uk.org.rivernile.android.bustracker.core.database.settings.alerts.AlertsDao
-import uk.org.rivernile.android.bustracker.core.database.settings.alerts.RoomAlertsDao
-import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops.FavouriteStopEntityFactory
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.arrival.ArrivalAlertDao
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.arrival.RoomArrivalAlertDao
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.proximity.ProximityAlertDao
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.proximity.RoomProximityAlertDao
 import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops.FavouriteStopsDao
-import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops.RoomFavouriteStopEntityFactory
 import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops.RoomFavouriteStopsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.migrations.Migration1To4
 import uk.org.rivernile.android.bustracker.core.database.settings.migrations.Migration2To4
 import uk.org.rivernile.android.bustracker.core.database.settings.migrations.Migration3To4
+import uk.org.rivernile.android.bustracker.core.database.settings.migrations.Migration4To5
 import javax.inject.Singleton
 
 /**
@@ -73,17 +74,22 @@ internal class SettingsDatabaseModule {
         .build()
 
     @Provides
-    fun provideAlertsDao(database: RoomSettingsDatabase): RoomAlertsDao =
-        database.alertsDao
+    fun provideArrivalAlertDao(database: RoomSettingsDatabase): RoomArrivalAlertDao =
+        database.arrivalAlertDao
 
     @Provides
     fun provideFavouriteStopsDao(database: RoomSettingsDatabase): RoomFavouriteStopsDao =
         database.favouriteStopsDao
 
+    @Provides
+    fun provideProximityAlertDao(database: RoomSettingsDatabase): RoomProximityAlertDao =
+        database.proximityAlertDao
+
     private val allMigrations get() = arrayOf(
         Migration1To4(),
         Migration2To4(),
-        Migration3To4()
+        Migration3To4(),
+        Migration4To5()
     )
 
     @Suppress("unused")
@@ -91,18 +97,13 @@ internal class SettingsDatabaseModule {
     @Module
     interface Bindings {
 
-        @Suppress("unused")
         @Binds
-        fun bindAlertsDao(roomAlertsDao: RoomAlertsDao): AlertsDao
+        fun bindArrivalAlertDao(roomArrivalAlertDao: RoomArrivalAlertDao): ArrivalAlertDao
 
-        @Suppress("unused")
         @Binds
         fun bindFavouriteStopsDao(roomFavouriteStopsDao: RoomFavouriteStopsDao): FavouriteStopsDao
 
-        @Suppress("unused")
         @Binds
-        fun bindFavouriteStopsEntityFactory(
-            roomFavouriteStopEntityFactory: RoomFavouriteStopEntityFactory
-        ): FavouriteStopEntityFactory
+        fun bindProximityAlertDao(roomProximityAlertDao: RoomProximityAlertDao): ProximityAlertDao
     }
 }

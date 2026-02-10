@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabase
 import uk.org.rivernile.android.bustracker.core.database.busstop.FakeBusStopDatabase
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -47,16 +48,22 @@ class ProxyServicePointDaoTest {
     fun getServicePointsFlow() = runTest {
         val first = listOf(
             FakeServicePoint(
-                serviceName = "1",
-                chainage = 100,
+                serviceDescriptor = FakeServiceDescriptor(
+                    serviceName = "1",
+                    operatorCode = "TEST"
+                ),
+                routeSection = 100,
                 latitude = 1.1,
                 longitude = 2.2
             )
         )
         val second = listOf(
             FakeServicePoint(
-                serviceName = "2",
-                chainage = 200,
+                serviceDescriptor = FakeServiceDescriptor(
+                    serviceName = "2",
+                    operatorCode = "TEST"
+                ),
+                routeSection = 200,
                 latitude = 3.3,
                 longitude = 4.4
             )

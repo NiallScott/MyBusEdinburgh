@@ -32,7 +32,6 @@
     <string name="about_version">Application version</string>
     <string name="about_author">Author</string>
     <string name="about_database_version">Database version</string>
-    <string name="about_topology_version">Topology version</string>
     <string name="about_website">Website</string>
     <string name="about_bluesky">Bluesky</string>
     <string name="about_credits">Credits</string>
@@ -40,7 +39,6 @@
     <string name="about_open_source">Open source licences</string>
 
     <string name="about_database_version_loading">Loading&#8230;</string>
-    <string name="about_topology_version_loading">Loading&#8230;</string>
 
     <string name="creditsdialog_title">Credits</string>
     <string name="creditsdialog_body">

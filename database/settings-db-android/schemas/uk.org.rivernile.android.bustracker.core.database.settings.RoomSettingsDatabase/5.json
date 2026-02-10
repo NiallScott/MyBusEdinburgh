@@ -1,0 +1,191 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 5,
+    "identityHash": "de26a7bc45563c2bfeb9bb88f3230cf5",
+    "entities": [
+      {
+        "tableName": "arrival_alert",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `time_added_millis` INTEGER NOT NULL, `stop_code` TEXT NOT NULL, `time_trigger_minutes` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeAdded",
+            "columnName": "time_added_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stopIdentifier",
+            "columnName": "stop_code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeTriggerMinutes",
+            "columnName": "time_trigger_minutes",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "arrival_alert_stop_code",
+            "unique": true,
+            "columnNames": [
+              "stop_code"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `arrival_alert_stop_code` ON `${TABLE_NAME}` (`stop_code`)"
+          }
+        ]
+      },
+      {
+        "tableName": "arrival_alert_service",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `arrival_alert_id` INTEGER NOT NULL, `service_name` TEXT NOT NULL, `operator_code` TEXT NOT NULL, FOREIGN KEY(`arrival_alert_id`) REFERENCES `arrival_alert`(`id`) ON UPDATE CASCADE ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "arrivalAlertId",
+            "columnName": "arrival_alert_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "serviceName",
+            "columnName": "service_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "operatorCode",
+            "columnName": "operator_code",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "arrival_alert_service_arrival_alert_id",
+            "unique": false,
+            "columnNames": [
+              "arrival_alert_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `arrival_alert_service_arrival_alert_id` ON `${TABLE_NAME}` (`arrival_alert_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "arrival_alert",
+            "onDelete": "CASCADE",
+            "onUpdate": "CASCADE",
+            "columns": [
+              "arrival_alert_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "favourite_stop",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`stop_code` TEXT NOT NULL, `stop_name` TEXT NOT NULL, PRIMARY KEY(`stop_code`))",
+        "fields": [
+          {
+            "fieldPath": "stopIdentifier",
+            "columnName": "stop_code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stopName",
+            "columnName": "stop_name",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "stop_code"
+          ]
+        }
+      },
+      {
+        "tableName": "proximity_alert",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `time_added_millis` INTEGER NOT NULL, `stop_code` TEXT NOT NULL, `radius_trigger_meters` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeAdded",
+            "columnName": "time_added_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stopIdentifier",
+            "columnName": "stop_code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "radiusTriggerMeters",
+            "columnName": "radius_trigger_meters",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "proximity_alert_stop_code",
+            "unique": true,
+            "columnNames": [
+              "stop_code"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `proximity_alert_stop_code` ON `${TABLE_NAME}` (`stop_code`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'de26a7bc45563c2bfeb9bb88f3230cf5')"
+    ]
+  }
+}

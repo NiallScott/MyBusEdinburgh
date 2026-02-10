@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,26 +26,28 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.service
 
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+
 /**
  * This contains details for a service.
  *
  * @author Niall Scott
  */
-interface ServiceDetails {
+public interface ServiceDetails {
 
     /**
-     * The display name of the service.
+     * Used to describe and identify the service.
      */
-    val name: String
+    public val descriptor: ServiceDescriptor
 
     /**
-     * A description of the service. This might be a human-readable version of its rout, or
+     * A description of the service. This might be a human-readable version of its route, or
      * something else that the user will find useful to describe the service.
      */
-    val description: String?
+    public val description: String?
 
     /**
-     * The display colour of the service. This may be `null` if no colour is attributed.
+     * Any colours which are attributed to the service.
      */
-    val colour: Int?
+    public val colours: ServiceColours
 }

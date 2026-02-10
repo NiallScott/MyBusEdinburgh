@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,6 +34,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toStopIdentifier
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import javax.inject.Inject
 
@@ -57,21 +59,22 @@ class DeleteFavouriteDialogFragmentViewModel @Inject constructor(
     companion object {
 
         /**
-         * State key for stop code.
+         * State key for stop identifier.
          */
-        const val STATE_STOP_CODE = "stopCode"
+        const val STATE_STOP_IDENTIFIER = "stopIdentifier"
     }
 
     /**
-     * This property contains the stop code for which the favourite stop should be removed.
+     * This property contains the stop identifier for which the favourite stop should be removed.
      */
-    private val stopCode: String? get() = savedStateHandle[STATE_STOP_CODE]
+    private val stopIdentifier: ParcelableStopIdentifier? get() =
+        savedStateHandle[STATE_STOP_IDENTIFIER]
 
     /**
      * This is called when the user has confirmed they wish to remove the favourite stop.
      */
     fun onUserConfirmDeletion() {
-        stopCode?.ifEmpty { null }?.let {
+        stopIdentifier?.toStopIdentifier()?.let {
             // Uses the application CoroutineScope as the Dialog dismisses immediately, and we need
             // this task to finish. Fire and forget is fine here.
             applicationCoroutineScope.launch(defaultDispatcher) {

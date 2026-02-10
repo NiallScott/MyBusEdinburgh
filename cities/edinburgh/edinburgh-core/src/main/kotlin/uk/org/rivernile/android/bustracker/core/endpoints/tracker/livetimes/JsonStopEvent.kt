@@ -59,6 +59,7 @@ import kotlin.time.Instant
 @Serializable
 internal data class JsonStopEvent(
     @SerialName("publicservicename") val publicServiceName: String? = null,
+    @SerialName("operator") val operator: String? = null,
     @SerialName("destination") val destination: String? = null,
     @SerialName("scheduledeparturetime") val scheduledDepartureTime: LocalTime? = null,
     @SerialName("departuretime") val departureTime: ArrivalDepartureTime? = null
@@ -89,7 +90,7 @@ internal sealed interface ArrivalDepartureTime {
     ): ArrivalDepartureTime
 }
 
-private object EventTimeSerialiser : KSerializer<ArrivalDepartureTime> {
+internal object EventTimeSerialiser : KSerializer<ArrivalDepartureTime> {
 
     override val descriptor = PrimitiveSerialDescriptor(
         serialName = checkNotNull(ArrivalDepartureTime::class.qualifiedName),

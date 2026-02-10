@@ -40,12 +40,25 @@ internal interface EdinburghOpenApi {
     /**
      * Get [JsonStopEvents].
      *
+     * @param atcoCode The stop code in ATCO form.
+     * @param numberOfDepartures The number of visits per service to request.
+     * @return The [Response] from executing this API.
+     */
+    @GET("stops/StopEvents?eventType=departure&lookahead=60&timeFormat=UTC&doCountdown=true")
+    suspend fun getStopEventsWithAtcoCode(
+        @Query("atcoCode") atcoCode: String,
+        @Query("minVisitsPerService") numberOfDepartures: Int
+    ): Response<JsonStopEvents>
+
+    /**
+     * Get [JsonStopEvents].
+     *
      * @param smsCode The stop code in SMS form.
      * @param numberOfDepartures The number of visits per service to request.
      * @return The [Response] from executing this API.
      */
     @GET("stops/StopEvents?eventType=departure&lookahead=60&timeFormat=UTC&doCountdown=true")
-    suspend fun getStopEvents(
+    suspend fun getStopEventsWithSmsCode(
         @Query("smsCode") smsCode: String,
         @Query("minVisitsPerService") numberOfDepartures: Int
     ): Response<JsonStopEvents>

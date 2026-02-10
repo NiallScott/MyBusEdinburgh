@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,10 +28,11 @@ package uk.org.rivernile.android.bustracker.core.favourites
 
 import app.cash.turbine.test
 import kotlinx.coroutines.test.runTest
-import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops.FakeFavouriteStopEntity
-import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops.FakeFavouriteStopEntityFactory
+import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops.FakeFavouriteStop
 import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops.FakeFavouriteStopsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops.FavouriteStopsDao
+import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops.InsertableFavouriteStop
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -52,11 +53,17 @@ class DefaultFavouritesRepositoryTest {
         val repository = createFavouritesRepository(favouriteStopsDao)
 
         repository.addOrUpdateFavouriteStop(
-            FavouriteStop(stopCode = "123456", stopName = "Stop name")
+            FavouriteStop(
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
+                stopName = "Stop name"
+            )
         )
 
         assertEquals(
-            FakeFavouriteStopEntity(stopCode = "123456", stopName = "Stop name"),
+            InsertableFavouriteStop(
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
+                stopName = "Stop name"
+            ),
             favouriteStopsDao.addedOrUpdatedFavouriteStops.last()
         )
     }
@@ -66,9 +73,12 @@ class DefaultFavouritesRepositoryTest {
         val favouriteStopsDao = FakeFavouriteStopsDao()
         val repository = createFavouritesRepository(favouriteStopsDao)
 
-        repository.removeFavouriteStop("123456")
+        repository.removeFavouriteStop("123456".toNaptanStopIdentifier())
 
-        assertEquals("123456", favouriteStopsDao.removedFavouriteStops.last())
+        assertEquals(
+            "123456".toNaptanStopIdentifier(),
+            favouriteStopsDao.removedFavouriteStops.last()
+        )
     }
 
     @Test
@@ -76,13 +86,13 @@ class DefaultFavouritesRepositoryTest {
         val repository = createFavouritesRepository(
             favouriteStopsDao = FakeFavouriteStopsDao(
                 onIsStopAddedAsFavouriteFlow = {
-                    assertEquals("123456", it)
+                    assertEquals("123456".toNaptanStopIdentifier(), it)
                     intervalFlowOf(0L, 10L, false, false, true, true, false)
                 }
             )
         )
 
-        repository.isStopAddedAsFavouriteFlow("123456").test {
+        repository.isStopAddedAsFavouriteFlow("123456".toNaptanStopIdentifier()).test {
             assertFalse(awaitItem())
             assertTrue(awaitItem())
             assertFalse(awaitItem())
@@ -92,20 +102,32 @@ class DefaultFavouritesRepositoryTest {
 
     @Test
     fun getFavouriteStopsFlowEmitsDistinctValues() = runTest {
-        val stop1 = FakeFavouriteStopEntity(stopCode = "123456", stopName = "Name 1")
-        val stop2 = FakeFavouriteStopEntity(stopCode = "123456", stopName = "Name 2")
+        val stop1 = FakeFavouriteStop(
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            stopName = "Name 1"
+        )
+        val stop2 = FakeFavouriteStop(
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            stopName = "Name 2"
+        )
         val repository = createFavouritesRepository(
             favouriteStopsDao = FakeFavouriteStopsDao(
                 onGetFavouriteStopFlow = {
-                    assertEquals("123456", it)
+                    assertEquals("123456".toNaptanStopIdentifier(), it)
                     intervalFlowOf(0L, 10L, null, null, stop1, stop1, stop2, stop2, stop1)
                 }
             )
         )
-        val expected1 = FavouriteStop(stopCode = "123456", stopName = "Name 1")
-        val expected2 = FavouriteStop(stopCode = "123456", stopName = "Name 2")
+        val expected1 = FavouriteStop(
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            stopName = "Name 1"
+        )
+        val expected2 = FavouriteStop(
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            stopName = "Name 2"
+        )
 
-        repository.getFavouriteStopFlow("123456").test {
+        repository.getFavouriteStopFlow("123456".toNaptanStopIdentifier()).test {
             assertNull(awaitItem())
             assertEquals(expected1, awaitItem())
             assertEquals(expected2, awaitItem())
@@ -116,9 +138,18 @@ class DefaultFavouritesRepositoryTest {
 
     @Test
     fun allFavouriteStopsFlowEmitsDistinctValues() = runTest {
-        val stop1 = FakeFavouriteStopEntity(stopCode = "1", stopName = "Name 1")
-        val stop2 = FakeFavouriteStopEntity(stopCode = "2", stopName = "Name 2")
-        val stop3 = FakeFavouriteStopEntity(stopCode = "3", stopName = "Name 3")
+        val stop1 = FakeFavouriteStop(
+            stopIdentifier = "1".toNaptanStopIdentifier(),
+            stopName = "Name 1"
+        )
+        val stop2 = FakeFavouriteStop(
+            stopIdentifier = "2".toNaptanStopIdentifier(),
+            stopName = "Name 2"
+        )
+        val stop3 = FakeFavouriteStop(
+            stopIdentifier = "3".toNaptanStopIdentifier(),
+            stopName = "Name 3"
+        )
         val repository = createFavouritesRepository(
             favouriteStopsDao = FakeFavouriteStopsDao(
                 onAllFavouriteStopsFlow = {
@@ -134,9 +165,18 @@ class DefaultFavouritesRepositoryTest {
                 }
             )
         )
-        val expected1 = FavouriteStop(stopCode = "1", stopName = "Name 1")
-        val expected2 = FavouriteStop(stopCode = "2", stopName = "Name 2")
-        val expected3 = FavouriteStop(stopCode = "3", stopName = "Name 3")
+        val expected1 = FavouriteStop(
+            stopIdentifier = "1".toNaptanStopIdentifier(),
+            stopName = "Name 1"
+        )
+        val expected2 = FavouriteStop(
+            stopIdentifier = "2".toNaptanStopIdentifier(),
+            stopName = "Name 2"
+        )
+        val expected3 = FavouriteStop(
+            stopIdentifier = "3".toNaptanStopIdentifier(),
+            stopName = "Name 3"
+        )
 
         repository.allFavouriteStopsFlow.test {
             assertNull(awaitItem())
@@ -150,8 +190,7 @@ class DefaultFavouritesRepositoryTest {
         favouriteStopsDao: FavouriteStopsDao
     ): DefaultFavouritesRepository {
         return DefaultFavouritesRepository(
-            favouriteStopsDao = favouriteStopsDao,
-            entityFactory = FakeFavouriteStopEntityFactory()
+            favouriteStopsDao = favouriteStopsDao
         )
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,7 +33,12 @@ import okhttp3.OkHttpClient
 import retrofit2.Converter
 import retrofit2.Retrofit
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
+import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiKeyGenerator
+import uk.org.rivernile.android.bustracker.core.endpoints.api.RealApiKeyGenerator
+import uk.org.rivernile.android.bustracker.core.endpoints.api.json.ApiServiceFactory
+import uk.org.rivernile.android.bustracker.core.endpoints.api.json.HeadersInterceptor
 import uk.org.rivernile.android.bustracker.core.endpoints.api.json.JsonApiEndpoint
+import uk.org.rivernile.android.bustracker.core.endpoints.api.json.RealApiServiceFactory
 import uk.org.rivernile.android.bustracker.core.http.di.ForKotlinJsonSerialization
 import java.util.concurrent.TimeUnit
 
@@ -43,11 +48,11 @@ import java.util.concurrent.TimeUnit
  * @author Niall Scott
  */
 @Module(includes = [ ApiModule.Bindings::class ])
-class ApiModule {
+public class ApiModule {
 
     @Provides
     @ForInternalApi
-    fun provideRetrofit(
+    internal fun provideRetrofit(
         @ForInternalApi baseUrl: String,
         @ForInternalApi okHttpClient: OkHttpClient,
         @ForKotlinJsonSerialization jsonConverterFactory: Converter.Factory
@@ -61,19 +66,29 @@ class ApiModule {
 
     @Provides
     @ForInternalApi
-    fun provideOkhttpClient(okHttpClient: OkHttpClient): OkHttpClient =
-        okHttpClient.newBuilder()
+    internal fun provideOkhttpClient(
+        okHttpClient: OkHttpClient,
+        headersInterceptor: HeadersInterceptor
+    ): OkHttpClient {
+        return okHttpClient.newBuilder()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .followRedirects(false)
+            .addInterceptor(headersInterceptor)
             .build()
+    }
 
     @Module
     internal interface Bindings {
 
-        @Suppress("unused")
         @Binds
         fun bindApiEndpoint(jsonApiEndpoint: JsonApiEndpoint): ApiEndpoint
+
+        @Binds
+        fun bindApiKeyGenerator(realApiKeyGenerator: RealApiKeyGenerator): ApiKeyGenerator
+
+        @Binds
+        fun bindApiServiceFactory(realApiServiceFactory: RealApiServiceFactory): ApiServiceFactory
     }
 }

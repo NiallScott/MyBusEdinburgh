@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
 import uk.org.rivernile.android.bustracker.core.livetimes.LiveTimesRepository
 import uk.org.rivernile.android.bustracker.core.livetimes.LiveTimesResult
@@ -58,19 +60,19 @@ class LiveTimesRetriever @Inject constructor(
      * is a [Flow] because it incorporates progress, success and error events, and also handles some
      * underlying data changing causing new emissions.
      *
-     * @param stopCode The stop code to get live times for.
+     * @param stopIdentifier The stop code to get live times for.
      * @param numberOfDepartures The number of departures per service to obtain.
      * @return A [Flow] which contains the updating [UiResult].
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun getLiveTimesFlow(stopCode: String, numberOfDepartures: Int): Flow<UiResult> {
-        return liveTimesRepository.getLiveTimesFlow(stopCode, numberOfDepartures)
+    fun getLiveTimesFlow(stopIdentifier: StopIdentifier, numberOfDepartures: Int): Flow<UiResult> {
+        return liveTimesRepository.getLiveTimesFlow(stopIdentifier, numberOfDepartures)
             .flatMapLatest {
-                obtainColoursForLiveTimes(stopCode, it)
+                obtainColoursForLiveTimes(stopIdentifier, it)
             }
             .map {
                 liveTimesMapper.mapLiveTimesAndColoursToUiResult(
-                    stopCode,
+                    stopIdentifier,
                     it.first,
                     it.second
                 )
@@ -90,21 +92,21 @@ class LiveTimesRetriever @Inject constructor(
      * colours for.
      *
      * When [LiveTimesResult] is [LiveTimesResult.Success], and there are live times for the given
-     * [stopCode], and there are colour results in the [ServicesRepository] for the services
+     * [stopIdentifier], and there are colour results in the [ServicesRepository] for the services
      * returned in the [LiveTimes], the service colour [Map] will be populated. If there are no
      * results, the [Map] will be `null`.
      *
-     * @param stopCode The stop code live times are being obtained for.
+     * @param stopIdentifier The stop live times are being obtained for.
      * @param result The current [LiveTimesResult] of attempting to obtain [LiveTimes].
      * @return A [Flow] which is a [Pair] of [LiveTimesResult] and maybe a [Map] of
      * [ServiceColours], if available.
      */
     private fun obtainColoursForLiveTimes(
-        stopCode: String,
+        stopIdentifier: StopIdentifier,
         result: LiveTimesResult
-    ): Flow<Pair<LiveTimesResult, Map<String, ServiceColours>?>> {
+    ): Flow<Pair<LiveTimesResult, Map<ServiceDescriptor, ServiceColours>?>> {
         return when (result) {
-            is LiveTimesResult.Success -> getColoursForLiveTimes(stopCode, result.liveTimes)
+            is LiveTimesResult.Success -> getColoursForLiveTimes(stopIdentifier, result.liveTimes)
             else -> flowOf(null)
         }.map {
             Pair(result, it)
@@ -112,27 +114,27 @@ class LiveTimesRetriever @Inject constructor(
     }
 
     /**
-     * Given a [LiveTimes] success result and the [stopCode] (as [LiveTimes] can contain results for
-     * multiple stops, so we need the [stopCode] to be able to look up the correct stop), load the
-     * [ServiceColours].
+     * Given a [LiveTimes] success result and the [stopIdentifier] (as [LiveTimes] can contain
+     * results for multiple stops, so we need the [stopIdentifier] to be able to look up the
+     * correct stop), load the [ServiceColours].
      *
-     * If the [stopCode] isn't in the result, or there were no services, or none of the services
-     * have colours attributed to them, then a [Flow] which only emits a single `null` will be
-     * returned. Otherwise, a [Flow] will be returned which emits [Map]s of the service name to a
+     * If the [stopIdentifier] isn't in the result, or there were no services, or none of the
+     * services have colours attributed to them, then a [Flow] which only emits a single `null` will
+     * be returned. Otherwise, a [Flow] will be returned which emits [Map]s of the service name to a
      * [ServiceColours] object, and this will emit new items if the backing data changes.
      *
-     * @param stopCode The stop code we are referencing in the [LiveTimes].
+     * @param stopIdentifier The stop we are referencing in the [LiveTimes].
      * @param liveTimes This contains the [LiveTimes] data.
      * @return A [Flow] which emits [Map]s of service names to [ServiceColours], or emits `null` if
      * unable to get colours.
      */
     private fun getColoursForLiveTimes(
-        stopCode: String,
+        stopIdentifier: StopIdentifier,
         liveTimes: LiveTimes
-    ): Flow<Map<String, ServiceColours>?> {
-        return liveTimes.stops[stopCode]
+    ): Flow<Map<ServiceDescriptor, ServiceColours>?> {
+        return liveTimes.stops[stopIdentifier]
             ?.services
-            ?.map { it.serviceName }
+            ?.map { it.serviceDescriptor }
             ?.ifEmpty { null }
             ?.toSet()
             ?.let(servicesRepository::getColoursForServicesFlow)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabase
 import uk.org.rivernile.android.bustracker.core.database.busstop.FakeBusStopDatabase
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -45,8 +46,18 @@ class ProxyServiceStopDaoTest {
 
     @Test
     fun getServicesForStopFlowRespondsToDatabaseOpenStatus() = runTest {
-        val first = listOf("1")
-        val second = listOf("2")
+        val first = listOf(
+            FakeServiceDescriptor(
+                serviceName = "1",
+                operatorCode = "TEST"
+            )
+        )
+        val second = listOf(
+            FakeServiceDescriptor(
+                serviceName = "2",
+                operatorCode = "TEST"
+            )
+        )
         val flows = ArrayDeque(
             listOf(
                 flowOf(first),
@@ -77,8 +88,22 @@ class ProxyServiceStopDaoTest {
 
     @Test
     fun getServicesForStopsFlowRespondsToDatbaseOpenStatus() = runTest {
-        val first = mapOf("1" to listOf("100"))
-        val second = mapOf("2" to listOf("200"))
+        val first = mapOf(
+            "1" to listOf(
+                FakeServiceDescriptor(
+                    serviceName = "100",
+                    operatorCode = "TEST"
+                )
+            )
+        )
+        val second = mapOf(
+            "2" to listOf(
+                FakeServiceDescriptor(
+                    serviceName = "200",
+                    operatorCode = "TEST"
+                )
+            )
+        )
         val flows = ArrayDeque(
             listOf(
                 flowOf(first),

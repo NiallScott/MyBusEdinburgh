@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,7 +37,9 @@ import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.alerts.ArrivalAlert
 import uk.org.rivernile.android.bustracker.core.alerts.ProximityAlert
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
+import uk.org.rivernile.android.bustracker.core.busstops.StopDetails
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.sortByServiceName
 import javax.inject.Inject
 
 /**
@@ -46,11 +48,13 @@ import javax.inject.Inject
  *
  * @param alertsRepository Where [Alert]s are sourced from.
  * @param busStopsRepository Where the stop details are sourced from.
+ * @param serviceNameComparator Used to compare and sort services.
  * @author Niall Scott
  */
 class AlertsRetriever @Inject constructor(
     private val alertsRepository: AlertsRepository,
-    private val busStopsRepository: BusStopsRepository
+    private val busStopsRepository: BusStopsRepository,
+    private val serviceNameComparator: Comparator<String>
 ) {
 
     /**
@@ -72,9 +76,9 @@ class AlertsRetriever @Inject constructor(
      */
     private fun loadStopDetailsForAlerts(alerts: List<Alert>?): Flow<List<UiAlert>> {
         return alerts?.takeIf(List<Alert>::isNotEmpty)?.let { a ->
-            val stopCodes = a.map(Alert::stopCode).toHashSet()
+            val stopIdentifiers = a.map(Alert::stopIdentifier).toHashSet()
 
-            busStopsRepository.getBusStopDetailsFlow(stopCodes)
+            busStopsRepository.getBusStopDetailsFlow(stopIdentifiers)
                 .map { combineAlertsAndStopDetails(a, it) }
         } ?: flowOf(emptyList())
     }
@@ -90,9 +94,9 @@ class AlertsRetriever @Inject constructor(
      */
     private fun combineAlertsAndStopDetails(
         alerts: List<Alert>,
-        stopDetailsMap: Map<String, StopDetails>?
+        stopDetailsMap: Map<StopIdentifier, StopDetails>?
     ) = alerts.map {
-        val stopDetails = stopDetailsMap?.get(it.stopCode)
+        val stopDetails = stopDetailsMap?.get(it.stopIdentifier)
 
         when (it) {
             is ArrivalAlert -> combineArrivalAlertAndStopDetails(it, stopDetails)
@@ -113,10 +117,10 @@ class AlertsRetriever @Inject constructor(
         stopDetails: StopDetails?
     ) = UiAlert.ArrivalAlert(
         alert.id,
-        alert.stopCode,
+        alert.stopIdentifier,
         stopDetails,
-        alert.serviceNames,
-        alert.timeTrigger
+        alert.services.sortByServiceName(serviceNameComparator),
+        alert.timeTriggerMinutes
     )
 
     /**
@@ -132,8 +136,8 @@ class AlertsRetriever @Inject constructor(
         stopDetails: StopDetails?
     ) = UiAlert.ProximityAlert(
         alert.id,
-        alert.stopCode,
+        alert.stopIdentifier,
         stopDetails,
-        alert.distanceFrom
+        alert.distanceFromMeters
     )
 }

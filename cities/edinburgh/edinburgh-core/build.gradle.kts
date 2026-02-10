@@ -28,7 +28,6 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
-    `java-test-fixtures`
 }
 
 dependencies {
@@ -36,11 +35,11 @@ dependencies {
     implementation(project(":core:alphanumcomparator"))
     implementation(project(":core:config"))
     implementation(project(":core:connectivity"))
+    implementation(project(":core:core-domain"))
     implementation(project(":core:coroutines"))
     implementation(project(":core:http-core"))
     implementation(project(":core:livetimes"))
     implementation(project(":core:logging"))
-    implementation(project(":core:services"))
     implementation(project(":core:time"))
     implementation(project(":endpoint:tracker-endpoint"))
 
@@ -63,9 +62,8 @@ dependencies {
     // Tests
     testImplementation(project(":testutils"))
     testImplementation(testFixtures(project(":core:connectivity")))
+    testImplementation(testFixtures(project(":core:core-domain")))
     testImplementation(testFixtures(project(":core:logging")))
     testImplementation(testFixtures(project(":core:time")))
     testImplementation(libs.kotlin.test.junit)
-
-    testFixturesImplementation(project(":core:services"))
 }

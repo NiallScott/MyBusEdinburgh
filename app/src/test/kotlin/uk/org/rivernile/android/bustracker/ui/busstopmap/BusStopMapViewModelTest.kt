@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,7 +45,12 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopLocation
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopLocation
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.core.preferences.LastMapCameraLocation
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
@@ -66,7 +71,7 @@ class BusStopMapViewModelTest {
     companion object {
 
         private const val STATE_SELECTED_SERVICES = "selectedServices"
-        private const val STATE_SELECTED_STOP_CODE = "selectedStopCode"
+        private const val STATE_SELECTED_STOP_IDENTIFIER = "selectedStopIdentifier"
         private const val STATE_TRAFFIC_VIEW_ENABLED = "trafficViewEnabled"
 
         private const val DEFAULT_ZOOM = 14f
@@ -338,13 +343,13 @@ class BusStopMapViewModelTest {
                 mock())
         whenever(routeLineRetriever.getRouteLinesFlow(null))
                 .thenReturn(flowOf(null))
-        whenever(routeLineRetriever.getRouteLinesFlow(setOf("1", "2", "3")))
+        whenever(routeLineRetriever.getRouteLinesFlow(setOf(service(1), service(2), service(3))))
                 .thenReturn(flowOf(expected))
         val viewModel = createViewModel()
 
         val observer = viewModel.routeLinesLiveData.test()
         advanceUntilIdle()
-        viewModel.onServicesSelected(listOf("1", "2", "3"))
+        viewModel.onServicesSelected(listOf(service(1), service(2), service(3)))
         advanceUntilIdle()
 
         observer.assertValues(null, expected)
@@ -353,14 +358,23 @@ class BusStopMapViewModelTest {
     @Test
     fun routeLinesLiveDataEmitsValuesFromRouteLineRetrieverWithServicesFromState() = runTest {
         val expected = listOf<UiServiceRoute>(
-                mock(),
-                mock(),
-                mock())
-        whenever(routeLineRetriever.getRouteLinesFlow(setOf("1", "2", "3")))
-                .thenReturn(flowOf(expected))
+            mock(),
+            mock(),
+            mock()
+        )
+        whenever(routeLineRetriever.getRouteLinesFlow(setOf(service(1), service(2), service(3))))
+            .thenReturn(flowOf(expected))
         val viewModel = createViewModel(
-                SavedStateHandle(
-                        mapOf(STATE_SELECTED_SERVICES to arrayOf("1", "2", "3"))))
+            SavedStateHandle(
+                mapOf(
+                    STATE_SELECTED_SERVICES to listOf(
+                        parcelableService(1),
+                        parcelableService(2),
+                        parcelableService(3)
+                    )
+                )
+            )
+        )
 
         val observer = viewModel.routeLinesLiveData.test()
         advanceUntilIdle()
@@ -691,36 +705,41 @@ class BusStopMapViewModelTest {
     }
 
     @Test
-    fun showStopMarkerInfoWindowLiveDataEmitsStopCodeWhenClicked() = runTest {
+    fun showStopMarkerInfoWindowLiveDataEmitsStopIdentifierWhenClicked() = runTest {
         val viewModel = createViewModel()
         val stopMarker = mock<UiStopMarker>()
-        whenever(stopMarker.stopCode)
-                .thenReturn("123456")
+        whenever(stopMarker.stopIdentifier)
+            .thenReturn("123456".toNaptanStopIdentifier())
 
         val observer = viewModel.showStopMarkerInfoWindowLiveData.test()
         viewModel.onMapMarkerClicked(stopMarker)
         advanceUntilIdle()
 
-        observer.assertValues(null, "123456")
+        observer.assertValues("123456".toNaptanStopIdentifier())
     }
 
     @Test
-    fun showStopMarkerInfoWindowLiveDataEmitsStopCodeWhenInSavedState() = runTest {
+    fun showStopMarkerInfoWindowLiveDataEmitsStopIdentifierWhenInSavedState() = runTest {
         val viewModel = createViewModel(
-                SavedStateHandle(mapOf(STATE_SELECTED_STOP_CODE to "123456")))
+            SavedStateHandle(
+                mapOf(
+                    STATE_SELECTED_STOP_IDENTIFIER to "123456".toParcelableNaptanStopIdentifier()
+                )
+            )
+        )
 
         val observer = viewModel.showStopMarkerInfoWindowLiveData.test()
         advanceUntilIdle()
 
-        observer.assertValues("123456")
+        observer.assertValues("123456".toNaptanStopIdentifier())
     }
 
     @Test
     fun showStopMarkerInfoWindowLiveDataEmitsNullWhenInfoWindowClosed() = runTest {
         val viewModel = createViewModel()
         val stopMarker = mock<UiStopMarker>()
-        whenever(stopMarker.stopCode)
-                .thenReturn("123456")
+        whenever(stopMarker.stopIdentifier)
+            .thenReturn("123456".toNaptanStopIdentifier())
 
         val observer = viewModel.showStopMarkerInfoWindowLiveData.test()
         viewModel.onMapMarkerClicked(stopMarker)
@@ -728,20 +747,20 @@ class BusStopMapViewModelTest {
         viewModel.onInfoWindowClosed()
         advanceUntilIdle()
 
-        observer.assertValues(null, "123456", null)
+        observer.assertValues("123456".toNaptanStopIdentifier(), null)
     }
 
     @Test
     fun showStopDetailsLiveDataEmitsWhenMarkerBubbleHasBeenClicked() {
         val stopMarker = mock<UiStopMarker>()
-        whenever(stopMarker.stopCode)
-                .thenReturn("123456")
+        whenever(stopMarker.stopIdentifier)
+            .thenReturn("123456".toNaptanStopIdentifier())
         val viewModel = createViewModel()
 
         val observer = viewModel.showStopDetailsLiveData.test()
         viewModel.onMarkerBubbleClicked(stopMarker)
 
-        observer.assertValues("123456")
+        observer.assertValues("123456".toNaptanStopIdentifier())
     }
 
     @Test
@@ -794,9 +813,9 @@ class BusStopMapViewModelTest {
 
     @Test
     fun showServicesChooserLiveDataEmitsParamsWithSelectedServices() = runTest {
-        val selectedServices = listOf("1", "2")
+        val selectedServices = listOf(service(1), service(2))
         whenever(servicesRepository.hasServicesFlow)
-                .thenReturn(flowOf(true))
+            .thenReturn(flowOf(true))
         whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
             .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
         val viewModel = createViewModel()
@@ -812,14 +831,20 @@ class BusStopMapViewModelTest {
 
     @Test
     fun showServicesChooserLiveDataEmitsParamsWithSelectedServicesFromState() = runTest {
-        val selectedServices = listOf("1", "2")
+        val selectedServices = listOf(service(1), service(2))
         whenever(servicesRepository.hasServicesFlow)
-                .thenReturn(flowOf(true))
+            .thenReturn(flowOf(true))
         whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
             .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
         val viewModel = createViewModel(
-                SavedStateHandle(
-                        mapOf(STATE_SELECTED_SERVICES to arrayOf("1", "2"))))
+            SavedStateHandle(
+                mapOf(
+                    STATE_SELECTED_SERVICES to listOf(
+                        parcelableService(1), parcelableService(2)
+                    )
+                )
+            )
+        )
 
         viewModel.isFilterMenuItemEnabledLiveData.test()
         val observer = viewModel.showServicesChooserLiveData.test()
@@ -831,16 +856,16 @@ class BusStopMapViewModelTest {
 
     @Test
     fun showStopShowsInfoWindowButDoesNotMoveCameraWhenNoStopLocation() = runTest {
-        whenever(busStopsRepository.getStopLocation("123456"))
+        whenever(busStopsRepository.getStopLocation("123456".toNaptanStopIdentifier()))
             .thenReturn(null)
         val viewModel = createViewModel()
 
         val showStopMarkerInfoWindowObserver = viewModel.showStopMarkerInfoWindowLiveData.test()
         val cameraLocationObserver = viewModel.cameraLocationLiveData.test()
-        viewModel.showStop("123456")
+        viewModel.showStop("123456".toNaptanStopIdentifier())
         advanceUntilIdle()
 
-        showStopMarkerInfoWindowObserver.assertValues(null, "123456")
+        showStopMarkerInfoWindowObserver.assertValues("123456".toNaptanStopIdentifier())
         cameraLocationObserver.assertEmpty()
         verify(preferenceRepository, never())
             .setLastMapCameraLocation(any())
@@ -848,16 +873,16 @@ class BusStopMapViewModelTest {
 
     @Test
     fun showStopShowsInfoWindowAndMovesCameraToStopLocation() = runTest {
-        whenever(busStopsRepository.getStopLocation("123456"))
-            .thenReturn(MockStopLocation(1.1, 2.2))
+        whenever(busStopsRepository.getStopLocation("123456".toNaptanStopIdentifier()))
+            .thenReturn(FakeStopLocation(1.1, 2.2))
         val viewModel = createViewModel()
 
         val showStopMarkerInfoWindowObserver = viewModel.showStopMarkerInfoWindowLiveData.test()
         val cameraLocationObserver = viewModel.cameraLocationLiveData.test()
-        viewModel.showStop("123456")
+        viewModel.showStop("123456".toNaptanStopIdentifier())
         advanceUntilIdle()
 
-        showStopMarkerInfoWindowObserver.assertValues(null, "123456")
+        showStopMarkerInfoWindowObserver.assertValues("123456".toNaptanStopIdentifier())
         cameraLocationObserver.assertValues(
             UiCameraLocation(UiLatLon(1.1, 2.2), STOP_ZOOM))
         verify(preferenceRepository)
@@ -866,16 +891,16 @@ class BusStopMapViewModelTest {
 
     @Test
     fun onStopSearchResultShowsInfoWindowButDoesNotMoveCameraWhenNoStopLocation() = runTest {
-        whenever(busStopsRepository.getStopLocation("123456"))
+        whenever(busStopsRepository.getStopLocation("123456".toNaptanStopIdentifier()))
             .thenReturn(null)
         val viewModel = createViewModel()
 
         val showStopMarkerInfoWindowObserver = viewModel.showStopMarkerInfoWindowLiveData.test()
         val cameraLocationObserver = viewModel.cameraLocationLiveData.test()
-        viewModel.onStopSearchResult("123456")
+        viewModel.onStopSearchResult("123456".toNaptanStopIdentifier())
         advanceUntilIdle()
 
-        showStopMarkerInfoWindowObserver.assertValues(null, "123456")
+        showStopMarkerInfoWindowObserver.assertValues("123456".toNaptanStopIdentifier())
         cameraLocationObserver.assertEmpty()
         verify(preferenceRepository, never())
             .setLastMapCameraLocation(any())
@@ -883,16 +908,16 @@ class BusStopMapViewModelTest {
 
     @Test
     fun onStopSearchResultShowsInfoWindowAndMovesCameraToStopLocation() = runTest {
-        whenever(busStopsRepository.getStopLocation("123456"))
-            .thenReturn(MockStopLocation(1.1, 2.2))
+        whenever(busStopsRepository.getStopLocation("123456".toNaptanStopIdentifier()))
+            .thenReturn(FakeStopLocation(1.1, 2.2))
         val viewModel = createViewModel()
 
         val showStopMarkerInfoWindowObserver = viewModel.showStopMarkerInfoWindowLiveData.test()
         val cameraLocationObserver = viewModel.cameraLocationLiveData.test()
-        viewModel.onStopSearchResult("123456")
+        viewModel.onStopSearchResult("123456".toNaptanStopIdentifier())
         advanceUntilIdle()
 
-        showStopMarkerInfoWindowObserver.assertValues(null, "123456")
+        showStopMarkerInfoWindowObserver.assertValues("123456".toNaptanStopIdentifier())
         cameraLocationObserver.assertValues(
             UiCameraLocation(UiLatLon(1.1, 2.2), STOP_ZOOM))
         verify(preferenceRepository)
@@ -962,7 +987,17 @@ class BusStopMapViewModelTest {
                     coroutineRule.scope,
                     coroutineRule.testDispatcher)
 
-    private data class MockStopLocation(
-        override val latitude: Double,
-        override val longitude: Double) : StopLocation
+    private fun service(id: Int): ServiceDescriptor {
+        return FakeServiceDescriptor(
+            serviceName = id.toString(),
+            operatorCode = "TEST$id"
+        )
+    }
+
+    private fun parcelableService(id: Int): ParcelableServiceDescriptor {
+        return ParcelableServiceDescriptor(
+            serviceName = id.toString(),
+            operatorCode = "TEST$id"
+        )
+    }
 }

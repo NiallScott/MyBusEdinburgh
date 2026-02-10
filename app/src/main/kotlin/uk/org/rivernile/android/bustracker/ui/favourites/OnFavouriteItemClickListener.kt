@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.favourites
 
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 
 /**
@@ -46,8 +47,8 @@ interface OnFavouriteItemClickListener {
     /**
      * A favourite item has been long clicked.
      *
-     * @param stopCode The stop code of the long clicked favourite item.
+     * @param stopIdentifier The stop identifier of the long clicked favourite item.
      * @return `true` if the long click was handled, otherwise `false`.
      */
-    fun onFavouriteLongClicked(stopCode: String): Boolean
+    fun onFavouriteLongClicked(stopIdentifier: StopIdentifier): Boolean
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,30 +27,34 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop.servicestop
 
 import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 
 /**
  * This DAO is used to access service stop data in the bus stop database.
  *
  * @author Niall Scott
  */
-interface ServiceStopDao {
+public interface ServiceStopDao {
 
     /**
-     * Get a [Flow] which emits [List]s of services which stop at the given [stopCode].
+     * Get a [Flow] which emits [List]s of services which stop at the given [naptanStopCode].
      *
-     * @param stopCode The stop code to get services for.
-     * @return A [Flow] which emits [List]s of services which stop at the given [stopCode].
+     * @param naptanStopCode The stop code to get services for.
+     * @return A [Flow] which emits [List]s of [ServiceDescriptor]s which stop at the given
+     * [naptanStopCode].
      */
-    fun getServicesForStopFlow(stopCode: String): Flow<List<String>?>
+    public fun getServicesForStopFlow(naptanStopCode: String): Flow<List<ServiceDescriptor>?>
 
     /**
-     * Given a [Set] of stop codes, get a [Flow] which emits a [Map] containing the mappings between
-     * the stop code and the [List] of services for that particular stop.
+     * Given a [Set] of Naptan stop codes, get a [Flow] which emits a [Map] containing the mappings
+     * between the stop code and the [List] of [ServiceDescriptor]s for that particular stop.
      *
-     * @param stopCodes The stop codes to get services for.
+     * @param naptanStopCodes The Naptan stop codes to get services for.
      * @return A [Flow] which emits a [Map] containing the mappings between
-     * the stop code and the [List] of services for that particular stop, or emits `null` when there
-     * is no data or there is an error.
+     * the stop code and the [List] of [ServiceDescriptor]s for that particular stop, or emits
+     * `null` when there is no data or there is an error.
      */
-    fun getServicesForStopsFlow(stopCodes: Set<String>): Flow<Map<String, List<String>>?>
+    public fun getServicesForStopsFlow(
+        naptanStopCodes: Set<String>
+    ): Flow<Map<String, List<ServiceDescriptor>>?>
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,37 +27,47 @@
 package uk.org.rivernile.android.bustracker.core.servicepoints
 
 import kotlinx.coroutines.flow.Flow
-import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.ServicePoint
+import kotlinx.coroutines.flow.map
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.ServicePointDao
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * This repository is used to access service point data.
  *
- * @param servicePointsDao The DAO to access the service points data store.
  * @author Niall Scott
  */
-@Singleton
-class ServicePointsRepository @Inject internal constructor(
-    private val servicePointsDao: ServicePointDao
-) {
+public interface ServicePointsRepository {
 
     /**
-     * This is a [Flow] which emits a [List] of [ServicePoint]s for the given [serviceNames]. `null`
-     * may be omitted if there are no results.
+     * This is a [Flow] which emits a [List] of [ServicePoint]s for the given [serviceDescriptors].
+     * `null` may be omitted if there are no results.
      *
      * Ordering is in the following precedence;
      *
-     * - [ServicePoint.serviceName]
-     * - [ServicePoint.chainage]
+     * - [ServicePoint.serviceDescriptor]
+     * - [ServicePoint.routeSection]
      * - Then ordered by an internal ordering value, so the points are in the correct order.
      *
-     * @param serviceNames Only [ServicePoint]s for the supplied [Set] of service names are
+     * @param serviceDescriptors Only [ServicePoint]s for the supplied [Set] of services are
      * returned. `null` means all [ServicePoint]s are returned - this could be an expensive
      * operation.
-     * @return A [List] of [ServicePoint]s for the given [serviceNames].
+     * @return A [List] of [ServicePoint]s for the given [serviceDescriptors].
      */
-    fun getServicePointsFlow(serviceNames: Set<String>?): Flow<List<ServicePoint>?> =
-        servicePointsDao.getServicePointsFlow(serviceNames)
+    public fun getServicePointsFlow(
+        serviceDescriptors: Set<ServiceDescriptor>?
+    ): Flow<List<ServicePoint>?>
+}
+
+internal class RealServicePointsRepository @Inject constructor(
+    private val servicePointsDao: ServicePointDao
+) : ServicePointsRepository {
+
+    override fun getServicePointsFlow(
+        serviceDescriptors: Set<ServiceDescriptor>?
+    ): Flow<List<ServicePoint>?> {
+        return servicePointsDao
+            .getServicePointsFlow(serviceDescriptors)
+            .map { it?.toServicePoints() }
+    }
 }

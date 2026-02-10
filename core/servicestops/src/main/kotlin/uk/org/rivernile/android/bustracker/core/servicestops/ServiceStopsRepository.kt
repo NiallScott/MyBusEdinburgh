@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,7 +27,12 @@
 package uk.org.rivernile.android.bustracker.core.servicestops
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.ServiceStopDao
+import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import javax.inject.Inject
 
 /**
@@ -38,33 +43,61 @@ import javax.inject.Inject
 public interface ServiceStopsRepository {
 
     /**
-     * Get a [Flow] which emits the [List] of service names which serve the given `stopCode`. If the
-     * services for the stop is updated later, these will be emitted as updates.
+     * Get a [Flow] which emits the [List] of services which serve the given [stopIdentifier]. If
+     * the services for the stop is updated later, these will be emitted as updates.
      *
-     * @param stopCode The stop code to get the services for.
-     * @return The [Flow] which emits the [List] of services for the given stop code.
+     * @param stopIdentifier The stop to get the services for.
+     * @return The [Flow] which emits the [List] of services for the given stop.
      */
-    public fun getServicesForStopFlow(stopCode: String): Flow<List<String>?>
+    public fun getServicesForStopFlow(
+        stopIdentifier: StopIdentifier
+    ): Flow<List<ServiceDescriptor>?>
 
     /**
-     * Get a [Flow] which emits a [Map] of stop codes to a [List] of service names which service
-     * that stop. If there is a change to the backing data, there will be a new emission with the
-     * latest data.
+     * Get a [Flow] which emits a [Map] of [StopIdentifier]s to a [List] of [ServiceDescriptor]
+     * which service that stop. If there is a change to the backing data, there will be a new
+     * emission with the latest data.
      *
-     * @param stopCodes A [Set] of the stop codes to get service names for.
+     * @param stopIdentifiers A [Set] of the stops to get services for.
      * @return The [Flow] which emits the [Map] of stop codes to a [List] of services which service
      * those stops.
      */
-    public fun getServicesForStopsFlow(stopCodes: Set<String>): Flow<Map<String, List<String>>?>
+    public fun getServicesForStopsFlow(
+        stopIdentifiers: Set<StopIdentifier>
+    ): Flow<Map<StopIdentifier, List<ServiceDescriptor>>?>
 }
 
 internal class DefaultServiceStopsRepository @Inject constructor(
     private val serviceStopDao: ServiceStopDao
 ) : ServiceStopsRepository {
 
-    override fun getServicesForStopFlow(stopCode: String) =
-        serviceStopDao.getServicesForStopFlow(stopCode)
+    override fun getServicesForStopFlow(
+        stopIdentifier: StopIdentifier
+    ): Flow<List<ServiceDescriptor>?> {
+        return serviceStopDao.getServicesForStopFlow(stopIdentifier.getNaptanCodeOrThrow())
+    }
 
-    override fun getServicesForStopsFlow(stopCodes: Set<String>) =
-        serviceStopDao.getServicesForStopsFlow(stopCodes)
+    override fun getServicesForStopsFlow(
+        stopIdentifiers: Set<StopIdentifier>
+    ): Flow<Map<StopIdentifier, List<ServiceDescriptor>>?> {
+        val stopCodes = stopIdentifiers
+            .map { it.getNaptanCodeOrThrow() }
+            .toSet()
+
+        return serviceStopDao
+            .getServicesForStopsFlow(stopCodes)
+            .map { servicesForStopEntry ->
+                servicesForStopEntry
+                    ?.mapKeys { it.key.toNaptanStopIdentifier() }
+            }
+    }
+
+    private fun StopIdentifier.getNaptanCodeOrThrow(): String {
+        return if (this is NaptanStopIdentifier) {
+            naptanStopCode
+        } else {
+            throw UnsupportedOperationException("Only Naptan stop identifiers are supported for " +
+                "now.")
+        }
+    }
 }

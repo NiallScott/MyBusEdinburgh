@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.callbacks
 
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+
 /**
  * This listener is used to send callbacks from [androidx.fragment.app.Fragment] to
  * [android.app.Activity]s when the user wishes to add a new proximity alert.
@@ -37,7 +39,7 @@ interface OnShowAddProximityAlertListener {
     /**
      * This is called when the user wants to view the interface to add a new proximity alert.
      *
-     * @param stopCode The stopCode the proximity alert should be added for.
+     * @param stopIdentifier The stop identifier the proximity alert should be added for.
      */
-    fun onShowAddProximityAlert(stopCode: String)
+    fun onShowAddProximityAlert(stopIdentifier: StopIdentifier)
 }

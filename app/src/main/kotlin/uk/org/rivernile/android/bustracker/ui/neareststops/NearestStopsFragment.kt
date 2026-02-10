@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,6 +41,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.core.content.ContextCompat
+import androidx.core.os.BundleCompat
 import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -48,6 +49,10 @@ import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableServiceDescriptorList
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
@@ -329,7 +334,7 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
      */
     private fun handleSelectedStopName(name: UiNearestStopName?) {
         actionMode?.title = name?.let {
-            textFormattingUtils.formatBusStopNameWithStopCode(it.stopCode, it.stopName)
+            textFormattingUtils.formatBusStopNameWithStopCode(it.stopIdentifier, it.stopName)
         }
     }
 
@@ -450,75 +455,75 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
     /**
      * Show stop data.
      *
-     * @param stopCode The stop code to show stop data for.
+     * @param stopIdentifier The stop to show stop data for.
      */
-    private fun handleShowStopData(stopCode: String) {
-        callbacks.onShowBusTimes(stopCode)
+    private fun handleShowStopData(stopIdentifier: StopIdentifier) {
+        callbacks.onShowBusTimes(stopIdentifier)
     }
 
     /**
      * Present UI to allow the user to add the given stop as a favourite.
      *
-     * @param stopCode The stop to add as a favourite.
+     * @param stopIdentifier The stop to add as a favourite.
      */
-    private fun handleShowAddFavouriteStop(stopCode: String) {
-        callbacks.onShowAddEditFavouriteStop(stopCode)
+    private fun handleShowAddFavouriteStop(stopIdentifier: StopIdentifier) {
+        callbacks.onShowAddEditFavouriteStop(stopIdentifier)
     }
 
     /**
      * Present UI to ask the user to confirm if they wish to delete the given favourite stop.
      *
-     * @param stopCode The stop to confirm deletion for.
+     * @param stopIdentifier The stop to confirm deletion for.
      */
-    private fun handleShowConfirmDeleteFavouriteStop(stopCode: String) {
-        callbacks.onShowConfirmFavouriteDeletion(stopCode)
+    private fun handleShowConfirmDeleteFavouriteStop(stopIdentifier: StopIdentifier) {
+        callbacks.onShowConfirmFavouriteDeletion(stopIdentifier)
     }
 
     /**
      * Show the given stop on the map.
      *
-     * @param stopCode The stop to show on the map.
+     * @param stopIdentifier The stop to show on the map.
      */
-    private fun handleShowOnMap(stopCode: String) {
-        callbacks.onShowBusStopMapWithStopCode(stopCode)
+    private fun handleShowOnMap(stopIdentifier: StopIdentifier) {
+        callbacks.onShowBusStopMapWithStopCode(stopIdentifier)
     }
 
     /**
      * Present UI to the user to allow them to add an arrival alert for the given stop.
      *
-     * @param stopCode The stop to add an arrival alert for.
+     * @param stopIdentifier The stop to add an arrival alert for.
      */
-    private fun handleAddArrivalAlert(stopCode: String) {
-        callbacks.onShowAddTimeAlert(stopCode, null)
+    private fun handleAddArrivalAlert(stopIdentifier: StopIdentifier) {
+        callbacks.onShowAddTimeAlert(stopIdentifier, null)
     }
 
     /**
      * Present UI to the user to allow them to confirm if the arrival alert for the given stop
      * should be removed.
      *
-     * @param stopCode The stop to confirm arrival alert deletion for.
+     * @param stopIdentifier The stop to confirm arrival alert deletion for.
      */
-    private fun handleConfirmDeleteArrivalAlert(stopCode: String) {
-        callbacks.onShowConfirmDeleteTimeAlert(stopCode)
+    private fun handleConfirmDeleteArrivalAlert(stopIdentifier: StopIdentifier) {
+        callbacks.onShowConfirmDeleteTimeAlert(stopIdentifier)
     }
 
     /**
      * Present UI to the user to allow them to add a proximity alert for the given stop.
      *
-     * @param stopCode The stop to add a proximity alert for.
+     * @param stopIdentifier The stop to add a proximity alert for.
      */
-    private fun handleAddProximityAlert(stopCode: String) {
-        callbacks.onShowAddProximityAlert(stopCode)
+    private fun handleAddProximityAlert(stopIdentifier: StopIdentifier) {
+        callbacks.onShowAddProximityAlert(stopIdentifier)
     }
 
     /**
      * Present UI to the user to allow them to confirm if the proximity alert for the given stop
      * should be removed.
      *
-     * @param stopCode The stop to confirm proximity alert deletion for.
+     * @param stopIdentifier The stop to confirm proximity alert deletion for.
      */
-    private fun handleConfirmDeleteProximityAlert(stopCode: String) {
-        callbacks.onShowConfirmDeleteProximityAlert(stopCode)
+    private fun handleConfirmDeleteProximityAlert(stopIdentifier: StopIdentifier) {
+        callbacks.onShowConfirmDeleteProximityAlert(stopIdentifier)
     }
 
     /**
@@ -527,10 +532,10 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
      *
      * @param selectedServices The existing selected services.
      */
-    private fun showServicesChooser(selectedServices: List<String>?) {
+    private fun showServicesChooser(selectedServices: List<ServiceDescriptor>?) {
         ServicesChooserParams.AllServices(
             R.string.neareststops_service_chooser_title,
-            selectedServices)
+            selectedServices?.toParcelableServiceDescriptorList())
             .let {
                 ServicesChooserDialogFragment.newInstance(it)
                     .show(childFragmentManager, DIALOG_SELECT_SERVICES)
@@ -636,8 +641,12 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
      * @param result The [Bundle] result generated by [ServicesChooserDialogFragment].
      */
     private fun handleServicesChosen(result: Bundle) {
-        viewModel.selectedServices = result
-            .getStringArrayList(ServicesChooserDialogFragment.RESULT_CHOSEN_SERVICES)
+        viewModel.selectedServices = BundleCompat
+            .getParcelableArrayList(
+                result,
+                ServicesChooserDialogFragment.RESULT_CHOSEN_SERVICES,
+                ParcelableServiceDescriptor::class.java
+            )
     }
 
     private val itemClickListener = object : OnNearStopItemClickListener {
@@ -645,8 +654,8 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
             viewModel.onNearestStopClicked(item)
         }
 
-        override fun onNearestStopLongClicked(stopCode: String) =
-            viewModel.onNearestStopLongClicked(stopCode)
+        override fun onNearestStopLongClicked(stopIdentifier: StopIdentifier) =
+            viewModel.onNearestStopLongClicked(stopIdentifier)
     }
 
     private val actionModeCallback = object : ActionMode.Callback {

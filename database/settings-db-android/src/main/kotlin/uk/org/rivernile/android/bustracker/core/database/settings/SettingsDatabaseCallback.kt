@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,31 +39,53 @@ import javax.inject.Inject
 internal class SettingsDatabaseCallback @Inject constructor() : RoomDatabase.Callback() {
 
     override fun onCreate(db: SupportSQLiteDatabase) {
-        db.createNewAlertTriggers()
+        db.createAlertTablesTriggers()
     }
 
-    /**
-     * Create the new triggers on the `active_alerts` table.
-     */
-    private fun SupportSQLiteDatabase.createNewAlertTriggers() {
-        createAlertsTrigger("insert_alert", "BEFORE INSERT")
-        createAlertsTrigger("delete_alert", "AFTER DELETE")
-        createAlertsTrigger("update_alert", "AFTER UPDATE")
+    private fun SupportSQLiteDatabase.createAlertTablesTriggers() {
+        createAlertTablesTrigger(
+            tableName = "arrival_alert",
+            triggerName = "insert_arrival_alert",
+            condition = "BEFORE INSERT"
+        )
+        createAlertTablesTrigger(
+            tableName = "arrival_alert",
+            triggerName = "delete_arrival_alert",
+            condition = "AFTER DELETE"
+        )
+        createAlertTablesTrigger(
+            tableName = "arrival_alert",
+            triggerName = "update_arrival_alert",
+            condition = "AFTER UPDATE"
+        )
+        createAlertTablesTrigger(
+            tableName = "proximity_alert",
+            triggerName = "insert_proximity_alert",
+            condition = "BEFORE INSERT"
+        )
+        createAlertTablesTrigger(
+            tableName = "proximity_alert",
+            triggerName = "delete_proximity_alert",
+            condition = "AFTER DELETE"
+        )
+        createAlertTablesTrigger(
+            tableName = "proximity_alert",
+            triggerName = "update_proximity_alert",
+            condition = "AFTER UPDATE"
+        )
     }
 
-    /**
-     * Create a trigger on the `active_alerts` table.
-     *
-     * @param triggerName The name the trigger should have in the database.
-     * @param condition The condition on which the trigger should fire on, in SQL syntax.
-     */
-    private fun SupportSQLiteDatabase.createAlertsTrigger(triggerName: String, condition: String) {
+    private fun SupportSQLiteDatabase.createAlertTablesTrigger(
+        tableName: String,
+        triggerName: String,
+        condition: String
+    ) {
         execSQL("""
-            CREATE TRIGGER IF NOT EXISTS $triggerName 
-            $condition ON active_alerts 
+            CREATE TRIGGER IF NOT EXISTS $triggerName
+            $condition ON $tableName
             BEGIN
-                DELETE FROM active_alerts 
-                WHERE timeAdded < ((SELECT strftime('%s','now') * 1000) - 3600000);
+                DELETE FROM $tableName
+                WHERE time_added_millis < ((SELECT strftime('%s','now') * 1000) - 3600000);
             END
         """.trimIndent())
     }

@@ -36,12 +36,19 @@ import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Json
  * @author Niall Scott
  */
 internal class FakeEdinburghOpenApi(
-    private val onGetStopEvents: (String, Int) -> Response<JsonStopEvents> =
+    private val onGetStopEventsWithAtcoCode: (String, Int) -> Response<JsonStopEvents> =
+        { _, _ -> throw NotImplementedError() },
+    private val onGetStopEventsWithSmsCode: (String, Int) -> Response<JsonStopEvents> =
         { _, _ -> throw NotImplementedError() }
 ) : EdinburghOpenApi {
 
-    override suspend fun getStopEvents(
+    override suspend fun getStopEventsWithAtcoCode(
+        atcoCode: String,
+        numberOfDepartures: Int
+    ) = onGetStopEventsWithAtcoCode(atcoCode, numberOfDepartures)
+
+    override suspend fun getStopEventsWithSmsCode(
         smsCode: String,
         numberOfDepartures: Int
-    ) = onGetStopEvents(smsCode, numberOfDepartures)
+    ) = onGetStopEventsWithSmsCode(smsCode, numberOfDepartures)
 }

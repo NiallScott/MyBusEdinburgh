@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -130,7 +130,7 @@ internal class AndroidBusStopDatabase @Inject constructor(
 
     companion object {
 
-        private const val DATABASE_NAME = "busstops10.db"
+        private const val DATABASE_NAME = "busstops23.db"
     }
 
     // Creates the RoomBusStopDatabase. Calling createRoomDatabase does not do IO blocking as the

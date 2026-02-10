@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -75,7 +75,9 @@ class FavouriteStopViewHolder(
             favouriteStop?.let {
                 root.isChecked = it.isSelected
                 txtFavouriteName.text = it.favouriteStop.stopName
-                txtServiceListing.text = it.services?.joinToString(", ")
+                txtServiceListing.text = it
+                    .services
+                    ?.joinToString(", ") { service -> service.serviceName }
             } ?: run {
                 root.isChecked = false
                 txtFavouriteName.text = null
@@ -102,6 +104,6 @@ class FavouriteStopViewHolder(
      * `false` if the favourite stop is `null`.
      */
     private fun handleLongClick() = favouriteStop?.let {
-        clickListener.onFavouriteLongClicked(it.favouriteStop.stopCode)
+        clickListener.onFavouriteLongClicked(it.favouriteStop.stopIdentifier)
     } ?: false
 }

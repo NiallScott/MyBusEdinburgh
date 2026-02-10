@@ -26,6 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Stop
@@ -59,7 +62,7 @@ class LiveTimesMapperTest {
     @Test
     fun mapLiveTimesAndColoursToUiResultWithProgressMapsToUiProgress() {
         val result = mapper.mapLiveTimesAndColoursToUiResult(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             LiveTimesResult.InProgress,
             null
         )
@@ -72,7 +75,11 @@ class LiveTimesMapperTest {
         val liveTimesResult = LiveTimesResult.Error.NoConnectivity(123L)
         val expected = UiResult.Error(123L, ErrorType.NO_CONNECTIVITY)
 
-        val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, null)
+        val result = mapper.mapLiveTimesAndColoursToUiResult(
+            "123456".toNaptanStopIdentifier(),
+            liveTimesResult,
+            null
+        )
 
         assertEquals(expected, result)
     }
@@ -82,7 +89,11 @@ class LiveTimesMapperTest {
         val liveTimesResult = LiveTimesResult.Error.Io(123L, UnknownHostException())
         val expected = UiResult.Error(123L, ErrorType.UNKNOWN_HOST)
 
-        val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, null)
+        val result = mapper.mapLiveTimesAndColoursToUiResult(
+            "123456".toNaptanStopIdentifier(),
+            liveTimesResult,
+            null
+        )
 
         assertEquals(expected, result)
     }
@@ -92,7 +103,11 @@ class LiveTimesMapperTest {
         val liveTimesResult = LiveTimesResult.Error.Io(123L, SocketTimeoutException())
         val expected = UiResult.Error(123L, ErrorType.COMMUNICATION)
 
-        val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, null)
+        val result = mapper.mapLiveTimesAndColoursToUiResult(
+            "123456".toNaptanStopIdentifier(),
+            liveTimesResult,
+            null
+        )
 
         assertEquals(expected, result)
     }
@@ -102,7 +117,11 @@ class LiveTimesMapperTest {
         val liveTimesResult = LiveTimesResult.Error.ServerError.Other(123L)
         val expected = UiResult.Error(123L, ErrorType.SERVER_ERROR)
 
-        val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, null)
+        val result = mapper.mapLiveTimesAndColoursToUiResult(
+            "123456".toNaptanStopIdentifier(),
+            liveTimesResult,
+            null
+        )
 
         assertEquals(expected, result)
     }
@@ -112,7 +131,11 @@ class LiveTimesMapperTest {
         val liveTimesResult = LiveTimesResult.Error.ServerError.Authentication(123L)
         val expected = UiResult.Error(123L, ErrorType.AUTHENTICATION)
 
-        val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, null)
+        val result = mapper.mapLiveTimesAndColoursToUiResult(
+            "123456".toNaptanStopIdentifier(),
+            liveTimesResult,
+            null
+        )
 
         assertEquals(expected, result)
     }
@@ -122,7 +145,11 @@ class LiveTimesMapperTest {
         val liveTimesResult = LiveTimesResult.Error.ServerError.Maintenance(123L)
         val expected = UiResult.Error(123L, ErrorType.DOWN_FOR_MAINTENANCE)
 
-        val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, null)
+        val result = mapper.mapLiveTimesAndColoursToUiResult(
+            "123456".toNaptanStopIdentifier(),
+            liveTimesResult,
+            null
+        )
 
         assertEquals(expected, result)
     }
@@ -132,7 +159,11 @@ class LiveTimesMapperTest {
         val liveTimesResult = LiveTimesResult.Error.ServerError.SystemOverloaded(123L)
         val expected = UiResult.Error(123L, ErrorType.SYSTEM_OVERLOADED)
 
-        val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, null)
+        val result = mapper.mapLiveTimesAndColoursToUiResult(
+            "123456".toNaptanStopIdentifier(),
+            liveTimesResult,
+            null
+        )
 
         assertEquals(expected, result)
     }
@@ -147,7 +178,11 @@ class LiveTimesMapperTest {
         )
         val expected = UiResult.Error(123L, ErrorType.NO_DATA)
 
-        val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, null)
+        val result = mapper.mapLiveTimesAndColoursToUiResult(
+            "123456".toNaptanStopIdentifier(),
+            liveTimesResult,
+            null
+        )
 
         assertEquals(expected, result)
     }
@@ -157,8 +192,8 @@ class LiveTimesMapperTest {
         val liveTimesResult = LiveTimesResult.Success(
             LiveTimes(
                 mapOf(
-                    "123456" to Stop(
-                        "123456",
+                    "123456".toNaptanStopIdentifier() to Stop(
+                        "123456".toNaptanStopIdentifier(),
                         emptyList()
                     )
                 ),
@@ -167,7 +202,11 @@ class LiveTimesMapperTest {
         )
         val expected = UiResult.Error(123L, ErrorType.NO_DATA)
 
-        val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, null)
+        val result = mapper.mapLiveTimesAndColoursToUiResult(
+            "123456".toNaptanStopIdentifier(),
+            liveTimesResult,
+            null
+        )
 
         assertEquals(expected, result)
     }
@@ -177,11 +216,14 @@ class LiveTimesMapperTest {
         val liveTimesResult = LiveTimesResult.Success(
             LiveTimes(
                 mapOf(
-                    "123456" to Stop(
-                        "123456",
+                    "123456".toNaptanStopIdentifier() to Stop(
+                        "123456".toNaptanStopIdentifier(),
                         listOf(
                             Service(
-                                "1",
+                                FakeServiceDescriptor(
+                                    serviceName = "1",
+                                    operatorCode = "TEST1"
+                                ),
                                 emptyList()
                             )
                         )
@@ -192,7 +234,11 @@ class LiveTimesMapperTest {
         )
         val expected = UiResult.Error(123L, ErrorType.NO_DATA)
 
-        val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, null)
+        val result = mapper.mapLiveTimesAndColoursToUiResult(
+            "123456".toNaptanStopIdentifier(),
+            liveTimesResult,
+            null
+        )
 
         assertEquals(expected, result)
     }
@@ -202,11 +248,14 @@ class LiveTimesMapperTest {
         val liveTimesResult = LiveTimesResult.Success(
             LiveTimes(
                 mapOf(
-                    "123456" to Stop(
-                        "123456",
+                    "123456".toNaptanStopIdentifier() to Stop(
+                        "123456".toNaptanStopIdentifier(),
                         listOf(
                             Service(
-                                "1",
+                                FakeServiceDescriptor(
+                                    serviceName = "1",
+                                    operatorCode = "TEST1"
+                                ),
                                 listOf(createVehicle())
                             )
                         )
@@ -218,10 +267,13 @@ class LiveTimesMapperTest {
         val expected = UiResult.Success(
             123L,
             UiStop(
-                "123456",
+                "123456".toNaptanStopIdentifier(),
                 listOf(
                     UiService(
-                        "1",
+                        FakeServiceDescriptor(
+                            serviceName = "1",
+                            operatorCode = "TEST1"
+                        ),
                         null,
                         listOf(createUiVehicle())
                     )
@@ -229,7 +281,11 @@ class LiveTimesMapperTest {
             )
         )
 
-        val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, null)
+        val result = mapper.mapLiveTimesAndColoursToUiResult(
+            "123456".toNaptanStopIdentifier(),
+            liveTimesResult,
+            null
+        )
 
         assertEquals(expected, result)
     }
@@ -239,11 +295,14 @@ class LiveTimesMapperTest {
         val liveTimesResult = LiveTimesResult.Success(
             LiveTimes(
                 mapOf(
-                    "123456" to Stop(
-                        "123456",
+                    "123456".toNaptanStopIdentifier() to Stop(
+                        "123456".toNaptanStopIdentifier(),
                         listOf(
                             Service(
-                                "1",
+                                FakeServiceDescriptor(
+                                    serviceName = "1",
+                                    operatorCode = "TEST1"
+                                ),
                                 listOf(createVehicle())
                             )
                         )
@@ -255,19 +314,31 @@ class LiveTimesMapperTest {
         val expected = UiResult.Success(
             123L,
             UiStop(
-                "123456",
+                "123456".toNaptanStopIdentifier(),
                 listOf(
                     UiService(
-                        "1",
+                        FakeServiceDescriptor(
+                            serviceName = "1",
+                            operatorCode = "TEST1"
+                        ),
                         ServiceColours(1, 2),
                         listOf(createUiVehicle())
                     )
                 )
             )
         )
-        val colours = mapOf("1" to ServiceColours(1, 2))
+        val colours = mapOf<ServiceDescriptor, ServiceColours>(
+            FakeServiceDescriptor(
+                serviceName = "1",
+                operatorCode = "TEST1"
+            ) to ServiceColours(1, 2)
+        )
 
-        val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, colours)
+        val result = mapper.mapLiveTimesAndColoursToUiResult(
+            "123456".toNaptanStopIdentifier(),
+            liveTimesResult,
+            colours
+        )
 
         assertEquals(expected, result)
     }
@@ -277,19 +348,28 @@ class LiveTimesMapperTest {
         val liveTimesResult = LiveTimesResult.Success(
             LiveTimes(
                 mapOf(
-                    "123456" to Stop(
-                        "123456",
+                    "123456".toNaptanStopIdentifier() to Stop(
+                        "123456".toNaptanStopIdentifier(),
                         listOf(
                             Service(
-                                "1",
+                                FakeServiceDescriptor(
+                                    serviceName = "1",
+                                    operatorCode = "TEST1"
+                                ),
                                 listOf(createVehicle())
                             ),
                             Service(
-                                "2",
+                                FakeServiceDescriptor(
+                                    serviceName = "2",
+                                    operatorCode = "TEST2"
+                                ),
                                 listOf(createVehicle())
                             ),
                             Service(
-                                "3",
+                                FakeServiceDescriptor(
+                                    serviceName = "3",
+                                    operatorCode = "TEST3"
+                                ),
                                 listOf(createVehicle())
                             )
                         )
@@ -301,32 +381,51 @@ class LiveTimesMapperTest {
         val expected = UiResult.Success(
             123L,
             UiStop(
-                "123456",
+                "123456".toNaptanStopIdentifier(),
                 listOf(
                     UiService(
-                        "1",
+                        FakeServiceDescriptor(
+                            serviceName = "1",
+                            operatorCode = "TEST1"
+                        ),
                         ServiceColours(1, 2),
                         listOf(createUiVehicle())
                     ),
                     UiService(
-                        "2",
+                        FakeServiceDescriptor(
+                            serviceName = "2",
+                            operatorCode = "TEST2"
+                        ),
                         null,
                         listOf(createUiVehicle())
                     ),
                     UiService(
-                        "3",
+                        FakeServiceDescriptor(
+                            serviceName = "3",
+                            operatorCode = "TEST3"
+                        ),
                         ServiceColours(3, 4),
                         listOf(createUiVehicle())
                     )
                 )
             )
         )
-        val colours = mapOf(
-            "1" to ServiceColours(1, 2),
-            "3" to ServiceColours(3, 4)
+        val colours = mapOf<ServiceDescriptor, ServiceColours>(
+            FakeServiceDescriptor(
+                serviceName = "1",
+                operatorCode = "TEST1"
+            ) to ServiceColours(1, 2),
+            FakeServiceDescriptor(
+                serviceName = "3",
+                operatorCode = "TEST3"
+            ) to ServiceColours(3, 4)
         )
 
-        val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, colours)
+        val result = mapper.mapLiveTimesAndColoursToUiResult(
+            "123456".toNaptanStopIdentifier(),
+            liveTimesResult,
+            colours
+        )
 
         assertEquals(expected, result)
     }

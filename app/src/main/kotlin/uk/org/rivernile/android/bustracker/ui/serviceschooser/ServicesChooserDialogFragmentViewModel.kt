@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import javax.inject.Inject
 
 /**
@@ -103,10 +104,10 @@ class ServicesChooserDialogFragmentViewModel @Inject constructor(
     /**
      * This is called when a service has been clicked.
      *
-     * @param serviceName The name of the service which was clicked.
+     * @param serviceDescriptor The descriptor of the service which was clicked.
      */
-    fun onServiceClicked(serviceName: String) {
-        state.onServiceClicked(serviceName)
+    fun onServiceClicked(serviceDescriptor: ServiceDescriptor) {
+        state.onServiceClicked(serviceDescriptor)
     }
 
     /**

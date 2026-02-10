@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.favourites.addedit
 
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.busstops.StopName
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 
 /**
@@ -47,9 +48,9 @@ sealed interface UiState {
     sealed interface Mode : UiState {
 
         /**
-         * The stop code.
+         * The stop identifier.
          */
-        val stopCode: String
+        val stopIdentifier: StopIdentifier
         /**
          * The stop name properties.
          */
@@ -58,23 +59,25 @@ sealed interface UiState {
         /**
          * The 'Add' layout should be shown.
          *
-         * @property stopCode The stop code.
+         * @property stopIdentifier The stop identifier.
          * @property stopName The name of the stop.
          */
         data class Add(
-                override val stopCode: String,
-                override val stopName: StopName?) : Mode
+            override val stopIdentifier: StopIdentifier,
+            override val stopName: StopName?
+        ) : Mode
 
         /**
          * The 'Edit' layout should be shown.
          *
-         * @property stopCode The stop code.
+         * @property stopName The stop identifier.
          * @property stopName The name of the stop.
          * @property favouriteStop The currently saved [FavouriteStop].
          */
         data class Edit(
-                override val stopCode: String,
-                override val stopName: StopName?,
-                val favouriteStop: FavouriteStop) : Mode
+            override val stopIdentifier: StopIdentifier,
+            override val stopName: StopName?,
+            val favouriteStop: FavouriteStop
+        ) : Mode
     }
 }

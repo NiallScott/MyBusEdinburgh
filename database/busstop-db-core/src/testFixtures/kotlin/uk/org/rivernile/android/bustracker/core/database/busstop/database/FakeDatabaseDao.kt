@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop.database
 
 import kotlinx.coroutines.flow.Flow
+import kotlin.time.Instant
 
 /**
  * A fake [DatabaseDao] for testing.
@@ -34,12 +35,12 @@ import kotlinx.coroutines.flow.Flow
  * @author Niall Scott
  */
 class FakeDatabaseDao(
-    private val onTopologyIdFlow: () -> Flow<String?> = { throw NotImplementedError() },
     private val onDatabaseMetadataFlow: () -> Flow<DatabaseMetadata?> =
-        { throw NotImplementedError() }
+        { throw NotImplementedError() },
+    private val onGetDatabaseUpdateTimestamp: () -> Instant? = { throw NotImplementedError() }
 ) : DatabaseDao {
 
-    override val topologyIdFlow get() = onTopologyIdFlow()
-
     override val databaseMetadataFlow get() = onDatabaseMetadataFlow()
+
+    override suspend fun getDatabaseUpdateTimestamp() = onGetDatabaseUpdateTimestamp()
 }

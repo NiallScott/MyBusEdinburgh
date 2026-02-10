@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,8 +34,6 @@ import uk.org.rivernile.android.bustracker.core.config.BuildConfiguration
 import uk.org.rivernile.android.bustracker.core.config.EdinburghBuildConfiguration
 import uk.org.rivernile.android.bustracker.core.livetimes.EdinburghIsNightServiceDetector
 import uk.org.rivernile.android.bustracker.core.livetimes.IsNightServiceDetector
-import uk.org.rivernile.android.bustracker.core.services.EdinburghServiceColourOverride
-import uk.org.rivernile.android.bustracker.core.services.ServiceColourOverride
 
 /**
  * This [Module] provides utility dependencies for the Edinburgh library.
@@ -56,12 +54,6 @@ internal interface UtilModule {
     fun bindBuildConfiguration(
         edinburghBuildConfiguration: EdinburghBuildConfiguration
     ): BuildConfiguration
-
-    @Suppress("unused")
-    @Binds
-    fun bindServiceColourOverride(
-        edinburghServiceColourOverride: EdinburghServiceColourOverride
-    ): ServiceColourOverride
 
     companion object {
 

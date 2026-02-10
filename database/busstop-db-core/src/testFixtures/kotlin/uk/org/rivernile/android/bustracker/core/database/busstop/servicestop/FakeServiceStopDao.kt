@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop.servicestop
 
 import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 
 /**
  * A fake [ServiceStopDao] for testing.
@@ -34,14 +35,16 @@ import kotlinx.coroutines.flow.Flow
  * @author Niall Scott
  */
 class FakeServiceStopDao(
-    private val onGetServicesForStopFlow: (String) -> Flow<List<String>?> =
+    private val onGetServicesForStopFlow: (String) -> Flow<List<ServiceDescriptor>?> =
         { throw NotImplementedError() },
-    private val onGetServicesForStopsFlow: (Set<String>) -> Flow<Map<String, List<String>>?> =
+    private val onGetServicesForStopsFlow:
+        (Set<String>) -> Flow<Map<String, List<ServiceDescriptor>>?> =
         { throw NotImplementedError() }
 ) : ServiceStopDao {
 
-    override fun getServicesForStopFlow(stopCode: String) = onGetServicesForStopFlow(stopCode)
+    override fun getServicesForStopFlow(naptanStopCode: String) =
+        onGetServicesForStopFlow(naptanStopCode)
 
-    override fun getServicesForStopsFlow(stopCodes: Set<String>) =
-        onGetServicesForStopsFlow(stopCodes)
+    override fun getServicesForStopsFlow(naptanStopCodes: Set<String>) =
+        onGetServicesForStopsFlow(naptanStopCodes)
 }

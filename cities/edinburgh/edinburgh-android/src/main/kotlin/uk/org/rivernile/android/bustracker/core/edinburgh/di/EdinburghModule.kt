@@ -26,15 +26,12 @@
 
 package uk.org.rivernile.android.bustracker.core.edinburgh.di
 
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.edinburgh.BuildConfig
 import uk.org.rivernile.android.bustracker.core.http.di.ForUserAgentAppName
-import uk.org.rivernile.android.bustracker.core.services.AndroidServiceColourProvider
-import uk.org.rivernile.android.bustracker.core.services.ServiceColourProvider
 
 /**
  * This [Module] provides dependencies specific to the Edinburgh implementation.
@@ -42,23 +39,18 @@ import uk.org.rivernile.android.bustracker.core.services.ServiceColourProvider
  * @author Niall Scott
  */
 @InstallIn(SingletonComponent::class)
-@Module(includes = [ EdinburghCoreModule::class ])
-internal interface EdinburghModule {
+@Module(
+    includes = [
+        EdinburghCoreModule::class
+    ]
+)
+internal class EdinburghModule {
 
-    @Suppress("unused")
-    @Binds
-    fun bindServiceColourProvider(
-        androidServiceColourProvider: AndroidServiceColourProvider
-    ): ServiceColourProvider
+    @Provides
+    @ForBusTrackerApiKey
+    fun provideBusTrackerApiKey(): String = BuildConfig.BUSTRACKER_API_KEY
 
-    companion object {
-
-        @Provides
-        @ForBusTrackerApiKey
-        fun provideBusTrackerApiKey(): String = BuildConfig.BUSTRACKER_API_KEY
-
-        @Provides
-        @ForUserAgentAppName
-        fun provideUserAgentAppName(): String = "MyBusEdinburgh"
-    }
+    @Provides
+    @ForUserAgentAppName
+    fun provideUserAgentAppName(): String = "MyBusEdinburgh"
 }

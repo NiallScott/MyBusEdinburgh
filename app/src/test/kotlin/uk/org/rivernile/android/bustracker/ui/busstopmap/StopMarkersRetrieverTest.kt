@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,10 +36,15 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopDetails
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopLocation
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopName
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopDetails
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopLocation
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopName
+import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -56,7 +61,7 @@ class StopMarkersRetrieverTest {
     companion object {
 
         private const val STATE_SELECTED_SERVICES = "selectedServices"
-        private const val STATE_SELECTED_STOP_CODE = "selectedStopCode"
+        private const val STATE_SELECTED_STOP_IDENTIFIER = "selectedStopIdentifier"
     }
 
     @Mock
@@ -65,7 +70,7 @@ class StopMarkersRetrieverTest {
     private lateinit var serviceListingRetriever: ServiceListingRetriever
 
     private val stopDetails1 = FakeStopDetails(
-        "123456",
+        "123456".toNaptanStopIdentifier(),
         FakeStopName(
             "Stop name 1",
             "Locality 1"
@@ -77,7 +82,7 @@ class StopMarkersRetrieverTest {
         StopOrientation.NORTH
     )
     private val stopDetails2 = FakeStopDetails(
-        "987654",
+        "987654".toNaptanStopIdentifier(),
         FakeStopName(
             "Stop name 2",
             "Locality 2"
@@ -89,7 +94,7 @@ class StopMarkersRetrieverTest {
         StopOrientation.NORTH_EAST
     )
     private val stopDetails3 = FakeStopDetails(
-        "246802",
+        "246802".toNaptanStopIdentifier(),
         FakeStopName(
             "Stop name 3",
             "Locality 4"
@@ -145,7 +150,7 @@ class StopMarkersRetrieverTest {
             .thenReturn(flowOf(null))
         val retriever = createRetriever()
         val expected1 = UiStopMarker(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name 1",
                 "Locality 1"
@@ -155,7 +160,7 @@ class StopMarkersRetrieverTest {
             null
         )
         val expected2 = UiStopMarker(
-            "987654",
+            "987654".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name 2",
                 "Locality 2"
@@ -165,7 +170,7 @@ class StopMarkersRetrieverTest {
             null
         )
         val expected3 = UiStopMarker(
-            "246802",
+            "246802".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name 3",
                 "Locality 3"
@@ -183,7 +188,9 @@ class StopMarkersRetrieverTest {
 
     @Test
     fun stopMarkersEmitsStopsWithFilteredServicesFromState() = runTest {
-        whenever(busStopsRepository.getStopDetailsWithServiceFilterFlow(setOf("1", "2", "3")))
+        whenever(busStopsRepository.getStopDetailsWithServiceFilterFlow(
+            setOf(service(1), service(2), service(3)))
+        )
             .thenReturn(
                 flowOf(
                     listOf(stopDetails1)
@@ -193,11 +200,15 @@ class StopMarkersRetrieverTest {
             .thenReturn(flowOf(null))
         val retriever = createRetriever(
             SavedStateHandle(
-                mapOf(STATE_SELECTED_SERVICES to arrayOf("1", "2", "3"))
+                mapOf(
+                    STATE_SELECTED_SERVICES to listOf(
+                        parcelableService(1), parcelableService(2), parcelableService(3)
+                    )
+                )
             )
         )
         val expected1 = UiStopMarker(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name 1",
                 "Locality 1"
@@ -225,7 +236,9 @@ class StopMarkersRetrieverTest {
                     )
                 )
             )
-        whenever(busStopsRepository.getStopDetailsWithServiceFilterFlow(setOf("1", "2", "3")))
+        whenever(busStopsRepository.getStopDetailsWithServiceFilterFlow(
+            setOf(service(1), service(2), service(3)))
+        )
             .thenReturn(
                 flowOf(
                     listOf(stopDetails1)
@@ -236,7 +249,7 @@ class StopMarkersRetrieverTest {
         val savedState = SavedStateHandle()
         val retriever = createRetriever(savedState)
         val expected1 = UiStopMarker(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name 1",
                 "Locality 1"
@@ -246,7 +259,7 @@ class StopMarkersRetrieverTest {
             null
         )
         val expected2 = UiStopMarker(
-            "987654",
+            "987654".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name 2",
                 "Locality 2"
@@ -256,7 +269,7 @@ class StopMarkersRetrieverTest {
             null
         )
         val expected3 = UiStopMarker(
-            "246802",
+            "246802".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name 3",
                 "Locality 3"
@@ -267,7 +280,11 @@ class StopMarkersRetrieverTest {
         )
 
         retriever.stopMarkersFlow.test {
-            savedState[STATE_SELECTED_SERVICES] = arrayOf("1", "2", "3")
+            savedState[STATE_SELECTED_SERVICES] = listOf(
+                parcelableService(1),
+                parcelableService(2),
+                parcelableService(3)
+            )
 
             assertEquals(listOf(expected1, expected2, expected3), awaitItem())
             assertEquals(listOf(expected1), awaitItem())
@@ -276,7 +293,7 @@ class StopMarkersRetrieverTest {
     }
 
     @Test
-    fun stopMarkersFlowDoesNotApplyServiceListingToNonMatchingStopCodes() = runTest {
+    fun stopMarkersFlowDoesNotApplyServiceListingToNonMatchingStopIdentifiers() = runTest {
         whenever(busStopsRepository.getStopDetailsWithServiceFilterFlow(null))
             .thenReturn(flowOf(listOf(stopDetails1)))
         whenever(serviceListingRetriever.getServiceListingFlow(null))
@@ -284,14 +301,17 @@ class StopMarkersRetrieverTest {
                 intervalFlowOf(
                     0L,
                     10L,
-                    UiServiceListing.InProgress("192837"),
-                    UiServiceListing.Empty("192837"),
-                    UiServiceListing.Success("192837", listOf("1", "2", "3"))
+                    UiServiceListing.InProgress("192837".toNaptanStopIdentifier()),
+                    UiServiceListing.Empty("192837".toNaptanStopIdentifier()),
+                    UiServiceListing.Success(
+                        "192837".toNaptanStopIdentifier(),
+                        listOf(service(1), service(2), service(3))
+                    )
                 )
             )
         val retriever = createRetriever()
         val expected = UiStopMarker(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name 1",
                 "Locality 1"
@@ -310,53 +330,59 @@ class StopMarkersRetrieverTest {
     }
 
     @Test
-    fun stopMarkersFlowAppliesServiceListingToMatchingStopCodesFromState() = runTest {
+    fun stopMarkersFlowAppliesServiceListingToMatchingStopIdentifiersFromState() = runTest {
         whenever(busStopsRepository.getStopDetailsWithServiceFilterFlow(null))
             .thenReturn(flowOf(listOf(stopDetails1)))
-        whenever(serviceListingRetriever.getServiceListingFlow("123456"))
+        whenever(serviceListingRetriever.getServiceListingFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(
                 intervalFlowOf(
                     0L,
                     10L,
-                    UiServiceListing.InProgress("123456"),
-                    UiServiceListing.Empty("123456"),
-                    UiServiceListing.Success("123456", listOf("1", "2", "3"))
+                    UiServiceListing.InProgress("123456".toNaptanStopIdentifier()),
+                    UiServiceListing.Empty("123456".toNaptanStopIdentifier()),
+                    UiServiceListing.Success(
+                        "123456".toNaptanStopIdentifier(),
+                        listOf(service(1), service(2), service(3))
+                    )
                 )
             )
         val retriever = createRetriever(
             SavedStateHandle(
-                mapOf(STATE_SELECTED_STOP_CODE to "123456")
+                mapOf(STATE_SELECTED_STOP_IDENTIFIER to "123456".toParcelableNaptanStopIdentifier())
             )
         )
         val expected1 = UiStopMarker(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name 1",
                 "Locality 1"
             ),
             LatLng(1.1, 2.1),
             StopOrientation.NORTH,
-            UiServiceListing.InProgress("123456")
+            UiServiceListing.InProgress("123456".toNaptanStopIdentifier())
         )
         val expected2 = UiStopMarker(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name 1",
                 "Locality 1"
             ),
             LatLng(1.1, 2.1),
             StopOrientation.NORTH,
-            UiServiceListing.Empty("123456")
+            UiServiceListing.Empty("123456".toNaptanStopIdentifier())
         )
         val expected3 = UiStopMarker(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name 1",
                 "Locality 1"
             ),
             LatLng(1.1, 2.1),
             StopOrientation.NORTH,
-            UiServiceListing.Success("123456", listOf("1", "2", "3"))
+            UiServiceListing.Success(
+                "123456".toNaptanStopIdentifier(),
+                listOf(service(1), service(2), service(3))
+            )
         )
 
         retriever.stopMarkersFlow.test {
@@ -368,25 +394,28 @@ class StopMarkersRetrieverTest {
     }
 
     @Test
-    fun stopMarkersFlowAppliesServiceListingToMatchingStopCodes() = runTest {
+    fun stopMarkersFlowAppliesServiceListingToMatchingStopIdentifiers() = runTest {
         whenever(busStopsRepository.getStopDetailsWithServiceFilterFlow(null))
             .thenReturn(flowOf(listOf(stopDetails1)))
         whenever(serviceListingRetriever.getServiceListingFlow(null))
             .thenReturn(flowOf(null))
-        whenever(serviceListingRetriever.getServiceListingFlow("123456"))
+        whenever(serviceListingRetriever.getServiceListingFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(
                 intervalFlowOf(
                     0L,
                     10L,
-                    UiServiceListing.InProgress("123456"),
-                    UiServiceListing.Empty("123456"),
-                    UiServiceListing.Success("123456", listOf("1", "2", "3"))
+                    UiServiceListing.InProgress("123456".toNaptanStopIdentifier()),
+                    UiServiceListing.Empty("123456".toNaptanStopIdentifier()),
+                    UiServiceListing.Success(
+                        "123456".toNaptanStopIdentifier(),
+                        listOf(service(1), service(2), service(3))
+                    )
                 )
             )
         val savedState = SavedStateHandle()
         val retriever = createRetriever(savedState)
         val expected1 = UiStopMarker(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name 1",
                 "Locality 1"
@@ -396,38 +425,41 @@ class StopMarkersRetrieverTest {
             null
         )
         val expected2 = UiStopMarker(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name 1",
                 "Locality 1"
             ),
             LatLng(1.1, 2.1),
             StopOrientation.NORTH,
-            UiServiceListing.InProgress("123456")
+            UiServiceListing.InProgress("123456".toNaptanStopIdentifier())
         )
         val expected3 = UiStopMarker(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name 1",
                 "Locality 1"
             ),
             LatLng(1.1, 2.1),
             StopOrientation.NORTH,
-            UiServiceListing.Empty("123456")
+            UiServiceListing.Empty("123456".toNaptanStopIdentifier())
         )
         val expected4 = UiStopMarker(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name 1",
                 "Locality 1"
             ),
             LatLng(1.1, 2.1),
             StopOrientation.NORTH,
-            UiServiceListing.Success("123456", listOf("1", "2", "3"))
+            UiServiceListing.Success(
+                "123456".toNaptanStopIdentifier(),
+                listOf(service(1), service(2), service(3))
+            )
         )
 
         retriever.stopMarkersFlow.test {
-            savedState[STATE_SELECTED_STOP_CODE] = "123456"
+            savedState[STATE_SELECTED_STOP_IDENTIFIER] = "123456".toParcelableNaptanStopIdentifier()
 
             assertEquals(listOf(expected1), awaitItem())
             assertEquals(listOf(expected2), awaitItem())
@@ -443,4 +475,18 @@ class StopMarkersRetrieverTest {
             busStopsRepository,
             serviceListingRetriever
         )
+
+    private fun service(id: Int): ServiceDescriptor {
+        return FakeServiceDescriptor(
+            serviceName = id.toString(),
+            operatorCode = "TEST$id"
+        )
+    }
+
+    private fun parcelableService(id: Int): ParcelableServiceDescriptor {
+        return ParcelableServiceDescriptor(
+            serviceName = id.toString(),
+            operatorCode = "TEST$id"
+        )
+    }
 }

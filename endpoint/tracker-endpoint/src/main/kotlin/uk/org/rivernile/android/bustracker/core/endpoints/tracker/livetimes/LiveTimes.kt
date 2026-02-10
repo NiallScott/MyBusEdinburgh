@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import kotlin.time.Instant
 
 /**
@@ -37,7 +38,7 @@ import kotlin.time.Instant
  * @author Niall Scott
  */
 public data class LiveTimes(
-    val stops: Map<String, Stop>,
+    val stops: Map<StopIdentifier, Stop>,
     val receiveTime: Instant
 )
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,6 +38,8 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.utils.Event
 import uk.org.rivernile.edinburghbustracker.android.R
@@ -46,8 +48,8 @@ import javax.inject.Inject
 
 /**
  * Show a [DialogFragment] which allows the user to add a new favourite stop, or edit the name
- * of an existing one. This [DialogFragment] will determine if the given stop code is already
- * a favourite stop and present the correct UI.
+ * of an existing one. This [DialogFragment] will determine if the given stop is already a favourite
+ * stop and present the correct UI.
  *
  * @author Niall Scott
  */
@@ -57,16 +59,20 @@ class AddEditFavouriteStopDialogFragment : DialogFragment() {
     companion object {
 
         /**
-         * Create a new instance of this [DialogFragment] with the given stop code.
+         * Create a new instance of this [DialogFragment] with the given stop identifier.
          *
-         * @param stopCode The stop to add or edit the favourite details for.
+         * @param stopIdentifier The stop to add or edit the favourite details for.
          * @return A new instance of this [DialogFragment].
          */
-        fun newInstance(stopCode: String) = AddEditFavouriteStopDialogFragment().apply {
-            arguments = Bundle().apply {
-                putString(AddEditFavouriteStopDialogFragmentViewModel.STATE_STOP_CODE, stopCode)
+        fun newInstance(stopIdentifier: StopIdentifier) =
+            AddEditFavouriteStopDialogFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable(
+                        AddEditFavouriteStopDialogFragmentViewModel.STATE_STOP_IDENTIFIER,
+                        stopIdentifier.toParcelableStopIdentifier()
+                    )
+                }
             }
-        }
     }
 
     @Inject
@@ -144,7 +150,7 @@ class AddEditFavouriteStopDialogFragment : DialogFragment() {
 
         viewBinding.apply {
             val stopName = textFormattingUtils.formatBusStopNameWithStopCode(
-                    state.stopCode, state.stopName)
+                    state.stopIdentifier, state.stopName)
             txtBlurb.text = getString(R.string.addeditfavouritestopdialog_blurb_add, stopName)
             contentView.showContentLayout()
         }
@@ -160,7 +166,7 @@ class AddEditFavouriteStopDialogFragment : DialogFragment() {
 
         viewBinding.apply {
             val stopName = textFormattingUtils.formatBusStopNameWithStopCode(
-                    state.stopCode, state.stopName)
+                    state.stopIdentifier, state.stopName)
             txtBlurb.text = getString(R.string.addeditfavouritestopdialog_blurb_edit, stopName)
             contentView.showContentLayout()
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,15 +26,29 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts.proximity
 
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.proximity.InsertableProximityAlert
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.proximity.ProximityAlert
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import kotlin.time.Instant
+
 /**
  * This class holds data for a proximity alert that the user has requested.
  *
- * @property stopCode The stop code this proximity alert is for.
+ * @property stopIdentifier The stop this proximity alert is for.
  * @property distanceFrom At what maximum distance from the stop should the alert fire at? Or, what
  * is the radius of the proximity area.
  * @author Niall Scott
  */
 public data class ProximityAlertRequest(
-    val stopCode: String,
+    val stopIdentifier: StopIdentifier,
     val distanceFrom: Int
 )
+
+internal fun ProximityAlertRequest.toProximityAlert(timeAdded: Instant): ProximityAlert {
+    return InsertableProximityAlert(
+        id = 0,
+        timeAdded = timeAdded,
+        stopIdentifier = stopIdentifier,
+        radiusTriggerMeters = distanceFrom
+    )
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,56 +46,56 @@ class StopTypeConverterTest {
 
     @Test
     fun convertToStopOrientationWithValue0MapsToNorth() {
-        val result = converter.convertToStopOrientation(0)
+        val result = converter.convertToStopOrientation("N")
 
         assertEquals(StopOrientation.NORTH, result)
     }
 
     @Test
     fun convertToStopOrientationWithValue1MapsToNorthEast() {
-        val result = converter.convertToStopOrientation(1)
+        val result = converter.convertToStopOrientation("NE")
 
         assertEquals(StopOrientation.NORTH_EAST, result)
     }
 
     @Test
     fun convertToStopOrientationWithValue2MapsToEast() {
-        val result = converter.convertToStopOrientation(2)
+        val result = converter.convertToStopOrientation("E")
 
         assertEquals(StopOrientation.EAST, result)
     }
 
     @Test
     fun convertToStopOrientationWithValue3MapsToSouthEast() {
-        val result = converter.convertToStopOrientation(3)
+        val result = converter.convertToStopOrientation("SE")
 
         assertEquals(StopOrientation.SOUTH_EAST, result)
     }
 
     @Test
     fun convertToStopOrientationWithValue4MapsToSouth() {
-        val result = converter.convertToStopOrientation(4)
+        val result = converter.convertToStopOrientation("S")
 
         assertEquals(StopOrientation.SOUTH, result)
     }
 
     @Test
     fun convertToStopOrientationWithValue5MapsToSouthWest() {
-        val result = converter.convertToStopOrientation(5)
+        val result = converter.convertToStopOrientation("SW")
 
         assertEquals(StopOrientation.SOUTH_WEST, result)
     }
 
     @Test
     fun convertToStopOrientationWithValue6MapsToWest() {
-        val result = converter.convertToStopOrientation(6)
+        val result = converter.convertToStopOrientation("W")
 
         assertEquals(StopOrientation.WEST, result)
     }
 
     @Test
     fun convertToStopOrientationWithValue7MapsToNorthWest() {
-        val result = converter.convertToStopOrientation(7)
+        val result = converter.convertToStopOrientation("NW")
 
         assertEquals(StopOrientation.NORTH_WEST, result)
     }
@@ -109,7 +109,7 @@ class StopTypeConverterTest {
 
     @Test
     fun convertToStopOrientationWithInvalidValueMapsToUnknown() {
-        val result = converter.convertToStopOrientation(8)
+        val result = converter.convertToStopOrientation("invalid")
 
         assertEquals(StopOrientation.UNKNOWN, result)
     }

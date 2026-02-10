@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toStopIdentifier
 import uk.org.rivernile.android.bustracker.core.services.ServiceWithColour
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import javax.inject.Inject
@@ -79,7 +81,8 @@ class ServicesLoader @Inject constructor(
         when (it) {
             is ServicesChooserParams.AllServices -> servicesRepository.allServiceNamesWithColourFlow
             is ServicesChooserParams.Stop ->
-                servicesRepository.getServiceNamesWithColourFlow(it.stopCode)
+                servicesRepository
+                    .getServiceNamesWithColourFlow(it.stopIdentifier.toStopIdentifier())
         }
     } ?: flowOf(null)
 
@@ -94,13 +97,13 @@ class ServicesLoader @Inject constructor(
      */
     private fun combineServicesWithSelected(
         services: List<ServiceWithColour>?,
-        selectedServices: Set<String>
+        selectedServices: Set<ServiceDescriptor>
     ): List<UiService> {
         return services?.map {
             UiService(
-                it.name,
+                it.serviceDescriptor,
                 it.colours,
-                selectedServices.contains(it.name)
+                selectedServices.contains(it.serviceDescriptor)
             )
         } ?: emptyList()
     }

@@ -32,6 +32,9 @@ import kotlinx.serialization.SerializationException
 import okhttp3.ResponseBody.Companion.toResponseBody
 import okio.IOException
 import retrofit2.Response
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toAtcoStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.ArrivalDepartureTime
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.EdinburghOpenApi
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.JsonStopEvent
@@ -63,26 +66,45 @@ import kotlin.time.Instant
 class EdinburghTrackerEndpointTest {
 
     @Test
-    fun getLiveTimesSingleReturnsNoConnectivityWhenNoConnectivity() = runTest {
+    fun getLiveTimesSingleAtcoReturnsNoConnectivityWhenNoConnectivity() = runTest {
         val endpoint = createEndpoint(
             connectivityRepository = FakeConnectivityRepository(
                 onHasInternetConnectivity = { false }
             )
         )
 
-        val result = endpoint.getLiveTimes(stopCode = "123456", numberOfDepartures = 4)
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toAtcoStopIdentifier(),
+            numberOfDepartures = 4
+        )
 
         assertEquals(LiveTimesResponse.Error.NoConnectivity, result)
     }
 
     @Test
-    fun getLiveTimesSingleReturnsIoErrorWhenSerializationExceptionIsThrown() = runTest {
+    fun getLiveTimesSingleNaptanReturnsNoConnectivityWhenNoConnectivity() = runTest {
+        val endpoint = createEndpoint(
+            connectivityRepository = FakeConnectivityRepository(
+                onHasInternetConnectivity = { false }
+            )
+        )
+
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            numberOfDepartures = 4
+        )
+
+        assertEquals(LiveTimesResponse.Error.NoConnectivity, result)
+    }
+
+    @Test
+    fun getLiveTimesSingleAtcoReturnsIoErrorWhenSerializationExceptionIsThrown() = runTest {
         val exception = SerializationException()
         val exceptionLogger = FakeExceptionLogger()
         val endpoint = createEndpoint(
             api = FakeEdinburghOpenApi(
-                onGetStopEvents = { stopCode, numberOfDepartures ->
-                    assertEquals("123456", stopCode)
+                onGetStopEventsWithAtcoCode = { atcoCode, numberOfDepartures ->
+                    assertEquals("123456", atcoCode)
                     assertEquals(4, numberOfDepartures)
                     throw exception
                 }
@@ -91,7 +113,10 @@ class EdinburghTrackerEndpointTest {
             exceptionLogger = exceptionLogger
         )
 
-        val result = endpoint.getLiveTimes(stopCode = "123456", numberOfDepartures = 4)
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toAtcoStopIdentifier(),
+            numberOfDepartures = 4
+        )
 
         assertEquals(
             LiveTimesResponse.Error.Io(throwable = exception),
@@ -102,13 +127,42 @@ class EdinburghTrackerEndpointTest {
     }
 
     @Test
-    fun getLiveTimesSingleReturnsIoErrorWhenIoExceptionIsThrown() = runTest {
+    fun getLiveTimesSingleNaptanReturnsIoErrorWhenSerializationExceptionIsThrown() = runTest {
+        val exception = SerializationException()
+        val exceptionLogger = FakeExceptionLogger()
+        val endpoint = createEndpoint(
+            api = FakeEdinburghOpenApi(
+                onGetStopEventsWithSmsCode = { smsCode, numberOfDepartures ->
+                    assertEquals("123456", smsCode)
+                    assertEquals(4, numberOfDepartures)
+                    throw exception
+                }
+            ),
+            connectivityRepository = connectivityRepositoryHasConnectivity,
+            exceptionLogger = exceptionLogger
+        )
+
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            numberOfDepartures = 4
+        )
+
+        assertEquals(
+            LiveTimesResponse.Error.Io(throwable = exception),
+            result
+        )
+        assertEquals(1, exceptionLogger.loggedThrowables.size)
+        assertSame(exception, exceptionLogger.loggedThrowables.last())
+    }
+
+    @Test
+    fun getLiveTimesSingleAtcoReturnsIoErrorWhenIoExceptionIsThrown() = runTest {
         val exception = IOException()
         val exceptionLogger = FakeExceptionLogger()
         val endpoint = createEndpoint(
             api = FakeEdinburghOpenApi(
-                onGetStopEvents = { stopCode, numberOfDepartures ->
-                    assertEquals("123456", stopCode)
+                onGetStopEventsWithAtcoCode = { atcoCode, numberOfDepartures ->
+                    assertEquals("123456", atcoCode)
                     assertEquals(4, numberOfDepartures)
                     throw exception
                 }
@@ -117,7 +171,10 @@ class EdinburghTrackerEndpointTest {
             exceptionLogger = exceptionLogger
         )
 
-        val result = endpoint.getLiveTimes(stopCode = "123456", numberOfDepartures = 4)
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toAtcoStopIdentifier(),
+            numberOfDepartures = 4
+        )
 
         assertEquals(
             LiveTimesResponse.Error.Io(throwable = exception),
@@ -128,12 +185,41 @@ class EdinburghTrackerEndpointTest {
     }
 
     @Test
-    fun getLiveTimesSingleReturnsAuthenticationErrorWhenUnauthorisedIsReturned() = runTest {
+    fun getLiveTimesSingleNaptanReturnsIoErrorWhenIoExceptionIsThrown() = runTest {
+        val exception = IOException()
         val exceptionLogger = FakeExceptionLogger()
         val endpoint = createEndpoint(
             api = FakeEdinburghOpenApi(
-                onGetStopEvents = { stopCode, numberOfDepartures ->
-                    assertEquals("123456", stopCode)
+                onGetStopEventsWithSmsCode = { smsCode, numberOfDepartures ->
+                    assertEquals("123456", smsCode)
+                    assertEquals(4, numberOfDepartures)
+                    throw exception
+                }
+            ),
+            connectivityRepository = connectivityRepositoryHasConnectivity,
+            exceptionLogger = exceptionLogger
+        )
+
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            numberOfDepartures = 4
+        )
+
+        assertEquals(
+            LiveTimesResponse.Error.Io(throwable = exception),
+            result
+        )
+        assertEquals(1, exceptionLogger.loggedThrowables.size)
+        assertSame(exception, exceptionLogger.loggedThrowables.last())
+    }
+
+    @Test
+    fun getLiveTimesSingleAtcoReturnsAuthenticationErrorWhenUnauthorisedIsReturned() = runTest {
+        val exceptionLogger = FakeExceptionLogger()
+        val endpoint = createEndpoint(
+            api = FakeEdinburghOpenApi(
+                onGetStopEventsWithAtcoCode = { atcoCode, numberOfDepartures ->
+                    assertEquals("123456", atcoCode)
                     assertEquals(4, numberOfDepartures)
                     Response.error(401, "Unauthorized".toResponseBody())
                 }
@@ -142,7 +228,10 @@ class EdinburghTrackerEndpointTest {
             exceptionLogger = exceptionLogger
         )
 
-        val result = endpoint.getLiveTimes(stopCode = "123456", numberOfDepartures = 4)
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toAtcoStopIdentifier(),
+            numberOfDepartures = 4
+        )
 
         assertEquals(
             LiveTimesResponse.Error.ServerError.Authentication,
@@ -153,12 +242,40 @@ class EdinburghTrackerEndpointTest {
     }
 
     @Test
-    fun getLiveTimesSingleReturnsOtherServerErrorOnAnyOtherServerError() = runTest {
+    fun getLiveTimesSingleNaptanReturnsAuthenticationErrorWhenUnauthorisedIsReturned() = runTest {
         val exceptionLogger = FakeExceptionLogger()
         val endpoint = createEndpoint(
             api = FakeEdinburghOpenApi(
-                onGetStopEvents = { stopCode, numberOfDepartures ->
-                    assertEquals("123456", stopCode)
+                onGetStopEventsWithSmsCode = { smsCode, numberOfDepartures ->
+                    assertEquals("123456", smsCode)
+                    assertEquals(4, numberOfDepartures)
+                    Response.error(401, "Unauthorized".toResponseBody())
+                }
+            ),
+            connectivityRepository = connectivityRepositoryHasConnectivity,
+            exceptionLogger = exceptionLogger
+        )
+
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            numberOfDepartures = 4
+        )
+
+        assertEquals(
+            LiveTimesResponse.Error.ServerError.Authentication,
+            result
+        )
+        assertEquals(1, exceptionLogger.loggedThrowables.size)
+        assertIs<RuntimeException>(exceptionLogger.loggedThrowables.last())
+    }
+
+    @Test
+    fun getLiveTimesSingleAtcoReturnsOtherServerErrorOnAnyOtherServerError() = runTest {
+        val exceptionLogger = FakeExceptionLogger()
+        val endpoint = createEndpoint(
+            api = FakeEdinburghOpenApi(
+                onGetStopEventsWithAtcoCode = { atcoCode, numberOfDepartures ->
+                    assertEquals("123456", atcoCode)
                     assertEquals(4, numberOfDepartures)
                     Response.error(404, "Not found".toResponseBody())
                 }
@@ -167,7 +284,10 @@ class EdinburghTrackerEndpointTest {
             exceptionLogger = exceptionLogger
         )
 
-        val result = endpoint.getLiveTimes(stopCode = "123456", numberOfDepartures = 4)
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toAtcoStopIdentifier(),
+            numberOfDepartures = 4
+        )
 
         assertEquals(
             LiveTimesResponse.Error.ServerError.Other(error = "Not found"),
@@ -178,11 +298,39 @@ class EdinburghTrackerEndpointTest {
     }
 
     @Test
-    fun getLiveTimesSingleReturnsSuccessWithEmptyLiveTimesWhenBodyIsNull() = runTest {
+    fun getLiveTimesSingleNaptanReturnsOtherServerErrorOnAnyOtherServerError() = runTest {
+        val exceptionLogger = FakeExceptionLogger()
         val endpoint = createEndpoint(
             api = FakeEdinburghOpenApi(
-                onGetStopEvents = { stopCode, numberOfDepartures ->
-                    assertEquals("123456", stopCode)
+                onGetStopEventsWithSmsCode = { smsCode, numberOfDepartures ->
+                    assertEquals("123456", smsCode)
+                    assertEquals(4, numberOfDepartures)
+                    Response.error(404, "Not found".toResponseBody())
+                }
+            ),
+            connectivityRepository = connectivityRepositoryHasConnectivity,
+            exceptionLogger = exceptionLogger
+        )
+
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            numberOfDepartures = 4
+        )
+
+        assertEquals(
+            LiveTimesResponse.Error.ServerError.Other(error = "Not found"),
+            result
+        )
+        assertEquals(1, exceptionLogger.loggedThrowables.size)
+        assertIs<RuntimeException>(exceptionLogger.loggedThrowables.last())
+    }
+
+    @Test
+    fun getLiveTimesSingleAtcoReturnsSuccessWithEmptyLiveTimesWhenBodyIsNull() = runTest {
+        val endpoint = createEndpoint(
+            api = FakeEdinburghOpenApi(
+                onGetStopEventsWithAtcoCode = { atcoCode, numberOfDepartures ->
+                    assertEquals("123456", atcoCode)
                     assertEquals(4, numberOfDepartures)
                     Response.success(null)
                 }
@@ -193,7 +341,10 @@ class EdinburghTrackerEndpointTest {
             )
         )
 
-        val result = endpoint.getLiveTimes(stopCode = "123456", numberOfDepartures = 4)
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toAtcoStopIdentifier(),
+            numberOfDepartures = 4
+        )
 
         assertEquals(
             LiveTimesResponse.Success(
@@ -206,11 +357,42 @@ class EdinburghTrackerEndpointTest {
     }
 
     @Test
-    fun getLiveTimesSingleReturnsSuccessWithLiveTimesWhenBodyIsPopulated() = runTest {
+    fun getLiveTimesSingleNaptanReturnsSuccessWithEmptyLiveTimesWhenBodyIsNull() = runTest {
         val endpoint = createEndpoint(
             api = FakeEdinburghOpenApi(
-                onGetStopEvents = { stopCode, numberOfDepartures ->
-                    assertEquals("123456", stopCode)
+                onGetStopEventsWithSmsCode = { smsCode, numberOfDepartures ->
+                    assertEquals("123456", smsCode)
+                    assertEquals(4, numberOfDepartures)
+                    Response.success(null)
+                }
+            ),
+            connectivityRepository = connectivityRepositoryHasConnectivity,
+            timeUtils = FakeTimeUtils(
+                onNow = { Instant.fromEpochMilliseconds(123L) }
+            )
+        )
+
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            numberOfDepartures = 4
+        )
+
+        assertEquals(
+            LiveTimesResponse.Success(
+                liveTimes = emptyLiveTimes(
+                    receiveTime = Instant.fromEpochMilliseconds(123L)
+                )
+            ),
+            result
+        )
+    }
+
+    @Test
+    fun getLiveTimesSingleAtcoReturnsSuccessWithLiveTimesWhenBodyIsPopulated() = runTest {
+        val endpoint = createEndpoint(
+            api = FakeEdinburghOpenApi(
+                onGetStopEventsWithAtcoCode = { atcoCode, numberOfDepartures ->
+                    assertEquals("123456", atcoCode)
                     assertEquals(4, numberOfDepartures)
                     Response.success(
                         JsonStopEvents(
@@ -218,6 +400,7 @@ class EdinburghTrackerEndpointTest {
                             events = listOf(
                                 JsonStopEvent(
                                     publicServiceName = "100",
+                                    operator = "TEST1",
                                     destination = "Destination",
                                     scheduledDepartureTime = LocalTime(hour = 12, minute = 34),
                                     departureTime = ArrivalDepartureTime.Seconds(999)
@@ -233,17 +416,90 @@ class EdinburghTrackerEndpointTest {
             )
         )
 
-        val result = endpoint.getLiveTimes(stopCode = "123456", numberOfDepartures = 4)
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toAtcoStopIdentifier(),
+            numberOfDepartures = 4
+        )
 
         assertEquals(
             LiveTimesResponse.Success(
                 liveTimes = LiveTimes(
                     stops = mapOf(
-                        "123456" to Stop(
-                            stopCode = "123456",
+                        "123456".toAtcoStopIdentifier() to Stop(
+                            stopIdentifier = "123456".toAtcoStopIdentifier(),
                             services = listOf(
                                 Service(
-                                    serviceName = "100",
+                                    serviceDescriptor = FakeServiceDescriptor(
+                                        serviceName = "100",
+                                        operatorCode = "TEST1"
+                                    ),
+                                    vehicles = listOf(
+                                        Vehicle(
+                                            destination = "Destination",
+                                            departureTime = Instant.fromEpochMilliseconds(122L) +
+                                                999.seconds,
+                                            departureMinutes = 16,
+                                            isEstimatedTime = false,
+                                            isDiverted = false
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    receiveTime = Instant.fromEpochMilliseconds(123L)
+                )
+            ),
+            result
+        )
+    }
+
+    @Test
+    fun getLiveTimesSingleNaptanReturnsSuccessWithLiveTimesWhenBodyIsPopulated() = runTest {
+        val endpoint = createEndpoint(
+            api = FakeEdinburghOpenApi(
+                onGetStopEventsWithSmsCode = { smsCode, numberOfDepartures ->
+                    assertEquals("123456", smsCode)
+                    assertEquals(4, numberOfDepartures)
+                    Response.success(
+                        JsonStopEvents(
+                            time = Instant.fromEpochMilliseconds(122L),
+                            events = listOf(
+                                JsonStopEvent(
+                                    publicServiceName = "100",
+                                    operator = "TEST1",
+                                    destination = "Destination",
+                                    scheduledDepartureTime = LocalTime(hour = 12, minute = 34),
+                                    departureTime = ArrivalDepartureTime.Seconds(999)
+                                )
+                            )
+                        )
+                    )
+                }
+            ),
+            connectivityRepository = connectivityRepositoryHasConnectivity,
+            timeUtils = FakeTimeUtils(
+                onNow = { Instant.fromEpochMilliseconds(123L) }
+            )
+        )
+
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            numberOfDepartures = 4
+        )
+
+        assertEquals(
+            LiveTimesResponse.Success(
+                liveTimes = LiveTimes(
+                    stops = mapOf(
+                        "123456".toNaptanStopIdentifier() to Stop(
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
+                            services = listOf(
+                                Service(
+                                    serviceDescriptor = FakeServiceDescriptor(
+                                        serviceName = "100",
+                                        operatorCode = "TEST1"
+                                    ),
                                     vehicles = listOf(
                                         Vehicle(
                                             destination = "Destination",

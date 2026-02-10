@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,14 +26,33 @@
 
 package uk.org.rivernile.android.bustracker.core.favourites
 
+import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops.InsertableFavouriteStop
+import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops.FavouriteStop
+    as DatabaseFavouriteStop
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+
 /**
  * A favourite stop.
  *
- * @property stopCode The stop code.
+ * @property stopIdentifier The identifier of the favourite stop.
  * @property stopName The name.
  * @author Niall Scott
  */
 public data class FavouriteStop(
-    val stopCode: String,
+    val stopIdentifier: StopIdentifier,
     val stopName: String
 )
+
+internal fun FavouriteStop.toDatabaseFavouriteStop(): DatabaseFavouriteStop {
+    return InsertableFavouriteStop(
+        stopIdentifier = stopIdentifier,
+        stopName = stopName
+    )
+}
+
+internal fun DatabaseFavouriteStop.toFavouriteStop(): FavouriteStop {
+    return FavouriteStop(
+        stopIdentifier = stopIdentifier,
+        stopName = stopName
+    )
+}

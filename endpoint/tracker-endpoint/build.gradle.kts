@@ -35,8 +35,12 @@ kotlin {
 
 dependencies {
 
+    implementation(project(":core:core-domain"))
     implementation(project(":core:coroutines"))
 
     // Dependency injection
     implementation(libs.javax.inject)
+
+    // Testing dependencies.
+    testFixturesImplementation(project(":core:core-domain"))
 }

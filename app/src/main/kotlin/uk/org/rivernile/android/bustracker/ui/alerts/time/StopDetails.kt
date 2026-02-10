@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,15 +26,17 @@
 
 package uk.org.rivernile.android.bustracker.ui.alerts.time
 
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.busstops.StopName
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
  * This class describes stop details shown in the arrival alert dialog.
  *
- * @property stopCode The stop code these details relate to.
+ * @property stopIdentifier The stop these details relate to.
  * @property stopName The display name details for the stop.
  * @author Niall Scott
  */
 data class StopDetails(
-    val stopCode: String,
-    val stopName: StopName?)
+    val stopIdentifier: StopIdentifier,
+    val stopName: StopName?
+)

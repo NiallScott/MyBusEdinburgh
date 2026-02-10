@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
 
 /**
@@ -38,19 +39,23 @@ public interface TrackerEndpoint {
     /**
      * Get live departure times.
      *
-     * @param stopCode The stop code to request.
-     * @param numberOfDepartures The number of departures per service to retrieve.
-     * @return The [LiveTimesResponse] for this request.
-     */
-    public suspend fun getLiveTimes(stopCode: String, numberOfDepartures: Int): LiveTimesResponse
-
-    /**
-     * Get live departure times.
-     * @param stopCodes The stop codes to get live departures for.
+     * @param stopIdentifier The stop to request.
      * @param numberOfDepartures The number of departures per service to retrieve.
      * @return The [LiveTimesResponse] for this request.
      */
     public suspend fun getLiveTimes(
-        stopCodes: List<String>, numberOfDepartures: Int
+        stopIdentifier: StopIdentifier,
+        numberOfDepartures: Int
+    ): LiveTimesResponse
+
+    /**
+     * Get live departure times.
+     * @param stopIdentifiers The stops to get live departures for.
+     * @param numberOfDepartures The number of departures per service to retrieve.
+     * @return The [LiveTimesResponse] for this request.
+     */
+    public suspend fun getLiveTimes(
+        stopIdentifiers: List<StopIdentifier>,
+        numberOfDepartures: Int
     ): LiveTimesResponse
 }

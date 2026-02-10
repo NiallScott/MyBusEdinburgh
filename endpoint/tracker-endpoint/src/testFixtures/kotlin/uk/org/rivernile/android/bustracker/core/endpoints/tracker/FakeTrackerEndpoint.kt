@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
 
 /**
@@ -34,19 +35,19 @@ import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Live
  * @author Niall Scott
  */
 class FakeTrackerEndpoint(
-    private val onGetLiveTimesWithSingleStop: (String, Int) -> LiveTimesResponse =
+    private val onGetLiveTimesWithSingleStop: (StopIdentifier, Int) -> LiveTimesResponse =
         { _, _ -> throw NotImplementedError() },
-    private val onGetLiveTimesWithMultipleStops: (List<String>, Int) -> LiveTimesResponse =
+    private val onGetLiveTimesWithMultipleStops: (List<StopIdentifier>, Int) -> LiveTimesResponse =
         { _, _ -> throw NotImplementedError() }
 ) : TrackerEndpoint {
 
     override suspend fun getLiveTimes(
-        stopCode: String,
+        stopIdentifier: StopIdentifier,
         numberOfDepartures: Int
-    ) = onGetLiveTimesWithSingleStop(stopCode, numberOfDepartures)
+    ) = onGetLiveTimesWithSingleStop(stopIdentifier, numberOfDepartures)
 
     override suspend fun getLiveTimes(
-        stopCodes: List<String>,
+        stopIdentifiers: List<StopIdentifier>,
         numberOfDepartures: Int
-    ) = onGetLiveTimesWithMultipleStops(stopCodes, numberOfDepartures)
+    ) = onGetLiveTimesWithMultipleStops(stopIdentifiers, numberOfDepartures)
 }

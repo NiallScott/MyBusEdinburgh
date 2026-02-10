@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -49,6 +49,13 @@ import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableServiceDescriptorList
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toStopIdentifier
 import uk.org.rivernile.android.bustracker.core.preferences.LastMapCameraLocation
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
@@ -91,7 +98,7 @@ class BusStopMapViewModel @Inject constructor(
     companion object {
 
         private const val STATE_SELECTED_SERVICES = "selectedServices"
-        private const val STATE_SELECTED_STOP_CODE = "selectedStopCode"
+        private const val STATE_SELECTED_STOP_IDENTIFIER = "selectedStopIdentifier"
         private const val STATE_TRAFFIC_VIEW_ENABLED = "trafficViewEnabled"
 
         private const val DEFAULT_ZOOM = 14f
@@ -107,11 +114,11 @@ class BusStopMapViewModel @Inject constructor(
             permissionHandler.permissionsState = value
         }
 
-    private val selectedServicesFlow =
-            savedState.getStateFlow<Array<String>?>(STATE_SELECTED_SERVICES, null)
+    private val selectedServicesFlow = savedState
+        .getStateFlow<List<ParcelableServiceDescriptor>?>(STATE_SELECTED_SERVICES, null)
 
-    private val selectedStopCodeFlow =
-            savedState.getStateFlow<String?>(STATE_SELECTED_STOP_CODE, null)
+    private val selectedStopIdentifierFlow = savedState
+        .getStateFlow<ParcelableStopIdentifier?>(STATE_SELECTED_STOP_IDENTIFIER, null)
 
     private val playServicesAvailabilityFlow = playServicesAvailabilityChecker
             .apiAvailabilityFlow
@@ -265,24 +272,25 @@ class BusStopMapViewModel @Inject constructor(
     private val showMapTypeSelection = SingleLiveEvent<Unit>()
 
     /**
-     * This [LiveData] emits a stop code when the stop marker info window should be shown.
+     * This [LiveData] emits a stop identifier when the stop marker info window should be shown.
      */
-    val showStopMarkerInfoWindowLiveData = selectedStopCodeFlow
+    val showStopMarkerInfoWindowLiveData = selectedStopIdentifierFlow
+        .map { it?.toStopIdentifier() }
         .asLiveData(viewModelScope.coroutineContext)
         .distinctUntilChanged()
 
     /**
-     * This [LiveData] emits a stop code when the stop details UI should be shown.
+     * This [LiveData] emits a stop identifier when the stop details UI should be shown.
      */
-    val showStopDetailsLiveData: LiveData<String> get() = showStopDetails
-    private val showStopDetails = SingleLiveEvent<String>()
+    val showStopDetailsLiveData: LiveData<StopIdentifier> get() = showStopDetails
+    private val showStopDetails = SingleLiveEvent<StopIdentifier>()
 
     /**
      * When this [LiveData] emits a new item, the services chooser should be shown. The data that is
      * emitted is the parameters which should be passed to the chooser UI.
      */
-    val showServicesChooserLiveData: LiveData<List<String>?> get() = showServicesChooser
-    private val showServicesChooser = SingleLiveEvent<List<String>?>()
+    val showServicesChooserLiveData: LiveData<List<ServiceDescriptor>?> get() = showServicesChooser
+    private val showServicesChooser = SingleLiveEvent<List<ServiceDescriptor>?>()
 
     /**
      * This is called when the error resolution button has been clicked.
@@ -297,13 +305,13 @@ class BusStopMapViewModel @Inject constructor(
 
     /**
      * This is called when a request has been made to move the map camera to the location of the
-     * given [stopCode].
+     * given [stopIdentifier].
      *
-     * @param stopCode The stop to move the camera map location to.
+     * @param stopIdentifier The stop to move the camera map location to.
      */
-    fun showStop(stopCode: String) {
-        savedState[STATE_SELECTED_STOP_CODE] = stopCode
-        moveCameraToStopLocation(stopCode)
+    fun showStop(stopIdentifier: StopIdentifier) {
+        savedState[STATE_SELECTED_STOP_IDENTIFIER] = stopIdentifier.toParcelableStopIdentifier()
+        moveCameraToStopLocation(stopIdentifier)
     }
 
     /**
@@ -320,7 +328,7 @@ class BusStopMapViewModel @Inject constructor(
      */
     fun onServicesMenuItemClicked() {
         if (hasServicesFlow.value) {
-            showServicesChooser.value = selectedServicesFlow.value?.toList()
+            showServicesChooser.value = selectedServicesFlow.value
         }
     }
 
@@ -355,17 +363,18 @@ class BusStopMapViewModel @Inject constructor(
      *
      * @param selectedServices The selected services.
      */
-    fun onServicesSelected(selectedServices: List<String>?) {
-        savedState[STATE_SELECTED_SERVICES] = selectedServices?.toTypedArray()
+    fun onServicesSelected(selectedServices: List<ServiceDescriptor>?) {
+        savedState[STATE_SELECTED_SERVICES] = selectedServices
+            ?.toParcelableServiceDescriptorList()
     }
 
     /**
-     * This is called when the user has selected a stop code search result.
+     * This is called when the user has selected a stop search result.
      *
-     * @param stopCode The selected stop code.
+     * @param stopIdentifier The selected stop.
      */
-    fun onStopSearchResult(stopCode: String) {
-        showStop(stopCode)
+    fun onStopSearchResult(stopIdentifier: StopIdentifier) {
+        showStop(stopIdentifier)
     }
 
     /**
@@ -374,7 +383,9 @@ class BusStopMapViewModel @Inject constructor(
      * @param stopMarker The stop marker.
      */
     fun onMapMarkerClicked(stopMarker: UiStopMarker) {
-        savedState[STATE_SELECTED_STOP_CODE] = stopMarker.stopCode
+        savedState[STATE_SELECTED_STOP_IDENTIFIER] = stopMarker
+            .stopIdentifier
+            .toParcelableStopIdentifier()
     }
 
     /**
@@ -383,14 +394,14 @@ class BusStopMapViewModel @Inject constructor(
      * @param stopMarker The stop marker that was clicked on.
      */
     fun onMarkerBubbleClicked(stopMarker: UiStopMarker) {
-        showStopDetails.value = stopMarker.stopCode
+        showStopDetails.value = stopMarker.stopIdentifier
     }
 
     /**
      * This is called when the map marker bubble has been closed.
      */
     fun onInfoWindowClosed() {
-        savedState[STATE_SELECTED_STOP_CODE] = null
+        savedState[STATE_SELECTED_STOP_IDENTIFIER] = null
     }
 
     /**
@@ -436,19 +447,19 @@ class BusStopMapViewModel @Inject constructor(
      *
      * @param services A service filter for the route lines.
      */
-    private fun loadRouteLines(services: Array<String>?) =
-            routeLineRetriever.getRouteLinesFlow(services?.toSet())
+    private fun loadRouteLines(services: List<ParcelableServiceDescriptor>?) =
+        routeLineRetriever.getRouteLinesFlow(services?.toSet())
 
     /**
-     * Move the map camera to the location of the given [stopCode]. If this stop code is invalid
-     * or there is no location for this stop, no action will be performed.
+     * Move the map camera to the location of the given [stopIdentifier]. If this stop identifier is
+     * invalid or there is no location for this stop, no action will be performed.
      *
-     * @param stopCode The stop code to move the map camera to.
+     * @param stopIdentifier The stop identifier to move the map camera to.
      */
-    private fun moveCameraToStopLocation(stopCode: String) {
+    private fun moveCameraToStopLocation(stopIdentifier: StopIdentifier) {
         viewModelScope.launch {
             withContext(defaultDispatcher) {
-                busStopsRepository.getStopLocation(stopCode)
+                busStopsRepository.getStopLocation(stopIdentifier)
             }?.let {
                 moveCameraToLocation(UiCameraLocation(
                         UiLatLon(

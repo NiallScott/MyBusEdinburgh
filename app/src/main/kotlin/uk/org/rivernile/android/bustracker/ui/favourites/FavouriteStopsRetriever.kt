@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,6 +32,9 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.sortByServiceName
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import uk.org.rivernile.android.bustracker.core.servicestops.ServiceStopsRepository
@@ -47,7 +50,8 @@ import javax.inject.Inject
  */
 class FavouriteStopsRetriever @Inject constructor(
     private val favouritesRepository: FavouritesRepository,
-    private val serviceStopsRepository: ServiceStopsRepository
+    private val serviceStopsRepository: ServiceStopsRepository,
+    private val serviceNameComparator: Comparator<String>
 ) {
 
     /**
@@ -72,30 +76,33 @@ class FavouriteStopsRetriever @Inject constructor(
      */
     private fun loadServices(favourites: List<FavouriteStop>?): Flow<List<UiFavouriteStop>?> {
         return favourites?.takeIf(List<FavouriteStop>::isNotEmpty)?.let { f ->
-            val stopCodes = f.map(FavouriteStop::stopCode).toHashSet()
+            val stopIdentifiers = f.map(FavouriteStop::stopIdentifier).toHashSet()
 
-            serviceStopsRepository.getServicesForStopsFlow(stopCodes)
+            serviceStopsRepository.getServicesForStopsFlow(stopIdentifiers)
                 .map { combineFavouritesAndServices(f, it) }
         } ?: flowOf(emptyList())
     }
 
     /**
-     * Given a [List] of [FavouriteStop]s and a [Map] of stop codes to service listings, combine
-     * them together to create a [List] of [UiFavouriteStop] for display on the UI.
+     * Given a [List] of [FavouriteStop]s and a [Map] of stop identifiers to service listings,
+     * combine them together to create a [List] of [UiFavouriteStop] for display on the UI.
      *
      * @param favouriteStops The user's favourite stops.
-     * @param stopServices A [Map] of stop code to service listing for the favourite stops, to be
-     * combined with the favourite stops for display on the UI.
+     * @param stopServices A [Map] of stop identifier to service listing for the favourite stops, to
+     * be combined with the favourite stops for display on the UI.
      * @return A [List] of [UiFavouriteStop]s, which is the favourites combined with the service
      * listing for that stop.
      */
     private fun combineFavouritesAndServices(
         favouriteStops: List<FavouriteStop>,
-        stopServices: Map<String, List<String>>?
+        stopServices: Map<StopIdentifier, List<ServiceDescriptor>>?
     ) = favouriteStops.map {
             UiFavouriteStop(
                 it,
-                stopServices?.get(it.stopCode),
-                false)
+                stopServices
+                    ?.get(it.stopIdentifier)
+                    ?.sortByServiceName(serviceNameComparator),
+                false
+            )
         }
 }

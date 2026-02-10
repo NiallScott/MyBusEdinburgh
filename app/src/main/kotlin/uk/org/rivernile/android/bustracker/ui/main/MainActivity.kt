@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -93,6 +93,9 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.ActivityMainBind
 import javax.inject.Inject
 import androidx.core.net.toUri
 import androidx.core.view.ViewGroupCompat
+import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
  * This [android.app.Activity] is the root Activity of the app.
@@ -252,51 +255,57 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    override fun onShowAddEditFavouriteStop(stopCode: String) {
+    override fun onShowAddEditFavouriteStop(stopIdentifier: StopIdentifier) {
         AddEditFavouriteStopDialogFragment
-            .newInstance(stopCode)
+            .newInstance(stopIdentifier)
             .show(supportFragmentManager, DIALOG_ADD_FAVOURITE)
     }
 
-    override fun onShowAddProximityAlert(stopCode: String) {
+    override fun onShowAddProximityAlert(stopIdentifier: StopIdentifier) {
         AddProximityAlertDialogFragment
-            .newInstance(stopCode)
+            .newInstance(stopIdentifier)
             .show(supportFragmentManager, DIALOG_ADD_PROX_ALERT)
     }
 
-    override fun onShowAddTimeAlert(stopCode: String, defaultServices: Array<String>?) {
+    override fun onShowAddTimeAlert(
+        stopIdentifier: StopIdentifier,
+        defaultServices: List<ServiceDescriptor>?
+    ) {
         AddTimeAlertDialogFragment
-            .newInstance(stopCode, defaultServices)
+            .newInstance(stopIdentifier, defaultServices)
             .show(supportFragmentManager, DIALOG_ADD_TIME_ALERT)
     }
 
-    override fun onShowBusStopMapWithStopCode(stopCode: String) {
+    override fun onShowBusStopMapWithStopCode(stopIdentifier: StopIdentifier) {
         Intent(this, BusStopMapActivity::class.java)
-            .putExtra(BusStopMapActivity.EXTRA_STOP_CODE, stopCode)
+            .putExtra(BusStopMapActivity.EXTRA_STOP_CODE, stopIdentifier.toNaptanStopCodeOrThrow())
             .let(this::startActivity)
     }
 
-    override fun onShowBusTimes(stopCode: String) {
+    override fun onShowBusTimes(stopIdentifier: StopIdentifier) {
         Intent(this, DisplayStopDataActivity::class.java)
-            .putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
+            .putExtra(
+                DisplayStopDataActivity.EXTRA_STOP_CODE,
+                stopIdentifier.toNaptanStopCodeOrThrow()
+            )
             .let(this::startActivity)
     }
 
-    override fun onShowConfirmDeleteProximityAlert(stopCode: String) {
+    override fun onShowConfirmDeleteProximityAlert(stopIdentifier: StopIdentifier) {
         DeleteProximityAlertDialogFragment
-            .newInstance(stopCode)
+            .newInstance(stopIdentifier)
             .show(supportFragmentManager, DIALOG_DELETE_PROX_ALERT)
     }
 
-    override fun onShowConfirmDeleteTimeAlert(stopCode: String) {
+    override fun onShowConfirmDeleteTimeAlert(stopIdentifier: StopIdentifier) {
         DeleteTimeAlertDialogFragment
-            .newInstance(stopCode)
+            .newInstance(stopIdentifier)
             .show(supportFragmentManager, DIALOG_DELETE_TIME_ALERT)
     }
 
-    override fun onShowConfirmFavouriteDeletion(stopCode: String) {
+    override fun onShowConfirmFavouriteDeletion(stopIdentifier: StopIdentifier) {
         DeleteFavouriteDialogFragment
-            .newInstance(stopCode)
+            .newInstance(stopIdentifier)
             .show(supportFragmentManager, DIALOG_DELETE_FAVOURITE)
     }
 
@@ -657,6 +666,14 @@ class MainActivity : AppCompatActivity(),
     private val backPressedCallback = object : OnBackPressedCallback(false) {
         override fun handleOnBackPressed() {
             viewBinding.searchView.hide()
+        }
+    }
+
+    private fun StopIdentifier.toNaptanStopCodeOrThrow(): String {
+        return if (this is NaptanStopIdentifier) {
+            naptanStopCode
+        } else {
+            throw UnsupportedOperationException("Only Naptan stop codes are supported for now.")
         }
     }
 }

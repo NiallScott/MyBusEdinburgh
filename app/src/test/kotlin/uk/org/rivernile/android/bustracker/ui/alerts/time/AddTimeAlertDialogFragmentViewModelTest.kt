@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,9 +34,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertSame
 import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -48,12 +46,20 @@ import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRequest
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopName
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.servicestops.ServiceStopsRepository
 import uk.org.rivernile.android.bustracker.coroutines.FlowTestObserver
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.testutils.test
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
+import kotlin.test.Test
+import kotlin.test.assertSame
 
 /**
  * Tests for [AddTimeAlertDialogFragmentViewModel].
@@ -109,7 +115,9 @@ class AddTimeAlertDialogFragmentViewModelTest {
     fun selectedServicesLiveDataEmitsNullWhenInitialStateIsEmpty() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
         val initialState = mapOf(
-                AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES to emptyArray<String>())
+            AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES to
+                emptyList<ParcelableServiceDescriptor>()
+        )
         val savedState = SavedStateHandle(initialState)
         val viewModel = createViewModel(savedState)
 
@@ -123,14 +131,16 @@ class AddTimeAlertDialogFragmentViewModelTest {
     fun selectedServicesLiveDataEmitsInitialStateWhenSet() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
         val initialState = mapOf(
-                AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES to arrayOf("1", "2"))
+            AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES to
+                listOf(parcelableService(1), parcelableService(2))
+        )
         val savedState = SavedStateHandle(initialState)
         val viewModel = createViewModel(savedState)
 
         val observer = viewModel.selectedServicesLiveData.test()
         advanceUntilIdle()
 
-        observer.assertValues(listOf("1", "2"))
+        observer.assertValues(listOf(parcelableService(1), parcelableService(2)))
     }
 
     @Test
@@ -140,18 +150,40 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
         val observer = viewModel.selectedServicesLiveData.test()
         advanceUntilIdle()
-        viewModel.selectedServices = listOf("1")
+        viewModel.selectedServices = listOf(parcelableService(1))
         advanceUntilIdle()
         viewModel.selectedServices = emptyList()
         advanceUntilIdle()
-        viewModel.selectedServices = listOf("1", "2")
+        viewModel.selectedServices = listOf(parcelableService(1), parcelableService(2))
         advanceUntilIdle()
 
         observer.assertValues(
                 null,
-                listOf("1"),
+                listOf(parcelableService(1)),
                 null,
-                listOf("1", "2"))
+                listOf(parcelableService(1), parcelableService(2)))
+    }
+
+    @Test
+    fun selectedServicesLiveDataEmitsSelectedServicesInOrder() = runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
+        val viewModel = createViewModel()
+
+        val observer = viewModel.selectedServicesLiveData.test()
+        viewModel.selectedServices = listOf(
+            parcelableService(2),
+            parcelableService(3),
+            parcelableService(1)
+        )
+        advanceUntilIdle()
+
+        observer.assertValues(
+            listOf(
+                parcelableService(1),
+                parcelableService(2),
+                parcelableService(3)
+            )
+        )
     }
 
     @Test
@@ -184,7 +216,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
         val viewModel = createViewModel()
 
         val observer = viewModel.stopDetailsLiveData.test()
-        viewModel.stopCode = null
+        viewModel.stopIdentifier = null
         advanceUntilIdle()
 
         observer.assertValues(null)
@@ -194,62 +226,66 @@ class AddTimeAlertDialogFragmentViewModelTest {
     fun stopDetailsLiveDataEmitsStopDetailsWithNullNameWhenRepositoryReturnsNullName() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
-        whenever(busStopsRepository.getNameForStopFlow("123456"))
+        whenever(busStopsRepository.getNameForStopFlow("123456".toNaptanStopIdentifier()))
                 .thenReturn(flowOf(null))
 
         val observer = viewModel.stopDetailsLiveData.test()
-        viewModel.stopCode = "123456"
+        viewModel.stopIdentifier = "123456".toParcelableNaptanStopIdentifier()
         advanceUntilIdle()
 
         observer.assertValues(
                 null,
-                StopDetails("123456", null))
+                StopDetails("123456".toNaptanStopIdentifier(), null))
     }
 
     @Test
     fun stopDetailsLiveDataEmitsStopDetailsWithNameWhenRepositoryReturnsName() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
-        whenever(busStopsRepository.getNameForStopFlow("123456"))
-                .thenReturn(flowOf(MockStopName("Name", "Locality")))
+        whenever(busStopsRepository.getNameForStopFlow("123456".toNaptanStopIdentifier()))
+                .thenReturn(flowOf(FakeStopName("Name", "Locality")))
 
         val observer = viewModel.stopDetailsLiveData.test()
-        viewModel.stopCode = "123456"
+        viewModel.stopIdentifier = "123456".toParcelableNaptanStopIdentifier()
         advanceUntilIdle()
 
         observer.assertValues(
                 null,
-                StopDetails("123456", null),
-                StopDetails("123456", MockStopName("Name", "Locality")))
+                StopDetails("123456".toNaptanStopIdentifier(), null),
+                StopDetails("123456".toNaptanStopIdentifier(), FakeStopName("Name", "Locality")))
     }
 
     @Test
     fun stopDetailsLiveDataEmitsCorrectDataOnChanges() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
-        whenever(busStopsRepository.getNameForStopFlow("123456"))
+        whenever(busStopsRepository.getNameForStopFlow("123456".toNaptanStopIdentifier()))
                 .thenReturn(flow{
-                    emit(MockStopName("Name", "Locality"))
+                    emit(FakeStopName("Name", "Locality"))
                     delay(10L)
-                    emit(MockStopName("Name 2", null))
+                    emit(FakeStopName("Name 2", null))
                 })
-        whenever(busStopsRepository.getNameForStopFlow("987654"))
-                .thenReturn(flowOf(MockStopName("Name 3", "Locality 3")))
+        whenever(busStopsRepository.getNameForStopFlow("987654".toNaptanStopIdentifier()))
+                .thenReturn(flowOf(FakeStopName("Name 3", "Locality 3")))
 
         val observer = viewModel.stopDetailsLiveData.test()
         advanceUntilIdle()
-        viewModel.stopCode = "123456"
+        viewModel.stopIdentifier = "123456".toParcelableNaptanStopIdentifier()
         advanceUntilIdle()
-        viewModel.stopCode = "987654"
+        viewModel.stopIdentifier = "987654".toParcelableNaptanStopIdentifier()
         advanceUntilIdle()
 
         observer.assertValues(
                 null,
-                StopDetails("123456", null),
-                StopDetails("123456", MockStopName("Name", "Locality")),
-                StopDetails("123456", MockStopName("Name 2", null)),
-                StopDetails("987654", null),
-                StopDetails("987654", MockStopName("Name 3", "Locality 3")))
+                StopDetails("123456".toNaptanStopIdentifier(), null),
+                StopDetails("123456".toNaptanStopIdentifier(), FakeStopName("Name", "Locality")),
+                StopDetails("123456".toNaptanStopIdentifier(), FakeStopName("Name 2", null)),
+                StopDetails("987654".toNaptanStopIdentifier(), null),
+                StopDetails(
+                    "987654".toNaptanStopIdentifier(),
+                    FakeStopName("Name 3", "Locality 3")
+                )
+        )
     }
 
     @Test
@@ -257,7 +293,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
         givenPermissionsTrackerFlowHasPermissionsState()
         whenever(uiStateCalculator.createUiStateFlow(any(), any(), any(), any()))
                 .thenReturn(flow {
-                    emit(UiState.ERROR_NO_STOP_CODE)
+                    emit(UiState.ERROR_NO_STOP_IDENTIFIER)
                     delay(100L)
                     emit(UiState.ERROR_PERMISSION_REQUIRED)
                     delay(100L)
@@ -274,7 +310,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
         advanceUntilIdle()
 
         observer.assertValues(
-                UiState.ERROR_NO_STOP_CODE,
+                UiState.ERROR_NO_STOP_IDENTIFIER,
                 UiState.ERROR_PERMISSION_REQUIRED,
                 UiState.ERROR_PERMISSION_DENIED,
                 UiState.ERROR_NO_SERVICES,
@@ -285,58 +321,69 @@ class AddTimeAlertDialogFragmentViewModelTest {
     @Test
     fun uiStateCalculatorIsPassedCorrectFlowObjects() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
-        val stopCodeFlow = FlowTestObserver<String?>(this)
+        val stopIdentifierFlow = FlowTestObserver<StopIdentifier?>(this)
         val stopDetailsFlow = FlowTestObserver<StopDetails?>(this)
-        val availableServicesFlow = FlowTestObserver<List<String>?>(this)
+        val availableServicesFlow = FlowTestObserver<List<ServiceDescriptor>?>(this)
         val permissionsStateFlow = FlowTestObserver<PermissionsState>(this)
         doAnswer {
-            stopCodeFlow.observe(it.getArgument(0))
+            stopIdentifierFlow.observe(it.getArgument(0))
             stopDetailsFlow.observe(it.getArgument(1))
             availableServicesFlow.observe(it.getArgument(2))
             permissionsStateFlow.observe(it.getArgument(3))
 
             flowOf(UiState.CONTENT)
         }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any(), any())
-        whenever(busStopsRepository.getNameForStopFlow("123456"))
-                .thenReturn(flowOf(MockStopName("Name 1", "Locality 1")))
-        whenever(busStopsRepository.getNameForStopFlow("987654"))
-                .thenReturn(flowOf(MockStopName("Name 2", "Locality 2")))
-        whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
-                .thenReturn(flowOf(listOf("1", "2", "3")))
-        whenever(serviceStopsRepository.getServicesForStopFlow("987654"))
-                .thenReturn(flowOf(listOf("4", "5", "6")))
+        whenever(busStopsRepository.getNameForStopFlow("123456".toNaptanStopIdentifier()))
+                .thenReturn(flowOf(FakeStopName("Name 1", "Locality 1")))
+        whenever(busStopsRepository.getNameForStopFlow("987654".toNaptanStopIdentifier()))
+                .thenReturn(flowOf(FakeStopName("Name 2", "Locality 2")))
+        whenever(serviceStopsRepository.getServicesForStopFlow("123456".toNaptanStopIdentifier()))
+                .thenReturn(flowOf(listOf(service(1), service(2), service(3))))
+        whenever(serviceStopsRepository.getServicesForStopFlow("987654".toNaptanStopIdentifier()))
+                .thenReturn(flowOf(listOf(service(4), service(5), service(6))))
         val viewModel = createViewModel()
 
         viewModel.uiStateLiveData.test()
         advanceUntilIdle()
-        viewModel.stopCode = "123456"
+        viewModel.stopIdentifier = "123456".toParcelableNaptanStopIdentifier()
         advanceUntilIdle()
-        viewModel.stopCode = "987654"
+        viewModel.stopIdentifier = "987654".toParcelableNaptanStopIdentifier()
         advanceUntilIdle()
-        stopCodeFlow.finish()
+        stopIdentifierFlow.finish()
         stopDetailsFlow.finish()
         availableServicesFlow.finish()
         permissionsStateFlow.finish()
 
-        stopCodeFlow.assertValues(null, "123456", "987654")
+        stopIdentifierFlow.assertValues(
+            null,
+            "123456".toNaptanStopIdentifier(),
+            "987654".toNaptanStopIdentifier()
+        )
         stopDetailsFlow.assertValues(
                 null,
-                StopDetails("123456", null),
-                StopDetails("123456", MockStopName("Name 1", "Locality 1")),
-                StopDetails("987654", null),
-                StopDetails("987654", MockStopName("Name 2", "Locality 2")))
+                StopDetails("123456".toNaptanStopIdentifier(), null),
+                StopDetails(
+                    "123456".toNaptanStopIdentifier(),
+                    FakeStopName("Name 1", "Locality 1")
+                ),
+                StopDetails("987654".toNaptanStopIdentifier(), null),
+                StopDetails(
+                    "987654".toNaptanStopIdentifier(),
+                    FakeStopName("Name 2", "Locality 2")
+                )
+        )
         availableServicesFlow.assertValues(
                 null,
-                listOf("1", "2", "3"),
+                listOf(service(1), service(2), service(3)),
                 null,
-                listOf("4", "5", "6"))
+                listOf(service(4), service(5), service(6)))
     }
 
     @Test
     fun addButtonEnabledLiveDataEmitsFalseWhenSelectedServicesIsNull() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
         val uiStateFlow = flow {
-            emit(UiState.ERROR_NO_STOP_CODE)
+            emit(UiState.ERROR_NO_STOP_IDENTIFIER)
             delay(100L)
             emit(UiState.ERROR_PERMISSION_REQUIRED)
             delay(100L)
@@ -363,7 +410,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
     fun addButtonEnabledLiveDataEmitsFalseWhenSelectedServicesIsEmpty() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
         val uiStateFlow = flow {
-            emit(UiState.ERROR_NO_STOP_CODE)
+            emit(UiState.ERROR_NO_STOP_IDENTIFIER)
             delay(100L)
             emit(UiState.ERROR_PERMISSION_REQUIRED)
             delay(100L)
@@ -391,7 +438,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
             runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
         val uiStateFlow = flow {
-            emit(UiState.ERROR_NO_STOP_CODE)
+            emit(UiState.ERROR_NO_STOP_IDENTIFIER)
             delay(100L)
             emit(UiState.ERROR_PERMISSION_REQUIRED)
             delay(100L)
@@ -414,7 +461,11 @@ class AddTimeAlertDialogFragmentViewModelTest {
         val viewModel = createViewModel()
 
         val observer = viewModel.addButtonEnabledLiveData.test()
-        viewModel.selectedServices = listOf("1", "2", "3")
+        viewModel.selectedServices = listOf(
+            parcelableService(1),
+            parcelableService(2),
+            parcelableService(3)
+        )
         advanceUntilIdle()
 
         observer.assertValues(false, true, false, true)
@@ -434,18 +485,18 @@ class AddTimeAlertDialogFragmentViewModelTest {
     @Test
     fun onSelectServicesClickedDoesNotShowServicesSelectionWhenAvailableServicesIsNull() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
-        val availableServicesFlow = FlowTestObserver<List<String>?>(this)
+        val availableServicesFlow = FlowTestObserver<List<ServiceDescriptor>?>(this)
         doAnswer {
             availableServicesFlow.observe(it.getArgument(2))
 
             flowOf(UiState.CONTENT)
         }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any(), any())
-        whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
+        whenever(serviceStopsRepository.getServicesForStopFlow("123456".toNaptanStopIdentifier()))
                 .thenReturn(flowOf(null))
         val viewModel = createViewModel()
 
         val observer = viewModel.showServicesChooserLiveData.test()
-        viewModel.stopCode = "123456"
+        viewModel.stopIdentifier = "123456".toParcelableNaptanStopIdentifier()
         advanceUntilIdle()
         viewModel.onSelectServicesClicked()
         advanceUntilIdle()
@@ -458,18 +509,18 @@ class AddTimeAlertDialogFragmentViewModelTest {
     fun onSelectServicesClickedDoesNotShowServicesSelectionWhenAvailableServicesIsEmpty() =
             runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
-        val availableServicesFlow = FlowTestObserver<List<String>?>(this)
+        val availableServicesFlow = FlowTestObserver<List<ServiceDescriptor>?>(this)
         doAnswer {
             availableServicesFlow.observe(it.getArgument(2))
 
             flowOf(UiState.CONTENT)
         }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any(), any())
-        whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
+        whenever(serviceStopsRepository.getServicesForStopFlow("123456".toNaptanStopIdentifier()))
                 .thenReturn(flowOf(emptyList()))
         val viewModel = createViewModel()
 
         val observer = viewModel.showServicesChooserLiveData.test()
-        viewModel.stopCode = "123456"
+        viewModel.stopIdentifier = "123456".toParcelableNaptanStopIdentifier()
         advanceUntilIdle()
         viewModel.onSelectServicesClicked()
         advanceUntilIdle()
@@ -481,113 +532,135 @@ class AddTimeAlertDialogFragmentViewModelTest {
     @Test
     fun onSelectServicesClickedShowsServicesSelectionWithNullSelectedServicesFirstTime() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
-        val availableServicesFlow = FlowTestObserver<List<String>?>(this)
+        val availableServicesFlow = FlowTestObserver<List<ServiceDescriptor>?>(this)
         doAnswer {
             availableServicesFlow.observe(it.getArgument(2))
 
             flowOf(UiState.CONTENT)
         }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any(), any())
-        whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
-                .thenReturn(flowOf(listOf("1", "2", "3")))
+        whenever(serviceStopsRepository.getServicesForStopFlow("123456".toNaptanStopIdentifier()))
+            .thenReturn(flowOf(listOf(service(1), service(2), service(3))))
         val viewModel = createViewModel()
 
         val observer = viewModel.showServicesChooserLiveData.test()
-        viewModel.stopCode = "123456"
+        viewModel.stopIdentifier = "123456".toParcelableNaptanStopIdentifier()
         advanceUntilIdle()
         viewModel.onSelectServicesClicked()
         advanceUntilIdle()
         availableServicesFlow.finish()
 
         observer.assertValues(
-                UiServicesChooserParams("123456", null))
+            UiServicesChooserParams("123456".toNaptanStopIdentifier(), null)
+        )
     }
 
     @Test
     fun onSelectServicesClickedShowsServicesSelectionWithInitialStateSelectedServices() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
-        val availableServicesFlow = FlowTestObserver<List<String>?>(this)
+        val availableServicesFlow = FlowTestObserver<List<ServiceDescriptor>?>(this)
         doAnswer {
             availableServicesFlow.observe(it.getArgument(2))
 
             flowOf(UiState.CONTENT)
         }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any(), any())
-        whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
-                .thenReturn(flowOf(listOf("1", "2", "3")))
+        whenever(serviceStopsRepository.getServicesForStopFlow("123456".toNaptanStopIdentifier()))
+                .thenReturn(flowOf(listOf(service(1), service(2), service(3))))
         val initialState = mapOf(
-                AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES to arrayOf("2", "3"))
+            AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES to
+                listOf(parcelableService(2), parcelableService(3))
+        )
         val savedState = SavedStateHandle(initialState)
         val viewModel = createViewModel(savedState)
 
         val chooserObserver = viewModel.showServicesChooserLiveData.test()
         viewModel.selectedServicesLiveData.test()
-        viewModel.stopCode = "123456"
+        viewModel.stopIdentifier = "123456".toParcelableNaptanStopIdentifier()
         advanceUntilIdle()
         viewModel.onSelectServicesClicked()
         advanceUntilIdle()
         availableServicesFlow.finish()
 
         chooserObserver.assertValues(
-                UiServicesChooserParams("123456", listOf("2", "3")))
+            UiServicesChooserParams(
+                "123456".toNaptanStopIdentifier(),
+                listOf(parcelableService(2), parcelableService(3))
+            )
+        )
     }
 
     @Test
     fun onSelectServicesClickedShowsServicesSelectionWithSelectedServicesSet() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
-        val availableServicesFlow = FlowTestObserver<List<String>?>(this)
+        val availableServicesFlow = FlowTestObserver<List<ServiceDescriptor>?>(this)
         doAnswer {
             availableServicesFlow.observe(it.getArgument(2))
 
             flowOf(UiState.CONTENT)
         }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any(), any())
-        whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
-                .thenReturn(flowOf(listOf("1", "2", "3")))
+        whenever(serviceStopsRepository.getServicesForStopFlow("123456".toNaptanStopIdentifier()))
+            .thenReturn(flowOf(listOf(service(1), service(2), service(3))))
         val viewModel = createViewModel()
 
         val chooserObserver = viewModel.showServicesChooserLiveData.test()
         viewModel.selectedServicesLiveData.test()
-        viewModel.stopCode = "123456"
+        viewModel.stopIdentifier = "123456".toParcelableNaptanStopIdentifier()
         advanceUntilIdle()
-        viewModel.selectedServices = listOf("2", "3")
+        viewModel.selectedServices = listOf(parcelableService(2), parcelableService(3))
         advanceUntilIdle()
         viewModel.onSelectServicesClicked()
         advanceUntilIdle()
         availableServicesFlow.finish()
 
         chooserObserver.assertValues(
-                UiServicesChooserParams("123456", listOf("2", "3")))
+            UiServicesChooserParams(
+                "123456".toNaptanStopIdentifier(),
+                listOf(parcelableService(2), parcelableService(3))
+            )
+        )
     }
 
     @Test
     fun onSelectServicesClickedShowsServicesSelectionWithRepresentativeExample() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
-        val availableServicesFlow = FlowTestObserver<List<String>?>(this)
+        val availableServicesFlow = FlowTestObserver<List<ServiceDescriptor>?>(this)
         doAnswer {
             availableServicesFlow.observe(it.getArgument(2))
 
             flowOf(UiState.CONTENT)
         }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any(), any())
-        whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
-                .thenReturn(flowOf(listOf("1", "2", "3")))
+        whenever(serviceStopsRepository.getServicesForStopFlow("123456".toNaptanStopIdentifier()))
+            .thenReturn(flowOf(listOf(service(1), service(2), service(3))))
         val initialState = mapOf(
-                AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES to arrayOf("2", "3"))
+            AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES to listOf(
+                parcelableService(2),
+                parcelableService(3)
+            )
+        )
         val savedState = SavedStateHandle(initialState)
         val viewModel = createViewModel(savedState)
 
         val chooserObserver = viewModel.showServicesChooserLiveData.test()
         viewModel.selectedServicesLiveData.test()
-        viewModel.stopCode = "123456"
+        viewModel.stopIdentifier = "123456".toParcelableNaptanStopIdentifier()
         advanceUntilIdle()
         viewModel.onSelectServicesClicked()
         advanceUntilIdle()
-        viewModel.selectedServices = listOf("2")
+        viewModel.selectedServices = listOf(parcelableService(2))
         advanceUntilIdle()
         viewModel.onSelectServicesClicked()
         advanceUntilIdle()
         availableServicesFlow.finish()
 
         chooserObserver.assertValues(
-                UiServicesChooserParams("123456", listOf("2", "3")),
-                UiServicesChooserParams("123456", listOf("2")))
+            UiServicesChooserParams(
+                "123456".toNaptanStopIdentifier(),
+                listOf(parcelableService(2), parcelableService(3))
+            ),
+            UiServicesChooserParams(
+                "123456".toNaptanStopIdentifier(),
+                listOf(parcelableService(2))
+            )
+        )
     }
 
     @Test
@@ -669,8 +742,12 @@ class AddTimeAlertDialogFragmentViewModelTest {
     fun onAddClickedDoesNotAddAlertWhenStopCodeIsNull() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
-        viewModel.stopCode = null
-        viewModel.selectedServices = listOf("1", "2", "3")
+        viewModel.stopIdentifier = null
+        viewModel.selectedServices = listOf(
+            parcelableService(1),
+            parcelableService(2),
+            parcelableService(3)
+        )
         viewModel.selectedServicesLiveData.test()
 
         viewModel.onAddClicked(10)
@@ -683,8 +760,12 @@ class AddTimeAlertDialogFragmentViewModelTest {
     fun onAddClickedDoesNotAddAlertWhenStopCodeIsEmpty() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
-        viewModel.stopCode = ""
-        viewModel.selectedServices = listOf("1", "2", "3")
+        viewModel.stopIdentifier = "".toParcelableNaptanStopIdentifier()
+        viewModel.selectedServices = listOf(
+            parcelableService(1),
+            parcelableService(2),
+            parcelableService(3)
+        )
         viewModel.selectedServicesLiveData.test()
 
         viewModel.onAddClicked(10)
@@ -697,7 +778,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
     fun onAddClickedDoesNotAddAlertWhenSelectedServicesIsNull() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
-        viewModel.stopCode = "123456"
+        viewModel.stopIdentifier = "123456".toParcelableNaptanStopIdentifier()
         viewModel.selectedServices = null
         viewModel.selectedServicesLiveData.test()
 
@@ -711,7 +792,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
     fun onAddClickedDoesNotAddAlertWhenSelectedServicesIsEmpty() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
-        viewModel.stopCode = "123456"
+        viewModel.stopIdentifier = "123456".toParcelableNaptanStopIdentifier()
         viewModel.selectedServices = listOf()
         viewModel.selectedServicesLiveData.test()
 
@@ -725,9 +806,17 @@ class AddTimeAlertDialogFragmentViewModelTest {
     fun onAddClickedAddsAlertsWhenConditionsAreSatisfied() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
-        viewModel.stopCode = "123456"
-        viewModel.selectedServices = listOf("1", "2", "3")
-        val expected = ArrivalAlertRequest("123456", listOf("1", "2", "3"), 10)
+        viewModel.stopIdentifier = "123456".toParcelableNaptanStopIdentifier()
+        viewModel.selectedServices = listOf(
+            parcelableService(1),
+            parcelableService(2),
+            parcelableService(3)
+        )
+        val expected = ArrivalAlertRequest(
+            "123456".toNaptanStopIdentifier(),
+            setOf(service(1), service(2), service(3)),
+            10
+        )
         viewModel.selectedServicesLiveData.test()
         advanceUntilIdle()
 
@@ -744,17 +833,29 @@ class AddTimeAlertDialogFragmentViewModelTest {
     }
 
     private fun createViewModel(savedState: SavedStateHandle = SavedStateHandle()) =
-            AddTimeAlertDialogFragmentViewModel(
-                    savedState,
-                    permissionsTracker,
-                    busStopsRepository,
-                    serviceStopsRepository,
-                    uiStateCalculator,
-                    alertsRepository,
-                    coroutineRule.scope,
-                    coroutineRule.testDispatcher)
+        AddTimeAlertDialogFragmentViewModel(
+            savedState,
+            permissionsTracker,
+            busStopsRepository,
+            serviceStopsRepository,
+            uiStateCalculator,
+            alertsRepository,
+            naturalOrder(),
+            coroutineRule.scope,
+            coroutineRule.testDispatcher
+        )
 
-    private data class MockStopName(
-        override val name: String,
-        override val locality: String?) : StopName
+    private fun parcelableService(id: Int): ParcelableServiceDescriptor {
+        return ParcelableServiceDescriptor(
+            serviceName = id.toString(),
+            operatorCode = "TEST$id"
+        )
+    }
+
+    private fun service(id: Int): ServiceDescriptor {
+        return FakeServiceDescriptor(
+            serviceName = id.toString(),
+            operatorCode = "TEST$id"
+        )
+    }
 }

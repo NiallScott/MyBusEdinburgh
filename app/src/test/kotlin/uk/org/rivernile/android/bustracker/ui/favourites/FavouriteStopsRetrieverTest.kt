@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,6 +36,9 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import uk.org.rivernile.android.bustracker.core.servicestops.ServiceStopsRepository
@@ -62,7 +65,11 @@ class FavouriteStopsRetrieverTest {
 
     @BeforeTest
     fun setUp() {
-        retriever = FavouriteStopsRetriever(favouritesRepository, serviceStopsRepository)
+        retriever = FavouriteStopsRetriever(
+            favouritesRepository,
+            serviceStopsRepository,
+            naturalOrder()
+        )
     }
 
     @Test
@@ -76,7 +83,7 @@ class FavouriteStopsRetrieverTest {
             awaitComplete()
         }
         verify(serviceStopsRepository, never())
-                .getServicesForStopsFlow(any())
+            .getServicesForStopsFlow(any())
     }
 
     @Test
@@ -96,14 +103,35 @@ class FavouriteStopsRetrieverTest {
     @Test
     fun allFavouriteStopsFlowWithFavouriteStopsAndNullServicesEmitsExpectedList() = runTest {
         val favouriteStops = listOf(
-            FavouriteStop("111111", "Favourite 1"),
-            FavouriteStop("222222", "Favourite 2"),
-            FavouriteStop("333333", "Favourite 3")
+            FavouriteStop("111111".toNaptanStopIdentifier(), "Favourite 1"),
+            FavouriteStop("222222".toNaptanStopIdentifier(), "Favourite 2"),
+            FavouriteStop("333333".toNaptanStopIdentifier(), "Favourite 3")
         )
         val expected = listOf(
-            UiFavouriteStop(FavouriteStop("111111", "Favourite 1"), null, false),
-            UiFavouriteStop(FavouriteStop("222222", "Favourite 2"), null, false),
-            UiFavouriteStop(FavouriteStop("333333", "Favourite 3"), null, false)
+            UiFavouriteStop(
+                FavouriteStop(
+                    "111111".toNaptanStopIdentifier(),
+                    "Favourite 1"
+                ),
+                null,
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "222222".toNaptanStopIdentifier(),
+                    "Favourite 2"
+                ),
+                null,
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "333333".toNaptanStopIdentifier(),
+                    "Favourite 3"
+                ),
+                null,
+                false
+            )
         )
         whenever(favouritesRepository.allFavouriteStopsFlow)
             .thenReturn(flowOf(favouriteStops))
@@ -120,14 +148,35 @@ class FavouriteStopsRetrieverTest {
     @Test
     fun allFavouriteStopsFlowWithFavouriteStopsAndEmptyServicesEmitsExpectedList() = runTest {
         val favouriteStops = listOf(
-            FavouriteStop("111111", "Favourite 1"),
-            FavouriteStop("222222", "Favourite 2"),
-            FavouriteStop("333333", "Favourite 3")
+            FavouriteStop("111111".toNaptanStopIdentifier(), "Favourite 1"),
+            FavouriteStop("222222".toNaptanStopIdentifier(), "Favourite 2"),
+            FavouriteStop("333333".toNaptanStopIdentifier(), "Favourite 3")
         )
         val expected = listOf(
-            UiFavouriteStop(FavouriteStop("111111", "Favourite 1"), null, false),
-            UiFavouriteStop(FavouriteStop("222222", "Favourite 2"), null, false),
-            UiFavouriteStop(FavouriteStop("333333", "Favourite 3"), null, false)
+            UiFavouriteStop(
+                FavouriteStop(
+                    "111111".toNaptanStopIdentifier(),
+                    "Favourite 1"
+                ),
+                null,
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "222222".toNaptanStopIdentifier(),
+                    "Favourite 2"
+                ),
+                null,
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "333333".toNaptanStopIdentifier(),
+                    "Favourite 3"
+                ),
+                null,
+                false
+            )
         )
         whenever(favouritesRepository.allFavouriteStopsFlow)
             .thenReturn(flowOf(favouriteStops))
@@ -144,36 +193,41 @@ class FavouriteStopsRetrieverTest {
     @Test
     fun allFavouriteStopsFlowWithFavouritesAndPopulatedServicesEmitsExpectedList() = runTest {
         val favouriteStops = listOf(
-            FavouriteStop("111111", "Favourite 1"),
-            FavouriteStop("222222", "Favourite 2"),
-            FavouriteStop("333333", "Favourite 3")
+            FavouriteStop("111111".toNaptanStopIdentifier(), "Favourite 1"),
+            FavouriteStop("222222".toNaptanStopIdentifier(), "Favourite 2"),
+            FavouriteStop("333333".toNaptanStopIdentifier(), "Favourite 3")
         )
         val expected = listOf(
             UiFavouriteStop(
-                FavouriteStop("111111", "Favourite 1"),
-                listOf("1", "2", "3"),
+                FavouriteStop("111111".toNaptanStopIdentifier(), "Favourite 1"),
+                listOf(service(1), service(2), service(3)),
                 false
             ),
             UiFavouriteStop(
-                FavouriteStop("222222", "Favourite 2"),
+                FavouriteStop("222222".toNaptanStopIdentifier(), "Favourite 2"),
                 null,
                 false
             ),
             UiFavouriteStop(
-                FavouriteStop("333333", "Favourite 3"),
-                listOf("1"),
+                FavouriteStop("333333".toNaptanStopIdentifier(), "Favourite 3"),
+                listOf(service(1)),
                 false
             )
         )
         whenever(favouritesRepository.allFavouriteStopsFlow)
             .thenReturn(flowOf(favouriteStops))
-        val stopCodes = setOf("111111", "222222", "333333")
-        whenever(serviceStopsRepository.getServicesForStopsFlow(stopCodes))
+        val stopIdentifiers = setOf(
+            "111111".toNaptanStopIdentifier(),
+            "222222".toNaptanStopIdentifier(),
+            "333333".toNaptanStopIdentifier()
+        )
+        whenever(serviceStopsRepository.getServicesForStopsFlow(stopIdentifiers))
             .thenReturn(
                 flowOf(
                     mapOf(
-                        "111111" to listOf("1", "2", "3"),
-                        "333333" to listOf("1")
+                        "111111".toNaptanStopIdentifier() to
+                            listOf(service(2), service(1), service(3)),
+                        "333333".toNaptanStopIdentifier() to listOf(service(1))
                     )
                 )
             )
@@ -188,62 +242,62 @@ class FavouriteStopsRetrieverTest {
     @Test
     fun allFavouriteStopsFlowWithChangingFavouritesEmitsExpectedLists() = runTest {
         val favouriteStops1 = listOf(
-            FavouriteStop("111111", "Favourite 1"),
-            FavouriteStop("222222", "Favourite 2"),
-            FavouriteStop("333333", "Favourite 3")
+            FavouriteStop("111111".toNaptanStopIdentifier(), "Favourite 1"),
+            FavouriteStop("222222".toNaptanStopIdentifier(), "Favourite 2"),
+            FavouriteStop("333333".toNaptanStopIdentifier(), "Favourite 3")
         )
         val favouriteStops2 = listOf(
-            FavouriteStop("111111", "Favourite 1"),
-            FavouriteStop("333333", "Favourite 3")
+            FavouriteStop("111111".toNaptanStopIdentifier(), "Favourite 1"),
+            FavouriteStop("333333".toNaptanStopIdentifier(), "Favourite 3")
         )
         val favouriteStops3 = listOf(
-            FavouriteStop("444444", "Favourite 4"),
-            FavouriteStop("111111", "Favourite 1"),
-            FavouriteStop("222222", "Favourite 2")
+            FavouriteStop("444444".toNaptanStopIdentifier(), "Favourite 4"),
+            FavouriteStop("111111".toNaptanStopIdentifier(), "Favourite 1"),
+            FavouriteStop("222222".toNaptanStopIdentifier(), "Favourite 2")
         )
         val expected1 = listOf(
             UiFavouriteStop(
-                FavouriteStop("111111", "Favourite 1"),
-                listOf("1", "2"),
+                FavouriteStop("111111".toNaptanStopIdentifier(), "Favourite 1"),
+                listOf(service(1), service(2)),
                 false
             ),
             UiFavouriteStop(
-                FavouriteStop("222222", "Favourite 2"),
-                listOf("3", "4"),
+                FavouriteStop("222222".toNaptanStopIdentifier(), "Favourite 2"),
+                listOf(service(3), service(4)),
                 false
             ),
             UiFavouriteStop(
-                FavouriteStop("333333", "Favourite 3"),
-                listOf("5", "6"),
+                FavouriteStop("333333".toNaptanStopIdentifier(), "Favourite 3"),
+                listOf(service(5), service(6)),
                 false
             )
         )
         val expected2 = listOf(
             UiFavouriteStop(
-                FavouriteStop("111111", "Favourite 1"),
-                listOf("1", "2"),
+                FavouriteStop("111111".toNaptanStopIdentifier(), "Favourite 1"),
+                listOf(service(1), service(2)),
                 false
             ),
             UiFavouriteStop(
-                FavouriteStop("333333", "Favourite 3"),
-                listOf("5", "6"),
+                FavouriteStop("333333".toNaptanStopIdentifier(), "Favourite 3"),
+                listOf(service(5), service(6)),
                 false
             )
         )
         val expected3 = listOf(
             UiFavouriteStop(
-                FavouriteStop("444444", "Favourite 4"),
-                listOf("7", "8"),
+                FavouriteStop("444444".toNaptanStopIdentifier(), "Favourite 4"),
+                listOf(service(7), service(8)),
                 false
             ),
             UiFavouriteStop(
-                FavouriteStop("111111", "Favourite 1"),
-                listOf("1", "2"),
+                FavouriteStop("111111".toNaptanStopIdentifier(), "Favourite 1"),
+                listOf(service(1), service(2)),
                 false
             ),
             UiFavouriteStop(
-                FavouriteStop("222222", "Favourite 2"),
-                listOf("3", "4"),
+                FavouriteStop("222222".toNaptanStopIdentifier(), "Favourite 2"),
+                listOf(service(3), service(4)),
                 false
             )
         )
@@ -261,10 +315,10 @@ class FavouriteStopsRetrieverTest {
             .thenReturn(
                 flowOf(
                     mapOf(
-                        "111111" to listOf("1", "2"),
-                        "222222" to listOf("3", "4"),
-                        "333333" to listOf("5", "6"),
-                        "444444" to listOf("7", "8")
+                        "111111".toNaptanStopIdentifier() to listOf(service(2), service(1)),
+                        "222222".toNaptanStopIdentifier() to listOf(service(3), service(4)),
+                        "333333".toNaptanStopIdentifier() to listOf(service(6), service(5)),
+                        "444444".toNaptanStopIdentifier() to listOf(service(7), service(8))
                     )
                 )
             )
@@ -281,83 +335,88 @@ class FavouriteStopsRetrieverTest {
     @Test
     fun allFavouriteStopsFlowWithChangingServicesEmitsExpectedList() = runTest {
         val favouriteStops = listOf(
-            FavouriteStop("111111", "Favourite 1"),
-            FavouriteStop("222222", "Favourite 2"),
-            FavouriteStop("333333", "Favourite 3")
+            FavouriteStop("111111".toNaptanStopIdentifier(), "Favourite 1"),
+            FavouriteStop("222222".toNaptanStopIdentifier(), "Favourite 2"),
+            FavouriteStop("333333".toNaptanStopIdentifier(), "Favourite 3")
         )
         val expected1 = listOf(
             UiFavouriteStop(
-                FavouriteStop("111111", "Favourite 1"),
-                listOf("1", "2"),
+                FavouriteStop("111111".toNaptanStopIdentifier(), "Favourite 1"),
+                listOf(service(1), service(2)),
                 false
             ),
             UiFavouriteStop(
-                FavouriteStop("222222", "Favourite 2"),
-                listOf("3", "4"),
+                FavouriteStop("222222".toNaptanStopIdentifier(), "Favourite 2"),
+                listOf(service(3), service(4)),
                 false
             ),
             UiFavouriteStop(
-                FavouriteStop("333333", "Favourite 3"),
-                listOf("5", "6"),
+                FavouriteStop("333333".toNaptanStopIdentifier(), "Favourite 3"),
+                listOf(service(5), service(6)),
                 false
             )
         )
         val expected2 = listOf(
             UiFavouriteStop(
-                FavouriteStop("111111", "Favourite 1"),
-                listOf("1", "2"),
+                FavouriteStop("111111".toNaptanStopIdentifier(), "Favourite 1"),
+                listOf(service(1), service(2)),
                 false
             ),
             UiFavouriteStop(
-                FavouriteStop("222222", "Favourite 2"),
-                listOf("7", "8"),
+                FavouriteStop("222222".toNaptanStopIdentifier(), "Favourite 2"),
+                listOf(service(7), service(8)),
                 false
             ),
             UiFavouriteStop(
-                FavouriteStop("333333", "Favourite 3"),
-                listOf("5", "6"),
+                FavouriteStop("333333".toNaptanStopIdentifier(), "Favourite 3"),
+                listOf(service(5), service(6)),
                 false
             )
         )
         val expected3 = listOf(
             UiFavouriteStop(
-                FavouriteStop("111111", "Favourite 1"),
-                listOf("9", "10"),
+                FavouriteStop("111111".toNaptanStopIdentifier(), "Favourite 1"),
+                // ...seemingly in wrong order, because of natural sort
+                listOf(service(10), service(9)),
                 false
             ),
             UiFavouriteStop(
-                FavouriteStop("222222", "Favourite 2"),
-                listOf("7", "8"),
+                FavouriteStop("222222".toNaptanStopIdentifier(), "Favourite 2"),
+                listOf(service(7), service(8)),
                 false
             ),
             UiFavouriteStop(
-                FavouriteStop("333333", "Favourite 3"),
-                listOf("5", "6"),
+                FavouriteStop("333333".toNaptanStopIdentifier(), "Favourite 3"),
+                listOf(service(5), service(6)),
                 false
             )
         )
         whenever(favouritesRepository.allFavouriteStopsFlow)
             .thenReturn(flowOf(favouriteStops))
-        val stopCodes = setOf("111111", "222222", "333333")
-        whenever(serviceStopsRepository.getServicesForStopsFlow(stopCodes))
+        val stopIdentifiers = setOf(
+            "111111".toNaptanStopIdentifier(),
+            "222222".toNaptanStopIdentifier(),
+            "333333".toNaptanStopIdentifier()
+        )
+        whenever(serviceStopsRepository.getServicesForStopsFlow(stopIdentifiers))
             .thenReturn(
                 intervalFlowOf(
                     0L,
                     100L,
                     mapOf(
-                        "111111" to listOf("1", "2"),
-                        "222222" to listOf("3", "4"),
-                        "333333" to listOf("5", "6")
+                        "111111".toNaptanStopIdentifier() to listOf(service(1), service(2)),
+                        "222222".toNaptanStopIdentifier() to listOf(service(4), service(3)),
+                        "333333".toNaptanStopIdentifier() to listOf(service(5), service(6))
                     ),
                     mapOf(
-                        "111111" to listOf("1", "2"),
-                        "222222" to listOf("7", "8"),
-                        "333333" to listOf("5", "6")
+                        "111111".toNaptanStopIdentifier() to listOf(service(1), service(2)),
+                        "222222".toNaptanStopIdentifier() to listOf(service(8), service(7)),
+                        "333333".toNaptanStopIdentifier() to listOf(service(5), service(6))
                     ),
                     mapOf(
-                        "111111" to listOf("9", "10"),
-                        "222222" to listOf("7", "8"),
-                        "333333" to listOf("5", "6")
+                        "111111".toNaptanStopIdentifier() to listOf(service(10), service(9)),
+                        "222222".toNaptanStopIdentifier() to listOf(service(7), service(8)),
+                        "333333".toNaptanStopIdentifier() to listOf(service(6), service(5))
                     )
                 )
             )
@@ -368,5 +427,12 @@ class FavouriteStopsRetrieverTest {
             assertEquals(expected2, awaitItem())
             assertEquals(expected3, awaitItem())
         }
+    }
+
+    private fun service(id: Int): ServiceDescriptor {
+        return FakeServiceDescriptor(
+            serviceName = id.toString(),
+            operatorCode = "TEST$id"
+        )
     }
 }

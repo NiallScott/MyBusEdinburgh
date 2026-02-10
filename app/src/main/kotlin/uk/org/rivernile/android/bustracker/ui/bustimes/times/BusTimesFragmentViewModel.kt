@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -49,6 +49,7 @@ import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import uk.org.rivernile.android.bustracker.core.time.ElapsedTimeCalculator
@@ -88,9 +89,9 @@ class BusTimesFragmentViewModel @Inject constructor(
     companion object {
 
         /**
-         * State key for the stop code.
+         * State key for the stop identifier.
          */
-        const val STATE_STOP_CODE = Arguments.STATE_STOP_CODE
+        const val STATE_STOP_IDENTIFIER = Arguments.STATE_STOP_IDENTIFIER
     }
 
     /**
@@ -114,12 +115,12 @@ class BusTimesFragmentViewModel @Inject constructor(
     private val refresh = RefreshLiveData(refreshController)
 
     /**
-     * This exposes the stop code as a [LiveData]. It is distinct as it only delivers stop code
-     * changes when an actual change occurs. If an update is made to the stop code that is identical
-     * to the previously held code, this won't be delivered in this [LiveData].
+     * This exposes the stop identifier as a [LiveData]. It is distinct as it only delivers stop
+     * identifier changes when an actual change occurs. If an update is made to the stop identifier
+     * that is identical to the previously held code, this won't be delivered in this [LiveData].
      */
-    private val distinctStopCodeLiveData = arguments
-        .stopCodeFlow
+    private val distinctStopIdentifierLiveData = arguments
+        .stopIdentifierFlow
         .asLiveData(viewModelScope.coroutineContext)
         .distinctUntilChanged()
 
@@ -138,8 +139,8 @@ class BusTimesFragmentViewModel @Inject constructor(
      * This [LiveData] emits whether the sorted by time item is enabled or not.
      */
     val isSortedByTimeEnabledLiveData = arguments
-        .stopCodeFlow
-        .map { !it.isNullOrEmpty() }
+        .stopIdentifierFlow
+        .map { it != null }
         .distinctUntilChanged()
         .asLiveData(viewModelScope.coroutineContext)
 
@@ -160,8 +161,8 @@ class BusTimesFragmentViewModel @Inject constructor(
      * This [LiveData] emits whether the auto refresh item is enabled or not.
      */
     val isAutoRefreshEnabledLiveData = arguments
-        .stopCodeFlow
-        .map { !it.isNullOrEmpty() }
+        .stopIdentifierFlow
+        .map { it != null }
         .distinctUntilChanged()
         .asLiveData(viewModelScope.coroutineContext)
 
@@ -183,8 +184,8 @@ class BusTimesFragmentViewModel @Inject constructor(
      * Show loading progress to the user. If there is no stop code, this will emit `null`.
      * Otherwise, it will emit the progress state of the loading live times.
      */
-    val showProgressLiveData = distinctStopCodeLiveData.switchMap { stopCode ->
-        if (!stopCode.isNullOrEmpty()) {
+    val showProgressLiveData = distinctStopIdentifierLiveData.switchMap { stopIdentifier ->
+        if (stopIdentifier != null) {
             liveTimes.map {
                 it is UiTransformedResult.InProgress
             }
@@ -335,10 +336,10 @@ class BusTimesFragmentViewModel @Inject constructor(
     /**
      * This is called when a parent item in the live times list has been clicked.
      *
-     * @param serviceName The name of the service represented by the parent item.
+     * @param serviceDescriptor The descriptor of the service represented by the parent item.
      */
-    fun onParentItemClicked(serviceName: String) {
-        expandedServicesTracker.onServiceClicked(serviceName)
+    fun onParentItemClicked(serviceDescriptor: ServiceDescriptor) {
+        expandedServicesTracker.onServiceClicked(serviceDescriptor)
     }
 
     /**

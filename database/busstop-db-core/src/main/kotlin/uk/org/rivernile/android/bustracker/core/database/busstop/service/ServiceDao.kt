@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,32 +27,36 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop.service
 
 import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 
 /**
  * This DAO is used to access service data in the bus stop database.
  *
  * @author Niall Scott
  */
-interface ServiceDao {
+public interface ServiceDao {
 
     /**
      * A [Flow] which emits a [List] of all [ServiceWithColour], if available.
      */
-    val allServiceNamesWithColourFlow: Flow<List<ServiceWithColour>?>
+    public val allServiceNamesWithColourFlow: Flow<List<ServiceWithColour>?>
 
     /**
-     * Get a [Flow] which emits a [List] of all [ServiceWithColour] for a given [stopCode], if
+     * Get a [Flow] which emits a [List] of all [ServiceWithColour] for a given [stopNaptanCode], if
      * available.
      *
-     * @return A [Flow] which emits a [List] of all [ServiceWithColour] for a given [stopCode], if
-     * available.
+     * @param stopNaptanCode The Naptan code of the stop to get.
+     * @return A [Flow] which emits a [List] of all [ServiceWithColour] for a given
+     * [stopNaptanCode], if available.
      */
-    fun getServiceNamesWithColourFlow(stopCode: String): Flow<List<ServiceWithColour>?>
+    public fun getServiceNamesWithColourFlow(
+        stopNaptanCode: String
+    ): Flow<List<ServiceWithColour>?>
 
     /**
      * A [Flow] which emits the number of services.
      */
-    val serviceCountFlow: Flow<Int?>
+    public val serviceCountFlow: Flow<Int?>
 
     /**
      * Get a [Flow] which emits colours for services. If [services] is specified, then only the
@@ -60,18 +64,20 @@ interface ServiceDao {
      *
      * @param services The services to get colours for, or `null` if colours for all services should
      * be returned.
-     * @return A [Flow] which emits [Map]s where the service name is the key and the colour for the
-     * service is the value. The [Flow] may emit `null` items.
+     * @return A [Flow] which emits [Map]s where the service descriptor is the key and the colours
+     * for the service is the value. The [Flow] may emit `null` items.
      */
-    fun getColoursForServicesFlow(services: Set<String>?): Flow<Map<String, Int?>?>
+    public fun getColoursForServicesFlow(
+        services: Set<ServiceDescriptor>?
+    ): Flow<Map<ServiceDescriptor, ServiceColours>?>
 
     /**
-     * Get a [Flow] which emits [ServiceDetails] for the given [stopCode].
+     * Get a [Flow] which emits [ServiceDetails] for the given [naptanCode].
      *
-     * @param stopCode The stop code to get [ServiceDetails] for.
-     * @return A [Flow] which emits a [List] of [ServiceDetails] for the given stop code. May be
+     * @param naptanCode The stop code to get [ServiceDetails] for.
+     * @return A [Flow] which emits a [List] of [ServiceDetails] for the given Naptan code. May be
      * `null` if there are no known services for the given stop code, or if there was some other
      * issue getting the details.
      */
-    fun getServiceDetailsFlow(stopCode: String): Flow<List<ServiceDetails>?>
+    public fun getServiceDetailsFlow(naptanCode: String): Flow<List<ServiceDetails>?>
 }

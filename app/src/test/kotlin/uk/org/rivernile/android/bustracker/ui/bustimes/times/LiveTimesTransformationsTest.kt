@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.livetimes.IsNightServiceDetector
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -60,17 +61,17 @@ class LiveTimesTransformationsTest {
         val transformations = createLiveTimesTransformations()
         val services = listOf(
             UiService(
-                "1",
+                service1,
                 null,
                 emptyList()
             ),
             UiService(
-                "2",
+                service2,
                 null,
                 emptyList()
             ),
             UiService(
-                "3",
+                service3,
                 null,
                 emptyList()
             )
@@ -88,29 +89,29 @@ class LiveTimesTransformationsTest {
         )
         val services = listOf(
             UiService(
-                "1",
+                service1,
                 null,
                 emptyList()
             ),
             UiService(
-                "2",
+                service2,
                 null,
                 emptyList()
             ),
             UiService(
-                "3",
+                service3,
                 null,
                 emptyList()
             )
         )
         val expected = listOf(
             UiService(
-                "1",
+                service1,
                 null,
                 emptyList()
             ),
             UiService(
-                "3",
+                service3,
                 null,
                 emptyList()
             )
@@ -143,7 +144,7 @@ class LiveTimesTransformationsTest {
         val date = Clock.System.now()
         val services = listOf(
             UiService(
-                "1",
+                service1,
                 null,
                 listOf(
                     UiVehicle(
@@ -156,12 +157,12 @@ class LiveTimesTransformationsTest {
                 )
             ),
             UiService(
-                "2",
+                service2,
                 null,
                 emptyList()
             ),
             UiService(
-                "3",
+                service3,
                 null,
                 listOf(
                     UiVehicle(
@@ -175,7 +176,7 @@ class LiveTimesTransformationsTest {
         )
         val expected = listOf(
             UiService(
-                "3",
+                service3,
                 null,
                 listOf(
                     UiVehicle(
@@ -188,7 +189,7 @@ class LiveTimesTransformationsTest {
                 )
             ),
             UiService(
-                "1",
+                service1,
                 null,
                 listOf(
                     UiVehicle(
@@ -201,7 +202,7 @@ class LiveTimesTransformationsTest {
                 )
             ),
             UiService(
-                "2",
+                service2,
                 null,
                 emptyList()
             )
@@ -218,7 +219,7 @@ class LiveTimesTransformationsTest {
         val date = Clock.System.now()
         val services = listOf(
             UiService(
-                "2",
+                service2,
                 null,
                 listOf(
                     UiVehicle(
@@ -231,7 +232,7 @@ class LiveTimesTransformationsTest {
                 )
             ),
             UiService(
-                "1",
+                service1,
                 null,
                 listOf(
                     UiVehicle(
@@ -244,7 +245,7 @@ class LiveTimesTransformationsTest {
                 )
             ),
             UiService(
-                "3",
+                service3,
                 null,
                 listOf(
                     UiVehicle(
@@ -259,7 +260,7 @@ class LiveTimesTransformationsTest {
         )
         val expected = listOf(
             UiService(
-                "3",
+                service3,
                 null,
                 listOf(
                     UiVehicle(
@@ -272,7 +273,7 @@ class LiveTimesTransformationsTest {
                 )
             ),
             UiService(
-                "1",
+                service1,
                 null,
                 listOf(
                     UiVehicle(
@@ -285,7 +286,7 @@ class LiveTimesTransformationsTest {
                 )
             ),
             UiService(
-                "2",
+                service2,
                 null,
                 listOf(
                     UiVehicle(
@@ -318,7 +319,7 @@ class LiveTimesTransformationsTest {
         val date = Clock.System.now()
         val services = listOf(
             UiService(
-                "1",
+                service1,
                 null,
                 listOf(
                     UiVehicle(
@@ -331,12 +332,12 @@ class LiveTimesTransformationsTest {
                 )
             ),
             UiService(
-                "2",
+                service2,
                 null,
                 emptyList()
             ),
             UiService(
-                "3",
+                service3,
                 null,
                 listOf(
                     UiVehicle(
@@ -351,7 +352,7 @@ class LiveTimesTransformationsTest {
         )
         val expected = listOf(
             UiLiveTimesItem(
-                "1",
+                service1,
                 null,
                 UiVehicle(
                     "Destination",
@@ -364,7 +365,7 @@ class LiveTimesTransformationsTest {
                 false
             ),
             UiLiveTimesItem(
-                "3",
+                service3,
                 null,
                 UiVehicle(
                     "Destination",
@@ -389,7 +390,7 @@ class LiveTimesTransformationsTest {
         val date = Clock.System.now()
         val services = listOf(
             UiService(
-                "1",
+                service1,
                 null,
                 listOf(
                     UiVehicle(
@@ -409,7 +410,7 @@ class LiveTimesTransformationsTest {
                 )
             ),
             UiService(
-                "3",
+                service3,
                 null,
                 listOf(
                     UiVehicle(
@@ -431,7 +432,7 @@ class LiveTimesTransformationsTest {
         )
         val expected = listOf(
             UiLiveTimesItem(
-                "1",
+                service1,
                 null,
                 UiVehicle(
                     "Destination",
@@ -444,7 +445,7 @@ class LiveTimesTransformationsTest {
                 true
             ),
             UiLiveTimesItem(
-                "1",
+                service1,
                 null,
                 UiVehicle(
                     "Destination",
@@ -457,7 +458,7 @@ class LiveTimesTransformationsTest {
                 true
             ),
             UiLiveTimesItem(
-                "3",
+                service3,
                 null,
                 UiVehicle(
                     "Destination",
@@ -471,7 +472,7 @@ class LiveTimesTransformationsTest {
             )
         )
 
-        val result = transformations.applyExpansions(services, setOf("1"))
+        val result = transformations.applyExpansions(services, setOf(service1))
 
         assertEquals(expected, result)
     }
@@ -482,7 +483,7 @@ class LiveTimesTransformationsTest {
         val date = Clock.System.now()
         val services = listOf(
             UiService(
-                "1",
+                service1,
                 null,
                 listOf(
                     UiVehicle(
@@ -502,7 +503,7 @@ class LiveTimesTransformationsTest {
                 )
             ),
             UiService(
-                "3",
+                service3,
                 null,
                 listOf(
                     UiVehicle(
@@ -524,7 +525,7 @@ class LiveTimesTransformationsTest {
         )
         val expected = listOf(
             UiLiveTimesItem(
-                "1",
+                service1,
                 null,
                 UiVehicle(
                     "Destination",
@@ -537,7 +538,7 @@ class LiveTimesTransformationsTest {
                 true
             ),
             UiLiveTimesItem(
-                "1",
+                service1,
                 null,
                 UiVehicle(
                     "Destination",
@@ -550,7 +551,7 @@ class LiveTimesTransformationsTest {
                 true
             ),
             UiLiveTimesItem(
-                "3",
+                service3,
                 null,
                 UiVehicle(
                     "Destination",
@@ -563,7 +564,7 @@ class LiveTimesTransformationsTest {
                 true
             ),
             UiLiveTimesItem(
-                "3",
+                service3,
                 null,
                 UiVehicle(
                     "Destination",
@@ -577,7 +578,7 @@ class LiveTimesTransformationsTest {
             )
         )
 
-        val result = transformations.applyExpansions(services, setOf("1", "3"))
+        val result = transformations.applyExpansions(services, setOf(service1, service3))
 
         assertEquals(expected, result)
     }
@@ -589,7 +590,22 @@ class LiveTimesTransformationsTest {
             isNightServiceDetector = object : IsNightServiceDetector {
                 override fun isNightService(serviceName: String) = isNightService(serviceName)
             },
-            serviceComparator = naturalOrder()
+            serviceNameComparator = naturalOrder()
         )
     }
+
+    private val service1 get() = FakeServiceDescriptor(
+        serviceName = "1",
+        operatorCode = "TEST1"
+    )
+
+    private val service2 get() = FakeServiceDescriptor(
+        serviceName = "2",
+        operatorCode = "TEST2"
+    )
+
+    private val service3 get() = FakeServiceDescriptor(
+        serviceName = "3",
+        operatorCode = "TEST3"
+    )
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.services.FakeServicesRepository
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
@@ -436,8 +437,14 @@ class RealServiceUpdatesDisplayFetcherTest {
             onGetColoursForServicesFlow = {
                 flowOf(
                     mapOf(
-                        "1" to ServiceColours(1, 2),
-                        "2" to ServiceColours(3, 4)
+                        FakeServiceDescriptor(
+                            serviceName = "1",
+                            operatorCode = "TEST1"
+                        ) to ServiceColours(1, 2),
+                        FakeServiceDescriptor(
+                            serviceName = "2",
+                            operatorCode = "TEST2"
+                        ) to ServiceColours(3, 4)
                     )
                 )
             }

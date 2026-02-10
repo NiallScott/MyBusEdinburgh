@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,16 +26,27 @@
 
 package uk.org.rivernile.android.bustracker.core.database.settings.favouritestops
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
  * This Room [Entity] is used for storage of favourite stops.
  *
  * @author Niall Scott
  */
-@Entity(tableName = "favourite_stops")
+@Entity(
+    tableName = "favourite_stop"
+)
 internal data class RoomFavouriteStopEntity(
-    @PrimaryKey override val stopCode: String,
-    override val stopName: String
-) : FavouriteStopEntity
+    @PrimaryKey @ColumnInfo("stop_code") override val stopIdentifier: StopIdentifier,
+    @ColumnInfo("stop_name") override val stopName: String
+) : FavouriteStop
+
+internal fun FavouriteStop.toFavouriteStopEntity(): RoomFavouriteStopEntity {
+    return RoomFavouriteStopEntity(
+        stopIdentifier = stopIdentifier,
+        stopName = stopName
+    )
+}

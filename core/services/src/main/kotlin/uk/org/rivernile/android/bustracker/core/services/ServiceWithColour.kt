@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,15 +26,36 @@
 
 package uk.org.rivernile.android.bustracker.core.services
 
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.ServiceWithColour
+    as DatabaseServiceWithColour
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+
 /**
  * A tuple of a service name and optional colours.
  *
- * @property name The display name of the service.
+ * @property serviceDescriptor The descriptor of this service.
  * @property colours The display colours of the service. This may be `null` if no colours are
  * attributed.
  * @author Niall Scott
  */
-data class ServiceWithColour(
-    val name: String,
+public data class ServiceWithColour(
+    val serviceDescriptor: ServiceDescriptor,
     val colours: ServiceColours?
 )
+
+internal inline fun List<DatabaseServiceWithColour>.toServiceWithColourList(
+    colourProducer: (Int) -> Int?
+): List<ServiceWithColour> {
+    return map {
+        it.toServiceWithColour(colourProducer)
+    }
+}
+
+private inline fun DatabaseServiceWithColour.toServiceWithColour(
+    colourProducer: (Int) -> Int?
+): ServiceWithColour {
+    return ServiceWithColour(
+        serviceDescriptor = descriptor,
+        colours = colours.toServiceColours(colourProducer)
+    )
+}

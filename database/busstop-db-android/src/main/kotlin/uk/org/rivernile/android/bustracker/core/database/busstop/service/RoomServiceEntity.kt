@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.service
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -35,8 +36,11 @@ import androidx.room.PrimaryKey
  *
  * @property id The ID of the service.
  * @property name The display name of the service.
+ * @property operatorId The ID of the operator to look up in the `operator` table.
  * @property description The service description (i.e. its route).
- * @property hexColour The colour to attribute to the service, if available.
+ * @property colourPrimary The primary colour to attribute to the service, if available.
+ * @property colourOnPrimary The colour to disable on top of the primary colour of the service, if
+ * available.
  * @author Niall Scott
  */
 @Entity(
@@ -44,13 +48,15 @@ import androidx.room.PrimaryKey
     indices = [
         Index(
             name = "service_index",
-            value = [ "name" ]
+            value = [ "name", "operator_id" ]
         )
     ]
 )
 internal data class RoomServiceEntity(
     @PrimaryKey val id: Int,
     val name: String,
-    val description: String?,
-    val hexColour: String?
+    @ColumnInfo("operator_id") val operatorId: Int,
+    val description: String,
+    @ColumnInfo("colour_primary") val colourPrimary: String?,
+    @ColumnInfo("colour_on_primary") val colourOnPrimary: String?
 )

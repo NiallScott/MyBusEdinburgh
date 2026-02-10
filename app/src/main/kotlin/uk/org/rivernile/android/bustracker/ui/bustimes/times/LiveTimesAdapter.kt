@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,10 +32,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemBusTimesChildBinding
 import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemBusTimesParentBinding
 
-typealias OnParentClickedListener = (serviceName: String) -> Unit
+typealias OnParentClickedListener = (serviceDescriptor: ServiceDescriptor) -> Unit
 
 /**
  * This [ListAdapter] shows a list of live times. This is arranged in a parent-child way, whereby
@@ -107,7 +108,7 @@ class LiveTimesAdapter(
     }
 
     override fun getItemId(position: Int) = getItem(position)?.let {
-        ((it.serviceName.hashCode() * 31) + it.position).toLong()
+        ((it.serviceDescriptor.hashCode() * 31) + it.position).toLong()
     } ?: 0L
 
     /**
@@ -116,7 +117,7 @@ class LiveTimesAdapter(
     private class ItemEquator : DiffUtil.ItemCallback<UiLiveTimesItem>() {
 
         override fun areItemsTheSame(oldItem: UiLiveTimesItem, newItem: UiLiveTimesItem): Boolean {
-            return oldItem.serviceName == newItem.serviceName &&
+            return oldItem.serviceDescriptor == newItem.serviceDescriptor &&
                     oldItem.position == newItem.position
         }
 

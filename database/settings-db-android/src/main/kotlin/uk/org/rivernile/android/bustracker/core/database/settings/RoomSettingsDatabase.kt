@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,8 +28,12 @@ package uk.org.rivernile.android.bustracker.core.database.settings
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import uk.org.rivernile.android.bustracker.core.database.settings.alerts.RoomAlertEntity
-import uk.org.rivernile.android.bustracker.core.database.settings.alerts.RoomAlertsDao
+import androidx.room.TypeConverters
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.arrival.RoomArrivalAlertDao
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.arrival.RoomArrivalAlertEntity
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.arrival.RoomArrivalAlertServiceEntity
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.proximity.RoomProximityAlertDao
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.proximity.RoomProximityAlertEntity
 import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops.RoomFavouriteStopEntity
 import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops.RoomFavouriteStopsDao
 
@@ -39,13 +43,25 @@ import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops
  * @author Niall Scott
  */
 @Database(
-    version = 4,
+    version = 5,
     entities = [
-        RoomAlertEntity::class,
-        RoomFavouriteStopEntity::class
+        RoomArrivalAlertEntity::class,
+        RoomArrivalAlertServiceEntity::class,
+        RoomFavouriteStopEntity::class,
+        RoomProximityAlertEntity::class
+    ]
+)
+@TypeConverters(
+    value = [
+        RoomSettingsTypeConverters::class
     ]
 )
 internal abstract class RoomSettingsDatabase : RoomDatabase() {
+
+    /**
+     * The [RoomArrivalAlertDao].
+     */
+    abstract val arrivalAlertDao: RoomArrivalAlertDao
 
     /**
      * The [RoomFavouriteStopsDao].
@@ -53,7 +69,7 @@ internal abstract class RoomSettingsDatabase : RoomDatabase() {
     abstract val favouriteStopsDao: RoomFavouriteStopsDao
 
     /**
-     * The [RoomAlertsDao].
+     * The [RoomProximityAlertDao].
      */
-    abstract val alertsDao: RoomAlertsDao
+    abstract val proximityAlertDao: RoomProximityAlertDao
 }

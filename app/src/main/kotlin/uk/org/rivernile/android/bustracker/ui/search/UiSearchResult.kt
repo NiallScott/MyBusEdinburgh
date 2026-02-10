@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,20 +26,23 @@
 
 package uk.org.rivernile.android.bustracker.ui.search
 
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
+import uk.org.rivernile.android.bustracker.core.busstops.StopName
+import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
  * This class contains the UI data for showing a single stop search result within the UI.
  *
- * @property stopCode The stop code of the search result.
+ * @property stopIdentifier The stop identifier of the search result.
  * @property stopName The name details for the stop.
  * @property orientation The stop orientation.
  * @property services The service listing for the stop.
  * @author Niall Scott
  */
 data class UiSearchResult(
-    val stopCode: String,
+    val stopIdentifier: StopIdentifier,
     val stopName: StopName?,
     val orientation: StopOrientation,
-    val services: String?)
+    val services: List<ServiceDescriptor>?
+)

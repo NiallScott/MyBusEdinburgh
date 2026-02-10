@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,7 +33,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.busstops.StopName
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import javax.inject.Inject
@@ -54,14 +55,14 @@ class FavouriteStopFetcher @Inject constructor(
 ) {
 
     /**
-     * Load combined stop details for the given stop code.
+     * Load combined stop details for the given stop identifier.
      *
-     * If the stop code is `null` or empty, [UiState.InProgress] will be the only state emitted.
+     * If the stop identifier is `null`, [UiState.InProgress] will be the only state emitted.
      *
-     * @param stopCode The stop code to get favourite information for.
+     * @param stopIdentifier The stop to get favourite information for.
      */
-    fun loadFavouriteStopAndDetails(stopCode: String?): Flow<UiState> {
-        return stopCode?.ifEmpty { null }?.let { sc ->
+    fun loadFavouriteStopAndDetails(stopIdentifier: StopIdentifier?): Flow<UiState> {
+        return stopIdentifier?.let { sc ->
             createFavouriteStopFlow(sc).combine(createStopNameFlow(sc)) { favourite, name ->
                 if (favourite is FavouriteResult.Item &&
                         name is StopNameResult.Item) {
@@ -76,26 +77,26 @@ class FavouriteStopFetcher @Inject constructor(
     }
 
     /**
-     * Create a new [Flow] which loads the [FavouriteStop] for the given stop code and emits
+     * Create a new [Flow] which loads the [FavouriteStop] for the given stop identifier and emits
      * [FavouriteResult] objects.
      *
-     * @param stopCode The stop code to load the [FavouriteStop] for.
-     * @return A new [Flow] which loads the [FavouriteStop] for the given stop code.
+     * @param stopIdentifier The stop to load the [FavouriteStop] for.
+     * @return A new [Flow] which loads the [FavouriteStop] for the given stop identifier.
      */
-    private fun createFavouriteStopFlow(stopCode: String): Flow<FavouriteResult> =
-        favouritesRepository.getFavouriteStopFlow(stopCode)
+    private fun createFavouriteStopFlow(stopIdentifier: StopIdentifier): Flow<FavouriteResult> =
+        favouritesRepository.getFavouriteStopFlow(stopIdentifier)
             .map { FavouriteResult.Item(it) }
             .onStart<FavouriteResult> { emit(FavouriteResult.InProgress) }
 
     /**
-     * Create a new [Flow] which loads the [StopName] for the given stop code and emits
+     * Create a new [Flow] which loads the [StopName] for the given stop identifier and emits
      * [StopNameResult] objects.
      *
-     * @param stopCode The stop code to load the [StopName] for.
-     * @return A new [Flow] which loads the [StopName] for the given stop code.
+     * @param stopIdentifier The stop to load the [StopName] for.
+     * @return A new [Flow] which loads the [StopName] for the given stop identifier.
      */
-    private fun createStopNameFlow(stopCode: String): Flow<StopNameResult> =
-        busStopsRepository.getNameForStopFlow(stopCode)
+    private fun createStopNameFlow(stopIdentifier: StopIdentifier): Flow<StopNameResult> =
+        busStopsRepository.getNameForStopFlow(stopIdentifier)
             .map { StopNameResult.Item(it) }
             .onStart<StopNameResult> { emit(StopNameResult.InProgress) }
 

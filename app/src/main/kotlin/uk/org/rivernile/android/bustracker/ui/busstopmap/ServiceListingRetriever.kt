@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,9 @@ package uk.org.rivernile.android.bustracker.ui.busstopmap
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.sortByServiceName
 import uk.org.rivernile.android.bustracker.core.servicestops.ServiceStopsRepository
 import javax.inject.Inject
 
@@ -36,21 +39,23 @@ import javax.inject.Inject
  * This class is used to retrieve the service listing for stops for the stop map.
  *
  * @param serviceStopsRepository Used to get the service listing.
+ * @param serviceNameComparator Used to sort the services by name.
  * @author Niall Scott
  */
 class ServiceListingRetriever @Inject constructor(
-    private val serviceStopsRepository: ServiceStopsRepository
+    private val serviceStopsRepository: ServiceStopsRepository,
+    private val serviceNameComparator: Comparator<String>
 ) {
 
     /**
      * Gets a [kotlinx.coroutines.flow.Flow] of [UiServiceListing] which is the service listing
-     * for a given [stopCode].
+     * for a given [stopIdentifier].
      *
-     * @param stopCode The stop code to get the service listing for.
+     * @param stopIdentifier The stop to get the service listing for.
      * @return A [kotlinx.coroutines.flow.Flow] of [UiServiceListing] which is the service listing
-     * for a given [stopCode].
+     * for a given [stopIdentifier].
      */
-    fun getServiceListingFlow(stopCode: String?) = stopCode?.ifBlank { null }?.let { sc ->
+    fun getServiceListingFlow(stopIdentifier: StopIdentifier?) = stopIdentifier?.let { sc ->
         serviceStopsRepository.getServicesForStopFlow(sc)
             .map {
                 mapToUiServiceListing(sc, it)
@@ -61,15 +66,18 @@ class ServiceListingRetriever @Inject constructor(
     /**
      * Map the loaded [services] to the appropriate [UiServiceListing].
      *
-     * @param stopCode The stop code the service listing is for.
+     * @param stopIdentifier The stop the service listing is for.
      * @param services The loaded service listing.
      * @return The appropriate [UiServiceListing]. This will be [UiServiceListing.Success] when
      * [services] is not `null` and not empty. Otherwise it will be [UiServiceListing.Empty].
      */
     private fun mapToUiServiceListing(
-        stopCode: String,
-        services: List<String>?
-    ) = services?.ifEmpty { null }?.let {
-        UiServiceListing.Success(stopCode, it)
-    } ?: UiServiceListing.Empty(stopCode)
+        stopIdentifier: StopIdentifier,
+        services: List<ServiceDescriptor>?
+    ) = services
+        ?.ifEmpty { null }
+        ?.sortByServiceName(serviceNameComparator)
+        ?.let {
+            UiServiceListing.Success(stopIdentifier, it)
+        } ?: UiServiceListing.Empty(stopIdentifier)
 }

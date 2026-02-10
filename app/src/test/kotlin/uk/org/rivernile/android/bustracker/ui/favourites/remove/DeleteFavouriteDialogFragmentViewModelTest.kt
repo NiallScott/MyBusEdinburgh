@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,6 +38,9 @@ import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
@@ -52,7 +55,7 @@ class DeleteFavouriteDialogFragmentViewModelTest {
 
     companion object {
 
-        private const val STATE_STOP_CODE = "stopCode"
+        private const val STATE_STOP_IDENTIFIER = "stopIdentifier"
     }
 
     @get:Rule
@@ -62,7 +65,7 @@ class DeleteFavouriteDialogFragmentViewModelTest {
     private lateinit var favouritesRepository: FavouritesRepository
 
     @Test
-    fun onUserConfirmDeletionDoesNotCauseDeletionWhenStopCodeIsNull() = runTest {
+    fun onUserConfirmDeletionDoesNotCauseDeletionWhenStopIdentifierIsNull() = runTest {
         val viewModel = createViewModel(null)
 
         viewModel.onUserConfirmDeletion()
@@ -72,8 +75,8 @@ class DeleteFavouriteDialogFragmentViewModelTest {
     }
 
     @Test
-    fun onUserConfirmDeletionDoesNotCauseDeletionWhenStopCodeIsEmpty() = runTest {
-        val viewModel = createViewModel("")
+    fun onUserConfirmDeletionDoesNotCauseDeletionWhenStopIdentifierIsEmpty() = runTest {
+        val viewModel = createViewModel("".toNaptanStopIdentifier())
 
         viewModel.onUserConfirmDeletion()
 
@@ -82,20 +85,24 @@ class DeleteFavouriteDialogFragmentViewModelTest {
     }
 
     @Test
-    fun onUserConfirmDeletionCausesDeletionWhenStopCodeIsPopulated() = runTest {
-        val viewModel = createViewModel("123456")
+    fun onUserConfirmDeletionCausesDeletionWhenStopIdentifierIsPopulated() = runTest {
+        val viewModel = createViewModel("123456".toNaptanStopIdentifier())
 
         viewModel.onUserConfirmDeletion()
         advanceUntilIdle()
 
         verify(favouritesRepository)
-                .removeFavouriteStop("123456")
+                .removeFavouriteStop("123456".toNaptanStopIdentifier())
     }
 
-    private fun createViewModel(stopCode: String?): DeleteFavouriteDialogFragmentViewModel {
+    private fun createViewModel(
+        stopIdentifier: StopIdentifier?
+    ): DeleteFavouriteDialogFragmentViewModel {
         val savedState = SavedStateHandle(
             mapOf(
-                STATE_STOP_CODE to stopCode))
+                STATE_STOP_IDENTIFIER to stopIdentifier?.toParcelableStopIdentifier()
+            )
+        )
 
         return DeleteFavouriteDialogFragmentViewModel(
             savedState,

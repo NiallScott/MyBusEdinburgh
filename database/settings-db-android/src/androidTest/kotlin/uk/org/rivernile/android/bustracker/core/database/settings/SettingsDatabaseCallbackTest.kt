@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,16 +27,13 @@
 package uk.org.rivernile.android.bustracker.core.database.settings
 
 import androidx.room.Room
-import androidx.room.testing.MigrationTestHelper
 import androidx.sqlite.db.SupportSQLiteDatabase
-import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
-import androidx.test.ext.junit.rules.DeleteFilesRule
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
+import kotlin.test.AfterTest
 
 /**
  * Tests for [SettingsDatabaseCallback].
@@ -45,59 +42,83 @@ import org.junit.Test
  */
 class SettingsDatabaseCallbackTest {
 
-    companion object {
-
-        private const val TEST_DB = "callback-test"
-    }
-
-    @get:Rule
-    val helper = MigrationTestHelper(
-        InstrumentationRegistry.getInstrumentation(),
-        RoomSettingsDatabase::class.java,
-        emptyList(),
-        FrameworkSQLiteOpenHelperFactory()
-    )
-
-    @get:Rule
-    val deleteFilesRule = DeleteFilesRule()
-
-    private lateinit var callback: SettingsDatabaseCallback
+    private lateinit var roomDatabase: RoomSettingsDatabase
+    private lateinit var database: SupportSQLiteDatabase
 
     @Before
     fun setUp() {
-        callback = SettingsDatabaseCallback()
+        roomDatabase = Room
+            .inMemoryDatabaseBuilder<RoomSettingsDatabase>(
+                context = InstrumentationRegistry.getInstrumentation().targetContext,
+            )
+            .addCallback(SettingsDatabaseCallback())
+            .build()
+        database = roomDatabase
+            .openHelper
+            .writableDatabase
+    }
+
+    @AfterTest
+    fun tearDown() {
+        database.close()
+        roomDatabase.close()
     }
 
     @Test
     fun callbackCreateAlertsTriggersOnCreation() {
         database.apply {
-            assertAlertTriggersExist(this)
+            assertAlertTablesTriggersExist()
+        }
+    }
+
+    @Test
+    fun insertArrivalAlertFiresTrigger() {
+        database.apply {
+            execSQL("""
+                INSERT INTO arrival_alert (
+                    time_added_millis, stop_code, time_trigger_minutes)
+                VALUES (
+                    0, '123456', 5)
+            """.trimIndent())
+            assertExpiredArrivalAlertExists()
+
+            execSQL("""
+                INSERT INTO arrival_alert (
+                    time_added_millis, stop_code, time_trigger_minutes)
+                VALUES (
+                    ${System.currentTimeMillis()}, '987654', 10)
+            """.trimIndent())
+
+            query("SELECT COUNT(*) FROM arrival_alert").use {
+                assertTrue(it.moveToNext())
+                assertEquals(1, it.getInt(0))
+            }
+
             close()
         }
     }
 
     @Test
-    fun insertAlertFiresTrigger() {
+    fun insertProximityAlertFiresTrigger() {
         database.apply {
             execSQL("""
-                INSERT INTO active_alerts (
-                    type, timeAdded, stopCode, distanceFrom, serviceNames, timeTrigger)
+                INSERT INTO proximity_alert (
+                    time_added_millis, stop_code, radius_trigger_meters)
                 VALUES (
-                    1, 0, '123456', 1, NULL, NULL)
+                    0, '123456', 100)
             """.trimIndent())
-            assertExpiredAlertExists()
+            assertExpiredProximityAlertExists()
 
             execSQL("""
-                INSERT INTO active_alerts (
-                    type, timeAdded, stopCode, distanceFrom, serviceNames, timeTrigger)
+                INSERT INTO proximity_alert (
+                    time_added_millis, stop_code, radius_trigger_meters)
                 VALUES (
-                    2, ${System.currentTimeMillis()}, '123456', NULL, '1,2,3', 1)
+                    ${System.currentTimeMillis()}, '987654', 250)
             """.trimIndent())
 
-            query("SELECT type FROM active_alerts").apply {
-                assertEquals(1, count)
-                assertTrue(moveToNext())
-                assertEquals(2, getInt(getColumnIndexOrThrow("type")))
+            query("SELECT COUNT(*) FROM proximity_alert").use {
+                assertTrue(it.moveToNext())
+                assertEquals(1, it.getInt(0))
                 close()
             }
 
@@ -106,34 +127,33 @@ class SettingsDatabaseCallbackTest {
     }
 
     @Test
-    fun updateAlertFiresTrigger() {
+    fun updateArrivalAlertFiresTrigger() {
         database.apply {
             execSQL("""
-                INSERT INTO active_alerts (
-                    type, timeAdded, stopCode, distanceFrom, serviceNames, timeTrigger)
+                INSERT INTO arrival_alert (
+                    time_added_millis, stop_code, time_trigger_minutes)
                 VALUES (
-                    2, ${System.currentTimeMillis()}, '123456', NULL, '1,2,3', 1)
+                    ${System.currentTimeMillis()}, '123456', 5)
             """.trimIndent())
 
             execSQL("""
-                INSERT INTO active_alerts (
-                    type, timeAdded, stopCode, distanceFrom, serviceNames, timeTrigger)
+                INSERT INTO arrival_alert (
+                    time_added_millis, stop_code, time_trigger_minutes)
                 VALUES (
-                    1, 0, '24680', 1, NULL, NULL)
+                    0, '24680', 10)
             """.trimIndent())
 
-            assertExpiredAlertExists()
+            assertExpiredArrivalAlertExists()
 
             execSQL("""
-                UPDATE active_alerts 
-                SET stopCode = '987654' 
-                WHERE stopCode = '123456'
+                UPDATE arrival_alert
+                SET stop_code = '987654'
+                WHERE stop_code = '123456'
             """.trimIndent())
 
-            query("SELECT type FROM active_alerts").apply {
-                assertEquals(1, count)
-                assertTrue(moveToNext())
-                assertEquals(2, getInt(getColumnIndexOrThrow("type")))
+            query("SELECT COUNT(*) FROM arrival_alert").use {
+                assertTrue(it.moveToNext())
+                assertEquals(1, it.getInt(0))
                 close()
             }
 
@@ -142,28 +162,33 @@ class SettingsDatabaseCallbackTest {
     }
 
     @Test
-    fun deleteAlertFiresTrigger() {
+    fun updateProximityAlertFiresTrigger() {
         database.apply {
             execSQL("""
-                INSERT INTO active_alerts (
-                    type, timeAdded, stopCode, distanceFrom, serviceNames, timeTrigger)
+                INSERT INTO proximity_alert (
+                    time_added_millis, stop_code, radius_trigger_meters)
                 VALUES (
-                    2, ${System.currentTimeMillis()}, '123456', NULL, '1,2,3', 1)
+                    ${System.currentTimeMillis()}, '123456', 100)
             """.trimIndent())
 
             execSQL("""
-                INSERT INTO active_alerts (
-                    type, timeAdded, stopCode, distanceFrom, serviceNames, timeTrigger)
+                INSERT INTO proximity_alert (
+                    time_added_millis, stop_code, radius_trigger_meters)
                 VALUES (
-                    1, 0, '24680', 1, NULL, NULL)
+                    0, '24680', 250)
             """.trimIndent())
 
-            assertExpiredAlertExists()
+            assertExpiredProximityAlertExists()
 
-            execSQL("DELETE FROM active_alerts WHERE stopCode = '123456'")
+            execSQL("""
+                UPDATE proximity_alert
+                SET stop_code = '987654'
+                WHERE stop_code = '123456'
+            """.trimIndent())
 
-            query("SELECT * FROM active_alerts").apply {
-                assertEquals(0, count)
+            query("SELECT COUNT(*) FROM proximity_alert").use {
+                assertTrue(it.moveToNext())
+                assertEquals(1, it.getInt(0))
                 close()
             }
 
@@ -171,24 +196,77 @@ class SettingsDatabaseCallbackTest {
         }
     }
 
-    private val database get() =
-        Room
-            .databaseBuilder(
-                InstrumentationRegistry.getInstrumentation().targetContext,
-                RoomSettingsDatabase::class.java,
-                TEST_DB
-            )
-            .addCallback(callback)
-            .build()
-            .openHelper
-            .writableDatabase
+    @Test
+    fun deleteArrivalAlertFiresTrigger() {
+        database.apply {
+            execSQL("""
+                INSERT INTO arrival_alert (
+                    time_added_millis, stop_code, time_trigger_minutes)
+                VALUES (
+                    ${System.currentTimeMillis()}, '123456', 5)
+            """.trimIndent())
 
-    private fun SupportSQLiteDatabase.assertExpiredAlertExists() {
-        query("SELECT timeAdded FROM active_alerts WHERE timeAdded = 0").apply {
-            assertEquals(1, count)
-            assertTrue(moveToNext())
-            assertEquals(0L, getLong(getColumnIndexOrThrow("timeAdded")))
+            execSQL("""
+                INSERT INTO arrival_alert (
+                    time_added_millis, stop_code, time_trigger_minutes)
+                VALUES (
+                    0, '24680', 10)
+            """.trimIndent())
+
+            assertExpiredArrivalAlertExists()
+
+            execSQL("DELETE FROM arrival_alert WHERE stop_code = '123456'")
+
+            query("SELECT * FROM arrival_alert").use {
+                assertEquals(0, it.count)
+            }
+
             close()
+        }
+    }
+
+    @Test
+    fun deleteProximityAlertFiresTrigger() {
+        database.apply {
+            execSQL("""
+                INSERT INTO proximity_alert (
+                    time_added_millis, stop_code, radius_trigger_meters)
+                VALUES (
+                    ${System.currentTimeMillis()}, '123456', 100)
+            """.trimIndent())
+
+            execSQL("""
+                INSERT INTO proximity_alert (
+                    time_added_millis, stop_code, radius_trigger_meters)
+                VALUES (
+                    0, '24680', 250)
+            """.trimIndent())
+
+            assertExpiredProximityAlertExists()
+
+            execSQL("DELETE FROM proximity_alert WHERE stop_code = '123456'")
+
+            query("SELECT * FROM proximity_alert").use {
+                assertEquals(0, it.count)
+            }
+
+            close()
+        }
+    }
+
+    private fun SupportSQLiteDatabase.assertExpiredArrivalAlertExists() {
+        query("SELECT time_added_millis FROM arrival_alert WHERE time_added_millis = 0").use {
+            assertEquals(1, it.count)
+            assertTrue(it.moveToNext())
+            assertEquals(0L, it.getLong(it.getColumnIndexOrThrow("time_added_millis")))
+        }
+    }
+
+    private fun SupportSQLiteDatabase.assertExpiredProximityAlertExists() {
+        query("SELECT time_added_millis FROM proximity_alert WHERE time_added_millis = 0").use {
+            assertEquals(1, it.count)
+            assertTrue(it.moveToNext())
+            assertEquals(0L, it.getLong(it.getColumnIndexOrThrow("time_added_millis")))
         }
     }
 }

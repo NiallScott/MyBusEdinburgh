@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+
 /**
  * Classes which wish to be informed when favourite click events happen should implement this
  * interface.
@@ -44,8 +46,8 @@ interface OnNearStopItemClickListener {
     /**
      * A nearest stop item has been long clicked.
      *
-     * @param stopCode The stop code of the long clicked nearest stop.
+     * @param stopIdentifier The stop of the long clicked nearest stop.
      * @return `true` if the long click was handled, otherwise `false`.
      */
-    fun onNearestStopLongClicked(stopCode: String): Boolean
+    fun onNearestStopLongClicked(stopIdentifier: StopIdentifier): Boolean
 }

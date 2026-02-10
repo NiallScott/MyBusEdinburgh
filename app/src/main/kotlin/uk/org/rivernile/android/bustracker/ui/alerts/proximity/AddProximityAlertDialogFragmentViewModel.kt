@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -49,9 +49,12 @@ import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertRequest
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
+import uk.org.rivernile.android.bustracker.core.busstops.StopName
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toStopIdentifier
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import javax.inject.Inject
 
@@ -81,29 +84,33 @@ class AddProximityAlertDialogFragmentViewModel @Inject constructor(
     companion object {
 
         /**
-         * This constant contains the key where the stop code is stored in the saved state.
+         * This constant contains the key where the stop identifier is stored in the saved state.
          */
-        const val STATE_STOP_CODE = "stopCode"
+        const val STATE_STOP_IDENTIFIER = "stopIdentifier"
     }
 
     /**
-     * This property is used to get and set the stop code the proximity alert should be added for.
+     * This property is used to get and set the stop identifier the proximity alert should be added for.
      */
-    var stopCode: String?
-        get() = savedState[STATE_STOP_CODE]
+    var stopIdentifier: ParcelableStopIdentifier?
+        get() = savedState[STATE_STOP_IDENTIFIER]
         set(value) {
-            savedState[STATE_STOP_CODE] = value
+            savedState[STATE_STOP_IDENTIFIER] = value
         }
 
-    private val stopCodeFlow = savedState.getStateFlow<String?>(STATE_STOP_CODE, null)
+    private val parcelableStopIdentifierFlow = savedState
+        .getStateFlow<ParcelableStopIdentifier?>(STATE_STOP_IDENTIFIER, null)
+
+    private val stopIdentifierFlow get() = parcelableStopIdentifierFlow
+        .map { it?.toStopIdentifier() }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val stopDetailsFlow = stopCodeFlow
+    private val stopDetailsFlow = stopIdentifierFlow
         .flatMapLatest(this::loadStopDetails)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     /**
-     * This [LiveData] emits the current [StopDetails] for the given stop code.
+     * This [LiveData] emits the current [StopDetails] for the given stop identifier.
      */
     val stopDetailsLiveData = stopDetailsFlow
         .asLiveData(viewModelScope.coroutineContext)
@@ -204,34 +211,36 @@ class AddProximityAlertDialogFragmentViewModel @Inject constructor(
 
     /**
      * Handle the user clicking on the 'Add' button which signals their intent to add a new
-     * proximity alert for the given stop code.
+     * proximity alert for the given stop identifier.
      *
      * @param meters The number of meters the user selected which is set as the bounds of the
      * proximity alert.
      */
     fun handleAddClicked(meters: Int) {
-        stopCode?.ifEmpty { null }?.let {
+        stopIdentifier?.let {
             // Uses the application CoroutineScope as the Dialog dismisses immediately, and we need
             // this task to finish. Fire and forget is fine here.
             applicationCoroutineScope.launch(defaultDispatcher) {
-                alertsRepository.addProximityAlert(ProximityAlertRequest(it, meters))
+                alertsRepository.addProximityAlert(
+                    ProximityAlertRequest(it.toStopIdentifier(), meters)
+                )
             }
         }
     }
 
     /**
-     * Load the details for the given [stopCode].
+     * Load the details for the given [stopIdentifier].
      *
-     * @param stopCode The stop code to load details for.
+     * @param stopIdentifier The stop to load details for.
      * @return A [kotlinx.coroutines.flow.Flow] containing the [StopDetails] (which emits new items
      * if the stop details change), or a [kotlinx.coroutines.flow.Flow] of `null` if the stop
-     * code is `null` or empty.
+     * identifier is `null`.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun loadStopDetails(stopCode: String?) = if (stopCode?.isNotEmpty() == true) {
-        busStopsRepository.getNameForStopFlow(stopCode)
+    private fun loadStopDetails(stopIdentifier: StopIdentifier?) = if (stopIdentifier != null) {
+        busStopsRepository.getNameForStopFlow(stopIdentifier)
             .mapLatest<StopName?, StopDetails?> {
-                StopDetails(stopCode, it)
+                StopDetails(stopIdentifier, it)
             }
             .onStart {
                 // Emit null as the first item to denote loading.

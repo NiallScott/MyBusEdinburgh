@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,7 +41,11 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toStopIdentifier
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import javax.inject.Inject
@@ -66,7 +70,7 @@ class StopDetailsFragmentViewModel @Inject constructor(
         /**
          * State key for stop code.
          */
-        const val STATE_STOP_CODE = "stopCode"
+        const val STATE_STOP_IDENTIFIER = "stopIdentifier"
         private const val STATE_ASKED_FOR_PERMISSIONS = "askedForPermissions"
 
         private const val LIVE_DATA_TIMEOUT_MILLIS = 1000L
@@ -75,9 +79,18 @@ class StopDetailsFragmentViewModel @Inject constructor(
     /**
      * The stop code to show details for.
      */
-    private val stopCode get() = stopCodeFlow.value
+    private val stopIdentifier get() = parcelableStopIdentifierFlow.value?.toStopIdentifier()
 
-    private val stopCodeFlow = savedState.getStateFlow<String?>(STATE_STOP_CODE, null)
+    private val parcelableStopIdentifierFlow = savedState
+        .getStateFlow<ParcelableStopIdentifier?>(STATE_STOP_IDENTIFIER, null)
+
+    private val stopIdentifierFlow get() = parcelableStopIdentifierFlow
+        .map { it?.toStopIdentifier() }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = null
+        )
 
     /**
      * The current state of permissions pertaining to this view.
@@ -99,7 +112,7 @@ class StopDetailsFragmentViewModel @Inject constructor(
 
     private val itemsFlow = uiItemRetriever
             .createUiItemFlow(
-                    stopCodeFlow,
+                    stopIdentifierFlow,
                     permissionsStateFlow.filterNotNull(),
                     viewModelScope)
             .flowOn(defaultDispatcher)
@@ -117,21 +130,21 @@ class StopDetailsFragmentViewModel @Inject constructor(
      * This [LiveData] emits the current state of the UI, as defined by [UiState].
      */
     val uiStateLiveData = itemsFlow
-            .map(this::calculateState)
-            .distinctUntilChanged()
-            .asLiveData(viewModelScope.coroutineContext, LIVE_DATA_TIMEOUT_MILLIS)
+        .map(this::calculateState)
+        .distinctUntilChanged()
+        .asLiveData(viewModelScope.coroutineContext, LIVE_DATA_TIMEOUT_MILLIS)
 
     /**
      * This [LiveData] emits when the user should be shown a map with the given stop highlighted.
      */
-    val showStopMapLiveData: LiveData<String> get() = showStopMap
-    private val showStopMap = SingleLiveEvent<String>()
+    val showStopMapLiveData: LiveData<StopIdentifier> get() = showStopMap
+    private val showStopMap = SingleLiveEvent<StopIdentifier>()
 
     /**
      * This is called when the map has been clicked on the UI.
      */
     fun onMapClicked() {
-        stopCode?.let {
+        stopIdentifier?.let {
             showStopMap.value = it
         }
     }

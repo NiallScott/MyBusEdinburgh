@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,6 +41,10 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
@@ -57,7 +61,7 @@ class FavouriteStopsFragmentViewModelTest {
 
     companion object {
 
-        private const val STATE_SELECTED_STOP_CODE = "selectedStopCode"
+        private const val STATE_SELECTED_STOP_IDENTIFIER = "selectedStopIdentifier"
     }
 
     @get:Rule
@@ -99,11 +103,33 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun favouritesLiveDataEmitsPopulatedListFromUpstream() = runTest {
         val favourites = listOf(
-                UiFavouriteStop(FavouriteStop("111111", "Name 1"), listOf("1", "2"), false),
-                UiFavouriteStop(FavouriteStop("222222", "Name 2"), listOf("3", "4"), false),
-                UiFavouriteStop(FavouriteStop("333333", "Name 3"), listOf("5", "6"), false))
+            UiFavouriteStop(
+                FavouriteStop(
+                    "111111".toNaptanStopIdentifier(),
+                    "Name 1"
+                ),
+                listOf(service(1), service(2)),
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "222222".toNaptanStopIdentifier(),
+                    "Name 2"
+                ),
+                listOf(service(3), service(4)),
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "333333".toNaptanStopIdentifier(),
+                    "Name 3"
+                ),
+                listOf(service(5), service(6)),
+                false
+            )
+        )
         whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
-                .thenReturn(flowOf(favourites))
+            .thenReturn(flowOf(favourites))
         val viewModel = createViewModel()
 
         val observer = viewModel.favouritesLiveData.test()
@@ -115,20 +141,65 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun favouritesLiveDataEmitsItemsWithCorrectSelectedState() = runTest {
         val favourites1 = listOf(
-                UiFavouriteStop(FavouriteStop("111111", "Name 1"), listOf("1", "2"), false),
-                UiFavouriteStop(FavouriteStop("222222", "Name 2"), listOf("3", "4"), false),
-                UiFavouriteStop(FavouriteStop("333333", "Name 3"), listOf("5", "6"), false))
+            UiFavouriteStop(
+                FavouriteStop(
+                    "111111".toNaptanStopIdentifier(),
+                    "Name 1"
+                ),
+                listOf(service(1), service(2)),
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "222222".toNaptanStopIdentifier(),
+                    "Name 2"
+                ),
+                listOf(service(3), service(4)
+                ),
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "333333".toNaptanStopIdentifier(),
+                    "Name 3"
+                ),
+                listOf(service(5), service(6)),
+                false
+            )
+        )
         val favourites2 = listOf(
-                UiFavouriteStop(FavouriteStop("111111", "Name 1"), listOf("1", "2"), false),
-                UiFavouriteStop(FavouriteStop("222222", "Name 2"), listOf("3", "4"), true),
-                UiFavouriteStop(FavouriteStop("333333", "Name 3"), listOf("5", "6"), false))
+            UiFavouriteStop(
+                FavouriteStop(
+                    "111111".toNaptanStopIdentifier(),
+                    "Name 1"
+                ),
+                listOf(service(1), service(2)),
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "222222".toNaptanStopIdentifier(),
+                    "Name 2"
+                ),
+                listOf(service(3), service(4)),
+                true
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "333333".toNaptanStopIdentifier(),
+                    "Name 3"
+                ),
+                listOf(service(5), service(6)),
+                false
+            )
+        )
         whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
-                .thenReturn(flowOf(favourites1))
+            .thenReturn(flowOf(favourites1))
         val viewModel = createViewModel()
 
         val observer = viewModel.favouritesLiveData.test()
         advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("222222")
+        viewModel.onFavouriteStopLongClicked("222222".toNaptanStopIdentifier())
         advanceUntilIdle()
         viewModel.onFavouriteStopUnselected()
         advanceUntilIdle()
@@ -139,7 +210,7 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun uiStateLiveDataEmitsInProgressWhenFavouritesIsNull() = runTest {
         whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
-                .thenReturn(flowOf(null))
+            .thenReturn(flowOf(null))
         val viewModel = createViewModel()
 
         val observer = viewModel.uiStateLiveData.test()
@@ -151,7 +222,7 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun uiStateLiveDataEmitsErrorWhenFavouritesIsEmpty() = runTest {
         whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
-                .thenReturn(flowOf(emptyList()))
+            .thenReturn(flowOf(emptyList()))
         val viewModel = createViewModel()
 
         val observer = viewModel.uiStateLiveData.test()
@@ -163,11 +234,33 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun uiStateLiveDataEmitsContentWhenFavouritesIsPopulated() = runTest {
         val favourites = listOf(
-                UiFavouriteStop(FavouriteStop("111111", "Name 1"), listOf("1", "2"), false),
-                UiFavouriteStop(FavouriteStop("222222", "Name 2"), listOf("3", "4"), false),
-                UiFavouriteStop(FavouriteStop("333333", "Name 3"), listOf("5", "6"), false))
+            UiFavouriteStop(
+                FavouriteStop(
+                    "111111".toNaptanStopIdentifier(),
+                    "Name 1"
+                ),
+                listOf(service(1), service(2)),
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "222222".toNaptanStopIdentifier(),
+                    "Name 2"
+                ),
+                listOf(service(3), service(4)),
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "333333".toNaptanStopIdentifier(),
+                    "Name 3"
+                ),
+                listOf(service(5), service(6)),
+                false
+            )
+        )
         whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
-                .thenReturn(flowOf(favourites))
+            .thenReturn(flowOf(favourites))
         val viewModel = createViewModel()
 
         val observer = viewModel.uiStateLiveData.test()
@@ -188,19 +281,11 @@ class FavouriteStopsFragmentViewModelTest {
 
     @Test
     fun showContextMenuLiveDataIsFalseWhenPreviousStateIsNull() = runTest {
-        val viewModel = createViewModel(SavedStateHandle(
-                mapOf(STATE_SELECTED_STOP_CODE to null)))
-
-        val observer = viewModel.showContextMenuLiveData.test()
-        advanceUntilIdle()
-
-        observer.assertValues(false)
-    }
-
-    @Test
-    fun showContextMenuLiveDataIsFalseWhenPreviousStateIsEmpty() = runTest {
-        val viewModel = createViewModel(SavedStateHandle(
-                mapOf(STATE_SELECTED_STOP_CODE to "")))
+        val viewModel = createViewModel(
+            SavedStateHandle(
+                mapOf(STATE_SELECTED_STOP_IDENTIFIER to null)
+            )
+        )
 
         val observer = viewModel.showContextMenuLiveData.test()
         advanceUntilIdle()
@@ -210,8 +295,11 @@ class FavouriteStopsFragmentViewModelTest {
 
     @Test
     fun showContextMenuLiveDataIsTrueWhenPreviousStateIsPopulated() = runTest {
-        val viewModel = createViewModel(SavedStateHandle(
-                mapOf(STATE_SELECTED_STOP_CODE to "123456")))
+        val viewModel = createViewModel(
+            SavedStateHandle(
+                mapOf(STATE_SELECTED_STOP_IDENTIFIER to "123456".toParcelableNaptanStopIdentifier())
+            )
+        )
 
         val observer = viewModel.showContextMenuLiveData.test()
         advanceUntilIdle()
@@ -222,8 +310,11 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun showContextMenuLiveDataEmitsFalseWhenPreviousStateIsPopulatedThenStopIsUnselected() =
             runTest {
-        val viewModel = createViewModel(SavedStateHandle(
-                mapOf(STATE_SELECTED_STOP_CODE to "123456")))
+        val viewModel = createViewModel(
+            SavedStateHandle(
+                mapOf(STATE_SELECTED_STOP_IDENTIFIER to "123456".toParcelableNaptanStopIdentifier())
+            )
+        )
 
         val observer = viewModel.showContextMenuLiveData.test()
         advanceUntilIdle()
@@ -240,7 +331,7 @@ class FavouriteStopsFragmentViewModelTest {
 
         val observer = viewModel.showContextMenuLiveData.test()
         advanceUntilIdle()
-        val result = viewModel.onFavouriteStopLongClicked("123456")
+        val result = viewModel.onFavouriteStopLongClicked("123456".toNaptanStopIdentifier())
         advanceUntilIdle()
 
         observer.assertValues(false)
@@ -248,29 +339,14 @@ class FavouriteStopsFragmentViewModelTest {
     }
 
     @Test
-    fun showContextMenuLiveDataIsFalseWhenStopIsLongClickedInNormalModeWithEmptyStopCode() =
+    fun showContextMenuLiveDataIsTrueWhenStopIsLongClickedInNormalModeWithPopulatedStopId() =
             runTest {
         val viewModel = createViewModel()
         viewModel.isCreateShortcutMode = false
 
         val observer = viewModel.showContextMenuLiveData.test()
         advanceUntilIdle()
-        val result = viewModel.onFavouriteStopLongClicked("")
-        advanceUntilIdle()
-
-        observer.assertValues(false)
-        assertFalse(result)
-    }
-
-    @Test
-    fun showContextMenuLiveDataIsTrueWhenStopIsLongClickedInNormalModeWithPopulatedStopCode() =
-            runTest {
-        val viewModel = createViewModel()
-        viewModel.isCreateShortcutMode = false
-
-        val observer = viewModel.showContextMenuLiveData.test()
-        advanceUntilIdle()
-        val result = viewModel.onFavouriteStopLongClicked("123456")
+        val result = viewModel.onFavouriteStopLongClicked("123456".toNaptanStopIdentifier())
         advanceUntilIdle()
 
         observer.assertValues(false, true)
@@ -284,7 +360,7 @@ class FavouriteStopsFragmentViewModelTest {
 
         val observer = viewModel.showContextMenuLiveData.test()
         advanceUntilIdle()
-        val result = viewModel.onFavouriteStopLongClicked("123456")
+        val result = viewModel.onFavouriteStopLongClicked("123456".toNaptanStopIdentifier())
         advanceUntilIdle()
         viewModel.onFavouriteStopUnselected()
         advanceUntilIdle()
@@ -296,9 +372,31 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun selectedStopNameLiveDataIsNullByDefault() = runTest {
         val favourites = listOf(
-                UiFavouriteStop(FavouriteStop("111111", "Name 1"), listOf("1", "2"), false),
-                UiFavouriteStop(FavouriteStop("222222", "Name 2"), listOf("3", "4"), false),
-                UiFavouriteStop(FavouriteStop("333333", "Name 3"), listOf("5", "6"), false))
+            UiFavouriteStop(
+                FavouriteStop(
+                    "111111".toNaptanStopIdentifier(),
+                    "Name 1"
+                ),
+                listOf(service(1), service(2)),
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "222222".toNaptanStopIdentifier(),
+                    "Name 2"
+                ),
+                listOf(service(3), service(4)),
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "333333".toNaptanStopIdentifier(),
+                    "Name 3"
+                ),
+                listOf(service(5), service(6)),
+                false
+            )
+        )
         whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
                 .thenReturn(flowOf(favourites))
         val viewModel = createViewModel()
@@ -313,13 +411,38 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun selectedStopNameLiveDataUsesNameOfStopFromPreviousState() = runTest {
         val favourites = listOf(
-                UiFavouriteStop(FavouriteStop("111111", "Name 1"), listOf("1", "2"), false),
-                UiFavouriteStop(FavouriteStop("222222", "Name 2"), listOf("3", "4"), false),
-                UiFavouriteStop(FavouriteStop("333333", "Name 3"), listOf("5", "6"), false))
+            UiFavouriteStop(
+                FavouriteStop(
+                    "111111".toNaptanStopIdentifier(),
+                    "Name 1"
+                ),
+                listOf(service(1), service(2)),
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "222222".toNaptanStopIdentifier(),
+                    "Name 2"
+                ),
+                listOf(service(3), service(4)),
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "333333".toNaptanStopIdentifier(),
+                    "Name 3"
+                ),
+                listOf(service(5), service(6)),
+                false
+            )
+        )
         whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
-                .thenReturn(flowOf(favourites))
-        val viewModel = createViewModel(SavedStateHandle(
-                mapOf(STATE_SELECTED_STOP_CODE to "222222")))
+            .thenReturn(flowOf(favourites))
+        val viewModel = createViewModel(
+            SavedStateHandle(
+                mapOf(STATE_SELECTED_STOP_IDENTIFIER to "222222".toParcelableNaptanStopIdentifier())
+            )
+        )
         viewModel.isCreateShortcutMode = false
 
         val observer = viewModel.selectedStopNameLiveData.test()
@@ -327,23 +450,50 @@ class FavouriteStopsFragmentViewModelTest {
         viewModel.onFavouriteStopUnselected()
         advanceUntilIdle()
 
-        observer.assertValues(UiFavouriteName("222222", FavouriteStopName("Name 2", null)), null)
+        observer.assertValues(
+            UiFavouriteName(
+                "222222".toNaptanStopIdentifier(),
+                FavouriteStopName("Name 2", null)
+            ),
+            null
+        )
     }
 
     @Test
-    fun selectedStopNameLiveDataEmitsNullWhenStopCodeIsEmpty() = runTest {
+    fun selectedStopNameLiveDataEmitsNullWhenStopIdentifierIsEmpty() = runTest {
         val favourites = listOf(
-                UiFavouriteStop(FavouriteStop("111111", "Name 1"), listOf("1", "2"), false),
-                UiFavouriteStop(FavouriteStop("222222", "Name 2"), listOf("3", "4"), false),
-                UiFavouriteStop(FavouriteStop("333333", "Name 3"), listOf("5", "6"), false))
+            UiFavouriteStop(
+                FavouriteStop(
+                    "111111".toNaptanStopIdentifier(), "Name 1"
+                ),
+                listOf(service(1), service(2)),
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "222222".toNaptanStopIdentifier(),
+                    "Name 2"
+                ),
+                listOf(service(3), service(4)),
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "333333".toNaptanStopIdentifier(),
+                    "Name 3"
+                ),
+                listOf(service(5), service(6)),
+                false
+            )
+        )
         whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
-                .thenReturn(flowOf(favourites))
+            .thenReturn(flowOf(favourites))
         val viewModel = createViewModel()
         viewModel.isCreateShortcutMode = false
 
         val observer = viewModel.selectedStopNameLiveData.test()
         advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("")
+        viewModel.onFavouriteStopLongClicked("".toNaptanStopIdentifier())
         advanceUntilIdle()
 
         observer.assertValues(null)
@@ -352,9 +502,31 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun selectedStopNameLiveDataEmitsNullWhenStopIsNotFound() = runTest {
         val favourites = listOf(
-                UiFavouriteStop(FavouriteStop("111111", "Name 1"), listOf("1", "2"), false),
-                UiFavouriteStop(FavouriteStop("222222", "Name 2"), listOf("3", "4"), false),
-                UiFavouriteStop(FavouriteStop("333333", "Name 3"), listOf("5", "6"), false))
+            UiFavouriteStop(
+                FavouriteStop(
+                    "111111".toNaptanStopIdentifier(),
+                    "Name 1"
+                ),
+                listOf(service(1), service(2)),
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "222222".toNaptanStopIdentifier(),
+                    "Name 2"
+                ),
+                listOf(service(3), service(4)),
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "333333".toNaptanStopIdentifier(),
+                    "Name 3"
+                ),
+                listOf(service(5), service(6)),
+                false
+            )
+        )
         whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
                 .thenReturn(flowOf(favourites))
         val viewModel = createViewModel()
@@ -362,7 +534,7 @@ class FavouriteStopsFragmentViewModelTest {
 
         val observer = viewModel.selectedStopNameLiveData.test()
         advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("444444")
+        viewModel.onFavouriteStopLongClicked("444444".toNaptanStopIdentifier())
         advanceUntilIdle()
 
         observer.assertValues(null)
@@ -371,43 +543,98 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun selectedStopNameLiveDataEmitsNameWhenStopIsFound() = runTest {
         val favourites = listOf(
-                UiFavouriteStop(FavouriteStop("111111", "Name 1"), listOf("1", "2"), false),
-                UiFavouriteStop(FavouriteStop("222222", "Name 2"), listOf("3", "4"), false),
-                UiFavouriteStop(FavouriteStop("333333", "Name 3"), listOf("5", "6"), false))
+            UiFavouriteStop(
+                FavouriteStop(
+                    "111111".toNaptanStopIdentifier(),
+                    "Name 1"
+                ),
+                listOf(service(1), service(2)),
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "222222".toNaptanStopIdentifier(),
+                    "Name 2"
+                ),
+                listOf(service(3), service(4)),
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "333333".toNaptanStopIdentifier(),
+                    "Name 3"
+                ),
+                listOf(service(5), service(6)),
+                false
+            )
+        )
         whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
-                .thenReturn(flowOf(favourites))
+            .thenReturn(flowOf(favourites))
         val viewModel = createViewModel()
         viewModel.isCreateShortcutMode = false
 
         val observer = viewModel.selectedStopNameLiveData.test()
         advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("222222")
+        viewModel.onFavouriteStopLongClicked("222222".toNaptanStopIdentifier())
         advanceUntilIdle()
 
-        observer.assertValues(null, UiFavouriteName("222222", FavouriteStopName("Name 2", null)))
+        observer.assertValues(
+            null,
+            UiFavouriteName(
+                "222222".toNaptanStopIdentifier(),
+                FavouriteStopName("Name 2", null)
+            )
+        )
     }
 
     @Test
     fun selectedStopNameLiveDataEmitNullWhenStopIsUnselected() = runTest {
         val favourites = listOf(
-                UiFavouriteStop(FavouriteStop("111111", "Name 1"), listOf("1", "2"), false),
-                UiFavouriteStop(FavouriteStop("222222", "Name 2"), listOf("3", "4"), false),
-                UiFavouriteStop(FavouriteStop("333333", "Name 3"), listOf("5", "6"), false))
+            UiFavouriteStop(
+                FavouriteStop(
+                    "111111".toNaptanStopIdentifier(),
+                    "Name 1"
+                ),
+                listOf(service(1), service(2)),
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "222222".toNaptanStopIdentifier(),
+                    "Name 2"
+                ),
+                listOf(service(3), service(4)),
+                false
+            ),
+            UiFavouriteStop(
+                FavouriteStop(
+                    "333333".toNaptanStopIdentifier(),
+                    "Name 3"
+                ),
+                listOf(service(5), service(6)),
+                false
+            )
+        )
         whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
-                .thenReturn(flowOf(favourites))
+            .thenReturn(flowOf(favourites))
         val viewModel = createViewModel()
         viewModel.isCreateShortcutMode = false
 
         val observer = viewModel.selectedStopNameLiveData.test()
         advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("222222")
+        viewModel.onFavouriteStopLongClicked("222222".toNaptanStopIdentifier())
         advanceUntilIdle()
         viewModel.onFavouriteStopUnselected()
         advanceUntilIdle()
 
         observer.assertValues(
             null,
-            UiFavouriteName("222222", FavouriteStopName("Name 2", null)), null)
+            UiFavouriteName(
+                "222222".toNaptanStopIdentifier(),
+                FavouriteStopName("Name 2", null)
+            ),
+            null
+        )
     }
 
     @Test
@@ -487,26 +714,14 @@ class FavouriteStopsFragmentViewModelTest {
     }
 
     @Test
-    fun isArrivalAlertEnabledLiveDataEmitsFalseWhenSelectedStopCodeIsEmpty()  = runTest {
-        val viewModel = createViewModel()
-
-        val observer = viewModel.isArrivalAlertEnabledLiveData.test()
-        advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("")
-        advanceUntilIdle()
-
-        observer.assertValues(false)
-    }
-
-    @Test
     fun isArrivalAlertEnabledLiveDataEmitsTrueWhenDoesNotHaveArrivalAlert() = runTest {
-        whenever(alertsRepository.hasArrivalAlertFlow("123456"))
+        whenever(alertsRepository.hasArrivalAlertFlow("123456".toNaptanStopIdentifier()))
                 .thenReturn(flowOf(false))
         val viewModel = createViewModel()
 
         val observer = viewModel.isArrivalAlertEnabledLiveData.test()
         advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("123456")
+        viewModel.onFavouriteStopLongClicked("123456".toNaptanStopIdentifier())
         advanceUntilIdle()
 
         observer.assertValues(false, true)
@@ -514,13 +729,13 @@ class FavouriteStopsFragmentViewModelTest {
 
     @Test
     fun isArrivalAlertEnabledLiveDataEmitsTrueWhenDoesHaveArrivalAlert() = runTest {
-        whenever(alertsRepository.hasArrivalAlertFlow("123456"))
+        whenever(alertsRepository.hasArrivalAlertFlow("123456".toNaptanStopIdentifier()))
                 .thenReturn(flowOf(true))
         val viewModel = createViewModel()
 
         val observer = viewModel.isArrivalAlertEnabledLiveData.test()
         advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("123456")
+        viewModel.onFavouriteStopLongClicked("123456".toNaptanStopIdentifier())
         advanceUntilIdle()
 
         observer.assertValues(false, true)
@@ -537,26 +752,14 @@ class FavouriteStopsFragmentViewModelTest {
     }
 
     @Test
-    fun isProximityAlertEnabledLiveDataEmitsFalseWhenSelectedStopCodeIsEmpty() = runTest {
-        val viewModel = createViewModel()
-
-        val observer = viewModel.isProximityAlertEnabledLiveData.test()
-        advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("")
-        advanceUntilIdle()
-
-        observer.assertValues(false)
-    }
-
-    @Test
     fun isProximityAlertEnabledLiveDataEmitsTrueWhenDoesNotHaveProximityAlert() = runTest {
-        whenever(alertsRepository.hasProximityAlertFlow("123456"))
+        whenever(alertsRepository.hasProximityAlertFlow("123456".toNaptanStopIdentifier()))
                 .thenReturn(flowOf(false))
         val viewModel = createViewModel()
 
         val observer = viewModel.isProximityAlertEnabledLiveData.test()
         advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("123456")
+        viewModel.onFavouriteStopLongClicked("123456".toNaptanStopIdentifier())
         advanceUntilIdle()
 
         observer.assertValues(false, true)
@@ -564,13 +767,13 @@ class FavouriteStopsFragmentViewModelTest {
 
     @Test
     fun isProximityAlertEnabledLiveDataEmitsTrueWhenDoesHaveProximityAlert() = runTest {
-        whenever(alertsRepository.hasProximityAlertFlow("123456"))
+        whenever(alertsRepository.hasProximityAlertFlow("123456".toNaptanStopIdentifier()))
                 .thenReturn(flowOf(true))
         val viewModel = createViewModel()
 
         val observer = viewModel.isProximityAlertEnabledLiveData.test()
         advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("123456")
+        viewModel.onFavouriteStopLongClicked("123456".toNaptanStopIdentifier())
         advanceUntilIdle()
 
         observer.assertValues(false, true)
@@ -587,26 +790,14 @@ class FavouriteStopsFragmentViewModelTest {
     }
 
     @Test
-    fun hasArrivalAlertLiveDataEmitsFalseWhenSelectedStopCodeIsEmpty() = runTest {
-        val viewModel = createViewModel()
-
-        val observer = viewModel.hasArrivalAlertLiveData.test()
-        advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("")
-        advanceUntilIdle()
-
-        observer.assertValues(false)
-    }
-
-    @Test
     fun hasArrivalAlertLiveDataEmitsFalseWhenDoesNotHaveArrivalAlert() = runTest {
-        whenever(alertsRepository.hasArrivalAlertFlow("123456"))
+        whenever(alertsRepository.hasArrivalAlertFlow("123456".toNaptanStopIdentifier()))
                 .thenReturn(flowOf(false))
         val viewModel = createViewModel()
 
         val observer = viewModel.hasArrivalAlertLiveData.test()
         advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("123456")
+        viewModel.onFavouriteStopLongClicked("123456".toNaptanStopIdentifier())
         advanceUntilIdle()
 
         observer.assertValues(false)
@@ -614,13 +805,13 @@ class FavouriteStopsFragmentViewModelTest {
 
     @Test
     fun hasArrivalAlertLiveDataEmitsTrueWhenDoesHaveArrivalAlert() = runTest {
-        whenever(alertsRepository.hasArrivalAlertFlow("123456"))
+        whenever(alertsRepository.hasArrivalAlertFlow("123456".toNaptanStopIdentifier()))
                 .thenReturn(flowOf(true))
         val viewModel = createViewModel()
 
         val observer = viewModel.hasArrivalAlertLiveData.test()
         advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("123456")
+        viewModel.onFavouriteStopLongClicked("123456".toNaptanStopIdentifier())
         advanceUntilIdle()
 
         observer.assertValues(false, true)
@@ -637,26 +828,14 @@ class FavouriteStopsFragmentViewModelTest {
     }
 
     @Test
-    fun hasProximityAlertLiveDataEmitsFalseWhenSelectedStopCodeIsEmpty() = runTest {
-        val viewModel = createViewModel()
-
-        val observer = viewModel.hasProximityAlertLiveData.test()
-        advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("")
-        advanceUntilIdle()
-
-        observer.assertValues(false)
-    }
-
-    @Test
     fun hasProximityAlertLiveDataEmitsFalseWhenDoesNotHaveProximityAlert() = runTest {
-        whenever(alertsRepository.hasProximityAlertFlow("123456"))
+        whenever(alertsRepository.hasProximityAlertFlow("123456".toNaptanStopIdentifier()))
                 .thenReturn(flowOf(false))
         val viewModel = createViewModel()
 
         val observer = viewModel.hasProximityAlertLiveData.test()
         advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("123456")
+        viewModel.onFavouriteStopLongClicked("123456".toNaptanStopIdentifier())
         advanceUntilIdle()
 
         observer.assertValues(false)
@@ -664,13 +843,13 @@ class FavouriteStopsFragmentViewModelTest {
 
     @Test
     fun hasProximityAlertLiveDataEmitsTrueWhenDoesHaveProximityAlert() = runTest {
-        whenever(alertsRepository.hasProximityAlertFlow("123456"))
+        whenever(alertsRepository.hasProximityAlertFlow("123456".toNaptanStopIdentifier()))
                 .thenReturn(flowOf(true))
         val viewModel = createViewModel()
 
         val observer = viewModel.hasProximityAlertLiveData.test()
         advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("123456")
+        viewModel.onFavouriteStopLongClicked("123456".toNaptanStopIdentifier())
         advanceUntilIdle()
 
         observer.assertValues(false, true)
@@ -683,9 +862,16 @@ class FavouriteStopsFragmentViewModelTest {
 
         val createShortcutObserver = viewModel.createShortcutLiveData.test()
         val showStopDataObserver = viewModel.showStopDataLiveData.test()
-        viewModel.onFavouriteStopClicked(FavouriteStop("123456", "Stop name"))
+        viewModel.onFavouriteStopClicked(
+            FavouriteStop(
+                "123456".toNaptanStopIdentifier(),
+                "Stop name"
+            )
+        )
 
-        createShortcutObserver.assertValues(FavouriteStop("123456", "Stop name"))
+        createShortcutObserver.assertValues(
+            FavouriteStop("123456".toNaptanStopIdentifier(), "Stop name")
+        )
         showStopDataObserver.assertEmpty()
     }
 
@@ -693,11 +879,13 @@ class FavouriteStopsFragmentViewModelTest {
     fun onFavouriteStopClickedWhenInNormalModeAndStopSelectedDoesNotShowStopData() {
         val viewModel = createViewModel()
         viewModel.isCreateShortcutMode = false
-        viewModel.onFavouriteStopLongClicked("123456")
+        viewModel.onFavouriteStopLongClicked("123456".toNaptanStopIdentifier())
 
         val createShortcutObserver = viewModel.createShortcutLiveData.test()
         val showStopDataObserver = viewModel.showStopDataLiveData.test()
-        viewModel.onFavouriteStopClicked(FavouriteStop("123456", "Stop name"))
+        viewModel.onFavouriteStopClicked(
+            FavouriteStop("123456".toNaptanStopIdentifier(), "Stop name")
+        )
 
         createShortcutObserver.assertEmpty()
         showStopDataObserver.assertEmpty()
@@ -710,10 +898,12 @@ class FavouriteStopsFragmentViewModelTest {
 
         val createShortcutObserver = viewModel.createShortcutLiveData.test()
         val showStopDataObserver = viewModel.showStopDataLiveData.test()
-        viewModel.onFavouriteStopClicked(FavouriteStop("123456", "Stop name"))
+        viewModel.onFavouriteStopClicked(
+            FavouriteStop("123456".toNaptanStopIdentifier(), "Stop name")
+        )
 
         createShortcutObserver.assertEmpty()
-        showStopDataObserver.assertValues("123456")
+        showStopDataObserver.assertValues("123456".toNaptanStopIdentifier())
     }
 
     @Test
@@ -736,12 +926,12 @@ class FavouriteStopsFragmentViewModelTest {
         val showEditFavouriteStopObserver = viewModel.showEditFavouriteStopLiveData.test()
         val showContextMenuObserver = viewModel.showContextMenuLiveData.test()
         advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("123456")
+        viewModel.onFavouriteStopLongClicked("123456".toNaptanStopIdentifier())
         advanceUntilIdle()
         val result = viewModel.onEditFavouriteClicked()
         advanceUntilIdle()
 
-        showEditFavouriteStopObserver.assertValues("123456")
+        showEditFavouriteStopObserver.assertValues("123456".toNaptanStopIdentifier())
         showContextMenuObserver.assertValues(false, true, false)
         assertTrue(result)
     }
@@ -766,12 +956,12 @@ class FavouriteStopsFragmentViewModelTest {
         val showDeleteFavouriteStopObserver = viewModel.showConfirmDeleteFavouriteLiveData.test()
         val showContextMenuObserver = viewModel.showContextMenuLiveData.test()
         advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("123456")
+        viewModel.onFavouriteStopLongClicked("123456".toNaptanStopIdentifier())
         advanceUntilIdle()
         val result = viewModel.onDeleteFavouriteClicked()
         advanceUntilIdle()
 
-        showDeleteFavouriteStopObserver.assertValues("123456")
+        showDeleteFavouriteStopObserver.assertValues("123456".toNaptanStopIdentifier())
         showContextMenuObserver.assertValues(false, true, false)
         assertTrue(result)
     }
@@ -796,13 +986,13 @@ class FavouriteStopsFragmentViewModelTest {
         val showOnMapObserver = viewModel.showOnMapLiveData.test()
         val showContextMenuObserver = viewModel.showContextMenuLiveData.test()
         advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("123456")
+        viewModel.onFavouriteStopLongClicked("123456".toNaptanStopIdentifier())
         advanceUntilIdle()
 
         val result = viewModel.onShowOnMapClicked()
         advanceUntilIdle()
 
-        showOnMapObserver.assertValues("123456")
+        showOnMapObserver.assertValues("123456".toNaptanStopIdentifier())
         showContextMenuObserver.assertValues(false, true, false)
         assertTrue(result)
     }
@@ -825,7 +1015,7 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun onProximityAlertClickedShowsAddProximityAlertWhenFavouriteSelectedAndNoProxAlert() =
             runTest {
-        whenever(alertsRepository.hasProximityAlertFlow("123456"))
+        whenever(alertsRepository.hasProximityAlertFlow("123456".toNaptanStopIdentifier()))
                 .thenReturn(flowOf(false))
         val viewModel = createViewModel()
         viewModel.isCreateShortcutMode = false
@@ -836,13 +1026,13 @@ class FavouriteStopsFragmentViewModelTest {
         val showContextMenuObserver = viewModel.showContextMenuLiveData.test()
         val hasProximityAlertObserver = viewModel.hasProximityAlertLiveData.test()
         advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("123456")
+        viewModel.onFavouriteStopLongClicked("123456".toNaptanStopIdentifier())
         advanceUntilIdle()
         val result = viewModel.onProximityAlertClicked()
         advanceUntilIdle()
 
         showConfirmDeleteProximityAlertObserver.assertEmpty()
-        showAddProximityAlertObserver.assertValues("123456")
+        showAddProximityAlertObserver.assertValues("123456".toNaptanStopIdentifier())
         showContextMenuObserver.assertValues(false, true, false)
         hasProximityAlertObserver.assertValues(false)
         assertTrue(result)
@@ -851,7 +1041,7 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun onProximityAlertClickedShowsRemoveProximityAlertWhenFavouriteSelectedAndHasProxAlert() =
             runTest {
-        whenever(alertsRepository.hasProximityAlertFlow("123456"))
+        whenever(alertsRepository.hasProximityAlertFlow("123456".toNaptanStopIdentifier()))
                 .thenReturn(flowOf(true))
         val viewModel = createViewModel()
         viewModel.isCreateShortcutMode = false
@@ -862,12 +1052,12 @@ class FavouriteStopsFragmentViewModelTest {
         val showContextMenuObserver = viewModel.showContextMenuLiveData.test()
         val hasProximityAlertObserver = viewModel.hasProximityAlertLiveData.test()
         advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("123456")
+        viewModel.onFavouriteStopLongClicked("123456".toNaptanStopIdentifier())
         advanceUntilIdle()
         val result = viewModel.onProximityAlertClicked()
         advanceUntilIdle()
 
-        showConfirmDeleteProximityAlertObserver.assertValues("123456")
+        showConfirmDeleteProximityAlertObserver.assertValues("123456".toNaptanStopIdentifier())
         showAddProximityAlertObserver.assertEmpty()
         showContextMenuObserver.assertValues(false, true, false)
         hasProximityAlertObserver.assertValues(false, true, false)
@@ -892,7 +1082,7 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun onArrivalAlertClickedShowsAddArrivalAlertWhenFavouriteSelectedAndNoArrivalAlert() =
             runTest {
-        whenever(alertsRepository.hasArrivalAlertFlow("123456"))
+        whenever(alertsRepository.hasArrivalAlertFlow("123456".toNaptanStopIdentifier()))
                 .thenReturn(flowOf(false))
         val viewModel = createViewModel()
         viewModel.isCreateShortcutMode = false
@@ -903,13 +1093,13 @@ class FavouriteStopsFragmentViewModelTest {
         val showContextMenuObserver = viewModel.showContextMenuLiveData.test()
         val hasArrivalAlertObserver = viewModel.hasArrivalAlertLiveData.test()
         advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("123456")
+        viewModel.onFavouriteStopLongClicked("123456".toNaptanStopIdentifier())
         advanceUntilIdle()
         val result = viewModel.onArrivalAlertClicked()
         advanceUntilIdle()
 
         showConfirmDeleteArrivalAlertObserver.assertEmpty()
-        showAddArrivalAlertObserver.assertValues("123456")
+        showAddArrivalAlertObserver.assertValues("123456".toNaptanStopIdentifier())
         showContextMenuObserver.assertValues(false, true, false)
         hasArrivalAlertObserver.assertValues(false)
         assertTrue(result)
@@ -918,7 +1108,7 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun onArrivalAlertClickedShowsRemoveArrivalAlertWhenFavouriteSelectedAndHasArrivalAlert() =
             runTest {
-        whenever(alertsRepository.hasArrivalAlertFlow("123456"))
+        whenever(alertsRepository.hasArrivalAlertFlow("123456".toNaptanStopIdentifier()))
                 .thenReturn(flowOf(true))
         val viewModel = createViewModel()
         viewModel.isCreateShortcutMode = false
@@ -929,12 +1119,12 @@ class FavouriteStopsFragmentViewModelTest {
         val showContextMenuObserver = viewModel.showContextMenuLiveData.test()
         val hasArrivalAlertObserver = viewModel.hasArrivalAlertLiveData.test()
         advanceUntilIdle()
-        viewModel.onFavouriteStopLongClicked("123456")
+        viewModel.onFavouriteStopLongClicked("123456".toNaptanStopIdentifier())
         advanceUntilIdle()
         val result = viewModel.onArrivalAlertClicked()
         advanceUntilIdle()
 
-        showConfirmDeleteArrivalAlertObserver.assertValues("123456")
+        showConfirmDeleteArrivalAlertObserver.assertValues("123456".toNaptanStopIdentifier())
         showAddArrivalAlertObserver.assertEmpty()
         showContextMenuObserver.assertValues(false, true, false)
         hasArrivalAlertObserver.assertValues(false, true, false)
@@ -946,17 +1136,7 @@ class FavouriteStopsFragmentViewModelTest {
         val viewModel = createViewModel()
         viewModel.isCreateShortcutMode = true
 
-        val result = viewModel.onFavouriteStopLongClicked("123456")
-
-        assertFalse(result)
-    }
-
-    @Test
-    fun onFavouriteStopLongClickedReturnsFalseWhenStopCodeIsEmpty() = runTest {
-        val viewModel = createViewModel()
-        viewModel.isCreateShortcutMode = false
-
-        val result = viewModel.onFavouriteStopLongClicked("")
+        val result = viewModel.onFavouriteStopLongClicked("123456".toNaptanStopIdentifier())
 
         assertFalse(result)
     }
@@ -966,16 +1146,24 @@ class FavouriteStopsFragmentViewModelTest {
         val viewModel = createViewModel()
         viewModel.isCreateShortcutMode = false
 
-        val result = viewModel.onFavouriteStopLongClicked("123456")
+        val result = viewModel.onFavouriteStopLongClicked("123456".toNaptanStopIdentifier())
 
         assertTrue(result)
     }
 
     private fun createViewModel(savedState: SavedStateHandle = SavedStateHandle()) =
-            FavouriteStopsFragmentViewModel(
-                    savedState,
-                    favouriteStopsRetriever,
-                    alertsRepository,
-                    featureRepository,
-                    coroutineRule.testDispatcher)
+        FavouriteStopsFragmentViewModel(
+            savedState,
+            favouriteStopsRetriever,
+            alertsRepository,
+            featureRepository,
+            coroutineRule.testDispatcher
+        )
+
+    private fun service(id: Int): ServiceDescriptor {
+        return FakeServiceDescriptor(
+            serviceName = id.toString(),
+            operatorCode = "TEST$id"
+        )
+    }
 }

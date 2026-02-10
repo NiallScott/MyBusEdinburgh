@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -71,6 +71,7 @@ dependencies {
 
     "edinburghImplementation"(project(":core:alphanumcomparator"))
     implementation(project(":core:connectivity-android"))
+    implementation(project(":core:core-domain"))
     implementation(project(":core:coroutines-android"))
     implementation(project(":core:logging-android"))
     implementation(project(":core:services-android"))
@@ -110,6 +111,7 @@ dependencies {
     androidTestImplementation(libs.kotlin.test.junit)
 
     "testEdinburghImplementation"(testFixtures(project(":cities:edinburgh:edinburgh-service-updates")))
+    testImplementation(testFixtures(project(":core:core-domain")))
     testImplementation(testFixtures(project(":core:connectivity")))
     testImplementation(testFixtures(project(":core:services")))
     testImplementation(testFixtures(project(":core:time")))

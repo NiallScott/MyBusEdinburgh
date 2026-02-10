@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,6 +33,8 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.services.ServiceDetails
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
@@ -61,10 +63,10 @@ class ServicesRetrieverTest {
 
     @Test
     fun getServicesFlowEmitsNullWhenNullServicesForStop() = runTest {
-        whenever(servicesRepository.getServiceDetailsFlow("123456"))
+        whenever(servicesRepository.getServiceDetailsFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(null))
 
-        retriever.getServicesFlow("123456").test {
+        retriever.getServicesFlow("123456".toNaptanStopIdentifier()).test {
             assertNull(awaitItem())
             awaitComplete()
         }
@@ -72,10 +74,10 @@ class ServicesRetrieverTest {
 
     @Test
     fun getServicesFlowEmitsNullWhenEmptyServicesForStop() = runTest {
-        whenever(servicesRepository.getServiceDetailsFlow("123456"))
+        whenever(servicesRepository.getServiceDetailsFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(emptyList()))
 
-        retriever.getServicesFlow("123456").test {
+        retriever.getServicesFlow("123456".toNaptanStopIdentifier()).test {
             assertNull(awaitItem())
             awaitComplete()
         }
@@ -83,22 +85,22 @@ class ServicesRetrieverTest {
 
     @Test
     fun getServicesFlowEmitsServicesWhenServiceDetailsIsPopulated() = runTest {
-        whenever(servicesRepository.getServiceDetailsFlow("123456"))
+        whenever(servicesRepository.getServiceDetailsFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(
                 flowOf(
                     listOf(
                         ServiceDetails(
-                            "1",
+                            service1,
                             "Service 1",
                             ServiceColours(1, 10)
                         ),
                         ServiceDetails(
-                            "2",
+                            service2,
                             null,
                             null
                         ),
                         ServiceDetails(
-                            "3",
+                            service3,
                             "Service 3",
                             null
                         )
@@ -106,23 +108,23 @@ class ServicesRetrieverTest {
                 )
             )
 
-        retriever.getServicesFlow("123456").test {
+        retriever.getServicesFlow("123456".toNaptanStopIdentifier()).test {
             assertEquals(
                 listOf(
                     UiItem.Service(
-                        "1".hashCode().toLong(),
+                        service1.hashCode().toLong(),
                         "1",
                         "Service 1",
                         ServiceColours(1, 10)
                     ),
                     UiItem.Service(
-                        "2".hashCode().toLong(),
+                        service2.hashCode().toLong(),
                         "2",
                         null,
                         null
                     ),
                     UiItem.Service(
-                        "3".hashCode().toLong(),
+                        service3.hashCode().toLong(),
                         "3",
                         "Service 3",
                         null
@@ -133,4 +135,19 @@ class ServicesRetrieverTest {
             awaitComplete()
         }
     }
+
+    private val service1 = FakeServiceDescriptor(
+        serviceName = "1",
+        operatorCode = "TEST1"
+    )
+
+    private val service2 = FakeServiceDescriptor(
+        serviceName = "2",
+        operatorCode = "TEST2"
+    )
+
+    private val service3 = FakeServiceDescriptor(
+        serviceName = "3",
+        operatorCode = "TEST3"
+    )
 }

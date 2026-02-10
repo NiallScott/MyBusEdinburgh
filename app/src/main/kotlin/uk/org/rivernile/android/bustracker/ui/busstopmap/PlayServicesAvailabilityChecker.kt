@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,12 +29,12 @@ package uk.org.rivernile.android.bustracker.ui.busstopmap
 import android.content.Context
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
 import javax.inject.Inject
-import kotlin.coroutines.coroutineContext
 
 /**
  * This class provides a [kotlinx.coroutines.flow.Flow] which emits the availability of Google Play
@@ -45,8 +45,9 @@ import kotlin.coroutines.coroutineContext
  * @author Niall Scott
  */
 class PlayServicesAvailabilityChecker @Inject constructor(
-        private val context: Context,
-        private val googleApiAvailability: GoogleApiAvailability) {
+    private val context: Context,
+    private val googleApiAvailability: GoogleApiAvailability
+) {
 
     companion object {
 
@@ -62,7 +63,7 @@ class PlayServicesAvailabilityChecker @Inject constructor(
     val apiAvailabilityFlow get() = flow {
         emit(PlayServicesAvailabilityResult.InProgress)
 
-        while (coroutineContext.isActive) {
+        while (currentCoroutineContext().isActive) {
             val apiResult = googleApiAvailability.isGooglePlayServicesAvailable(context)
 
             if (apiResult == ConnectionResult.SUCCESS) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.favourites
 
 import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
  * A fake [FavouritesRepository] for testing.
@@ -36,10 +37,10 @@ import kotlinx.coroutines.flow.Flow
 class FakeFavouritesRepository(
     private val onAddOrUpdateFavouriteStop: (FavouriteStop) -> Unit =
         { throw NotImplementedError() },
-    private val onRemoveFavouriteStop: (String) -> Unit = { throw NotImplementedError() },
-    private val onIsStopAddedAsFavouriteFlow: (String) -> Flow<Boolean> =
+    private val onRemoveFavouriteStop: (StopIdentifier) -> Unit = { throw NotImplementedError() },
+    private val onIsStopAddedAsFavouriteFlow: (StopIdentifier) -> Flow<Boolean> =
         { throw NotImplementedError() },
-    private val onGetFavouriteStopFlow: (String) -> Flow<FavouriteStop?> =
+    private val onGetFavouriteStopFlow: (StopIdentifier) -> Flow<FavouriteStop?> =
         { throw NotImplementedError() },
     private val onAllFavouriteStopsFlow: () -> Flow<List<FavouriteStop>?> =
         { throw NotImplementedError() }
@@ -49,15 +50,15 @@ class FakeFavouritesRepository(
         onAddOrUpdateFavouriteStop(favouriteStop)
     }
 
-    override suspend fun removeFavouriteStop(stopCode: String) {
-        onRemoveFavouriteStop(stopCode)
+    override suspend fun removeFavouriteStop(stopIdentifier: StopIdentifier) {
+        onRemoveFavouriteStop(stopIdentifier)
     }
 
-    override fun isStopAddedAsFavouriteFlow(stopCode: String) =
-        onIsStopAddedAsFavouriteFlow(stopCode)
+    override fun isStopAddedAsFavouriteFlow(stopIdentifier: StopIdentifier) =
+        onIsStopAddedAsFavouriteFlow(stopIdentifier)
 
-    override fun getFavouriteStopFlow(stopCode: String) =
-        onGetFavouriteStopFlow(stopCode)
+    override fun getFavouriteStopFlow(stopIdentifier: StopIdentifier) =
+        onGetFavouriteStopFlow(stopIdentifier)
 
     override val allFavouriteStopsFlow get() = onAllFavouriteStopsFlow()
 }

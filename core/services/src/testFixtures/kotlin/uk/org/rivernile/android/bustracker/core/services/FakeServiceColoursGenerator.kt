@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,10 +32,9 @@ package uk.org.rivernile.android.bustracker.core.services
  * @author Niall Scott
  */
 class FakeServiceColoursGenerator(
-    private val onGenerateServiceColours: (Int?) -> ServiceColours? =
-        { throw NotImplementedError() }
+    private val onGenerateColourOnPrimary: (Int) -> Int? = { throw NotImplementedError() }
 ) : ServiceColoursGenerator {
 
-    override fun generateServiceColours(serviceColour: Int?) =
-        onGenerateServiceColours(serviceColour)
+    override fun generateColourOnPrimary(primaryColour: Int) =
+        onGenerateColourOnPrimary(primaryColour)
 }

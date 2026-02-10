@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,6 +41,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddEditFavouriteStopListener
@@ -216,7 +217,7 @@ class FavouriteStopsFragment : Fragment(), HasScrollableContent {
      */
     private fun handleSelectedStopName(name: UiFavouriteName?) {
         actionMode?.title = name?.let {
-            textFormattingUtils.formatBusStopNameWithStopCode(it.stopCode, it.stopName)
+            textFormattingUtils.formatBusStopNameWithStopCode(it.stopIdentifier, it.stopName)
         }
     }
 
@@ -302,10 +303,10 @@ class FavouriteStopsFragment : Fragment(), HasScrollableContent {
     /**
      * Show stop data.
      *
-     * @param stopCode The stop code to show stop data for.
+     * @param stopIdentifier The stop to show stop data for.
      */
-    private fun handleShowStopData(stopCode: String) {
-        callbacks?.onShowBusTimes(stopCode)
+    private fun handleShowStopData(stopIdentifier: StopIdentifier) {
+        callbacks?.onShowBusTimes(stopIdentifier)
     }
 
     /**
@@ -314,72 +315,75 @@ class FavouriteStopsFragment : Fragment(), HasScrollableContent {
      * @param favouriteStop The favourite stop to create a shortcut for.
      */
     private fun handleCreateShortcut(favouriteStop: FavouriteStop) {
-        createShortcutCallbacks?.onCreateShortcut(favouriteStop.stopCode, favouriteStop.stopName)
+        createShortcutCallbacks?.onCreateShortcut(
+            favouriteStop.stopIdentifier,
+            favouriteStop.stopName
+        )
     }
 
     /**
      * Present UI to allow the user to edit the given stop.
      *
-     * @param stopCode The favourite stop to edit.
+     * @param stopIdentifier The favourite stop to edit.
      */
-    private fun handleShowEditFavouriteStop(stopCode: String) {
-        callbacks?.onShowAddEditFavouriteStop(stopCode)
+    private fun handleShowEditFavouriteStop(stopIdentifier: StopIdentifier) {
+        callbacks?.onShowAddEditFavouriteStop(stopIdentifier)
     }
 
     /**
      * Present UI to ask the user to confirm if they wish to delete the given favourite stop.
      *
-     * @param stopCode The stop to confirm deletion for.
+     * @param stopIdentifier The stop to confirm deletion for.
      */
-    private fun handleShowConfirmDeleteFavouriteStop(stopCode: String) {
-        callbacks?.onShowConfirmFavouriteDeletion(stopCode)
+    private fun handleShowConfirmDeleteFavouriteStop(stopIdentifier: StopIdentifier) {
+        callbacks?.onShowConfirmFavouriteDeletion(stopIdentifier)
     }
 
     /**
      * Show the given stop on the map.
      *
-     * @param stopCode The stop to show on the map.
+     * @param stopIdentifier The stop to show on the map.
      */
-    private fun handleShowOnMap(stopCode: String) {
-        callbacks?.onShowBusStopMapWithStopCode(stopCode)
+    private fun handleShowOnMap(stopIdentifier: StopIdentifier) {
+        callbacks?.onShowBusStopMapWithStopCode(stopIdentifier)
     }
 
     /**
      * Present UI to the user to allow them to add an arrival alert for the given stop.
      *
-     * @param stopCode The stop to add an arrival alert for.
+     * @param stopIdentifier The stop to add an arrival alert for.
      */
-    private fun handleAddArrivalAlert(stopCode: String) {
-        callbacks?.onShowAddTimeAlert(stopCode, null)
+    private fun handleAddArrivalAlert(stopIdentifier: StopIdentifier) {
+        callbacks?.onShowAddTimeAlert(stopIdentifier, null)
     }
 
     /**
      * Present UI to the user to allow them to confirm if the arrival alert for the given stop
      * should be removed.
      *
-     * @param stopCode The stop to confirm arrival alert deletion for.
+     * @param stopIdentifier The stop to confirm arrival alert deletion for.
      */
-    private fun handleConfirmDeleteArrivalAlert(stopCode: String) {
-        callbacks?.onShowConfirmDeleteTimeAlert(stopCode)
+    private fun handleConfirmDeleteArrivalAlert(stopIdentifier: StopIdentifier) {
+        callbacks?.onShowConfirmDeleteTimeAlert(stopIdentifier)
     }
 
     /**
      * Present UI to the user to allow them to add a proximity alert for the given stop.
      *
-     * @param stopCode The stop to add a proximity alert for.
+     * @param stopIdentifier The stop to add a proximity alert for.
      */
-    private fun handleAddProximityAlert(stopCode: String) {
-        callbacks?.onShowAddProximityAlert(stopCode)
+    private fun handleAddProximityAlert(stopIdentifier: StopIdentifier) {
+        callbacks?.onShowAddProximityAlert(stopIdentifier)
     }
 
     /**
      * Present UI to the user to allow them to confirm if the proximity alert for the given stop
      * should be removed.
      *
-     * @param stopCode The stop to confirm proximity alert deletion for.
+     * @param stopIdentifier The stop to confirm proximity alert deletion for.
      */
-    private fun handleConfirmDeleteProximityAlert(stopCode: String) {
-        callbacks?.onShowConfirmDeleteProximityAlert(stopCode)
+    private fun handleConfirmDeleteProximityAlert(stopIdentifier: StopIdentifier) {
+        callbacks?.onShowConfirmDeleteProximityAlert(stopIdentifier)
     }
 
     private val favouriteItemClickListener = object : OnFavouriteItemClickListener {
@@ -387,8 +391,8 @@ class FavouriteStopsFragment : Fragment(), HasScrollableContent {
             viewModel.onFavouriteStopClicked(favouriteStop)
         }
 
-        override fun onFavouriteLongClicked(stopCode: String) =
-                viewModel.onFavouriteStopLongClicked(stopCode)
+        override fun onFavouriteLongClicked(stopIdentifier: StopIdentifier) =
+            viewModel.onFavouriteStopLongClicked(stopIdentifier)
     }
 
     private val actionModeCallback = object : ActionMode.Callback {
@@ -460,10 +464,10 @@ class FavouriteStopsFragment : Fragment(), HasScrollableContent {
         /**
          * This is called when the user has selected a stop and a shortcut should be created for it.
          *
-         * @param stopCode The stop code to create a shortcut for.
+         * @param stopIdentifier The stop to create a shortcut for.
          * @param stopName The user's name for the stop at the time they requested the shortcut be
          * created.
          */
-        fun onCreateShortcut(stopCode: String, stopName: String)
+        fun onCreateShortcut(stopIdentifier: StopIdentifier, stopName: String)
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,9 +46,10 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.MapInfoWindowBin
  * @author Niall Scott
  */
 class MapInfoWindow(
-        private val context: Context,
-        inflater: LayoutInflater,
-        private val rootView: ViewGroup) : GoogleMap.InfoWindowAdapter {
+    private val context: Context,
+    inflater: LayoutInflater,
+    private val rootView: ViewGroup
+) : GoogleMap.InfoWindowAdapter {
 
     private val viewBinding by lazy {
         MapInfoWindowBinding.inflate(inflater, rootView, false)
@@ -63,16 +64,18 @@ class MapInfoWindow(
             txtTitle.text = marker.title
 
             txtSnippet.text = (marker.tag as? UiStopMarker)
-                    ?.serviceListing
-                    ?.let {
-                when (it) {
-                    is UiServiceListing.InProgress ->
-                        context.getString(R.string.busstopmapfragment_info_window_services_loading)
-                    is UiServiceListing.Empty ->
-                        context.getString(R.string.busstopmapfragment_info_window_services_empty)
-                    is UiServiceListing.Success -> it.services.joinToString()
-                }
-            }
+                ?.serviceListing
+                ?.toServiceListingString()
         }.root
+    }
+
+    private fun UiServiceListing.toServiceListingString(): String {
+        return when (this) {
+            is UiServiceListing.InProgress ->
+                context.getString(R.string.busstopmapfragment_info_window_services_loading)
+            is UiServiceListing.Empty ->
+                context.getString(R.string.busstopmapfragment_info_window_services_empty)
+            is UiServiceListing.Success -> services.joinToString { it.serviceName }
+        }
     }
 }

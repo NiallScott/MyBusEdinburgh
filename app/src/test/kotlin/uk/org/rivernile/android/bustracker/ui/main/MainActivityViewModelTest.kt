@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,6 +36,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.testutils.test
 
@@ -199,7 +200,7 @@ class MainActivityViewModelTest {
         val showInvalidQrCodeErrorObserver = viewModel.showInvalidQrCodeErrorLiveData.test()
         viewModel.onQrScanned(ScanQrCodeResult.Success("123456"))
 
-        showStopObserver.assertValues("123456")
+        showStopObserver.assertValues("123456".toNaptanStopIdentifier())
         showInvalidQrCodeErrorObserver.assertEmpty()
     }
 

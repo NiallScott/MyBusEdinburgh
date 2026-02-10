@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,30 +26,33 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 
+import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+
 /**
  * A stop search result.
  *
  * @author Niall Scott
  */
-interface StopSearchResult {
+public interface StopSearchResult {
 
     /**
      * The stop code.
      */
-    val stopCode: String
+    public val naptanStopIdentifier: NaptanStopIdentifier
 
     /**
      * The stop name.
      */
-    val stopName: StopName
+    public val stopName: StopName
 
     /**
      * The stop orientation.
      */
-    val orientation: StopOrientation
+    public val orientation: StopOrientation
 
     /**
-     * A [String] which lists the services which stop at this stop.
+     * The service listing for this stop search result.
      */
-    val serviceListing: String?
+    public val serviceListing: List<ServiceDescriptor>?
 }

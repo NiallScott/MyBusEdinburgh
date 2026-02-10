@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,20 +28,56 @@ package uk.org.rivernile.android.bustracker.core.endpoints.api.json
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
 
 /**
  * This class represents the JSON structure of the database version.
  *
- * @property schemaVersion The version of the database schema.
- * @property topologyId The topology ID to represent the version of the data.
+ * @property schemaName The name of the schema/app this database version is for.
+ * @property schemaVersionCode The version code of the schema.
+ * @property timestampInSeconds The timestamp the database was created at, in UNIX timestamp
+ * seconds.
  * @property databaseUrl The URL of the database.
- * @property checksum A checksum to use to verify the consistency of the database file.
+ * @property sha256Checksum The SHA-256 checksum of the database to ensure data integrity.
  * @author Niall Scott
  */
 @Serializable
 internal data class JsonDatabaseVersion(
-    @SerialName("db_schema_version") val schemaVersion: String? = null,
-    @SerialName("topo_id") val topologyId: String? = null,
-    @SerialName("db_url") val databaseUrl: String? = null,
-    @SerialName("checksum") val checksum: String? = null
+    @SerialName("schemaName") val schemaName: String? = null,
+    @SerialName("schemaVersionCode") val schemaVersionCode: Int? = null,
+    @SerialName("unixTimestampSeconds") val timestampInSeconds: Long? = null,
+    @SerialName("databaseUrl") val databaseUrl: String? = null,
+    @SerialName("sha256Checksum") val sha256Checksum: String? = null
 )
+
+/**
+ * Verify the schema details are correct.
+ *
+ * @param expectedSchemaName The expected name of the schema.
+ * @param expectedSchemaVersionCode The expected version code of the schema.
+ * @return `true` if the schema passes verification, otherwise `false`.
+ */
+internal fun JsonDatabaseVersion.verify(
+    expectedSchemaName: String,
+    expectedSchemaVersionCode: Int
+): Boolean {
+    return expectedSchemaName == schemaName && expectedSchemaVersionCode == schemaVersionCode
+}
+
+/**
+ * Map this [JsonDatabaseVersion] to a [DatabaseVersion]. If any required fields are missing, then
+ * `null` will be returned.
+ *
+ * @return This [JsonDatabaseVersion] as a [DatabaseVersion], or `null` if this could not be mapped.
+ */
+internal fun JsonDatabaseVersion.toDatabaseVersionOrNull(): DatabaseVersion? {
+    val timestampInSeconds = timestampInSeconds ?: return null
+    val databaseUrl = databaseUrl?.ifBlank { null } ?: return null
+    val sha256Checksum = sha256Checksum?.ifBlank { null } ?: return null
+
+    return DatabaseVersion(
+        timestampInSeconds = timestampInSeconds,
+        databaseUrl = databaseUrl,
+        sha256Checksum = sha256Checksum
+    )
+}

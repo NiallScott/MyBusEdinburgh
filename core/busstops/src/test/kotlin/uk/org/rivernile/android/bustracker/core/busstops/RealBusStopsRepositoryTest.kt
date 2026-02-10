@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,20 +27,34 @@
 package uk.org.rivernile.android.bustracker.core.busstops
 
 import app.cash.turbine.test
+import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopDetails
+    as DatabaseFakeStopDetails
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopDetailsWithServices
+    as DatabaseFakeStopDetailsWithServices
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopLocation
+    as DatabaseFakeStopLocation
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopName
+    as DatabaseFakeStopName
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopSearchResult
+    as DatabaseFakeStopSearchResult
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDao
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
+    as DatabaseStopDetails
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetailsWithServices
+    as DatabaseStopDetailsWithServices
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopLocation
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+    as DatabaseStopLocation
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName as DatabaseStopName
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
+    as DatabaseStopOrientation
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopSearchResult
+    as DatabaseStopSearchResult
+import uk.org.rivernile.android.bustracker.core.domain.toAtcoStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -54,10 +68,19 @@ import kotlin.test.fail
  */
 class RealBusStopsRepositoryTest {
 
+    @Test(expected = UnsupportedOperationException::class)
+    fun getNameForStopFlowWithNonNaptanStopIdentifierThrowsException() = runTest {
+        val repository = createBusStopsRepository(
+            stopsDao = FakeStopDao()
+        )
+
+        repository.getNameForStopFlow("123456".toAtcoStopIdentifier()).single()
+    }
+
     @Test
     fun getNameForStopFlowEmitsItems() = runTest {
-        val stopName1 = createStopName(1)
-        val stopName2 = createStopName(2)
+        val databaseStopName1 = createDatabaseStopName(1)
+        val databaseStopName2 = createDatabaseStopName(2)
         val repository = createBusStopsRepository(
             stopsDao = FakeStopDao(
                 onGetNameForStopFlow = {
@@ -66,25 +89,34 @@ class RealBusStopsRepositoryTest {
                         0L,
                         10L,
                         null,
-                        stopName1,
-                        stopName2
+                        databaseStopName1,
+                        databaseStopName2
                     )
                 }
             )
         )
 
-        repository.getNameForStopFlow("123456").test {
+        repository.getNameForStopFlow("123456".toNaptanStopIdentifier()).test {
             assertNull(awaitItem())
-            assertEquals(stopName1, awaitItem())
-            assertEquals(stopName2, awaitItem())
+            assertEquals(databaseStopName1.toStopName(), awaitItem())
+            assertEquals(databaseStopName2.toStopName(), awaitItem())
             awaitComplete()
         }
     }
 
+    @Test(expected = UnsupportedOperationException::class)
+    fun getBusStopDetailsFlowWithNonNaptanStopIdentifierThrowsException() = runTest {
+        val repository = createBusStopsRepository(
+            stopsDao = FakeStopDao()
+        )
+
+        repository.getBusStopDetailsFlow("123456".toAtcoStopIdentifier()).single()
+    }
+
     @Test
     fun getBusStopDetailsFlowEmitsItems() = runTest {
-        val stopDetails1 = createStopDetails(1)
-        val stopDetails2 = createStopDetails(2)
+        val databaseStopDetails1 = createDatabaseStopDetails(1)
+        val databaseStopDetails2 = createDatabaseStopDetails(2)
         val repository = createBusStopsRepository(
             stopsDao = FakeStopDao(
                 onGetStopDetailsFlowForSingleStop = {
@@ -93,25 +125,37 @@ class RealBusStopsRepositoryTest {
                         0L,
                         10L,
                         null,
-                        stopDetails1,
-                        stopDetails2
+                        databaseStopDetails1,
+                        databaseStopDetails2
                     )
                 }
             )
         )
 
-        repository.getBusStopDetailsFlow("123456").test {
+        repository.getBusStopDetailsFlow("123456".toNaptanStopIdentifier()).test {
             assertNull(awaitItem())
-            assertEquals(stopDetails1, awaitItem())
-            assertEquals(stopDetails2, awaitItem())
+            assertEquals(databaseStopDetails1.toStopDetails(), awaitItem())
+            assertEquals(databaseStopDetails2.toStopDetails(), awaitItem())
             awaitComplete()
         }
     }
 
+    @Test(expected = UnsupportedOperationException::class)
+    fun getBusStopDetailsFlowWithNonNaptanStopIdentifiersThrowsException() = runTest {
+        val repository = createBusStopsRepository(
+            stopsDao = FakeStopDao()
+        )
+
+        repository.getBusStopDetailsFlow(
+            setOf(
+                "123456".toAtcoStopIdentifier(),
+                "987654".toAtcoStopIdentifier()
+            )
+        ).single()
+    }
+
     @Test
     fun getBusStopDetailsFlowWithStopCodeSetEmitsItems() = runTest {
-        val stopDetails1 = mapOf<String, StopDetails>()
-        val stopDetails2 = mapOf<String, StopDetails>()
         val repository = createBusStopsRepository(
             stopsDao = FakeStopDao(
                 onGetStopDetailsFlowForMultipleStops = {
@@ -120,25 +164,30 @@ class RealBusStopsRepositoryTest {
                         0L,
                         10L,
                         null,
-                        stopDetails1,
-                        stopDetails2
+                        mapOf(),
+                        mapOf()
                     )
                 }
             )
         )
 
-        repository.getBusStopDetailsFlow(setOf("123456", "987654")).test {
+        repository.getBusStopDetailsFlow(
+            setOf(
+                "123456".toNaptanStopIdentifier(),
+                "987654".toNaptanStopIdentifier()
+            )
+        ).test {
             assertNull(awaitItem())
-            assertEquals(stopDetails1, awaitItem())
-            assertEquals(stopDetails2, awaitItem())
+            assertEquals(mapOf(), awaitItem())
+            assertEquals(mapOf(), awaitItem())
             awaitComplete()
         }
     }
 
     @Test
     fun getStopDetailsWithinSpanFlowWithNullServiceFilterEmitsItems() = runTest {
-        val stopDetails1 = createStopDetailsWithServices(1)
-        val stopDetails2 = createStopDetailsWithServices(2)
+        val databaseStopDetails1 = createDatabaseStopDetailsWithServices(1)
+        val databaseStopDetails2 = createDatabaseStopDetailsWithServices(2)
         val repository = createBusStopsRepository(
             stopsDao = FakeStopDao(
                 onGetStopDetailsWithinSpanFlow = { minLat, minLon, maxLat, maxLon ->
@@ -150,8 +199,8 @@ class RealBusStopsRepositoryTest {
                         0L,
                         10L,
                         null,
-                        listOf(stopDetails1),
-                        listOf(stopDetails1, stopDetails2)
+                        listOf(databaseStopDetails1),
+                        listOf(databaseStopDetails1, databaseStopDetails2)
                     )
                 },
                 onGetStopDetailsWithinSpanFlowWithServiceFilter = { _, _, _, _, _ ->
@@ -162,16 +211,22 @@ class RealBusStopsRepositoryTest {
 
         repository.getStopDetailsWithinSpanFlow(1.1, 2.2, 3.3, 4.4, null).test {
             assertNull(awaitItem())
-            assertEquals(listOf(stopDetails1), awaitItem())
-            assertEquals(listOf(stopDetails1, stopDetails2), awaitItem())
+            assertEquals(listOf(databaseStopDetails1).toStopDetailsWithServicesList(), awaitItem())
+            assertEquals(
+                listOf(
+                    databaseStopDetails1,
+                    databaseStopDetails2
+                ).toStopDetailsWithServicesList(),
+                awaitItem()
+            )
             awaitComplete()
         }
     }
 
     @Test
     fun getStopDetailsWithinSpanFlowWithEmptyServiceFilterEmitsItems() = runTest {
-        val stopDetails1 = createStopDetailsWithServices(1)
-        val stopDetails2 = createStopDetailsWithServices(2)
+        val databaseStopDetails1 = createDatabaseStopDetailsWithServices(1)
+        val databaseStopDetails2 = createDatabaseStopDetailsWithServices(2)
         val repository = createBusStopsRepository(
             stopsDao = FakeStopDao(
                 onGetStopDetailsWithinSpanFlow = { minLat, minLon, maxLat, maxLon ->
@@ -183,8 +238,8 @@ class RealBusStopsRepositoryTest {
                         0L,
                         10L,
                         null,
-                        listOf(stopDetails1),
-                        listOf(stopDetails1, stopDetails2)
+                        listOf(databaseStopDetails1),
+                        listOf(databaseStopDetails1, databaseStopDetails2)
                     )
                 },
                 onGetStopDetailsWithinSpanFlowWithServiceFilter = { _, _, _, _, _ ->
@@ -195,16 +250,36 @@ class RealBusStopsRepositoryTest {
 
         repository.getStopDetailsWithinSpanFlow(1.1, 2.2, 3.3, 4.4, emptySet()).test {
             assertNull(awaitItem())
-            assertEquals(listOf(stopDetails1), awaitItem())
-            assertEquals(listOf(stopDetails1, stopDetails2), awaitItem())
+            assertEquals(listOf(databaseStopDetails1).toStopDetailsWithServicesList(), awaitItem())
+            assertEquals(
+                listOf(
+                    databaseStopDetails1,
+                    databaseStopDetails2
+                ).toStopDetailsWithServicesList(),
+                awaitItem()
+            )
             awaitComplete()
         }
     }
 
     @Test
     fun getStopDetailsWithinSpanFlowWithServiceFilterEmitsItems() = runTest {
-        val stopDetails1 = createStopDetailsWithServices(1)
-        val stopDetails2 = createStopDetailsWithServices(2)
+        val databaseStopDetails1 = createDatabaseStopDetailsWithServices(1)
+        val databaseStopDetails2 = createDatabaseStopDetailsWithServices(2)
+        val services = setOf(
+            FakeServiceDescriptor(
+                serviceName = "1",
+                operatorCode = "TEST1"
+            ),
+            FakeServiceDescriptor(
+                serviceName = "2",
+                operatorCode = "TEST2"
+            ),
+            FakeServiceDescriptor(
+                serviceName = "3",
+                operatorCode = "TEST3"
+            )
+        )
         val repository = createBusStopsRepository(
             stopsDao = FakeStopDao(
                 onGetStopDetailsWithinSpanFlow = { _, _, _, _ ->
@@ -216,13 +291,13 @@ class RealBusStopsRepositoryTest {
                     assertEquals(2.2, minLon)
                     assertEquals(3.3, maxLat)
                     assertEquals(4.4, maxLon)
-                    assertEquals(setOf("1", "2", "3"), serviceFilter)
+                    assertEquals(services, serviceFilter)
                     intervalFlowOf(
                         0L,
                         10L,
                         null,
-                        listOf(stopDetails1),
-                        listOf(stopDetails1, stopDetails2)
+                        listOf(databaseStopDetails1),
+                        listOf(databaseStopDetails1, databaseStopDetails2)
                     )
                 }
             )
@@ -233,46 +308,72 @@ class RealBusStopsRepositoryTest {
             2.2,
             3.3,
             4.4,
-            setOf("1", "2", "3")
+            services
         ).test {
             assertNull(awaitItem())
-            assertEquals(listOf(stopDetails1), awaitItem())
-            assertEquals(listOf(stopDetails1, stopDetails2), awaitItem())
+            assertEquals(listOf(databaseStopDetails1).toStopDetailsWithServicesList(), awaitItem())
+            assertEquals(
+                listOf(
+                    databaseStopDetails1,
+                    databaseStopDetails2
+                ).toStopDetailsWithServicesList(),
+                awaitItem()
+            )
             awaitComplete()
         }
     }
 
     @Test
     fun getStopDetailsWithServiceFilterFlowEmitsItems() = runTest {
-        val stopDetails1 = createStopDetails(1)
-        val stopDetails2 = createStopDetails(2)
+        val databaseStopDetails1 = createDatabaseStopDetails(1)
+        val databaseStopDetails2 = createDatabaseStopDetails(2)
+        val services = setOf(
+            FakeServiceDescriptor(
+                serviceName = "1",
+                operatorCode = "TEST1"
+            ),
+            FakeServiceDescriptor(
+                serviceName = "2",
+                operatorCode = "TEST2"
+            ),
+            FakeServiceDescriptor(
+                serviceName = "3",
+                operatorCode = "TEST3"
+            )
+        )
         val repository = createBusStopsRepository(
             stopsDao = FakeStopDao(
                 onGetStopDetailsWithServiceFilterFlow = {
-                    assertEquals(setOf("1", "2", "3"), it)
+                    assertEquals(services, it)
                     intervalFlowOf(
                         0L,
                         10L,
                         null,
-                        listOf(stopDetails1),
-                        listOf(stopDetails1, stopDetails2)
+                        listOf(databaseStopDetails1),
+                        listOf(databaseStopDetails1, databaseStopDetails2)
                     )
                 }
             )
         )
 
-        repository.getStopDetailsWithServiceFilterFlow(setOf("1", "2", "3")).test {
+        repository.getStopDetailsWithServiceFilterFlow(services).test {
             assertNull(awaitItem())
-            assertEquals(listOf(stopDetails1), awaitItem())
-            assertEquals(listOf(stopDetails1, stopDetails2), awaitItem())
+            assertEquals(listOf(databaseStopDetails1).toStopDetailsList(), awaitItem())
+            assertEquals(
+                listOf(
+                    databaseStopDetails1,
+                    databaseStopDetails2
+                ).toStopDetailsList(),
+                awaitItem()
+            )
             awaitComplete()
         }
     }
 
     @Test
     fun getStopSearchResultsFlowEmitsItems() = runTest {
-        val searchResult1 = createStopSearchResult(1)
-        val searchResult2 = createStopSearchResult(2)
+        val databaseSearchResult1 = createDatabaseStopSearchResult(1)
+        val databaseSearchResult2 = createDatabaseStopSearchResult(2)
         val repository = createBusStopsRepository(
             stopsDao = FakeStopDao(
                 onGetStopSearchResultsFlow = {
@@ -281,8 +382,8 @@ class RealBusStopsRepositoryTest {
                         0L,
                         10L,
                         null,
-                        listOf(searchResult1),
-                        listOf(searchResult1, searchResult2)
+                        listOf(databaseSearchResult1),
+                        listOf(databaseSearchResult1, databaseSearchResult2)
                     )
                 }
             )
@@ -290,44 +391,68 @@ class RealBusStopsRepositoryTest {
 
         repository.getStopSearchResultsFlow("search term").test {
             assertNull(awaitItem())
-            assertEquals(listOf(searchResult1), awaitItem())
-            assertEquals(listOf(searchResult1, searchResult2), awaitItem())
+            assertEquals(listOf(databaseSearchResult1).toStopSearchResults(), awaitItem())
+            assertEquals(
+                listOf(
+                    databaseSearchResult1,
+                    databaseSearchResult2
+                ).toStopSearchResults(),
+                awaitItem()
+            )
             awaitComplete()
         }
     }
 
+    @Test(expected = UnsupportedOperationException::class)
+    fun getStopLocationWithNonNaptanStopIdentifierThrowsException() = runTest {
+        val repository = createBusStopsRepository(
+            stopsDao = FakeStopDao()
+        )
+
+        repository.getStopLocation("123456".toAtcoStopIdentifier())
+    }
+
     @Test
     fun getStopLocationReturnsStopLocation() = runTest {
-        val stopLocation = createStopLocation()
+        val databaseStopLocation = createDatabaseStopLocation()
         val repository = createBusStopsRepository(
             stopsDao = FakeStopDao(
                 onGetLocationForStopFlow = {
                     assertEquals("123456", it)
-                    intervalFlowOf(10L, 10L, stopLocation)
+                    intervalFlowOf(10L, 10L, databaseStopLocation)
                 }
             )
         )
 
-        val result = repository.getStopLocation("123456")
+        val result = repository.getStopLocation("123456".toNaptanStopIdentifier())
 
-        assertEquals(stopLocation, result)
+        assertEquals(databaseStopLocation.toStopLocation(), result)
+    }
+
+    @Test(expected = UnsupportedOperationException::class)
+    fun getNameForStopWithNonNaptanStopIdentifierThrowsException() = runTest {
+        val repository = createBusStopsRepository(
+            stopsDao = FakeStopDao()
+        )
+
+        repository.getNameForStop("123456".toAtcoStopIdentifier())
     }
 
     @Test
     fun getNameForStopReturnsStopName() = runTest {
-        val stopName = createStopName()
+        val databaseStopName = createDatabaseStopName()
         val repository = createBusStopsRepository(
             stopsDao = FakeStopDao(
                 onGetNameForStopFlow = {
                     assertEquals("123456", it)
-                    intervalFlowOf(10L, 10L, stopName)
+                    intervalFlowOf(10L, 10L, databaseStopName)
                 }
             )
         )
 
-        val result = repository.getNameForStop("123456")
+        val result = repository.getNameForStop("123456".toNaptanStopIdentifier())
 
-        assertEquals(stopName, result)
+        assertEquals(databaseStopName.toStopName(), result)
     }
 
     private fun createBusStopsRepository(
@@ -336,44 +461,46 @@ class RealBusStopsRepositoryTest {
         return RealBusStopsRepository(stopsDao)
     }
 
-    private fun createStopName(index: Int = 1): StopName {
-        return FakeStopName(
+    private fun createDatabaseStopName(index: Int = 1): DatabaseStopName {
+        return DatabaseFakeStopName(
             name = "Name$index",
             locality = "Locality$index"
         )
     }
 
-    private fun createStopLocation(index: Int = 1): StopLocation {
-        return FakeStopLocation(
+    private fun createDatabaseStopLocation(index: Int = 1): DatabaseStopLocation {
+        return DatabaseFakeStopLocation(
             latitude = 1.1 * index,
             longitude = 2.2 * index
         )
     }
 
-    private fun createStopDetails(index: Int = 1): StopDetails {
-        return FakeStopDetails(
-            stopCode = "stopCode$index",
-            stopName = createStopName(index),
-            location = createStopLocation(index),
-            orientation = StopOrientation.NORTH
+    private fun createDatabaseStopDetails(index: Int = 1): DatabaseStopDetails {
+        return DatabaseFakeStopDetails(
+            naptanStopIdentifier = "stopCode$index".toNaptanStopIdentifier(),
+            stopName = createDatabaseStopName(index),
+            location = createDatabaseStopLocation(index),
+            orientation = DatabaseStopOrientation.NORTH
         )
     }
 
-    private fun createStopDetailsWithServices(index: Int = 1): StopDetailsWithServices {
-        return FakeStopDetailsWithServices(
-            stopCode = "stopCode$index",
-            stopName = createStopName(index),
-            location = createStopLocation(index),
-            orientation = StopOrientation.NORTH,
+    private fun createDatabaseStopDetailsWithServices(
+        index: Int = 1
+    ): DatabaseStopDetailsWithServices {
+        return DatabaseFakeStopDetailsWithServices(
+            naptanStopIdentifier = "stopCode$index".toNaptanStopIdentifier(),
+            stopName = createDatabaseStopName(index),
+            location = createDatabaseStopLocation(index),
+            orientation = DatabaseStopOrientation.NORTH,
             serviceListing = null
         )
     }
 
-    private fun createStopSearchResult(index: Int = 1): StopSearchResult {
-        return FakeStopSearchResult(
-            stopCode = "stopCode$index",
-            stopName = createStopName(index),
-            orientation = StopOrientation.NORTH,
+    private fun createDatabaseStopSearchResult(index: Int = 1): DatabaseStopSearchResult {
+        return DatabaseFakeStopSearchResult(
+            naptanStopIdentifier = "stopCode$index".toNaptanStopIdentifier(),
+            stopName = createDatabaseStopName(index),
+            orientation = DatabaseStopOrientation.NORTH,
             serviceListing = null
         )
     }

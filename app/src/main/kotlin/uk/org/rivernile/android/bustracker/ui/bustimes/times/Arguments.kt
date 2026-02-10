@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,10 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.times
 import androidx.lifecycle.SavedStateHandle
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toStopIdentifier
 import javax.inject.Inject
 
 /**
@@ -47,11 +51,13 @@ class Arguments @Inject constructor(
         /**
          * The state key for stop code.
          */
-        const val STATE_STOP_CODE = "stopCode"
+        const val STATE_STOP_IDENTIFIER = "stopIdentifier"
     }
 
     /**
      * This [kotlinx.coroutines.flow.Flow] emits the stop code argument.
      */
-    val stopCodeFlow: Flow<String?> = savedState.getStateFlow<String?>(STATE_STOP_CODE, null)
+    val stopIdentifierFlow: Flow<StopIdentifier?> = savedState
+        .getStateFlow<ParcelableStopIdentifier?>(STATE_STOP_IDENTIFIER, null)
+        .map { it?.toStopIdentifier() }
 }

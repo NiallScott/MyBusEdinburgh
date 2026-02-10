@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,6 +40,9 @@ import org.mockito.Mockito.mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import uk.org.rivernile.android.bustracker.testutils.test
@@ -150,7 +153,15 @@ class ServicesChooserDialogFragmentViewModelTest {
     @Test
     fun uiStateLiveDataEmitsGlobalErrorWhenServicesEMptyAndParamsStop() = runTest {
         whenever(arguments.paramsFlow)
-            .thenReturn(flowOf(ServicesChooserParams.Stop(0, null, "123456")))
+            .thenReturn(
+                flowOf(
+                    ServicesChooserParams.Stop(
+                        titleResId = 0,
+                        selectedServices = null,
+                        stopIdentifier = "123456".toParcelableNaptanStopIdentifier()
+                    )
+                )
+            )
         whenever(servicesLoader.servicesFlow)
             .thenReturn(intervalFlowOf(10L, 10L, emptyList()))
         whenever(state.hasSelectedServicesFlow)
@@ -168,7 +179,15 @@ class ServicesChooserDialogFragmentViewModelTest {
     @Test
     fun uiStateLiveDataEmitsValues() = runTest {
         whenever(arguments.paramsFlow)
-            .thenReturn(flowOf(ServicesChooserParams.Stop(0, null, "123456")))
+            .thenReturn(
+                flowOf(
+                    ServicesChooserParams.Stop(
+                        titleResId = 0,
+                        selectedServices = null,
+                        stopIdentifier = "123456".toParcelableNaptanStopIdentifier()
+                    )
+                )
+            )
         whenever(servicesLoader.servicesFlow)
             .thenReturn(intervalFlowOf(
                 10L,
@@ -212,7 +231,7 @@ class ServicesChooserDialogFragmentViewModelTest {
         whenever(state.hasSelectedServicesFlow)
             .thenReturn(flowOf(false))
         val viewModel = createViewModel()
-        val expected = mock<ArrayList<String>?>()
+        val expected = mock<ArrayList<ParcelableServiceDescriptor>?>()
         whenever(state.selectedServices)
             .thenReturn(expected)
 
@@ -229,10 +248,20 @@ class ServicesChooserDialogFragmentViewModelTest {
             .thenReturn(flowOf(false))
         val viewModel = createViewModel()
 
-        viewModel.onServiceClicked("1")
+        viewModel.onServiceClicked(
+            FakeServiceDescriptor(
+                serviceName = "1",
+                operatorCode = "TEST1"
+            )
+        )
 
         verify(state)
-            .onServiceClicked("1")
+            .onServiceClicked(
+                FakeServiceDescriptor(
+                    serviceName = "1",
+                    operatorCode = "TEST1"
+                )
+            )
     }
 
     @Test

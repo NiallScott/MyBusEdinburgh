@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,15 +26,18 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 
+import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+
 /**
  * A fake [StopDetailsWithServices] for use in tests.
  *
  * @author Niall Scott
  */
 data class FakeStopDetailsWithServices(
-    override val stopCode: String,
+    override val naptanStopIdentifier: NaptanStopIdentifier,
     override val stopName: StopName,
     override val location: StopLocation,
     override val orientation: StopOrientation,
-    override val serviceListing: String?
+    override val serviceListing: List<ServiceDescriptor>?
 ) : StopDetailsWithServices

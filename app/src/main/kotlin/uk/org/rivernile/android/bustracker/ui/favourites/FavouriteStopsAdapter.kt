@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -42,10 +42,10 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemFavourit
  * @author Niall Scott
  */
 class FavouriteStopsAdapter(
-        context: Context,
-        private val clickListener: OnFavouriteItemClickListener,
-        private val isCreateShortcutMode: Boolean)
-    : ListAdapter<UiFavouriteStop, FavouriteStopViewHolder>(ItemEquator()) {
+    context: Context,
+    private val clickListener: OnFavouriteItemClickListener,
+    private val isCreateShortcutMode: Boolean
+) : ListAdapter<UiFavouriteStop, FavouriteStopViewHolder>(ItemEquator()) {
 
     private val inflater = LayoutInflater.from(context)
 
@@ -54,17 +54,18 @@ class FavouriteStopsAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-            FavouriteStopViewHolder(
-                    ListItemFavouriteStopBinding.inflate(inflater, parent, false),
-                    clickListener,
-                    isCreateShortcutMode)
+        FavouriteStopViewHolder(
+            ListItemFavouriteStopBinding.inflate(inflater, parent, false),
+            clickListener,
+            isCreateShortcutMode
+        )
 
     override fun onBindViewHolder(holder: FavouriteStopViewHolder, position: Int) {
         holder.populate(getItem(position))
     }
 
     override fun getItemId(position: Int) =
-            getItem(position)?.favouriteStop?.stopCode?.hashCode()?.toLong() ?: 0L
+        getItem(position)?.favouriteStop?.stopIdentifier?.hashCode()?.toLong() ?: 0L
 
     /**
      * This is used to compare [UiFavouriteStop] items to determine position updates.
@@ -72,9 +73,9 @@ class FavouriteStopsAdapter(
     private class ItemEquator : DiffUtil.ItemCallback<UiFavouriteStop>() {
 
         override fun areItemsTheSame(oldItem: UiFavouriteStop, newItem: UiFavouriteStop) =
-                oldItem.favouriteStop.stopCode == newItem.favouriteStop.stopCode
+            oldItem.favouriteStop.stopIdentifier == newItem.favouriteStop.stopIdentifier
 
         override fun areContentsTheSame(oldItem: UiFavouriteStop, newItem: UiFavouriteStop) =
-                oldItem == newItem
+            oldItem == newItem
     }
 }

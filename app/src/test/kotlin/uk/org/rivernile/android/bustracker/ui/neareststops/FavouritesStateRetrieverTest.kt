@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,6 +33,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -58,20 +59,10 @@ class FavouritesStateRetrieverTest {
     }
 
     @Test
-    fun getIsAddedAsFavouriteStopEmitsNullWhenStopCodeIsNull() = runTest {
-        val stopCodeFlow = flowOf(null)
+    fun getIsAddedAsFavouriteStopEmitsNullWhenStopIdentifierIsNull() = runTest {
+        val stopIdentifierFlow = flowOf(null)
 
-        retriever.getIsAddedAsFavouriteStopFlow(stopCodeFlow).test {
-            assertNull(awaitItem())
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun getIsAddedAsFavouriteStopEmitsNullWhenStopCodeIsEmpty() = runTest {
-        val stopCodeFlow = flowOf("")
-
-        retriever.getIsAddedAsFavouriteStopFlow(stopCodeFlow).test {
+        retriever.getIsAddedAsFavouriteStopFlow(stopIdentifierFlow).test {
             assertNull(awaitItem())
             awaitComplete()
         }
@@ -79,11 +70,11 @@ class FavouritesStateRetrieverTest {
 
     @Test
     fun getIsAddedAsFavouriteStopEmitsValuesFromFavouritesRepository() = runTest {
-        val stopCodeFlow = flowOf("123456")
-        whenever(favouritesRepository.isStopAddedAsFavouriteFlow("123456"))
+        val stopIdentifierFlow = flowOf("123456".toNaptanStopIdentifier())
+        whenever(favouritesRepository.isStopAddedAsFavouriteFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(false, true, false))
 
-        retriever.getIsAddedAsFavouriteStopFlow(stopCodeFlow).test {
+        retriever.getIsAddedAsFavouriteStopFlow(stopIdentifierFlow).test {
             assertNull(awaitItem())
             assertEquals(false, awaitItem())
             assertEquals(true, awaitItem())

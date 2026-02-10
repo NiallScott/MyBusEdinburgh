@@ -32,6 +32,9 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.datetime.TimeZone
 import kotlinx.serialization.SerializationException
 import okio.IOException
+import uk.org.rivernile.android.bustracker.core.domain.AtcoStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.EdinburghOpenApi
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
@@ -65,22 +68,32 @@ internal class EdinburghTrackerEndpoint @Inject constructor(
     private val timeZone = TimeZone.of("Europe/London")
 
     override suspend fun getLiveTimes(
-        stopCode: String,
+        stopIdentifier: StopIdentifier,
         numberOfDepartures: Int
     ): LiveTimesResponse {
         return if (connectivityRepository.hasInternetConnectivity) {
             try {
-                val response = api.getStopEvents(
-                    smsCode = stopCode,
-                    numberOfDepartures = numberOfDepartures,
-                )
+                val response = when (stopIdentifier) {
+                    is AtcoStopIdentifier -> {
+                        api.getStopEventsWithAtcoCode(
+                            atcoCode = stopIdentifier.atcoCode,
+                            numberOfDepartures = numberOfDepartures
+                        )
+                    }
+                    is NaptanStopIdentifier -> {
+                        api.getStopEventsWithSmsCode(
+                            smsCode = stopIdentifier.naptanStopCode,
+                            numberOfDepartures = numberOfDepartures
+                        )
+                    }
+                }
 
                 if (response.isSuccessful) {
                     val receiveTime = timeUtils.now
                     val liveTimes = response
                         .body()
                         ?.toLiveTimes(
-                            stopCode = stopCode,
+                            stopIdentifier = stopIdentifier,
                             numberOfDepartures = numberOfDepartures,
                             receiveTime = receiveTime,
                             timeZone = timeZone
@@ -114,17 +127,17 @@ internal class EdinburghTrackerEndpoint @Inject constructor(
     }
 
     override suspend fun getLiveTimes(
-        stopCodes: List<String>,
+        stopIdentifiers: List<StopIdentifier>,
         numberOfDepartures: Int
     ) = coroutineScope {
         var minReceiveTime = Instant.DISTANT_FUTURE
-        val stops = mutableMapOf<String, Stop>()
+        val stops = mutableMapOf<StopIdentifier, Stop>()
 
-        stopCodes
-            .map { stopCode ->
+        stopIdentifiers
+            .map { stopIdentifier ->
                 async {
                     getLiveTimes(
-                        stopCode = stopCode,
+                        stopIdentifier = stopIdentifier,
                         numberOfDepartures = numberOfDepartures
                     )
                 }

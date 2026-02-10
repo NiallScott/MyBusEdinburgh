@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,11 +46,11 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemSearchRe
  * @author Niall Scott
  */
 class SearchAdapter(
-        context: Context,
-        private val stopMapMarkerDecorator: StopMapMarkerDecorator,
-        private val textFormattingUtils: TextFormattingUtils,
-        private val clickListener: OnItemClickedListener)
-    : ListAdapter<UiSearchResult, SearchResultViewHolder>(ItemEquator()) {
+    context: Context,
+    private val stopMapMarkerDecorator: StopMapMarkerDecorator,
+    private val textFormattingUtils: TextFormattingUtils,
+    private val clickListener: OnItemClickedListener
+) : ListAdapter<UiSearchResult, SearchResultViewHolder>(ItemEquator()) {
 
     private val inflater = LayoutInflater.from(context)
     private val directionStrings = context.resources.getStringArray(R.array.orientations)
@@ -60,19 +60,20 @@ class SearchAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-            SearchResultViewHolder(
-                    ListItemSearchResultBinding.inflate(inflater, parent, false),
-                    clickListener,
-                    stopMapMarkerDecorator,
-                    textFormattingUtils,
-                    directionStrings)
+        SearchResultViewHolder(
+            ListItemSearchResultBinding.inflate(inflater, parent, false),
+            clickListener,
+            stopMapMarkerDecorator,
+            textFormattingUtils,
+            directionStrings
+        )
 
     override fun onBindViewHolder(holder: SearchResultViewHolder, position: Int) {
         holder.populate(getItem(position))
     }
 
     override fun getItemId(position: Int) =
-            getItem(position)?.stopCode?.hashCode()?.toLong() ?: 0L
+        getItem(position)?.stopIdentifier?.hashCode()?.toLong() ?: 0L
 
     /**
      * This class is used to compare [UiSearchResult] items to determine position updates.
@@ -80,9 +81,9 @@ class SearchAdapter(
     private class ItemEquator : DiffUtil.ItemCallback<UiSearchResult>() {
 
         override fun areItemsTheSame(oldItem: UiSearchResult, newItem: UiSearchResult) =
-                oldItem.stopCode == newItem.stopCode
+            oldItem.stopIdentifier == newItem.stopIdentifier
 
         override fun areContentsTheSame(oldItem: UiSearchResult, newItem: UiSearchResult) =
-                oldItem == newItem
+            oldItem == newItem
     }
 }

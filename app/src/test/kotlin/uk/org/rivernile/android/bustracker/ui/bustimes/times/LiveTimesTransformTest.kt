@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,6 +34,7 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import kotlin.test.BeforeTest
@@ -130,12 +131,12 @@ class LiveTimesTransformTest {
             .thenReturn(flowOf(true))
         val uiResult = UiResult.Success(123L, uiStop)
         whenever(expandedServicesTracker.expandedServicesFlow)
-            .thenReturn(flowOf(setOf("1")))
+            .thenReturn(flowOf(setOf(service1)))
         whenever(transformations.filterNightServices(uiServices1, true))
             .thenReturn(uiServices1)
         whenever(transformations.sortServices(uiServices1, true))
             .thenReturn(uiServices1)
-        whenever(transformations.applyExpansions(uiServices1, setOf("1")))
+        whenever(transformations.applyExpansions(uiServices1, setOf(service1)))
             .thenReturn(listOf(uiLiveTimesItem1))
 
         transform.getLiveTimesTransformFlow(uiResult).test {
@@ -152,7 +153,7 @@ class LiveTimesTransformTest {
             .thenReturn(flowOf(false))
         val uiResult = UiResult.Success(123L, uiStop)
         whenever(expandedServicesTracker.expandedServicesFlow)
-            .thenReturn(flowOf(setOf("1")))
+            .thenReturn(flowOf(setOf(service1)))
         whenever(transformations.filterNightServices(uiServices1, false))
             .thenReturn(uiServices1)
         whenever(transformations.filterNightServices(uiServices1, true))
@@ -161,9 +162,9 @@ class LiveTimesTransformTest {
             .thenReturn(uiServices1)
         whenever(transformations.sortServices(uiServices2, false))
             .thenReturn(uiServices2)
-        whenever(transformations.applyExpansions(uiServices1, setOf("1")))
+        whenever(transformations.applyExpansions(uiServices1, setOf(service1)))
             .thenReturn(listOf(uiLiveTimesItem1))
-        whenever(transformations.applyExpansions(uiServices2, setOf("1")))
+        whenever(transformations.applyExpansions(uiServices2, setOf(service1)))
             .thenReturn(listOf(uiLiveTimesItem2))
 
         transform.getLiveTimesTransformFlow(uiResult).test {
@@ -181,16 +182,16 @@ class LiveTimesTransformTest {
             .thenReturn(intervalFlowOf(0L, 10L, false, true))
         val uiResult = UiResult.Success(123L, uiStop)
         whenever(expandedServicesTracker.expandedServicesFlow)
-            .thenReturn(flowOf(setOf("1")))
+            .thenReturn(flowOf(setOf(service1)))
         whenever(transformations.filterNightServices(uiServices1, false))
             .thenReturn(uiServices1, uiServices2)
         whenever(transformations.sortServices(uiServices1, false))
             .thenReturn(uiServices1)
         whenever(transformations.sortServices(uiServices2, true))
             .thenReturn(uiServices2)
-        whenever(transformations.applyExpansions(uiServices1, setOf("1")))
+        whenever(transformations.applyExpansions(uiServices1, setOf(service1)))
             .thenReturn(listOf(uiLiveTimesItem1))
-        whenever(transformations.applyExpansions(uiServices2, setOf("1")))
+        whenever(transformations.applyExpansions(uiServices2, setOf(service1)))
             .thenReturn(listOf(uiLiveTimesItem2))
 
         transform.getLiveTimesTransformFlow(uiResult).test {
@@ -208,14 +209,14 @@ class LiveTimesTransformTest {
             .thenReturn(flowOf(false))
         val uiResult = UiResult.Success(123L, uiStop)
         whenever(expandedServicesTracker.expandedServicesFlow)
-            .thenReturn(intervalFlowOf(0L, 200L, setOf("1"), setOf("1", "2")))
+            .thenReturn(intervalFlowOf(0L, 200L, setOf(service1), setOf(service1, service2)))
         whenever(transformations.filterNightServices(uiServices1, false))
             .thenReturn(uiServices1)
         whenever(transformations.sortServices(uiServices1, false))
             .thenReturn(uiServices1)
-        whenever(transformations.applyExpansions(uiServices1, setOf("1")))
+        whenever(transformations.applyExpansions(uiServices1, setOf(service1)))
             .thenReturn(listOf(uiLiveTimesItem1))
-        whenever(transformations.applyExpansions(uiServices1, setOf("1", "2")))
+        whenever(transformations.applyExpansions(uiServices1, setOf(service1, service2)))
             .thenReturn(listOf(uiLiveTimesItem2))
 
         transform.getLiveTimesTransformFlow(uiResult).test {
@@ -231,4 +232,14 @@ class LiveTimesTransformTest {
         whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow)
             .thenReturn(flowOf(false))
     }
+
+    private val service1 get() = FakeServiceDescriptor(
+        serviceName = "1",
+        operatorCode = "TEST1"
+    )
+
+    private val service2 get() = FakeServiceDescriptor(
+        serviceName = "2",
+        operatorCode = "TEST2"
+    )
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -66,6 +66,8 @@ include(
     ":core:config",
     ":core:connectivity",
     ":core:connectivity-android",
+    ":core:core-domain",
+    ":core:core-domain-android",
     ":core:coroutines",
     ":core:coroutines-android",
     ":core:favourites",
@@ -86,6 +88,7 @@ include(
     ":core:services",
     ":core:services-android",
     ":core:servicepoints",
+    ":core:servicepoints-android",
     ":core:servicestops",
     ":core:servicestops-android",
     ":core:time",

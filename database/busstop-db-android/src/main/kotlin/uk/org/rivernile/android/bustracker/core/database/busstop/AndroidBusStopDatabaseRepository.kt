@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseMetadata
 import java.io.File
@@ -53,6 +52,5 @@ internal class AndroidBusStopDatabaseRepository @Inject constructor(
     override val databaseMetadataFlow: Flow<DatabaseMetadata?> get() =
         databaseDao.databaseMetadataFlow
 
-    override suspend fun getTopologyVersionId() =
-        databaseDao.topologyIdFlow.first()
+    override suspend fun getDatabaseUpdateTimestamp() = databaseDao.getDatabaseUpdateTimestamp()
 }

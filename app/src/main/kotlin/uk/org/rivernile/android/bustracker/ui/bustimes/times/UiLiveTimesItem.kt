@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,12 +26,13 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 
 /**
  * This describes a single row shown in the live times listing.
  *
- * @property serviceName The name of the service.
+ * @property serviceDescriptor The descriptor of the service.
  * @property serviceColours The colour palette of the service.
  * @property vehicle The specific vehicle this data is for, where the live time is located.
  * @property position The position of this item within its service grouping.
@@ -39,7 +40,7 @@ import uk.org.rivernile.android.bustracker.core.services.ServiceColours
  * @author Niall Scott
  */
 data class UiLiveTimesItem(
-    val serviceName: String,
+    val serviceDescriptor: ServiceDescriptor,
     val serviceColours: ServiceColours?,
     val vehicle: UiVehicle,
     val position: Int,

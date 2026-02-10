@@ -36,6 +36,9 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Stop
@@ -73,17 +76,17 @@ class LiveTimesRetrieverTest {
     @Test
     fun getLiveTimesFlowWithInProgressResultDoesNotGetColours() = runTest {
         val liveTimesFlow = flowOf(LiveTimesResult.InProgress)
-        whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
+        whenever(liveTimesRepository.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4))
             .thenReturn(liveTimesFlow)
         whenever(liveTimesMapper
             .mapLiveTimesAndColoursToUiResult(
-                "123456",
+                "123456".toNaptanStopIdentifier(),
                 LiveTimesResult.InProgress,
                 null
             )
         ).thenReturn(UiResult.InProgress)
 
-        retriever.getLiveTimesFlow("123456", 4).test {
+        retriever.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4).test {
             assertEquals(UiResult.InProgress, awaitItem())
             awaitComplete()
         }
@@ -97,20 +100,20 @@ class LiveTimesRetrieverTest {
         val errorResult = LiveTimesResult.Error.NoConnectivity(123L)
         val errorUiResult = UiResult.Error(123L, ErrorType.NO_CONNECTIVITY)
         val liveTimesFlow = flowOf(LiveTimesResult.InProgress, errorResult)
-        whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
+        whenever(liveTimesRepository.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4))
             .thenReturn(liveTimesFlow)
         whenever(liveTimesMapper
             .mapLiveTimesAndColoursToUiResult(
-                "123456",
+                "123456".toNaptanStopIdentifier(),
                 LiveTimesResult.InProgress,
                 null
             )
         ).thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper
-            .mapLiveTimesAndColoursToUiResult("123456", errorResult, null)
+            .mapLiveTimesAndColoursToUiResult("123456".toNaptanStopIdentifier(), errorResult, null)
         ).thenReturn(errorUiResult)
 
-        retriever.getLiveTimesFlow("123456", 4).test {
+        retriever.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4).test {
             assertEquals(UiResult.InProgress, awaitItem())
             assertEquals(errorUiResult, awaitItem())
             awaitComplete()
@@ -130,20 +133,20 @@ class LiveTimesRetrieverTest {
         )
         val errorUiResult = UiResult.Error(123L, ErrorType.NO_DATA)
         val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
-        whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
+        whenever(liveTimesRepository.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4))
             .thenReturn(liveTimesFlow)
         whenever(liveTimesMapper
             .mapLiveTimesAndColoursToUiResult(
-                "123456",
+                "123456".toNaptanStopIdentifier(),
                 LiveTimesResult.InProgress,
                 null
             )
         ).thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper
-            .mapLiveTimesAndColoursToUiResult("123456", successResult, null)
+            .mapLiveTimesAndColoursToUiResult("123456".toNaptanStopIdentifier(), successResult, null)
         ).thenReturn(errorUiResult)
 
-        retriever.getLiveTimesFlow("123456", 4).test {
+        retriever.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4).test {
             assertEquals(UiResult.InProgress, awaitItem())
             assertEquals(errorUiResult, awaitItem())
             awaitComplete()
@@ -158,8 +161,8 @@ class LiveTimesRetrieverTest {
         val successResult = LiveTimesResult.Success(
             LiveTimes(
                 mapOf(
-                    "123456" to Stop(
-                        "123456",
+                    "123456".toNaptanStopIdentifier() to Stop(
+                        "123456".toNaptanStopIdentifier(),
                         emptyList(),
                     )
                 ),
@@ -168,20 +171,20 @@ class LiveTimesRetrieverTest {
         )
         val errorUiResult = UiResult.Error(123L, ErrorType.NO_DATA)
         val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
-        whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
+        whenever(liveTimesRepository.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4))
             .thenReturn(liveTimesFlow)
         whenever(liveTimesMapper
             .mapLiveTimesAndColoursToUiResult(
-                "123456",
+                "123456".toNaptanStopIdentifier(),
                 LiveTimesResult.InProgress,
                 null
             )
         ).thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper
-            .mapLiveTimesAndColoursToUiResult("123456", successResult, null)
+            .mapLiveTimesAndColoursToUiResult("123456".toNaptanStopIdentifier(), successResult, null)
         ).thenReturn(errorUiResult)
 
-        retriever.getLiveTimesFlow("123456", 4).test {
+        retriever.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4).test {
             assertEquals(UiResult.InProgress, awaitItem())
             assertEquals(errorUiResult, awaitItem())
             awaitComplete()
@@ -196,11 +199,11 @@ class LiveTimesRetrieverTest {
         val successResult = LiveTimesResult.Success(
             LiveTimes(
                 mapOf(
-                    "123456" to Stop(
-                        "123456",
+                    "123456".toNaptanStopIdentifier() to Stop(
+                        "123456".toNaptanStopIdentifier(),
                         listOf(
                             Service(
-                                "1",
+                                service1,
                                 emptyList()
                             )
                         )
@@ -209,14 +212,14 @@ class LiveTimesRetrieverTest {
                 Instant.fromEpochMilliseconds(123L)
             )
         )
-        val serviceColoursFlow = flowOf<Map<String, ServiceColours>?>(null)
+        val serviceColoursFlow = flowOf<Map<ServiceDescriptor, ServiceColours>?>(null)
         val successUiResult = UiResult.Success(
             123L,
             UiStop(
-                "123456",
+                "123456".toNaptanStopIdentifier(),
                 listOf(
                     UiService(
-                        "1",
+                        service1,
                         null,
                         emptyList()
                     )
@@ -224,22 +227,26 @@ class LiveTimesRetrieverTest {
             )
         )
         val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
-        whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
+        whenever(liveTimesRepository.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4))
             .thenReturn(liveTimesFlow)
-        whenever(servicesRepository.getColoursForServicesFlow(setOf("1")))
+        whenever(servicesRepository.getColoursForServicesFlow(setOf(service1)))
             .thenReturn(serviceColoursFlow)
         whenever(liveTimesMapper
             .mapLiveTimesAndColoursToUiResult(
-                "123456",
+                "123456".toNaptanStopIdentifier(),
                 LiveTimesResult.InProgress,
                 null
             )
         ).thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper
-            .mapLiveTimesAndColoursToUiResult("123456", successResult, null)
+            .mapLiveTimesAndColoursToUiResult(
+                "123456".toNaptanStopIdentifier(),
+                successResult,
+                null
+            )
         ).thenReturn(successUiResult)
 
-        retriever.getLiveTimesFlow("123456", 4).test {
+        retriever.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4).test {
             assertEquals(UiResult.InProgress, awaitItem())
             assertEquals(successUiResult, awaitItem())
             awaitComplete()
@@ -251,11 +258,11 @@ class LiveTimesRetrieverTest {
         val successResult = LiveTimesResult.Success(
             LiveTimes(
                 mapOf(
-                    "123456" to Stop(
-                        "123456",
+                    "123456".toNaptanStopIdentifier() to Stop(
+                        "123456".toNaptanStopIdentifier(),
                         listOf(
                             Service(
-                                "1",
+                                service1,
                                 emptyList()
                             )
                         ),
@@ -264,14 +271,14 @@ class LiveTimesRetrieverTest {
                 Instant.fromEpochMilliseconds(123L)
             )
         )
-        val serviceColoursFlow = flowOf<Map<String, ServiceColours>?>(emptyMap())
+        val serviceColoursFlow = flowOf<Map<ServiceDescriptor, ServiceColours>?>(emptyMap())
         val successUiResult = UiResult.Success(
             123L,
             UiStop(
-                "123456",
+                "123456".toNaptanStopIdentifier(),
                 listOf(
                     UiService(
-                        "1",
+                        service1,
                         null,
                         emptyList()
                     )
@@ -279,22 +286,25 @@ class LiveTimesRetrieverTest {
             )
         )
         val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
-        whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
+        whenever(liveTimesRepository.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4))
             .thenReturn(liveTimesFlow)
-        whenever(servicesRepository.getColoursForServicesFlow(setOf("1")))
+        whenever(servicesRepository.getColoursForServicesFlow(setOf(service1)))
             .thenReturn(serviceColoursFlow)
         whenever(liveTimesMapper
             .mapLiveTimesAndColoursToUiResult(
-                "123456",
+                "123456".toNaptanStopIdentifier(),
                 LiveTimesResult.InProgress,
                 null
             )
         ).thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper
-            .mapLiveTimesAndColoursToUiResult("123456", successResult, emptyMap()))
+            .mapLiveTimesAndColoursToUiResult(
+                "123456".toNaptanStopIdentifier(),
+                successResult,
+                emptyMap()))
             .thenReturn(successUiResult)
 
-        retriever.getLiveTimesFlow("123456", 4).test {
+        retriever.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4).test {
             assertEquals(UiResult.InProgress, awaitItem())
             assertEquals(successUiResult, awaitItem())
             awaitComplete()
@@ -306,11 +316,11 @@ class LiveTimesRetrieverTest {
         val successResult = LiveTimesResult.Success(
             LiveTimes(
                 mapOf(
-                    "123456" to Stop(
-                        "123456",
+                    "123456".toNaptanStopIdentifier() to Stop(
+                        "123456".toNaptanStopIdentifier(),
                         listOf(
                             Service(
-                                "1",
+                                service1,
                                 emptyList()
                             )
                         )
@@ -319,15 +329,17 @@ class LiveTimesRetrieverTest {
                 Instant.fromEpochMilliseconds(123L)
             )
         )
-        val serviceColours = mapOf("1" to ServiceColours(1, 10))
+        val serviceColours = mapOf<ServiceDescriptor, ServiceColours>(
+            service1 to ServiceColours(1, 10)
+        )
         val serviceColoursFlow = flowOf(serviceColours)
         val successUiResult = UiResult.Success(
             123L,
             UiStop(
-                "123456",
+                "123456".toNaptanStopIdentifier(),
                 listOf(
                     UiService(
-                        "1",
+                        service1,
                         ServiceColours(1, 10),
                         emptyList()
                     )
@@ -335,23 +347,27 @@ class LiveTimesRetrieverTest {
             )
         )
         val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
-        whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
+        whenever(liveTimesRepository.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4))
             .thenReturn(liveTimesFlow)
-        whenever(servicesRepository.getColoursForServicesFlow(setOf("1")))
+        whenever(servicesRepository.getColoursForServicesFlow(setOf(service1)))
             .thenReturn(serviceColoursFlow)
         whenever(liveTimesMapper
             .mapLiveTimesAndColoursToUiResult(
-                "123456",
+                "123456".toNaptanStopIdentifier(),
                 LiveTimesResult.InProgress,
                 null
             )
         )
             .thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper
-            .mapLiveTimesAndColoursToUiResult("123456", successResult, serviceColours)
+            .mapLiveTimesAndColoursToUiResult(
+                "123456".toNaptanStopIdentifier(),
+                successResult,
+                serviceColours
+            )
         ).thenReturn(successUiResult)
 
-        retriever.getLiveTimesFlow("123456", 4).test {
+        retriever.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4).test {
             assertEquals(UiResult.InProgress, awaitItem())
             assertEquals(successUiResult, awaitItem())
             awaitComplete()
@@ -363,19 +379,19 @@ class LiveTimesRetrieverTest {
         val successResult = LiveTimesResult.Success(
             LiveTimes(
                 mapOf(
-                    "123456" to Stop(
-                        "123456",
+                    "123456".toNaptanStopIdentifier() to Stop(
+                        "123456".toNaptanStopIdentifier(),
                         listOf(
                             Service(
-                                "1",
+                                service1,
                                 emptyList()
                             ),
                             Service(
-                                "2",
+                                service2,
                                 emptyList()
                             ),
                             Service(
-                                "3",
+                                service3,
                                 emptyList()
                             )
                         )
@@ -384,29 +400,29 @@ class LiveTimesRetrieverTest {
                 Instant.fromEpochMilliseconds(123L)
             )
         )
-        val serviceColours = mapOf(
-            "1" to ServiceColours(1, 10),
-            "2" to ServiceColours(2, 20),
-            "3" to ServiceColours(3, 30)
+        val serviceColours = mapOf<ServiceDescriptor, ServiceColours>(
+            service1 to ServiceColours(1, 10),
+            service2 to ServiceColours(2, 20),
+            service3 to ServiceColours(3, 30)
         )
         val serviceColoursFlow = flowOf(serviceColours)
         val successUiResult = UiResult.Success(
             123L,
             UiStop(
-                "123456",
+                "123456".toNaptanStopIdentifier(),
                 listOf(
                     UiService(
-                        "1",
+                        service1,
                         ServiceColours(1, 10),
                         emptyList()
                     ),
                     UiService(
-                        "2",
+                        service2,
                         ServiceColours(2, 20),
                         emptyList()
                     ),
                     UiService(
-                        "3",
+                        service3,
                         ServiceColours(3, 30),
                         emptyList()
                     )
@@ -414,22 +430,26 @@ class LiveTimesRetrieverTest {
             )
         )
         val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
-        whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
+        whenever(liveTimesRepository.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4))
             .thenReturn(liveTimesFlow)
-        whenever(servicesRepository.getColoursForServicesFlow(setOf("1", "2", "3")))
+        whenever(servicesRepository.getColoursForServicesFlow(setOf(service1, service2, service3)))
             .thenReturn(serviceColoursFlow)
         whenever(liveTimesMapper
             .mapLiveTimesAndColoursToUiResult(
-                "123456",
+                "123456".toNaptanStopIdentifier(),
                 LiveTimesResult.InProgress,
                 null
             )
         ).thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper
-            .mapLiveTimesAndColoursToUiResult("123456", successResult, serviceColours)
+            .mapLiveTimesAndColoursToUiResult(
+                "123456".toNaptanStopIdentifier(),
+                successResult,
+                serviceColours
+            )
         ).thenReturn(successUiResult)
 
-        retriever.getLiveTimesFlow("123456", 4).test {
+        retriever.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4).test {
             assertEquals(UiResult.InProgress, awaitItem())
             assertEquals(successUiResult, awaitItem())
             awaitComplete()
@@ -441,11 +461,11 @@ class LiveTimesRetrieverTest {
         val successResult = LiveTimesResult.Success(
             LiveTimes(
                 mapOf(
-                    "123456" to Stop(
-                        "123456",
+                    "123456".toNaptanStopIdentifier() to Stop(
+                        "123456".toNaptanStopIdentifier(),
                         listOf(
                             Service(
-                                "1",
+                                service1,
                                 emptyList()
                             )
                         )
@@ -454,16 +474,20 @@ class LiveTimesRetrieverTest {
                 Instant.fromEpochMilliseconds(123L)
             )
         )
-        val serviceColours1 = mapOf("1" to ServiceColours(1, 10))
-        val serviceColours2 = mapOf("1" to ServiceColours(2, 20))
+        val serviceColours1 = mapOf<ServiceDescriptor, ServiceColours>(
+            service1 to ServiceColours(1, 10)
+        )
+        val serviceColours2 = mapOf<ServiceDescriptor, ServiceColours>(
+            service1 to ServiceColours(2, 20)
+        )
         val serviceColoursFlow = flowOf(serviceColours1, serviceColours2)
         val successUiResult1 = UiResult.Success(
             123L,
             UiStop(
-                "123456",
+                "123456".toNaptanStopIdentifier(),
                 listOf(
                     UiService(
-                        "1",
+                        service1,
                         ServiceColours(1, 10),
                         emptyList()
                     )
@@ -473,10 +497,10 @@ class LiveTimesRetrieverTest {
         val successUiResult2 = UiResult.Success(
             123L,
             UiStop(
-                "123456",
+                "123456".toNaptanStopIdentifier(),
                 listOf(
                     UiService(
-                        "1",
+                        service1,
                         ServiceColours(2, 20),
                         emptyList()
                     )
@@ -484,29 +508,52 @@ class LiveTimesRetrieverTest {
             )
         )
         val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
-        whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
+        whenever(liveTimesRepository.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4))
             .thenReturn(liveTimesFlow)
-        whenever(servicesRepository.getColoursForServicesFlow(setOf("1")))
+        whenever(servicesRepository.getColoursForServicesFlow(setOf(service1)))
             .thenReturn(serviceColoursFlow)
         whenever(liveTimesMapper
             .mapLiveTimesAndColoursToUiResult(
-                "123456",
+                "123456".toNaptanStopIdentifier(),
                 LiveTimesResult.InProgress,
                 null
             )
         ).thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper
-            .mapLiveTimesAndColoursToUiResult("123456", successResult, serviceColours1)
+            .mapLiveTimesAndColoursToUiResult(
+                "123456".toNaptanStopIdentifier(),
+                successResult,
+                serviceColours1
+            )
         ).thenReturn(successUiResult1)
         whenever(liveTimesMapper
-            .mapLiveTimesAndColoursToUiResult("123456", successResult, serviceColours2)
+            .mapLiveTimesAndColoursToUiResult(
+                "123456".toNaptanStopIdentifier(),
+                successResult,
+                serviceColours2
+            )
         ).thenReturn(successUiResult2)
 
-        retriever.getLiveTimesFlow("123456", 4).test {
+        retriever.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4).test {
             assertEquals(UiResult.InProgress, awaitItem())
             assertEquals(successUiResult1, awaitItem())
             assertEquals(successUiResult2, awaitItem())
             awaitComplete()
         }
     }
+
+    private val service1 get() = FakeServiceDescriptor(
+        serviceName = "1",
+        operatorCode = "TEST1"
+    )
+
+    private val service2 get() = FakeServiceDescriptor(
+        serviceName = "2",
+        operatorCode = "TEST2"
+    )
+
+    private val service3 get() = FakeServiceDescriptor(
+        serviceName = "3",
+        operatorCode = "TEST3"
+    )
 }

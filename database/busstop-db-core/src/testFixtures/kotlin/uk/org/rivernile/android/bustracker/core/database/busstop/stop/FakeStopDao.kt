@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 
 import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 
 /**
  * A fake [StopDao] for testing.
@@ -41,28 +42,32 @@ class FakeStopDao(
         { throw NotImplementedError() },
     private val onGetStopDetailsFlowForMultipleStops:
         (Set<String>) -> Flow<Map<String, StopDetails>?> = { throw NotImplementedError() },
-    private val onGetStopDetailsWithServiceFilterFlow: (Set<String>?) -> Flow<List<StopDetails>?> =
+    private val onGetStopDetailsWithServiceFilterFlow:
+        (Set<ServiceDescriptor>?) -> Flow<List<StopDetails>?> =
         { throw NotImplementedError() },
     private val onGetStopDetailsWithinSpanFlow:
         (Double, Double, Double, Double) -> Flow<List<StopDetailsWithServices>?> =
         { _, _, _, _ -> throw NotImplementedError() },
     private val onGetStopDetailsWithinSpanFlowWithServiceFilter:
-        (Double, Double, Double, Double, Set<String>) -> Flow<List<StopDetailsWithServices>?> =
+        (Double, Double, Double, Double, Set<ServiceDescriptor>) ->
+        Flow<List<StopDetailsWithServices>?> =
         { _, _, _, _, _ -> throw NotImplementedError() },
     private val onGetStopSearchResultsFlow: (String) -> Flow<List<StopSearchResult>?> =
         { throw NotImplementedError() }
 ) : StopDao {
 
-    override fun getNameForStopFlow(stopCode: String) = onGetNameForStopFlow(stopCode)
+    override fun getNameForStopFlow(naptanStopCode: String) = onGetNameForStopFlow(naptanStopCode)
 
-    override fun getLocationForStopFlow(stopCode: String) = onGetLocationForStopFlow(stopCode)
+    override fun getLocationForStopFlow(naptanStopCode: String) =
+        onGetLocationForStopFlow(naptanStopCode)
 
-    override fun getStopDetailsFlow(stopCode: String) = onGetStopDetailsFlowForSingleStop(stopCode)
+    override fun getStopDetailsFlow(naptanStopCode: String) =
+        onGetStopDetailsFlowForSingleStop(naptanStopCode)
 
-    override fun getStopDetailsFlow(stopCodes: Set<String>) =
-        onGetStopDetailsFlowForMultipleStops(stopCodes)
+    override fun getStopDetailsFlow(naptanStopCodes: Set<String>) =
+        onGetStopDetailsFlowForMultipleStops(naptanStopCodes)
 
-    override fun getStopDetailsWithServiceFilterFlow(serviceFilter: Set<String>?) =
+    override fun getStopDetailsWithServiceFilterFlow(serviceFilter: Set<ServiceDescriptor>?) =
         onGetStopDetailsWithServiceFilterFlow(serviceFilter)
 
     override fun getStopDetailsWithinSpanFlow(
@@ -77,7 +82,7 @@ class FakeStopDao(
         minLongitude: Double,
         maxLatitude: Double,
         maxLongitude: Double,
-        serviceFilter: Set<String>
+        serviceFilter: Set<ServiceDescriptor>
     ) = onGetStopDetailsWithinSpanFlowWithServiceFilter(
         minLatitude,
         minLongitude,

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,14 +31,17 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.RoomDatabaseDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.RoomDatabaseInfoEntity
+import uk.org.rivernile.android.bustracker.core.database.busstop.operator.RoomOperatorEntity
 import uk.org.rivernile.android.bustracker.core.database.busstop.service.RoomServiceDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.service.RoomServiceEntity
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.RoomServiceView
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.RoomServicePointDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.RoomServicePointEntity
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.RoomServiceStopDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.RoomServiceStopEntity
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.RoomStopDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.RoomStopEntity
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopIdentifierTypeConverter
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopTypeConverter
 
 /**
@@ -50,14 +53,20 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopTypeCo
     version = 2,
     entities = [
         RoomDatabaseInfoEntity::class,
+        RoomOperatorEntity::class,
         RoomServiceEntity::class,
         RoomServicePointEntity::class,
         RoomServiceStopEntity::class,
         RoomStopEntity::class
+    ],
+    views = [
+        RoomServiceView::class
     ]
 )
 @TypeConverters(
     value = [
+        InstantTypeConverter::class,
+        StopIdentifierTypeConverter::class,
         StopTypeConverter::class
     ]
 )

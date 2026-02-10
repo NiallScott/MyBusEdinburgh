@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,7 +34,8 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopName
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopName
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
@@ -63,7 +64,7 @@ class FavouriteStopFetcherTest {
     }
 
     @Test
-    fun loadFavouriteStopAndDetailsWithNullStopCodeEmitsInProgress() = runTest {
+    fun loadFavouriteStopAndDetailsWithNullStopIdentifierEmitsInProgress() = runTest {
         fetcher.loadFavouriteStopAndDetails(null).test {
             assertEquals(UiState.InProgress, awaitItem())
             awaitComplete()
@@ -71,23 +72,15 @@ class FavouriteStopFetcherTest {
     }
 
     @Test
-    fun loadFavouriteStopAndDetailsWithEmptyStopCodeEmitsInProgress() = runTest {
-        fetcher.loadFavouriteStopAndDetails("").test {
-            assertEquals(UiState.InProgress, awaitItem())
-            awaitComplete()
-        }
-    }
-
-    @Test
     fun loadFavouriteStopAndDetailsWithNoFavouriteOrDetailsEmitsAddMode() = runTest {
-        whenever(favouritesRepository.getFavouriteStopFlow("123456"))
+        whenever(favouritesRepository.getFavouriteStopFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(null))
-        whenever(busStopsRepository.getNameForStopFlow("123456"))
+        whenever(busStopsRepository.getNameForStopFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(intervalFlowOf(10L, 10L, null))
 
-        fetcher.loadFavouriteStopAndDetails("123456").test {
+        fetcher.loadFavouriteStopAndDetails("123456".toNaptanStopIdentifier()).test {
             assertEquals(UiState.InProgress, awaitItem())
-            assertEquals(UiState.Mode.Add("123456", null), awaitItem())
+            assertEquals(UiState.Mode.Add("123456".toNaptanStopIdentifier(), null), awaitItem())
             awaitComplete()
         }
     }
@@ -95,55 +88,69 @@ class FavouriteStopFetcherTest {
     @Test
     fun loadFavouriteStopAndDetailsWithNoFavouriteButStopNameEmitsAddMode() = runTest {
         val stopName = FakeStopName("Name", "Locality")
-        whenever(favouritesRepository.getFavouriteStopFlow("123456"))
+        whenever(favouritesRepository.getFavouriteStopFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(null))
-        whenever(busStopsRepository.getNameForStopFlow("123456"))
+        whenever(busStopsRepository.getNameForStopFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(intervalFlowOf(10L, 10L, stopName))
 
-        fetcher.loadFavouriteStopAndDetails("123456").test {
+        fetcher.loadFavouriteStopAndDetails("123456".toNaptanStopIdentifier()).test {
             assertEquals(UiState.InProgress, awaitItem())
-            assertEquals(UiState.Mode.Add("123456", stopName), awaitItem())
+            assertEquals(UiState.Mode.Add("123456".toNaptanStopIdentifier(), stopName), awaitItem())
             awaitComplete()
         }
     }
 
     @Test
     fun loadFavouriteStopAndDetailsWithFavouriteButNoDetailsEmitsEditMode() = runTest {
-        val favouriteStop = FavouriteStop("123456", "Stored name")
-        whenever(favouritesRepository.getFavouriteStopFlow("123456"))
+        val favouriteStop = FavouriteStop("123456".toNaptanStopIdentifier(), "Stored name")
+        whenever(favouritesRepository.getFavouriteStopFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(favouriteStop))
-        whenever(busStopsRepository.getNameForStopFlow("123456"))
+        whenever(busStopsRepository.getNameForStopFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(intervalFlowOf(10L, 10L, null))
 
-        fetcher.loadFavouriteStopAndDetails("123456").test {
+        fetcher.loadFavouriteStopAndDetails("123456".toNaptanStopIdentifier()).test {
             assertEquals(UiState.InProgress, awaitItem())
-            assertEquals(UiState.Mode.Edit("123456", null, favouriteStop), awaitItem())
+            assertEquals(
+                UiState.Mode.Edit(
+                    "123456".toNaptanStopIdentifier(),
+                    null,
+                    favouriteStop
+                ),
+                awaitItem()
+            )
             awaitComplete()
         }
     }
 
     @Test
     fun loadFavouriteStopAndDetailsWithFavouriteAndStopNameEmitsEditMode() = runTest {
-        val favouriteStop = FavouriteStop("123456", "Stored name")
+        val favouriteStop = FavouriteStop("123456".toNaptanStopIdentifier(), "Stored name")
         val stopName = FakeStopName("Name", "Locality")
-        whenever(favouritesRepository.getFavouriteStopFlow("123456"))
+        whenever(favouritesRepository.getFavouriteStopFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(favouriteStop))
-        whenever(busStopsRepository.getNameForStopFlow("123456"))
+        whenever(busStopsRepository.getNameForStopFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(intervalFlowOf(10L, 10L, stopName))
 
-        fetcher.loadFavouriteStopAndDetails("123456").test {
+        fetcher.loadFavouriteStopAndDetails("123456".toNaptanStopIdentifier()).test {
             assertEquals(UiState.InProgress, awaitItem())
-            assertEquals(UiState.Mode.Edit("123456", stopName, favouriteStop), awaitItem())
+            assertEquals(
+                UiState.Mode.Edit(
+                    "123456".toNaptanStopIdentifier(),
+                    stopName,
+                    favouriteStop
+                ),
+                awaitItem()
+            )
             awaitComplete()
         }
     }
 
     @Test
     fun loadFavouriteStopAndDetailsPropagatesUpdatesToFavouriteStop() = runTest {
-        val favouriteStop1 = FavouriteStop("123456", "Stored name 1")
-        val favouriteStop2 = FavouriteStop("123456", "Stored name 2")
+        val favouriteStop1 = FavouriteStop("123456".toNaptanStopIdentifier(), "Stored name 1")
+        val favouriteStop2 = FavouriteStop("123456".toNaptanStopIdentifier(), "Stored name 2")
         val stopName = FakeStopName("Name", "Locality")
-        whenever(favouritesRepository.getFavouriteStopFlow("123456"))
+        whenever(favouritesRepository.getFavouriteStopFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(
                 intervalFlowOf(
                     10L,
@@ -153,27 +160,47 @@ class FavouriteStopFetcherTest {
                     null
                 )
             )
-        whenever(busStopsRepository.getNameForStopFlow("123456"))
+        whenever(busStopsRepository.getNameForStopFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(stopName))
 
-        fetcher.loadFavouriteStopAndDetails("123456").test {
+        fetcher.loadFavouriteStopAndDetails("123456".toNaptanStopIdentifier()).test {
             assertEquals(UiState.InProgress, awaitItem())
-            assertEquals(UiState.Mode.Edit("123456", stopName, favouriteStop1), awaitItem())
-            assertEquals(UiState.Mode.Edit("123456", stopName, favouriteStop2), awaitItem())
-            assertEquals(UiState.Mode.Add("123456", stopName), awaitItem())
+            assertEquals(
+                UiState.Mode.Edit(
+                    "123456".toNaptanStopIdentifier(),
+                    stopName,
+                    favouriteStop1
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                UiState.Mode.Edit(
+                    "123456".toNaptanStopIdentifier(),
+                    stopName,
+                    favouriteStop2
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                UiState.Mode.Add(
+                    "123456".toNaptanStopIdentifier(),
+                    stopName
+                ),
+                awaitItem()
+            )
             awaitComplete()
         }
     }
 
     @Test
     fun loadFavouriteStopAndDetailsPropagatesUpdatesToStopName() = runTest {
-        val favouriteStop = FavouriteStop("123456", "Stored name")
+        val favouriteStop = FavouriteStop("123456".toNaptanStopIdentifier(), "Stored name")
         val stopName1 = FakeStopName("Name 1", "Locality")
         val stopName2 = FakeStopName("Name 2", "Locality")
         val stopName3 = FakeStopName("Name 3", "Locality")
-        whenever(favouritesRepository.getFavouriteStopFlow("123456"))
+        whenever(favouritesRepository.getFavouriteStopFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(favouriteStop))
-        whenever(busStopsRepository.getNameForStopFlow("123456"))
+        whenever(busStopsRepository.getNameForStopFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(
                 intervalFlowOf(
                     10L,
@@ -184,11 +211,32 @@ class FavouriteStopFetcherTest {
                 )
             )
 
-        fetcher.loadFavouriteStopAndDetails("123456").test {
+        fetcher.loadFavouriteStopAndDetails("123456".toNaptanStopIdentifier()).test {
             assertEquals(UiState.InProgress, awaitItem())
-            assertEquals(UiState.Mode.Edit("123456", stopName1, favouriteStop), awaitItem())
-            assertEquals(UiState.Mode.Edit("123456", stopName2, favouriteStop), awaitItem())
-            assertEquals(UiState.Mode.Edit("123456", stopName3, favouriteStop), awaitItem())
+            assertEquals(
+                UiState.Mode.Edit(
+                    "123456".toNaptanStopIdentifier(),
+                    stopName1,
+                    favouriteStop
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                UiState.Mode.Edit(
+                    "123456".toNaptanStopIdentifier(),
+                    stopName2,
+                    favouriteStop
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                UiState.Mode.Edit(
+                    "123456".toNaptanStopIdentifier(),
+                    stopName3,
+                    favouriteStop
+                ),
+                awaitItem()
+            )
             awaitComplete()
         }
     }

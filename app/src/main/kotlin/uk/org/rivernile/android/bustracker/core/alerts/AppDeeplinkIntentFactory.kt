@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,8 @@ package uk.org.rivernile.android.bustracker.core.alerts
 
 import android.content.Context
 import android.content.Intent
+import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
@@ -46,15 +48,21 @@ class AppDeeplinkIntentFactory @Inject constructor(
     private val featureRepository: FeatureRepository
 ) : DeeplinkIntentFactory {
 
-    override fun createShowBusTimesIntent(stopCode: String) =
+    override fun createShowBusTimesIntent(stopIdentifier: StopIdentifier): Intent =
         Intent(context, DisplayStopDataActivity::class.java)
             .setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA)
-            .putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
+            .putExtra(
+                DisplayStopDataActivity.EXTRA_STOP_CODE,
+                stopIdentifier.toNaptanStopCodeOrThrow()
+            )
 
-    override fun createShowStopOnMapIntent(stopCode: String): Intent? {
+    override fun createShowStopOnMapIntent(stopIdentifier: StopIdentifier): Intent? {
         return if (featureRepository.hasStopMapUiFeature) {
             Intent(context, BusStopMapActivity::class.java)
-                .putExtra(BusStopMapActivity.EXTRA_STOP_CODE, stopCode)
+                .putExtra(
+                    BusStopMapActivity.EXTRA_STOP_CODE,
+                    stopIdentifier.toNaptanStopCodeOrThrow()
+                )
         } else {
             null
         }
@@ -63,4 +71,12 @@ class AppDeeplinkIntentFactory @Inject constructor(
     override fun createManageAlertsIntent() =
         Intent(MainActivity.ACTION_MANAGE_ALERTS)
             .setPackage(context.packageName)
+
+    private fun StopIdentifier.toNaptanStopCodeOrThrow(): String {
+        return if (this is NaptanStopIdentifier) {
+            naptanStopCode
+        } else {
+            throw UnsupportedOperationException("Atco codes are not yet supported.")
+        }
+    }
 }
