@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -117,7 +117,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="main_navigation_updates">Updates</string>
     <string name="main_navigation_alerts">Alerts</string>
     <string name="main_search_bar_hint">Search stops</string>
-    <string name="main_invalid_qrcode">The scanned QR code does not contain stop data</string>
 
     <!--
     ********************************
@@ -398,17 +397,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="deletetimedialog_title">Remove time alert?</string>
 
     <!--
-    ***************************************************
-    * Strings for InstallBarcodeScannerDialogFragment *
-    ***************************************************
-    -->
-    <string name="barcodescannerdialog_title">QR scanning app required</string>
-    <string name="barcodescannerdialog_message">To scan QR codes, your device must have a compatible scanning app installed. Do you wish to download this from the Google Play Store?\n\nThe application is called Barcode Scanner by the ZXing Team and is free to download.</string>
-    <string name="barcodescannerdialog_btn_positive">Go to Play Store</string>
-    <string name="barcodescannerdialog_btn_negative">No thanks</string>
-    <string name="barcodescannerdialog_noplaystore">Google Play Store is missing</string>
-
-    <!--
     ************************************************
     * Strings for MapTypeBottomSheetDialogFragment *
     ************************************************
@@ -530,11 +518,4 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="neareststops_menu_prox_rem">@string/prox_alert_rem</string>
     <string name="neareststops_menu_time_add">@string/time_alert_add</string>
     <string name="neareststops_menu_time_rem">@string/time_alert_rem</string>
-
-    <!--
-    ***********************************
-    * Strings for SearchActivity menu *
-    ***********************************
-    -->
-    <string name="search_menu_scan">Scan QR code</string>
 </resources>

@@ -39,11 +39,9 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.launch
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
@@ -91,7 +89,6 @@ import uk.org.rivernile.edinburghbustracker.android.BuildConfig
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.ActivityMainBinding
 import javax.inject.Inject
-import androidx.core.net.toUri
 import androidx.core.view.ViewGroupCompat
 import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
@@ -108,7 +105,6 @@ class MainActivity : AppCompatActivity(),
         BusStopMapFragment.Callbacks,
         ExploreFragment.Callbacks,
         FavouriteStopsFragment.Callbacks,
-        InstallBarcodeScannerDialogFragment.Callbacks,
         NearestStopsFragment.Callbacks,
         SearchFragment.Callbacks,
         TurnOnGpsDialogFragment.Callbacks {
@@ -131,10 +127,6 @@ class MainActivity : AppCompatActivity(),
         private const val DIALOG_DELETE_TIME_ALERT = "dialogDeleteTimeAlert"
         private const val DIALOG_DELETE_FAVOURITE = "dialogDeleteFavourite"
         private const val DIALOG_TURN_ON_GPS = "dialogTurnOnGps"
-        private const val DIALOG_INSTALL_QR_SCANNER = "installQrScannerDialog"
-
-        private const val BARCODE_APP_PACKAGE =
-                "market://details?id=com.google.zxing.client.android"
     }
 
     @Inject
@@ -143,12 +135,6 @@ class MainActivity : AppCompatActivity(),
     private val viewModel by viewModels<MainActivityViewModel>()
 
     private lateinit var viewBinding: ActivityMainBinding
-
-    private var menuItemScan: MenuItem? = null
-
-    private val scanQrCodeLauncher = registerForActivityResult(ScanQrCode()) {
-        viewModel.onQrScanned(it)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -183,17 +169,6 @@ class MainActivity : AppCompatActivity(),
         addMenuProvider(menuProvider)
         onBackPressedDispatcher.addCallback(this, backPressedCallback)
 
-        viewModel.showStopLiveData.observe(this, this::onShowBusTimes)
-        viewModel.isScanMenuItemVisibleLiveData.observe(this, this::handleIsScanMenuItemVisible)
-        viewModel.showQrCodeScannerLiveData.observe(this) {
-            handleShowQrCodeScanner()
-        }
-        viewModel.showInstallQrScannerDialogLiveData.observe(this) {
-            handleShowInstallQrScannerDialog()
-        }
-        viewModel.showInvalidQrCodeErrorLiveData.observe(this) {
-            showInvalidQrCodeError()
-        }
         viewModel.showSettingsLiveData.observe(this) {
             showSettings()
         }
@@ -326,24 +301,6 @@ class MainActivity : AppCompatActivity(),
             .show(supportFragmentManager, DIALOG_TURN_ON_GPS)
     }
 
-    override fun onShowInstallBarcodeScanner() {
-        try {
-            Intent(Intent.ACTION_VIEW)
-                .setData(BARCODE_APP_PACKAGE.toUri())
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                .let(this::startActivity)
-        } catch (e: ActivityNotFoundException) {
-            exceptionLogger.log(e)
-            Toast
-                .makeText(
-                    this,
-                    R.string.barcodescannerdialog_noplaystore,
-                    Toast.LENGTH_LONG
-                )
-                .show()
-        }
-    }
-
     override fun onExploreTabSwitched() {
         viewBinding.appBarLayout.setExpanded(true, true)
     }
@@ -412,11 +369,6 @@ class MainActivity : AppCompatActivity(),
                     marginParams.bottomMargin
             applyBottomContentPadding(supportFragmentManager, contentBottomPadding)
         }
-
-        searchView.inflateMenu(R.menu.search_option_menu)
-        menuItemScan = searchView.toolbar.menu.findItem(R.id.search_option_menu_scan)
-        handleIsScanMenuItemVisible(viewModel.isScanMenuItemVisibleLiveData.value ?: false)
-        searchView.setOnMenuItemClickListener(this@MainActivity::handleSearchViewMenuItemClicked)
 
         searchView.editText.doAfterTextChanged {
             performSearch(it?.toString())
@@ -526,60 +478,6 @@ class MainActivity : AppCompatActivity(),
     private fun performSearch(searchTerm: String?) {
         (supportFragmentManager.findFragmentById(R.id.fragmentSearch) as SearchFragment)
             .searchTerm = searchTerm
-    }
-
-    /**
-     * Handle a [MenuItem] inside [SearchView] being clicked.
-     *
-     * @param menuItem The clicked [MenuItem].
-     * @return `true` if the click was handled here, otherwise `false`.
-     */
-    private fun handleSearchViewMenuItemClicked(menuItem: MenuItem) = when (menuItem.itemId) {
-        R.id.search_option_menu_scan -> {
-            viewModel.onScanMenuItemClicked()
-            true
-        }
-        else -> false
-    }
-
-    /**
-     * Handle the visibility of the scan QR code menu item changing.
-     *
-     * @param isVisible Is the scan QR code menu item visible?
-     */
-    private fun handleIsScanMenuItemVisible(isVisible: Boolean) {
-        menuItemScan?.isVisible = isVisible
-    }
-
-    /**
-     * Attempt to launch the QR code scanner application.
-     */
-    private fun handleShowQrCodeScanner() {
-        try {
-            scanQrCodeLauncher.launch()
-        } catch (_: ActivityNotFoundException) {
-            viewModel.onQrScannerNotFound()
-        } catch (_: SecurityException) {
-            // SecurityException has been seen out in the wild, albeit from an unsupported app which
-            // is hijacking the Intent. When this happens, the user will be directed to install the
-            // supported app.
-            viewModel.onQrScannerNotFound()
-        }
-    }
-
-    /**
-     * Show a dialog to the user asking them if they wish to install the QR scanner application.
-     */
-    private fun handleShowInstallQrScannerDialog() {
-        InstallBarcodeScannerDialogFragment()
-            .show(supportFragmentManager, DIALOG_INSTALL_QR_SCANNER)
-    }
-
-    /**
-     * Show a [Toast] notification which informs the user they scanned an invalid QR code.
-     */
-    private fun showInvalidQrCodeError() {
-        Toast.makeText(this, R.string.main_invalid_qrcode, Toast.LENGTH_SHORT).show()
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -47,9 +47,4 @@ interface FeatureRepository {
      * Is the proximity alert feature available?
      */
     val hasProximityAlertFeature: Boolean
-
-    /**
-     * Is the camera feature available?
-     */
-    val hasCameraFeature: Boolean
 }

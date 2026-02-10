@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.features
 
 import android.content.Context
-import android.content.pm.PackageManager
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
@@ -42,15 +41,14 @@ import javax.inject.Singleton
  * @param googleApiAvailability A [GoogleApiAvailability] instance which we can use to determine if
  * Google Play Services is available and ready on the device.
  * @param locationRepository Used to obtain location service information.
- * @param packageManager Used to query the package manager for device features.
  * @author Niall Scott
  */
 @Singleton
 class AndroidFeatureRepository @Inject constructor(
     private val context: Context,
     private val googleApiAvailability: GoogleApiAvailability,
-    private val locationRepository: LocationRepository,
-    private val packageManager: PackageManager) : FeatureRepository {
+    private val locationRepository: LocationRepository
+) : FeatureRepository {
 
     override val hasStopMapUiFeature get() =
         googleApiAvailability.isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
@@ -59,7 +57,4 @@ class AndroidFeatureRepository @Inject constructor(
 
     override val hasProximityAlertFeature get() =
         locationRepository.hasLocationFeature
-
-    override val hasCameraFeature get() =
-        packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,8 +34,7 @@ package uk.org.rivernile.android.bustracker.core.features
 class FakeFeatureRepository(
     private val onHasStopMapUiFeature: () -> Boolean = { throw NotImplementedError() },
     private val onHasArrivalAlertFeature: () -> Boolean = { throw NotImplementedError() },
-    private val onHasProximityAlertFeature: () -> Boolean = { throw NotImplementedError() },
-    private val onHasCameraFeature: () -> Boolean = { throw NotImplementedError() }
+    private val onHasProximityAlertFeature: () -> Boolean = { throw NotImplementedError() }
 ) : FeatureRepository {
 
     override val hasStopMapUiFeature get() = onHasStopMapUiFeature()
@@ -43,6 +42,4 @@ class FakeFeatureRepository(
     override val hasArrivalAlertFeature get() = onHasArrivalAlertFeature()
 
     override val hasProximityAlertFeature get() = onHasProximityAlertFeature()
-
-    override val hasCameraFeature get() = onHasCameraFeature()
 }
