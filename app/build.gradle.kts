@@ -72,7 +72,8 @@ android {
             applicationId = "uk.org.rivernile.edinburghbustracker.android"
             versionCode = 22
             versionName = "3.3"
-            setProperty("archivesBaseName", "MyBusEdinburgh-$versionName")
+            // TODO: find a proper way to change the APK name - maybe androidComponents API?
+            base.archivesName.set("MyBusEdinburgh-$versionName")
         }
     }
 
