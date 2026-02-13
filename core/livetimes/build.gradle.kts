@@ -26,7 +26,7 @@
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.ksp)
+    id("mybus.dagger-convention")
 }
 
 kotlin {
@@ -39,10 +39,6 @@ dependencies {
     implementation(project(":core:coroutines"))
     implementation(project(":core:time"))
     implementation(project(":endpoint:tracker-endpoint"))
-
-    // Dagger 2
-    implementation(libs.dagger.core)
-    ksp(libs.dagger.compiler)
 
     // Testing dependencies
     testImplementation(testFixtures(project(":core:time")))

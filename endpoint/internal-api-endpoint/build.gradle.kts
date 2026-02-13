@@ -27,7 +27,7 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.ksp)
+    id("mybus.dagger-convention")
     `java-test-fixtures`
 }
 
@@ -40,10 +40,6 @@ dependencies {
     implementation(project(":core:coroutines"))
     implementation(project(":core:http-core"))
     implementation(project(":core:logging"))
-
-    // Dagger 2
-    implementation(libs.dagger.core)
-    ksp(libs.dagger.compiler)
 
     // Retrofit
     implementation(libs.retrofit)

@@ -25,8 +25,7 @@
  */
 
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
+    id("mybus.android-library")
     alias(libs.plugins.kotlin.parcelize)
 }
 

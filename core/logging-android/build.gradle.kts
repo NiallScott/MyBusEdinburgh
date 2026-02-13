@@ -25,10 +25,8 @@
  */
 
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
+    id("mybus.android-library")
+    id("mybus.hilt-convention")
 }
 
 android {
@@ -57,10 +55,6 @@ android {
 dependencies {
 
     api(project(":core:logging"))
-
-    // Hilt (dependency injection)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
 
     // Firebase
     implementation(platform(libs.firebase.bom))

@@ -26,7 +26,7 @@
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.ksp)
+    id("mybus.dagger-convention")
     `java-test-fixtures`
 }
 
@@ -43,10 +43,6 @@ dependencies {
     implementation(project(":database:busstop-db-core"))
     implementation(project(":database:settings-db-core"))
     implementation(project(":endpoint:tracker-endpoint"))
-
-    // Dagger 2
-    implementation(libs.dagger.core)
-    ksp(libs.dagger.compiler)
 
     // Testing dependencies
     testImplementation(testFixtures(project(":core:busstops")))

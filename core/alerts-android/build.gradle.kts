@@ -25,10 +25,8 @@
  */
 
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
+    id("mybus.android-library")
+    id("mybus.hilt-convention")
 }
 
 android {
@@ -72,10 +70,6 @@ dependencies {
     // AndroidX
     implementation(libs.androidx.core)
     implementation(libs.androidx.startup)
-
-    // Hilt (dependency injection)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
 
     // Play Services
     implementation(libs.play.services.location)

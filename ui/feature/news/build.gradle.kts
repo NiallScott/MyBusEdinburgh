@@ -25,11 +25,9 @@
  */
 
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose.compiler)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
+    id("mybus.android-library")
+    id("mybus.android-compose")
+    id("mybus.hilt-convention")
 }
 
 android {
@@ -57,10 +55,6 @@ android {
             enableAndroidTestCoverage = true
         }
     }
-
-    buildFeatures {
-        compose = true
-    }
 }
 
 kotlin {
@@ -79,10 +73,6 @@ dependencies {
     "edinburghImplementation"(project(":cities:edinburgh:edinburgh-service-updates-android"))
     implementation(project(":ui:ui-core"))
 
-    // Hilt (dependency injection)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
-
     // AndroidX
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout.compose)
@@ -92,7 +82,6 @@ dependencies {
     implementation(libs.androidx.window)
 
     // Compose
-    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)

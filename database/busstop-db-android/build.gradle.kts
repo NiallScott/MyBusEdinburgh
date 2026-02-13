@@ -25,10 +25,9 @@
  */
 
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
+    id("mybus.android-library")
+    id("mybus.hilt-convention")
+    id("mybus.room-convention")
 }
 
 android {
@@ -57,12 +56,6 @@ android {
         }
     }
 
-    sourceSets {
-        // This adds the generated Room schema files to the instrumentation test assets so that they
-        // can be loaded at test time.
-        getByName("androidTest").assets.srcDir("$projectDir/schemas")
-    }
-
     packaging {
         resources {
             excludes += setOf(
@@ -75,16 +68,6 @@ kotlin {
     explicitApi()
 }
 
-ksp {
-    /*
-     * This is used to export the Room schema out to a JSON file in the module's "schemas"
-     * directory. We want to do this so that we can compare schema versions after upgrades.
-     * It's also possible for us to do automated testing using the JSON files to test database
-     * migrations.
-     */
-    arg("room.schemaLocation", "$projectDir/schemas")
-}
-
 dependencies {
 
     implementation(project(":core:core-domain"))
@@ -94,14 +77,6 @@ dependencies {
 
     // Kotlin
     implementation(libs.coroutines.android)
-
-    // Hilt (dependency injection)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
-
-    // Room (ORM)
-    implementation(libs.androidx.room.core)
-    ksp(libs.androidx.room.compiler)
 
     // Okio
     implementation(libs.okio)

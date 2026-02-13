@@ -25,10 +25,8 @@
  */
 
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
+    id("mybus.android-library")
+    id("mybus.hilt-convention")
 }
 
 android {
@@ -58,10 +56,6 @@ dependencies {
 
     implementation(project(":core:coroutines-android"))
     api(project(":core:servicepoints"))
-
-    // Hilt (dependency injection)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
 
     // Testing dependencies
     androidTestImplementation(libs.androidx.test.runner)

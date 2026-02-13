@@ -25,10 +25,8 @@
  */
 
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
+    id("mybus.android-library")
+    id("mybus.hilt-convention")
 }
 
 android {
@@ -64,10 +62,6 @@ dependencies {
     implementation(project(":cities:edinburgh:edinburgh-core"))
     implementation(project(":core:http-core-android"))
     implementation(project(":endpoint:tracker-endpoint"))
-
-    // Hilt (dependency injection)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
 
     // Testing dependencies
     androidTestImplementation(libs.androidx.test.runner)

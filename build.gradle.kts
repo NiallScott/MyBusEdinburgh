@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,18 +24,11 @@
  *
  */
 
-import com.android.build.api.dsl.ManagedVirtualDevice
-import com.android.build.gradle.BaseExtension
-import com.android.build.gradle.BasePlugin
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
-
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.android.test) apply false
     alias(libs.plugins.androidx.baselineprofile) apply false
-    alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.compose.compiler) apply false
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.kotlin.serialization) apply false
@@ -46,117 +39,8 @@ plugins {
     alias(libs.plugins.firebase.crashlytics) apply false
     alias(libs.plugins.firebase.appdistribution) apply false
     base
-}
 
-subprojects {
-
-    tasks.withType<JavaCompile>().configureEach {
-        sourceCompatibility = JavaVersion.VERSION_17.toString()
-        targetCompatibility = JavaVersion.VERSION_17.toString()
-    }
-
-    tasks.withType<KotlinJvmCompile>().configureEach {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
-        }
-    }
-
-    tasks.withType<Test>().configureEach {
-        maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
-    }
-
-    plugins.withType<BasePlugin>().configureEach {
-        extensions.configure<BaseExtension> {
-            compileSdkVersion(libs.versions.android.sdk.compile.get().toInt())
-            buildToolsVersion(libs.versions.android.build.tools.get())
-
-            defaultConfig {
-                minSdk = libs.versions.android.sdk.min.get().toInt()
-                targetSdk = libs.versions.android.sdk.target.get().toInt()
-            }
-
-            compileOptions {
-                sourceCompatibility = JavaVersion.VERSION_17
-                targetCompatibility = JavaVersion.VERSION_17
-            }
-
-            signingConfigs {
-                create("globalDebug") {
-                    storeFile = file(project.findProperty("mybus.keystore.debug.file")
-                        ?.toString()
-                        ?: "/dev/null")
-                    storePassword = project.findProperty("mybus.keystore.debug.storePassword")
-                        ?.toString()
-                        ?: "not_set"
-                    keyAlias = project.findProperty("mybus.keystore.debug.keyAlias")
-                        ?.toString()
-                        ?: "not_set"
-                    keyPassword = project.findProperty("mybus.keystore.debug.keyPassword")
-                        ?.toString()
-                        ?: "not_set"
-                }
-            }
-
-            testOptions {
-                @Suppress("UnstableApiUsage")
-                managedDevices {
-                    allDevices {
-                        maybeCreate<ManagedVirtualDevice>("pixel2api28").apply {
-                            device = "Pixel 2"
-                            sdkVersion = 28
-                            systemImageSource = "aosp" // No ATD.
-                        }
-
-                        maybeCreate<ManagedVirtualDevice>("pixel2api29").apply {
-                            device = "Pixel 2"
-                            sdkVersion = 29
-                            systemImageSource = "aosp" // No ATD.
-                        }
-
-                        maybeCreate<ManagedVirtualDevice>("pixel2api30").apply {
-                            device = "Pixel 2"
-                            sdkVersion = 30
-                            systemImageSource = "aosp-atd"
-                        }
-
-                        maybeCreate<ManagedVirtualDevice>("pixel2api31").apply {
-                            device = "Pixel 2"
-                            sdkVersion = 31
-                            systemImageSource = "aosp-atd"
-                        }
-
-                        maybeCreate<ManagedVirtualDevice>("pixel2api33").apply {
-                            device = "Pixel 2"
-                            sdkVersion = 33
-                            systemImageSource = "aosp-atd"
-                        }
-
-                        maybeCreate<ManagedVirtualDevice>("pixel2api34").apply {
-                            device = "Pixel 2"
-                            sdkVersion = 34
-                            systemImageSource = "aosp-atd"
-                        }
-
-                        maybeCreate<ManagedVirtualDevice>("pixel2api35").apply {
-                            device = "Pixel 2"
-                            sdkVersion = 35
-                            systemImageSource = "aosp-atd"
-                        }
-                    }
-
-                    groups {
-                        maybeCreate("allApis").apply {
-                            targetDevices += allDevices["pixel2api28"]
-                            targetDevices += allDevices["pixel2api29"]
-                            targetDevices += allDevices["pixel2api30"]
-                            targetDevices += allDevices["pixel2api31"]
-                            targetDevices += allDevices["pixel2api33"]
-                            targetDevices += allDevices["pixel2api34"]
-                            // API 35 is excluded for now as it doesn't seem to work.
-                        }
-                    }
-                }
-            }
-        }
-    }
+    id("mybus.java-convention")
+    id("mybus.kotlin-convention")
+    id("mybus.test-convention")
 }

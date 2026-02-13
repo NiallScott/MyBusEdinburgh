@@ -110,4 +110,7 @@ include(
     ":ui:text-formatting",
     ":ui:ui-core",
     ":ui:widget:contentview",
-    ":ui:widget:expandcollapseindicator")
+    ":ui:widget:expandcollapseindicator"
+)
+
+includeBuild("build-logic")

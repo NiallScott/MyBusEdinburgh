@@ -27,7 +27,7 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.ksp)
+    id("mybus.dagger-convention")
 }
 
 dependencies {
@@ -42,10 +42,6 @@ dependencies {
     implementation(project(":core:logging"))
     implementation(project(":core:time"))
     implementation(project(":endpoint:tracker-endpoint"))
-
-    // Dagger 2
-    implementation(libs.dagger.core)
-    ksp(libs.dagger.compiler)
 
     // Retrofit
     implementation(libs.retrofit)

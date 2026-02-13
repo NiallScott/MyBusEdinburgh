@@ -5,21 +5,21 @@ android-sdk-min = "28"
 android-sdk-target = "36"
 android-build-tools = "36.1.0"
 
-android-gradle-plugin = "8.13.2"
+android-gradle-plugin = "9.0.1"
 coroutines = "1.10.2"
-dagger = "2.57.2"
-kotlin = "2.3.0"
+dagger = "2.59.1"
+kotlin = "2.3.10"
 okhttp = "5.3.2"
 retrofit = "3.0.0"
 
 # AndroidX
-androidx-activity = "1.12.2"
+androidx-activity = "1.12.4"
 androidx-benchmark = "1.4.1"
 androidx-fragment = "1.8.9"
 androidx-hilt = "1.3.0"
 androidx-lifecycle = "2.10.0"
 androidx-room = "2.8.4"
-androidx-work = "2.11.0"
+androidx-work = "2.11.1"
 
 # Testing versions.
 espresso = "3.7.0"
@@ -52,7 +52,7 @@ retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit
 retrofit-converter-kotlin-serialization = { module = "com.squareup.retrofit2:converter-kotlinx-serialization", version.ref = "retrofit" }
 
 # (De-)serialisation
-kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.9.0" }
+kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.10.0" }
 
 # Kotlin immutable collections
 kotlin-immutable-collections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.4.0" }
@@ -65,7 +65,7 @@ androidx-activity = { module = "androidx.activity:activity-ktx", version.ref = "
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
 androidx-annotation = { module = "androidx.annotation:annotation", version = "1.9.1" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.1" }
-androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2025.12.01" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2026.02.00" }
 androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.2.1" }
@@ -97,15 +97,15 @@ material-compose = { module = "androidx.compose.material3:material3" }
 material-compose-adaptive = { module = "androidx.compose.material3.adaptive:adaptive" }
 
 # Firebase
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.7.0" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.9.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 
 # Play Services
 play-services-location = { module = "com.google.android.gms:play-services-location", version = "21.3.0" }
-play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "19.2.0" }
-play-services-maps-ktx = { module = "com.google.maps.android:maps-ktx", version = "5.2.2" }
-play-services-maps-utils = { module = "com.google.maps.android:android-maps-utils", version = "3.20.1" }
-play-services-maps-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version = "5.2.2" }
+play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.0.0" }
+play-services-maps-ktx = { module = "com.google.maps.android:maps-ktx", version = "6.0.0" }
+play-services-maps-utils = { module = "com.google.maps.android:android-maps-utils", version = "4.0.0" }
+play-services-maps-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version = "6.0.0" }
 
 # Testing dependencies.
 androidx-arch-core-test = { module = "androidx.arch.core:core-testing", version = "2.2.0" }
@@ -126,7 +126,7 @@ hilt-test = { module = "com.google.dagger:hilt-android-testing", version.ref = "
 junit = { module = "junit:junit", version = "4.13.2" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
-mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "6.1.0" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "6.2.3" }
 turbine = { module = "app.cash.turbine:turbine", version = "1.2.1" }
 
 [plugins]
@@ -134,13 +134,12 @@ android-application = { id = "com.android.application", version.ref = "android-g
 android-library = { id = "com.android.library", version.ref = "android-gradle-plugin" }
 android-test = { id = "com.android.test", version.ref = "android-gradle-plugin" }
 androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "androidx-benchmark" }
-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.2.0" }
+firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.2.1" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.6" }
 google-services = { id = "com.google.gms.google-services", version = "4.4.4" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-ksp = { id = "com.google.devtools.ksp", version = "2.3.4" }
+ksp = { id = "com.google.devtools.ksp", version = "2.3.5" }

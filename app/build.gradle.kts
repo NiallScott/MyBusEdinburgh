@@ -27,15 +27,14 @@
 import com.android.build.api.variant.ResValue
 
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
+    id("mybus.android-application")
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
     alias(libs.plugins.firebase.appdistribution)
     alias(libs.plugins.androidx.baselineprofile)
+    id("mybus.hilt-convention")
 }
 
 android {
@@ -108,8 +107,9 @@ android {
     }
 
     buildFeatures {
-        viewBinding = true
         buildConfig = true
+        viewBinding = true
+        resValues = true
     }
 }
 
@@ -165,8 +165,6 @@ dependencies {
     implementation(project(":ui:widget:expandcollapseindicator"))
 
     // Hilt (dependency injection)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
     ksp(libs.kotlin.metadata)
 
     // AndroidX
