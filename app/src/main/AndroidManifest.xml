@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -124,17 +124,30 @@
             android:label="@string/displaystopdata_title"
             android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity"
             android:exported="true">
-            <!-- This Activity attempts to take over HTTP accessing of
-                 mobile.mybustracker.co.uk. -->
+
             <intent-filter
                 android:autoVerify="false">
 
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+                <!--
+                URL is in the following format;
+                https://www.edinburghtraveltracker.com/#/liveDepartures?smsCode=<sms code>
+
+                Because of the '#', Android treats everything after it as a Uri fragment.
+
+                Prior to Android 15 all requests to https://*.edinburghtraveltracker.com will be
+                intercepted. From Android 15 onwards, only requests which have a fragment beginning
+                with "/liveDepartures" will be intercepted.
+                -->
                 <data
-                    android:scheme="http"
-                    android:host="mobile.mybustracker.co.uk" />
+                    android:scheme="https"
+                    android:host="*.edinburghtraveltracker.com" />
+                <uri-relative-filter-group>
+                    <data
+                        android:fragmentAdvancedPattern="/liveDepartures?.+" />
+                </uri-relative-filter-group>
             </intent-filter>
             <!-- External applications can call this Intent action to load bus
                  times. -->

@@ -99,7 +99,7 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
         private const val DIALOG_REMOVE_ARRIVAL_ALERT = "removeArrivalAlert"
         private const val DIALOG_REMOVE_PROX_ALERT = "removeProxAlert"
 
-        private const val DEEPLINK_QUERY_PARAMETER_STOP_CODE = "busStopCode"
+        private const val DEEPLINK_QUERY_PARAMETER_STOP_CODE = "smsCode"
     }
 
     @Inject
@@ -123,7 +123,14 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
 
         intent.let {
             viewModel.stopIdentifier = if (Intent.ACTION_VIEW == it.action) {
+                // Because the URL contains '#' as a path segment, Android treats this as the
+                // beginning of a Uri gragment component. So to parse the query parameter, we
+                // toString() the Uri, remove the '#' element and re-parse the Uri to get the
+                // smsCode.
                 it.data
+                    ?.toString()
+                    ?.replace("#/", "")
+                    ?.let(String::toUri)
                     ?.getQueryParameter(DEEPLINK_QUERY_PARAMETER_STOP_CODE)
                     ?.toNaptanStopIdentifier()
             } else {
