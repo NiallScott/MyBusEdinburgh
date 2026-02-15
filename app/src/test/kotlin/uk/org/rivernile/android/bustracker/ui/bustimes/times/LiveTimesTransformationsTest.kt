@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
 import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
-import uk.org.rivernile.android.bustracker.core.livetimes.IsNightServiceDetector
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -39,88 +38,6 @@ import kotlin.time.Clock
  * @author Niall Scott
  */
 class LiveTimesTransformationsTest {
-
-    @Test
-    fun filterNightServicesCopesWithEmptyServicesWhenShowNightServicesIsEnabled() {
-        val transformations = createLiveTimesTransformations()
-        val result = transformations.filterNightServices(emptyList(), true)
-
-        assertTrue(result.isEmpty())
-    }
-
-    @Test
-    fun filterNightServicesCopesWithEmptyServicesWhenShowNightServicesIsNotEnabled() {
-        val transformations = createLiveTimesTransformations()
-        val result = transformations.filterNightServices(emptyList(), false)
-
-        assertTrue(result.isEmpty())
-    }
-
-    @Test
-    fun filterNightServicesDoesNotFilterOutServicesWhenShowingNightServicesAndNoNightBuses() {
-        val transformations = createLiveTimesTransformations()
-        val services = listOf(
-            UiService(
-                service1,
-                null,
-                emptyList()
-            ),
-            UiService(
-                service2,
-                null,
-                emptyList()
-            ),
-            UiService(
-                service3,
-                null,
-                emptyList()
-            )
-        )
-
-        val result = transformations.filterNightServices(services, true)
-
-        assertEquals(services, result)
-    }
-
-    @Test
-    fun filterNightServiceFiltersOutNightServicesWhenNotShowingNightServices() {
-        val transformations = createLiveTimesTransformations(
-            isNightService = { it == "2" }
-        )
-        val services = listOf(
-            UiService(
-                service1,
-                null,
-                emptyList()
-            ),
-            UiService(
-                service2,
-                null,
-                emptyList()
-            ),
-            UiService(
-                service3,
-                null,
-                emptyList()
-            )
-        )
-        val expected = listOf(
-            UiService(
-                service1,
-                null,
-                emptyList()
-            ),
-            UiService(
-                service3,
-                null,
-                emptyList()
-            )
-        )
-
-        val result = transformations.filterNightServices(services, false)
-
-        assertEquals(expected, result)
-    }
 
     @Test
     fun sortServicesCopesWithEmptyListWhenSortingByTime() {
@@ -583,13 +500,8 @@ class LiveTimesTransformationsTest {
         assertEquals(expected, result)
     }
 
-    private fun createLiveTimesTransformations(
-        isNightService: (String) -> Boolean = { false }
-    ): LiveTimesTransformations {
+    private fun createLiveTimesTransformations(): LiveTimesTransformations {
         return LiveTimesTransformations(
-            isNightServiceDetector = object : IsNightServiceDetector {
-                override fun isNightService(serviceName: String) = isNightService(serviceName)
-            },
             serviceNameComparator = naturalOrder()
         )
     }

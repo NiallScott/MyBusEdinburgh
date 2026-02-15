@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,8 +39,6 @@ class FakePreferenceDataStorage(
     private val onAppThemeFlow: () -> Flow<AppTheme> = { throw NotImplementedError() },
     private val onIsLiveTimesAutoRefreshEnabledFlow: () -> Flow<Boolean> =
         { throw NotImplementedError() },
-    private val onIsLiveTimesShowNightServicesEnabledFlow: () -> Flow<Boolean> =
-        { throw NotImplementedError() },
     private val onIsLiveTimesSortByTimeFlow: () -> Flow<Boolean> = { throw NotImplementedError() },
     private val onLiveTimesNumberOfDeparturesFlow: () -> Flow<Int> =
         { throw NotImplementedError() },
@@ -75,9 +73,6 @@ class FakePreferenceDataStorage(
 
     override val isLiveTimesAutoRefreshEnabledFlow: Flow<Boolean>
         get() = onIsLiveTimesAutoRefreshEnabledFlow()
-
-    override val isLiveTimesShowNightServicesEnabledFlow: Flow<Boolean>
-        get() = onIsLiveTimesShowNightServicesEnabledFlow()
 
     override val isLiveTimesSortByTimeFlow: Flow<Boolean>
         get() = onIsLiveTimesSortByTimeFlow()

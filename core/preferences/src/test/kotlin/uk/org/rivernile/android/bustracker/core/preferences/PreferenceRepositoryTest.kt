@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -82,22 +82,6 @@ class PreferenceRepositoryTest {
         )
 
         repository.isLiveTimesAutoRefreshEnabledFlow.test {
-            assertFalse(awaitItem())
-            assertTrue(awaitItem())
-            assertFalse(awaitItem())
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun isLiveTimesShowNightServicesEnabledFlowReturnsFlowFromPreferenceDataStorage() = runTest {
-        val repository = createPreferenceRepository(
-            preferenceDataStorage = FakePreferenceDataStorage(
-                onIsLiveTimesShowNightServicesEnabledFlow = { flowOf(false, true, false) }
-            )
-        )
-
-        repository.isLiveTimesShowNightServicesEnabledFlow.test {
             assertFalse(awaitItem())
             assertTrue(awaitItem())
             assertFalse(awaitItem())

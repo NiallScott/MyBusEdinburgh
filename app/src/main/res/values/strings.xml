@@ -146,7 +146,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="preferences_checkbox_bustimes_autorefresh">Auto refresh</string>
     <string name="preferences_checkbox_bustimes_autorefresh_ticked">Disable to not auto refresh by default</string>
     <string name="preferences_checkbox_bustimes_autorefresh_unticked">Enable to auto refresh by default</string>
-    <string name="preferences_checkbox_bustimes_nightbus">Show night services</string>
     <string name="preferences_checkbox_bustimes_sorting">Sort by arrival time</string>
     <string name="preferences_list_bustimes_numdepartures">Number of departures</string>
     <string name="preferences_list_bustimes_dialog">Number of departures to show</string>

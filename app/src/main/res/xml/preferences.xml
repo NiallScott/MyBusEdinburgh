@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -79,11 +79,6 @@
             android:summaryOn="@string/preferences_checkbox_bustimes_autorefresh_ticked"
             android:summaryOff="@string/preferences_checkbox_bustimes_autorefresh_unticked"
             android:defaultValue="false" />
-
-        <SwitchPreferenceCompat
-            android:key="pref_nightservices_state"
-            android:title="@string/preferences_checkbox_bustimes_nightbus"
-            android:defaultValue="true" />
 
         <SwitchPreferenceCompat
             android:key="pref_servicessorting_state"

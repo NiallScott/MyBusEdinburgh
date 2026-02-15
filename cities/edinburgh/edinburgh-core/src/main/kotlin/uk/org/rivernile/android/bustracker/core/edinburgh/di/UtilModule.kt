@@ -32,8 +32,6 @@ import dagger.Module
 import dagger.Provides
 import uk.org.rivernile.android.bustracker.core.config.BuildConfiguration
 import uk.org.rivernile.android.bustracker.core.config.EdinburghBuildConfiguration
-import uk.org.rivernile.android.bustracker.core.livetimes.EdinburghIsNightServiceDetector
-import uk.org.rivernile.android.bustracker.core.livetimes.IsNightServiceDetector
 
 /**
  * This [Module] provides utility dependencies for the Edinburgh library.
@@ -42,12 +40,6 @@ import uk.org.rivernile.android.bustracker.core.livetimes.IsNightServiceDetector
  */
 @Module
 internal interface UtilModule {
-
-    @Suppress("unused")
-    @Binds
-    fun bindIsNightServiceDetector(
-        edinburghIsNightServiceDetector: EdinburghIsNightServiceDetector
-    ): IsNightServiceDetector
 
     @Suppress("unused")
     @Binds

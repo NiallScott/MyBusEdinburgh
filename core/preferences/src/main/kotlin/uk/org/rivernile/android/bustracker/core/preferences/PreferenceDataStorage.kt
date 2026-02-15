@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,91 +33,85 @@ import kotlinx.coroutines.flow.Flow
  *
  * @author Niall Scott
  */
-interface PreferenceDataStorage {
+public interface PreferenceDataStorage {
 
     /**
      * A [Flow] which emits whether database updates should happen over Wi-Fi only.
      */
-    val isDatabaseUpdateWifiOnlyFlow: Flow<Boolean>
+    public val isDatabaseUpdateWifiOnlyFlow: Flow<Boolean>
 
     /**
      * A [Flow] which emits the [AppTheme] and will emit further values when this preference
      * changes.
      */
-    val appThemeFlow: Flow<AppTheme>
+    public val appThemeFlow: Flow<AppTheme>
 
     /**
      * A [Flow] which emits whether auto refresh is enabled by default, and will emit further
      * values when this preference changes.
      */
-    val isLiveTimesAutoRefreshEnabledFlow: Flow<Boolean>
-
-    /**
-     * A [Flow] which emits whether night services should be shown or not, and will emit further
-     * values when this preference changes.
-     */
-    val isLiveTimesShowNightServicesEnabledFlow: Flow<Boolean>
+    public val isLiveTimesAutoRefreshEnabledFlow: Flow<Boolean>
 
     /**
      * A [Flow] which emits whether live times are sorted by time, and will emit further values when
      * this preference changes.
      */
-    val isLiveTimesSortByTimeFlow: Flow<Boolean>
+    public val isLiveTimesSortByTimeFlow: Flow<Boolean>
 
     /**
      * A [Flow] which returns the number of departures preference value and will emit further values
      * when this preference changes.
      */
-    val liveTimesNumberOfDeparturesFlow: Flow<Int>
+    public val liveTimesNumberOfDeparturesFlow: Flow<Int>
 
     /**
      * A [Flow] which emits whether the zoom controls should be visible on the map or not.
      */
-    val isMapZoomControlsVisibleFlow: Flow<Boolean>
+    public val isMapZoomControlsVisibleFlow: Flow<Boolean>
 
     /**
      * A [Flow] which emits whether the GPS prompt is disabled.
      */
-    val isGpsPromptDisabledFlow: Flow<Boolean>
+    public val isGpsPromptDisabledFlow: Flow<Boolean>
 
     /**
      * A [Flow] which emits the last (most recently recorded) map camera location.
      */
-    val lastMapCameraLocationFlow: Flow<LastMapCameraLocation>
+    public val lastMapCameraLocationFlow: Flow<LastMapCameraLocation>
 
     /**
      * A [Flow] which emits the last set map type.
      */
-    val mapTypeFlow: Flow<Int>
+    public val mapTypeFlow: Flow<Int>
 
     /**
      * Toggle the sort by time preference.
      */
-    suspend fun toggleSortByTime()
+    public suspend fun toggleSortByTime()
 
     /**
      * Toggle the auto-refresh preference.
      */
-    suspend fun toggleAutoRefresh()
+    public suspend fun toggleAutoRefresh()
 
     /**
      * Set the value of the GPS prompt disabled preference.
      *
      * @param isDisabled Is the GPS prompt disabled?
      */
-    suspend fun setIsGpsPromptDisabled(isDisabled: Boolean)
+    public suspend fun setIsGpsPromptDisabled(isDisabled: Boolean)
 
     /**
      * Set the value of the last map camera location preference.
      *
      * @param cameraLocation The last map camera location.
      */
-    suspend fun setLastMapCameraLocation(cameraLocation: LastMapCameraLocation)
+    public suspend fun setLastMapCameraLocation(cameraLocation: LastMapCameraLocation)
 
     /**
      * Set the value of the map type preference.
      *
      * @param mapType The new value of the map type preference.
      */
-    suspend fun setMapType(mapType: Int)
+    public suspend fun setMapType(mapType: Int)
 }
