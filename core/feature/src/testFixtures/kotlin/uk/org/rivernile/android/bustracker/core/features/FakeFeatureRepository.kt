@@ -35,7 +35,6 @@ class FakeFeatureRepository(
     private val onHasStopMapUiFeature: () -> Boolean = { throw NotImplementedError() },
     private val onHasArrivalAlertFeature: () -> Boolean = { throw NotImplementedError() },
     private val onHasProximityAlertFeature: () -> Boolean = { throw NotImplementedError() },
-    private val onHasCameraFeature: () -> Boolean = { throw NotImplementedError() },
     private val onHasPinShortcutFeature: () -> Boolean = { throw NotImplementedError() }
 ) : FeatureRepository {
 
@@ -44,8 +43,6 @@ class FakeFeatureRepository(
     override val hasArrivalAlertFeature get() = onHasArrivalAlertFeature()
 
     override val hasProximityAlertFeature get() = onHasProximityAlertFeature()
-
-    override val hasCameraFeature get() = onHasCameraFeature()
 
     override val hasPinShortcutFeature get() = onHasPinShortcutFeature()
 }

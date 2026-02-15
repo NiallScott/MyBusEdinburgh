@@ -26,6 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.ui.callbacks
 
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+
 /**
  * This listener is used to send callbacks from `Fragment`s to [android.app.Activity]s when the user
  * wishes to add a new arrival alert.
@@ -37,9 +40,12 @@ public interface OnShowAddArrivalAlertListener {
     /**
      * This is called when the user wants to view the interface to add a new arrival alert.
      *
-     * @param stopCode The stopCode the arrival alert should be added for.
+     * @param stopIdentifier The stop identifier the time alert should be added for.
      * @param defaultServices The services that should be selected by default. Set to `null` if no
      * services should be selected.
      */
-    public fun onShowAddArrivalAlert(stopCode: String, defaultServices: Array<String>?)
+    public fun onShowAddArrivalAlert(
+        stopIdentifier: StopIdentifier,
+        defaultServices: List<ServiceDescriptor>?
+    )
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,9 +38,12 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopName
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopSearchResult
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopSearchResult
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import uk.org.rivernile.android.bustracker.testutils.test
@@ -69,13 +72,18 @@ class SearchFragmentViewModelTest {
 
     @Test
     fun onItemClickedShowsStopDetails() {
-        val item = UiSearchResult("123456", null, StopOrientation.UNKNOWN, null)
+        val item = UiSearchResult(
+            "123456".toNaptanStopIdentifier(),
+            null,
+            StopOrientation.UNKNOWN,
+            null
+        )
         val viewModel = createViewModel()
 
         val observer = viewModel.showStopLiveData.test()
         viewModel.onItemClicked(item)
 
-        observer.assertValues("123456")
+        observer.assertValues("123456".toNaptanStopIdentifier())
     }
 
     @Test
@@ -155,24 +163,28 @@ class SearchFragmentViewModelTest {
                     SEARCH_PROGRESS_DELAY_MILLIS + 1,
                     0L,
                     listOf(
-                        MockStopSearchResult(
-                            "123456",
-                            MockStopName(
+                        FakeStopSearchResult(
+                            "123456".toNaptanStopIdentifier(),
+                            FakeStopName(
                                 "Name 1",
-                                "Locality 1"),
+                                "Locality 1"
+                            ),
                             StopOrientation.NORTH,
-                            "1, 2, 3")
+                            listOf(service(2), service(1), service(3))
+                        )
                 ))
             )
         val viewModel = createViewModel()
         val expectedResults = listOf(
             UiSearchResult(
-                "123456",
-                MockStopName(
+                "123456".toNaptanStopIdentifier(),
+                FakeStopName(
                     "Name 1",
                     "Locality 1"),
                 StopOrientation.NORTH,
-                "1, 2, 3"))
+                listOf(service(1), service(2), service(3))
+            )
+        )
 
         val uiStateObserver = viewModel.uiStateLiveData.test()
         val searchResultsObserver = viewModel.searchResultsLiveData.test()
@@ -189,20 +201,23 @@ class SearchFragmentViewModelTest {
 
     @Test
     fun uiStateFlowEmitsContentUpdates() = runTest {
-        val searchResult1 = MockStopSearchResult(
-            "123456",
-            MockStopName(
+        val searchResult1 = FakeStopSearchResult(
+            "123456".toNaptanStopIdentifier(),
+            FakeStopName(
                 "Name 1",
-                "Locality 1"),
+                "Locality 1"
+            ),
             StopOrientation.NORTH,
-            "1, 2, 3")
-        val searchResult2 = MockStopSearchResult(
-            "987654",
-            MockStopName(
+            listOf(service(3), service(1), service(2))
+        )
+        val searchResult2 = FakeStopSearchResult(
+            "987654".toNaptanStopIdentifier(),
+            FakeStopName(
                 "Name 2",
                 "Locality 2"),
             StopOrientation.NORTH_EAST,
-            "4, 5, 6")
+            listOf(service(6), service(5), service(4))
+        )
         whenever(busStopsRepository.getStopSearchResultsFlow("abc"))
             .thenReturn(
                 intervalFlowOf(
@@ -213,19 +228,21 @@ class SearchFragmentViewModelTest {
                     listOf(searchResult1, searchResult2)))
         val viewModel = createViewModel()
         val expectedResult1 = UiSearchResult(
-            "123456",
-            MockStopName(
+            "123456".toNaptanStopIdentifier(),
+            FakeStopName(
                 "Name 1",
                 "Locality 1"),
             StopOrientation.NORTH,
-            "1, 2, 3")
+            listOf(service(1), service(2), service(3))
+        )
         val expectedResult2 = UiSearchResult(
-            "987654",
-            MockStopName(
+            "987654".toNaptanStopIdentifier(),
+            FakeStopName(
                 "Name 2",
                 "Locality 2"),
             StopOrientation.NORTH_EAST,
-            "4, 5, 6")
+            listOf(service(4), service(5), service(6))
+        )
         val expectedResults1 = listOf(expectedResult1)
         val expectedResults2 = listOf(expectedResult1, expectedResult2)
 
@@ -248,20 +265,22 @@ class SearchFragmentViewModelTest {
 
     @Test
     fun uiStateFlowBehavesCorrectlyWhenSearchTermChanges() = runTest {
-        val searchResult1 = MockStopSearchResult(
-            "123456",
-            MockStopName(
+        val searchResult1 = FakeStopSearchResult(
+            "123456".toNaptanStopIdentifier(),
+            FakeStopName(
                 "Name 1",
                 "Locality 1"),
             StopOrientation.NORTH,
-            "1, 2, 3")
-        val searchResult2 = MockStopSearchResult(
-            "987654",
-            MockStopName(
+            listOf(service(3), service(1), service(2))
+        )
+        val searchResult2 = FakeStopSearchResult(
+            "987654".toNaptanStopIdentifier(),
+            FakeStopName(
                 "Name 2",
                 "Locality 2"),
             StopOrientation.NORTH_EAST,
-            "4, 5, 6")
+            listOf(service(6), service(5), service(4))
+        )
         whenever(busStopsRepository.getStopSearchResultsFlow("abc"))
             .thenReturn(
                 intervalFlowOf(SEARCH_PROGRESS_DELAY_MILLIS + 1L, 0L, listOf(searchResult1)))
@@ -270,19 +289,21 @@ class SearchFragmentViewModelTest {
                 intervalFlowOf(SEARCH_PROGRESS_DELAY_MILLIS - 1L, 0L, listOf(searchResult2)))
         val viewModel = createViewModel()
         val expectedResult1 = UiSearchResult(
-            "123456",
-            MockStopName(
+            "123456".toNaptanStopIdentifier(),
+            FakeStopName(
                 "Name 1",
                 "Locality 1"),
             StopOrientation.NORTH,
-            "1, 2, 3")
+            listOf(service(1), service(2), service(3))
+        )
         val expectedResult2 = UiSearchResult(
-            "987654",
-            MockStopName(
+            "987654".toNaptanStopIdentifier(),
+            FakeStopName(
                 "Name 2",
                 "Locality 2"),
             StopOrientation.NORTH_EAST,
-            "4, 5, 6")
+            listOf(service(4), service(5), service(6))
+        )
         val expectedResults1 = listOf(expectedResult1)
         val expectedResults2 = listOf(expectedResult2)
 
@@ -307,15 +328,14 @@ class SearchFragmentViewModelTest {
         SearchFragmentViewModel(
             savedState,
             busStopsRepository,
-            coroutineRule.testDispatcher)
+            naturalOrder(),
+            coroutineRule.testDispatcher
+        )
 
-    private data class MockStopName(
-        override val name: String,
-        override val locality: String?) : StopName
-
-    private data class MockStopSearchResult(
-        override val stopCode: String,
-        override val stopName: StopName,
-        override val orientation: StopOrientation,
-        override val serviceListing: String?) : StopSearchResult
+    private fun service(id: Int): ServiceDescriptor {
+        return FakeServiceDescriptor(
+            serviceName = id.toString(),
+            operatorCode = "TEST$id"
+        )
+    }
 }

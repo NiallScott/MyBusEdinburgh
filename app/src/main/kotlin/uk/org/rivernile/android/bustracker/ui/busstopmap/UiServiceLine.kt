@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,4 +33,5 @@ package uk.org.rivernile.android.bustracker.ui.busstopmap
  * @author Niall Scott
  */
 data class UiServiceLine(
-        val points: List<UiLatLon>)
+    val points: List<UiLatLon>
+)

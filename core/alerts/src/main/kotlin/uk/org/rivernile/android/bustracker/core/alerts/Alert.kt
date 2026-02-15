@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,14 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts
 
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.arrival.ArrivalAlert
+    as DatabaseArrivalAlert
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.proximity.ProximityAlert
+    as DatabaseProximityAlert
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import kotlin.time.Instant
+
 /**
  * This is the base type for user alerts.
  *
@@ -39,48 +47,73 @@ public sealed interface Alert {
     public val id: Int
 
     /**
-     * The UNIX timestamp, in milliseconds, that the alert was created at.
+     * The time that this alert was created at.
      */
-    public val timeAdded: Long
+    public val timeAdded: Instant
 
     /**
-     * What stop code does the alert concern?
+     * What stop does the alert concern?
      */
-    public val stopCode: String
+    public val stopIdentifier: StopIdentifier
 }
 
 /**
  * This data class describes an arrival alert that is persisted in the settings database.
  *
  * @property id The ID of this alert.
- * @property timeAdded The UNIX timestamp, in milliseconds, that the alert was created at.
- * @property stopCode What stop code does the alert concern?
- * @property serviceNames A non-empty [List] of service names to trigger the alert for.
- * @property timeTrigger The alert should be fired when any of the named services is due at the
- * named stop at this value or less.
+ * @property timeAdded The time the arrival alert was created at.
+ * @property stopIdentifier What stop does the alert concern?
+ * @property services A non-empty [List] of services to trigger the alert for.
+ * @property timeTriggerMinutes The alert should be fired when any of the named services is due at
+ * the named stop at this value or less.
  * @author Niall Scott
  */
 public data class ArrivalAlert(
     override val id: Int,
-    override val timeAdded: Long,
-    override val stopCode: String,
-    val serviceNames: List<String>,
-    val timeTrigger: Int
+    override val timeAdded: Instant,
+    override val stopIdentifier: StopIdentifier,
+    val services: Set<ServiceDescriptor>,
+    val timeTriggerMinutes: Int
 ) : Alert
 
 /**
  * This data class describes a proximity alert that is persisted in the settings database.
  *
  * @property id The ID of this alert.
- * @property timeAdded The UNIX timestamp, in milliseconds, that the alert was created at.
- * @property stopCode What stop code does the alert concern?
- * @property distanceFrom At what maximum distance from the stop should the alert fire at? Or, what
- * is the radius of the proximity area.
+ * @property timeAdded The time the proximity alert was created at.
+ * @property stopIdentifier What code does the alert concern?
+ * @property distanceFromMeters At what maximum distance from the stop should the alert fire at? Or,
+ * what is the radius of the proximity area.
  * @author Niall Scott
  */
 public data class ProximityAlert(
     override val id: Int,
-    override val timeAdded: Long,
-    override val stopCode: String,
-    val distanceFrom: Int
+    override val timeAdded: Instant,
+    override val stopIdentifier: StopIdentifier,
+    val distanceFromMeters: Int
 ) : Alert
+
+internal fun List<DatabaseArrivalAlert>.toArrivalAlertList(): List<ArrivalAlert> =
+    map { it.toArrivalAlert() }
+
+internal fun DatabaseArrivalAlert.toArrivalAlert(): ArrivalAlert {
+    return ArrivalAlert(
+        id = id,
+        timeAdded = timeAdded,
+        stopIdentifier = stopIdentifier,
+        services = services,
+        timeTriggerMinutes = timeTriggerMinutes
+    )
+}
+
+internal fun List<DatabaseProximityAlert>.toProximityAlertList(): List<ProximityAlert> =
+    map { it.toProximityAlert() }
+
+internal fun DatabaseProximityAlert.toProximityAlert(): ProximityAlert {
+    return ProximityAlert(
+        id = id,
+        timeAdded = timeAdded,
+        stopIdentifier = stopIdentifier,
+        distanceFromMeters = radiusTriggerMeters
+    )
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onStart
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import javax.inject.Inject
 
@@ -62,57 +63,59 @@ class AlertsStateRetriever @Inject constructor(
     val isProximityAlertVisibleFlow get() = flowOf(featureRepository.hasProximityAlertFeature)
 
     /**
-     * Get a [Flow] which uses the [selectedStopCodeFlow] as the currently selected stop code and
-     * this [Flow] emits whether the given stop is added as an arrival alert. `null` will be emitted
-     * when loading and when there is no stop code.
+     * Get a [Flow] which uses the [selectedStopIdentifierFlow] as the currently selected stop
+     * identifier and this [Flow] emits whether the given stop is added as an arrival alert.
+     * `null` will be emitted when loading and when there is no stop identifier.
      *
-     * @param selectedStopCodeFlow A [Flow] which emits the currently selected stop code.
+     * @param selectedStopIdentifierFlow A [Flow] which emits the currently selected stop
+     * identifier.
      * @return A [Flow] which emits whether the selected stop is added as an arrival alert or not,
-     * or emits `null` when loading or no stop code is selected.
+     * or emits `null` when loading or no stop is selected.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun getHasArrivalAlertFlow(selectedStopCodeFlow: Flow<String?>) =
-        selectedStopCodeFlow
+    fun getHasArrivalAlertFlow(selectedStopIdentifierFlow: Flow<StopIdentifier?>) =
+        selectedStopIdentifierFlow
             .flatMapLatest(this::loadHasArrivalAlert)
 
     /**
-     * Get a [Flow] which uses the [selectedStopCodeFlow] as the currently selected stop code and
-     * this [Flow] emits whether the given stop is added as a proximity alert. `null` will be
-     * emitted when loading and when there is no stop code.
+     * Get a [Flow] which uses the [selectedStopIdentifierFlow] as the currently selected stop
+     * and this [Flow] emits whether the given stop is added as a proximity alert. `null` will be
+     * emitted when loading and when there is no stop identifier.
      *
-     * @param selectedStopCodeFlow A [Flow] which emits the currently selected stop code.
+     * @param selectedStopIdentifierFlow A [Flow] which emits the currently selected stop
+     * identifier.
      * @return A [Flow] which emits whether the selected stop is added as a proximity alert or not,
-     * or emits `null` when loading or no stop code is selected.
+     * or emits `null` when loading or no stop is selected.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun getHasProximityAlertFlow(selectedStopCodeFlow: Flow<String?>) =
-        selectedStopCodeFlow
+    fun getHasProximityAlertFlow(selectedStopIdentifierFlow: Flow<StopIdentifier?>) =
+        selectedStopIdentifierFlow
             .flatMapLatest(this::loadHasProximityAlert)
 
     /**
-     * Load whether the given [stopCode] has an arrival alert set against it or not. If the
-     * [stopCode] is `null` or empty, the returned [Flow] emits `null`. `null` will also be
-     * emitted in lieu of a value while the status is loading.
+     * Load whether the given [stopIdentifier] has an arrival alert set against it or not. If the
+     * [stopIdentifier] is `null`, the returned [Flow] emits `null`. `null` will also be emitted in
+     * lieu of a value while the status is loading.
      *
-     * @param stopCode The stop code to get the arrival alert status for.
-     * @return A [Flow] which emits whether the given stop code has an arrival alert set against
-     * it or not.
+     * @param stopIdentifier The stop to get the arrival alert status for.
+     * @return A [Flow] which emits whether the given stop identifier has an arrival alert set
+     * against it or not.
      */
-    private fun loadHasArrivalAlert(stopCode: String?) = stopCode?.ifEmpty { null }?.let {
+    private fun loadHasArrivalAlert(stopIdentifier: StopIdentifier?) = stopIdentifier?.let {
         alertsRepository.hasArrivalAlertFlow(it)
             .onStart<Boolean?> { emit(null) }
     } ?: flowOf(null)
 
     /**
-     * Load whether the given [stopCode] has a proximity alert set against it or not. If the
-     * [stopCode] is `null` or empty, the returned [Flow] emits `null`. `null` will also be
-     * emitted in lieu of a value while the status is loading.
+     * Load whether the given [stopIdentifier] has a proximity alert set against it or not. If the
+     * [stopIdentifier] is `null`, the returned [Flow] emits `null`. `null` will also be emitted in
+     * lieu of a value while the status is loading.
      *
-     * @param stopCode The stop code to get the proximity alert status for.
-     * @return A [Flow] which emits whether the given stop code has a proximity alert set against
-     * it or not.
+     * @param stopIdentifier The stop to get the proximity alert status for.
+     * @return A [Flow] which emits whether the given stop identifier has a proximity alert set
+     * against it or not.
      */
-    private fun loadHasProximityAlert(stopCode: String?) = stopCode?.ifEmpty { null }?.let {
+    private fun loadHasProximityAlert(stopIdentifier: StopIdentifier?) = stopIdentifier?.let {
         alertsRepository.hasProximityAlertFlow(it)
             .onStart<Boolean?> { emit(null) }
     } ?: flowOf(null)

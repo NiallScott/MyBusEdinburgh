@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onStart
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import javax.inject.Inject
 
@@ -47,29 +48,29 @@ class FavouritesStateRetriever @Inject constructor(
 ) {
 
     /**
-     * Get a [Flow] which uses the [selectedStopCodeFlow] as the currently selected stop code and
+     * Get a [Flow] which uses the [selectedStopIdentifierFlow] as the currently selected stop and
      * this [Flow] emits whether the given stop is added as a favourite. `null` will be emitted when
-     * loading and when there is no stop code.
+     * loading and when there is no stop identifier.
      *
-     * @param selectedStopCodeFlow A [Flow] which emits the currently selected stop code.
+     * @param selectedStopIdentifierFlow A [Flow] which emits the currently selected stop.
      * @return A [Flow] which emits whether the selected stop is added as a favourite or not, or
-     * emits `null` when loading or no stop code is selected.
+     * emits `null` when loading or no stop identifier is selected.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun getIsAddedAsFavouriteStopFlow(selectedStopCodeFlow: Flow<String?>) =
-        selectedStopCodeFlow
+    fun getIsAddedAsFavouriteStopFlow(selectedStopIdentifierFlow: Flow<StopIdentifier?>) =
+        selectedStopIdentifierFlow
             .flatMapLatest(this::loadIsFavouriteStop)
 
     /**
-     * Load whether the given [stopCode] is added as a user favourite or not. If the [stopCode]
+     * Load whether the given [stopIdentifier] is added as a user favourite or not. If the [stopIdentifier]
      * is `null` or empty, the returned [kotlinx.coroutines.flow.Flow] emits `null`. `null` will
      * also be emitted in lieu of a value while the status is loading.
      *
-     * @param stopCode The stop code to get favourite status for.
-     * @return A [kotlinx.coroutines.flow.Flow] which emits whether the given stop code is added as
-     * a user favourite.
+     * @param stopIdentifier The stop to get favourite status for.
+     * @return A [kotlinx.coroutines.flow.Flow] which emits whether the given stop identifier is
+     * added as a user favourite.
      */
-    private fun loadIsFavouriteStop(stopCode: String?) = stopCode?.ifEmpty { null }?.let {
+    private fun loadIsFavouriteStop(stopIdentifier: StopIdentifier?) = stopIdentifier?.let {
         favouritesRepository.isStopAddedAsFavouriteFlow(it)
             .onStart<Boolean?> { emit(null) }
     } ?: flowOf(null)

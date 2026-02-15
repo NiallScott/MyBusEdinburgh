@@ -27,7 +27,8 @@
 package uk.org.rivernile.android.bustracker.core.text
 
 import android.content.Context
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.busstops.StopName
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.ui.textformatting.R
 import javax.inject.Inject
 
@@ -62,16 +63,30 @@ public class TextFormattingUtils @Inject internal constructor(
     /**
      * Format a bus stop name [String] containing the stop code.
      *
-     * @param stopCode The stop code.
+     * @param stopIdentifier The stop identifier.
      * @param stopName The stop name data.
      * @return The formatted stop name, containing the stop code.
      */
-    public fun formatBusStopNameWithStopCode(stopCode: String, stopName: StopName?): String =
+    public fun formatBusStopNameWithStopCode(
+        stopIdentifier: StopIdentifier,
+        stopName: StopName?
+    ): String =
         stopName?.let {
             it.locality
                 ?.ifEmpty { null }
                 ?.let { locality ->
-                    context.getString(R.string.busstop_locality, it.name, locality, stopCode)
-                } ?: context.getString(R.string.busstop, it.name, stopCode)
-        } ?: stopCode
+                    context.getString(
+                        R.string.busstop_locality,
+                        it.name,
+                        locality,
+                        stopIdentifier.toHumanReadableString()
+                    )
+                } ?: run {
+                    context.getString(
+                        R.string.busstop,
+                        it.name,
+                        stopIdentifier.toHumanReadableString()
+                    )
+                }
+        } ?: stopIdentifier.toHumanReadableString()
 }

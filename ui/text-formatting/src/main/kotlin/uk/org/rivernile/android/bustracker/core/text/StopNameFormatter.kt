@@ -34,6 +34,7 @@ import androidx.compose.runtime.compositionLocalWithComputedDefaultOf
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import dagger.hilt.android.qualifiers.ApplicationContext
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.ui.textformatting.R
 import javax.inject.Inject
 
@@ -55,16 +56,19 @@ public interface StopNameFormatter {
     /**
      * Format to a bus stop name [String] containing the stop code.
      *
-     * @param stopCode The stop code.
+     * @param stopIdentifier The stop identifier.
      * @param stopName The stop name data.
      * @return The formatted stop name, containing the stop code.
      */
-    public fun formatBusStopNameWithStopCode(stopCode: String, stopName: UiStopName?): String
+    public fun formatBusStopNameWithStopIdentifier(
+        stopIdentifier: StopIdentifier,
+        stopName: UiStopName?
+    ): String
 }
 
 /**
  * A [ProvidableCompositionLocal] which provides the [StopNameFormatter] to use for formatting stop
- * names. By default this will provide the real run-time instance. This can be replaced at testing
+ * names. By default, this will provide the real run-time instance. This can be replaced at testing
  * time by providing a new [ProvidableCompositionLocal].
  */
 public val LocalStopNameFormatter: ProvidableCompositionLocal<StopNameFormatter> =
@@ -91,21 +95,24 @@ public fun formatBusStopName(stopName: UiStopName): String {
 }
 
 /**
- * A convenience [Composable] which formats the supplied [stopCode] and [stopName] using
- * [StopNameFormatter.formatBusStopNameWithStopCode].
+ * A convenience [Composable] which formats the supplied [stopIdentifier] and [stopName] using
+ * [StopNameFormatter.formatBusStopNameWithStopIdentifier].
  *
- * @param stopCode See [StopNameFormatter.formatBusStopNameWithStopCode].
- * @param stopName See [StopNameFormatter.formatBusStopNameWithStopCode].
- * @return See [StopNameFormatter.formatBusStopNameWithStopCode].
- * @see StopNameFormatter.formatBusStopNameWithStopCode
+ * @param stopIdentifier See [StopNameFormatter.formatBusStopNameWithStopIdentifier].
+ * @param stopName See [StopNameFormatter.formatBusStopNameWithStopIdentifier].
+ * @return See [StopNameFormatter.formatBusStopNameWithStopIdentifier].
+ * @see StopNameFormatter.formatBusStopNameWithStopIdentifier
  */
 @Composable
 @ReadOnlyComposable
-public fun formatBusStopNameWithStopCode(stopCode: String, stopName: UiStopName?): String {
+public fun formatBusStopNameWithStopIdentifier(
+    stopIdentifier: StopIdentifier,
+    stopName: UiStopName?
+): String {
     // Read LocalConfiguration so that this Composable is recomposed when it changes.
     LocalConfiguration.current
-    return LocalStopNameFormatter.current.formatBusStopNameWithStopCode(
-        stopCode = stopCode,
+    return LocalStopNameFormatter.current.formatBusStopNameWithStopIdentifier(
+        stopIdentifier = stopIdentifier,
         stopName = stopName
     )
 }
@@ -124,8 +131,8 @@ internal class RealStopNameFormatter @Inject constructor(
             ?: stopName.name
     }
 
-    override fun formatBusStopNameWithStopCode(
-        stopCode: String,
+    override fun formatBusStopNameWithStopIdentifier(
+        stopIdentifier: StopIdentifier,
         stopName: UiStopName?
     ): String {
         return stopName
@@ -133,10 +140,19 @@ internal class RealStopNameFormatter @Inject constructor(
                 it.locality
                     ?.ifEmpty { null }
                     ?.let { locality ->
-                        context.getString(R.string.busstop_locality, it.name, locality, stopCode)
+                        context.getString(
+                            R.string.busstop_locality,
+                            it.name,
+                            locality,
+                            stopIdentifier.toHumanReadableString()
+                        )
                     }
-                    ?: context.getString(R.string.busstop, it.name, stopCode)
+                    ?: context.getString(
+                        R.string.busstop,
+                        it.name,
+                        stopIdentifier.toHumanReadableString()
+                    )
             }
-            ?: stopCode
+            ?: stopIdentifier.toHumanReadableString()
     }
 }

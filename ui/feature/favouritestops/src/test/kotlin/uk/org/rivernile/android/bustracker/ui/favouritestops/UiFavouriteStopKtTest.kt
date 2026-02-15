@@ -27,6 +27,9 @@
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
 import kotlinx.collections.immutable.persistentListOf
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
@@ -52,17 +55,17 @@ class UiFavouriteStopKtTest {
     }
 
     @Test
-    fun toUiFavouriteStopsMapsStopCodeAndSavedName() {
+    fun toUiFavouriteStopsMapsStopIdentifierAndSavedName() {
         val favouriteStops = listOf(
             FavouriteStopWithServices(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 savedName = "Saved name",
                 services = null
             )
         )
         val expected = listOf(
             UiFavouriteStop(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 savedName = "Saved name",
                 services = null,
                 dropdownMenu = null
@@ -78,17 +81,17 @@ class UiFavouriteStopKtTest {
     }
 
     @Test
-    fun toUiFavouriteStopsMapsStopCodeAndSavedNameWithEmptyServices() {
+    fun toUiFavouriteStopsMapsStopIdentifierAndSavedNameWithEmptyServices() {
         val favouriteStops = listOf(
             FavouriteStopWithServices(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 savedName = "Saved name",
                 services = emptyList()
             )
         )
         val expected = listOf(
             UiFavouriteStop(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 savedName = "Saved name",
                 services = null,
                 dropdownMenu = null
@@ -107,14 +110,14 @@ class UiFavouriteStopKtTest {
     fun toUiFavouriteStopsMapsColoursWithNullColoursMap() {
         val favouriteStops = listOf(
             FavouriteStopWithServices(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 savedName = "Saved name",
-                services = listOf("1", "2", "3")
+                services = listOf(service(1), service(2), service(3))
             )
         )
         val expected = listOf(
             UiFavouriteStop(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 savedName = "Saved name",
                 services = persistentListOf(
                     UiServiceName(
@@ -146,14 +149,14 @@ class UiFavouriteStopKtTest {
     fun toUiFavouriteStopsMapsColoursWithEmptyColoursMap() {
         val favouriteStops = listOf(
             FavouriteStopWithServices(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 savedName = "Saved name",
-                services = listOf("1", "2", "3")
+                services = listOf(service(1), service(2), service(3))
             )
         )
         val expected = listOf(
             UiFavouriteStop(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 savedName = "Saved name",
                 services = persistentListOf(
                     UiServiceName(
@@ -185,14 +188,14 @@ class UiFavouriteStopKtTest {
     fun toUiFavouriteStopsMapsColoursWithPopulatedColoursMap() {
         val favouriteStops = listOf(
             FavouriteStopWithServices(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 savedName = "Saved name",
-                services = listOf("1", "2", "3")
+                services = listOf(service(1), service(2), service(3))
             )
         )
         val expected = listOf(
             UiFavouriteStop(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 savedName = "Saved name",
                 services = persistentListOf(
                     UiServiceName(
@@ -220,12 +223,12 @@ class UiFavouriteStopKtTest {
 
         val result = favouriteStops.toUiFavouriteStops(
             serviceColours = mapOf(
-                "1" to ServiceColours(
-                    primaryColour = 100,
+                service(1) to ServiceColours(
+                    colourPrimary = 100,
                     colourOnPrimary = 200
                 ),
-                "3" to ServiceColours(
-                    primaryColour = 300,
+                service(3) to ServiceColours(
+                    colourPrimary = 300,
                     colourOnPrimary = 400
                 )
             ),
@@ -239,14 +242,14 @@ class UiFavouriteStopKtTest {
     fun toUiFavouriteStopsDoesNotIncludeDropdownMenuWhenMapIsEmpty() {
         val favouriteStops = listOf(
             FavouriteStopWithServices(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 savedName = "Saved name",
                 services = null
             )
         )
         val expected = listOf(
             UiFavouriteStop(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 savedName = "Saved name",
                 services = null,
                 dropdownMenu = null
@@ -265,14 +268,14 @@ class UiFavouriteStopKtTest {
     fun toUiFavouriteStopsDoesNotIncludeDropdownMenuWhenMapContainsUnrecognisedItem() {
         val favouriteStops = listOf(
             FavouriteStopWithServices(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 savedName = "Saved name",
                 services = null
             )
         )
         val expected = listOf(
             UiFavouriteStop(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 savedName = "Saved name",
                 services = null,
                 dropdownMenu = null
@@ -282,7 +285,7 @@ class UiFavouriteStopKtTest {
         val result = favouriteStops.toUiFavouriteStops(
             serviceColours = null,
             dropdownMenus = mapOf(
-                "987654" to UiFavouriteDropdownMenu()
+                "987654".toNaptanStopIdentifier() to UiFavouriteDropdownMenu()
             )
         )
 
@@ -293,14 +296,14 @@ class UiFavouriteStopKtTest {
     fun toUiFavouriteStopsIncludesDropdownMenuWhenMapContainsExpectedStop() {
         val favouriteStops = listOf(
             FavouriteStopWithServices(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 savedName = "Saved name",
                 services = null
             )
         )
         val expected = listOf(
             UiFavouriteStop(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 savedName = "Saved name",
                 services = null,
                 dropdownMenu = UiFavouriteDropdownMenu()
@@ -310,10 +313,17 @@ class UiFavouriteStopKtTest {
         val result = favouriteStops.toUiFavouriteStops(
             serviceColours = null,
             dropdownMenus = mapOf(
-                "123456" to UiFavouriteDropdownMenu()
+                "123456".toNaptanStopIdentifier() to UiFavouriteDropdownMenu()
             )
         )
 
         assertEquals(expected, result)
+    }
+
+    private fun service(id: Int): ServiceDescriptor {
+        return FakeServiceDescriptor(
+            serviceName = id.toString(),
+            operatorCode = "TEST$id"
+        )
     }
 }

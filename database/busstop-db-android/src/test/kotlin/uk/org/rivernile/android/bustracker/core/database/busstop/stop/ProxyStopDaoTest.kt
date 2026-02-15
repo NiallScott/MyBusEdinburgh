@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabase
 import uk.org.rivernile.android.bustracker.core.database.busstop.FakeBusStopDatabase
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -192,7 +194,15 @@ class ProxyStopDaoTest {
                 onStopDao = {
                     FakeStopDao(
                         onGetStopDetailsWithServiceFilterFlow = {
-                            assertEquals(setOf("1"), it)
+                            assertEquals(
+                                setOf(
+                                    FakeServiceDescriptor(
+                                        serviceName = "1",
+                                        operatorCode = "TEST"
+                                    )
+                                ),
+                                it
+                            )
                             flows.removeFirst()
                         }
                     )
@@ -201,7 +211,14 @@ class ProxyStopDaoTest {
             )
         )
 
-        dao.getStopDetailsWithServiceFilterFlow(setOf("1")).test {
+        dao.getStopDetailsWithServiceFilterFlow(
+            setOf(
+                FakeServiceDescriptor(
+                    serviceName = "1",
+                    operatorCode = "TEST"
+                )
+            )
+        ).test {
             assertEquals(first, awaitItem())
             assertEquals(second, awaitItem())
             awaitComplete()
@@ -264,7 +281,15 @@ class ProxyStopDaoTest {
                             assertEquals(2.2, minLon)
                             assertEquals(3.3, maxLat)
                             assertEquals(4.4, maxLon)
-                            assertEquals(setOf("1"), serviceFilter)
+                            assertEquals(
+                                setOf(
+                                    FakeServiceDescriptor(
+                                        serviceName = "1",
+                                        operatorCode = "TEST"
+                                    )
+                                ),
+                                serviceFilter
+                            )
                             flows.removeFirst()
                         }
                     )
@@ -272,8 +297,14 @@ class ProxyStopDaoTest {
                 onIsDatabaseOpenFlow = { intervalFlowOf(0L, 10L, true, false, true) }
             )
         )
+        val services = setOf(
+            FakeServiceDescriptor(
+                serviceName = "1",
+                operatorCode = "TEST"
+            )
+        )
 
-        dao.getStopDetailsWithinSpanFlow(1.1, 2.2, 3.3, 4.4, setOf("1")).test {
+        dao.getStopDetailsWithinSpanFlow(1.1, 2.2, 3.3, 4.4, services).test {
             assertEquals(first, awaitItem())
             assertEquals(second, awaitItem())
             awaitComplete()
@@ -285,24 +316,42 @@ class ProxyStopDaoTest {
     fun getStopSearchResultsFlowRespondsToDatabaseOpenStatus() = runTest {
         val first = listOf(
             FakeStopSearchResult(
-                stopCode = "1",
+                naptanStopIdentifier = "1".toNaptanStopIdentifier(),
                 stopName = FakeStopName(
                     name = "Name 1",
                     locality = "Locality 1"
                 ),
                 orientation = StopOrientation.NORTH,
-                serviceListing = "100, 200"
+                serviceListing = listOf(
+                    FakeServiceDescriptor(
+                        serviceName = "100",
+                        operatorCode = "TEST"
+                    ),
+                    FakeServiceDescriptor(
+                        serviceName = "200",
+                        operatorCode = "TEST"
+                    )
+                )
             )
         )
         val second = listOf(
             FakeStopSearchResult(
-                stopCode = "2",
+                naptanStopIdentifier = "2".toNaptanStopIdentifier(),
                 stopName = FakeStopName(
                     name = "Name 2",
                     locality = "Locality 2"
                 ),
                 orientation = StopOrientation.SOUTH,
-                serviceListing = "300, 400"
+                serviceListing = listOf(
+                    FakeServiceDescriptor(
+                        serviceName = "300",
+                        operatorCode = "TEST"
+                    ),
+                    FakeServiceDescriptor(
+                        serviceName = "400",
+                        operatorCode = "TEST"
+                    )
+                )
             )
         )
         val flows = ArrayDeque(
@@ -340,7 +389,7 @@ class ProxyStopDaoTest {
     }
 
     private val firstStopDetails get() = FakeStopDetails(
-        stopCode = "1",
+        naptanStopIdentifier = "1".toNaptanStopIdentifier(),
         stopName = FakeStopName(
             name = "Name 1",
             locality = "Locality 1"
@@ -353,7 +402,7 @@ class ProxyStopDaoTest {
     )
 
     private val secondStopDetails get() = FakeStopDetails(
-        stopCode = "2",
+        naptanStopIdentifier = "2".toNaptanStopIdentifier(),
         stopName = FakeStopName(
             name = "Name 2",
             locality = "Locality 2"
@@ -366,7 +415,7 @@ class ProxyStopDaoTest {
     )
 
     private val firstStopDetailsWithServices get() = FakeStopDetailsWithServices(
-        stopCode = "1",
+        naptanStopIdentifier = "1".toNaptanStopIdentifier(),
         stopName = FakeStopName(
             name = "Name 1",
             locality = "Locality 1"
@@ -376,11 +425,20 @@ class ProxyStopDaoTest {
             longitude = 2.2
         ),
         orientation = StopOrientation.NORTH,
-        serviceListing = "100, 200"
+        serviceListing = listOf(
+            FakeServiceDescriptor(
+                serviceName = "100",
+                operatorCode = "TEST"
+            ),
+            FakeServiceDescriptor(
+                serviceName = "200",
+                operatorCode = "TEST"
+            )
+        )
     )
 
     private val secondStopDetailsWithServices get() = FakeStopDetailsWithServices(
-        stopCode = "2",
+        naptanStopIdentifier = "2".toNaptanStopIdentifier(),
         stopName = FakeStopName(
             name = "Name 2",
             locality = "Locality 2"
@@ -390,6 +448,15 @@ class ProxyStopDaoTest {
             longitude = 4.4
         ),
         orientation = StopOrientation.SOUTH,
-        serviceListing = "300, 400"
+        serviceListing = listOf(
+            FakeServiceDescriptor(
+                serviceName = "300",
+                operatorCode = "TEST"
+            ),
+            FakeServiceDescriptor(
+                serviceName = "400",
+                operatorCode = "TEST"
+            )
+        )
     )
 }

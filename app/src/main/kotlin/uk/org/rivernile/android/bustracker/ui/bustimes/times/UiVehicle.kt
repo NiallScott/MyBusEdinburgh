@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
-import java.util.Date
+import kotlin.time.Instant
 
 /**
  * This represents a departure/live time for a service.
@@ -39,8 +39,9 @@ import java.util.Date
  * @author Niall Scott
  */
 data class UiVehicle(
-        val destination: String?,
-        val isDiverted: Boolean,
-        val departureTime: Date,
-        val departureMinutes: Int,
-        val isEstimatedTime: Boolean)
+    val destination: String?,
+    val isDiverted: Boolean,
+    val departureTime: Instant,
+    val departureMinutes: Int,
+    val isEstimatedTime: Boolean
+)

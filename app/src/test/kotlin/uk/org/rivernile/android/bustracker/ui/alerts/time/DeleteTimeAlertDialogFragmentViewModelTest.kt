@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,6 +39,9 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
 /**
@@ -52,7 +55,7 @@ class DeleteTimeAlertDialogFragmentViewModelTest {
 
     companion object {
 
-        private const val STATE_STOP_CODE = "stopCode"
+        private const val STATE_STOP_IDENTIFIER = "stopIdentifier"
     }
 
     @get:Rule
@@ -68,34 +71,38 @@ class DeleteTimeAlertDialogFragmentViewModelTest {
         viewModel.onUserConfirmDeletion()
 
         verify(alertsRepository, never())
-                .removeArrivalAlert(anyOrNull<String>())
+            .removeArrivalAlert(anyOrNull<StopIdentifier>())
     }
 
     @Test
     fun onUserConfirmDeletionDoesNotCauseDeletionWhenStopCodeIsEmpty() = runTest {
-        val viewModel = createViewModel("")
+        val viewModel = createViewModel("".toNaptanStopIdentifier())
 
         viewModel.onUserConfirmDeletion()
 
         verify(alertsRepository, never())
-                .removeArrivalAlert(anyOrNull<String>())
+            .removeArrivalAlert(anyOrNull<StopIdentifier>())
     }
 
     @Test
     fun onUserConfirmDeletionCausesDeletionWhenStopCodeIsPopulated() = runTest {
-        val viewModel = createViewModel("123456")
+        val viewModel = createViewModel("123456".toNaptanStopIdentifier())
 
         viewModel.onUserConfirmDeletion()
         advanceUntilIdle()
 
         verify(alertsRepository)
-                .removeArrivalAlert("123456")
+            .removeArrivalAlert("123456".toNaptanStopIdentifier())
     }
 
-    private fun createViewModel(stopCode: String?): DeleteTimeAlertDialogFragmentViewModel {
+    private fun createViewModel(
+        stopIdentifier: StopIdentifier?
+    ): DeleteTimeAlertDialogFragmentViewModel {
         val savedState = SavedStateHandle(
             mapOf(
-                STATE_STOP_CODE to stopCode))
+                STATE_STOP_IDENTIFIER to stopIdentifier?.toParcelableStopIdentifier()
+            )
+        )
 
         return DeleteTimeAlertDialogFragmentViewModel(
             savedState,

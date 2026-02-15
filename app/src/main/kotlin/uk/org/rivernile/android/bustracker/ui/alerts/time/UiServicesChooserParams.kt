@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.ui.alerts.time
 
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+
 /**
  * This class contains the parameters which are sent through to the services selection UI.
  *
@@ -34,5 +37,6 @@ package uk.org.rivernile.android.bustracker.ui.alerts.time
  * @author Niall Scott
  */
 data class UiServicesChooserParams(
-        val stopCode: String,
-        val selectedServices: List<String>?)
+    val stopIdentifier: StopIdentifier,
+    val selectedServices: List<ServiceDescriptor>?
+)

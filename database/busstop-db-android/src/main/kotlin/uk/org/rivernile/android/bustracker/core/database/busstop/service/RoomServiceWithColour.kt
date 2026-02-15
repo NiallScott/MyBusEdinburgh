@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,22 +26,16 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.service
 
-import androidx.room.ColumnInfo
-import androidx.room.TypeConverters
+import androidx.room.Embedded
 
 /**
  * This is the Room specific implementation of [ServiceWithColour].
  *
- * @property name See [ServiceWithColour.name].
- * @property colour See [ServiceWithColour.colour].
+ * @property descriptor Used to describe a service.
+ * @property colours The colours attributed to the service.
  * @author Niall Scott
  */
 internal data class RoomServiceWithColour(
-    override val name: String,
-    @field:TypeConverters(ColourTypeConverter::class)
-    @ColumnInfo(
-        name = "hexColour",
-        typeAffinity = ColumnInfo.TEXT
-    )
-    override val colour: Int?
+    @Embedded override val descriptor: RoomServiceDescriptor,
+    @Embedded override val colours: RoomServiceColours
 ) : ServiceWithColour

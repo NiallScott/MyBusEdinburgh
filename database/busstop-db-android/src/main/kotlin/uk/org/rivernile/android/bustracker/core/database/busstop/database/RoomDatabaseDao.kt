@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,7 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.database
 import androidx.room.Dao
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
+import kotlin.time.Instant
 
 /**
  * This is the Room implementation of [DatabaseDao].
@@ -39,18 +40,18 @@ import kotlinx.coroutines.flow.Flow
 internal interface RoomDatabaseDao : DatabaseDao {
 
     @get:Query("""
-        SELECT topologyId 
-        FROM database_info 
-        ORDER BY updateTimestamp DESC 
-        LIMIT 1
-    """)
-    override val topologyIdFlow: Flow<String?>
-
-    @get:Query("""
-        SELECT updateTimestamp, topologyId 
-        FROM database_info 
-        ORDER BY updateTimestamp DESC 
+        SELECT update_timestamp
+        FROM database_info
+        ORDER BY update_timestamp DESC
         LIMIT 1
     """)
     override val databaseMetadataFlow: Flow<RoomDatabaseMetadata?>
+
+    @Query("""
+        SELECT update_timestamp
+        FROM database_info
+        ORDER BY update_timestamp DESC
+        LIMIT 1
+    """)
+    override suspend fun getDatabaseUpdateTimestamp(): Instant?
 }

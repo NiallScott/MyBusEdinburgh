@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,11 +35,14 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopDetailsWithServices
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopLocation
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopName
+import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
 import uk.org.rivernile.android.bustracker.core.config.ConfigRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopDetailsWithServices
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopLocation
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopName
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
@@ -69,7 +72,8 @@ class UiStateRetrieverTest {
         retriever = UiStateRetriever(
             locationRepository,
             busStopsRepository,
-            configRepository
+            configRepository,
+            naturalOrder()
         )
     }
 
@@ -246,21 +250,21 @@ class UiStateRetrieverTest {
         whenever(configRepository.nearestStopsLongitudeSpan)
             .thenReturn(2.2)
         val stopDetails1 = FakeStopDetailsWithServices(
-            "111111",
+            "111111".toNaptanStopIdentifier(),
             FakeStopName("Name 1", "Locality 1"),
             FakeStopLocation(1.1, 1.2),
             StopOrientation.NORTH,
-            "1, 2, 3"
+            listOf(service(1), service(3), service(2))
         )
         val stopDetails2 = FakeStopDetailsWithServices(
-            "222222",
+            "222222".toNaptanStopIdentifier(),
             FakeStopName("Name 2", "Locality 2"),
             FakeStopLocation(2.1, 2.2),
             StopOrientation.NORTH_EAST,
-            "4, 5, 6"
+            listOf(service(6), service(5), service(4))
         )
         val stopDetails3 = FakeStopDetailsWithServices(
-            "333333",
+            "333333".toNaptanStopIdentifier(),
             FakeStopName("Name 3", null),
             FakeStopLocation(3.1, 3.2),
             StopOrientation.EAST,
@@ -305,7 +309,7 @@ class UiStateRetrieverTest {
                     UiState.Success(
                         listOf(
                             UiNearestStop(
-                                "333333",
+                                "333333".toNaptanStopIdentifier(),
                                 FakeStopName("Name 3", null),
                                 null,
                                 1,
@@ -313,17 +317,17 @@ class UiStateRetrieverTest {
                                 false
                             ),
                             UiNearestStop(
-                                "111111",
+                                "111111".toNaptanStopIdentifier(),
                                 FakeStopName("Name 1", "Locality 1"),
-                                "1, 2, 3",
+                                listOf(service(1), service(2), service(3)),
                                 2,
                                 StopOrientation.NORTH,
                                 false
                             ),
                             UiNearestStop(
-                                "222222",
+                                "222222".toNaptanStopIdentifier(),
                                 FakeStopName("Name 2", "Locality 2"),
-                                "4, 5, 6",
+                                listOf(service(4), service(5), service(6)),
                                 3,
                                 StopOrientation.NORTH_EAST,
                                 false
@@ -348,21 +352,21 @@ class UiStateRetrieverTest {
         whenever(configRepository.nearestStopsLongitudeSpan)
             .thenReturn(2.2)
         val stopDetails1 = FakeStopDetailsWithServices(
-            "111111",
+            "111111".toNaptanStopIdentifier(),
             FakeStopName("Name 1", "Locality 1"),
             FakeStopLocation(1.1, 1.2),
             StopOrientation.NORTH,
-            "1, 2, 3"
+            listOf(service(3), service(2), service(1))
         )
         val stopDetails2 = FakeStopDetailsWithServices(
-            "222222",
+            "222222".toNaptanStopIdentifier(),
             FakeStopName("Name 2", "Locality 2"),
             FakeStopLocation(2.1, 2.2),
             StopOrientation.NORTH_EAST,
-            "4, 5, 6"
+            listOf(service(4), service(5), service(6))
         )
         val stopDetails3 = FakeStopDetailsWithServices(
-            "333333",
+            "333333".toNaptanStopIdentifier(),
             FakeStopName("Name 3", null),
             FakeStopLocation(3.1, 3.2),
             StopOrientation.EAST,
@@ -407,7 +411,7 @@ class UiStateRetrieverTest {
                     UiState.Success(
                         listOf(
                             UiNearestStop(
-                                "333333",
+                                "333333".toNaptanStopIdentifier(),
                                 FakeStopName("Name 3", null),
                                 null,
                                 1,
@@ -415,17 +419,17 @@ class UiStateRetrieverTest {
                                 false
                             ),
                             UiNearestStop(
-                                "111111",
+                                "111111".toNaptanStopIdentifier(),
                                 FakeStopName("Name 1", "Locality 1"),
-                                "1, 2, 3",
+                                listOf(service(1), service(2), service(3)),
                                 2,
                                 StopOrientation.NORTH,
                                 false
                             ),
                             UiNearestStop(
-                                "222222",
+                                "222222".toNaptanStopIdentifier(),
                                 FakeStopName("Name 2", "Locality 2"),
-                                "4, 5, 6",
+                                listOf(service(4), service(5), service(6)),
                                 3,
                                 StopOrientation.NORTH_EAST,
                                 false
@@ -450,21 +454,21 @@ class UiStateRetrieverTest {
         whenever(configRepository.nearestStopsLongitudeSpan)
             .thenReturn(2.2)
         val stopDetails1 = FakeStopDetailsWithServices(
-            "111111",
+            "111111".toNaptanStopIdentifier(),
             FakeStopName("Name 1", "Locality 1"),
             FakeStopLocation(1.1, 1.2),
             StopOrientation.NORTH,
-            "1, 2, 3"
+            listOf(service(1), service(2), service(3))
         )
         val stopDetails2 = FakeStopDetailsWithServices(
-            "222222",
+            "222222".toNaptanStopIdentifier(),
             FakeStopName("Name 2", "Locality 2"),
             FakeStopLocation(2.1, 2.2),
             StopOrientation.NORTH_EAST,
-            "4, 5, 6"
+            listOf(service(5), service(6), service(4))
         )
         val stopDetails3 = FakeStopDetailsWithServices(
-            "333333",
+            "333333".toNaptanStopIdentifier(),
             FakeStopName("Name 3", null),
             FakeStopLocation(3.1, 3.2),
             StopOrientation.EAST,
@@ -476,7 +480,7 @@ class UiStateRetrieverTest {
                 18.3,
                 11.1,
                 22.7,
-                setOf("1", "2", "3")
+                setOf(service(1), service(2), service(3))
             )
         ).thenReturn(flowOf(listOf(stopDetails1, stopDetails2, stopDetails3)))
         whenever(locationRepository
@@ -501,7 +505,7 @@ class UiStateRetrieverTest {
         retriever
             .getUiStateFlow(
                 flowOf(PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED)),
-                flowOf(setOf("1", "2", "3"))
+                flowOf(setOf(service(1), service(2), service(3)))
             )
             .test {
                 assertEquals(UiState.Error.LocationUnknown, awaitItem())
@@ -509,7 +513,7 @@ class UiStateRetrieverTest {
                     UiState.Success(
                         listOf(
                             UiNearestStop(
-                                "333333",
+                                "333333".toNaptanStopIdentifier(),
                                 FakeStopName("Name 3", null),
                                 null,
                                 1,
@@ -517,17 +521,17 @@ class UiStateRetrieverTest {
                                 false
                             ),
                             UiNearestStop(
-                                "111111",
+                                "111111".toNaptanStopIdentifier(),
                                 FakeStopName("Name 1", "Locality 1"),
-                                "1, 2, 3",
+                                listOf(service(1), service(2), service(3)),
                                 2,
                                 StopOrientation.NORTH,
                                 false
                             ),
                             UiNearestStop(
-                                "222222",
+                                "222222".toNaptanStopIdentifier(),
                                 FakeStopName("Name 2", "Locality 2"),
-                                "4, 5, 6",
+                                listOf(service(4), service(5), service(6)),
                                 3,
                                 StopOrientation.NORTH_EAST,
                                 false
@@ -548,5 +552,12 @@ class UiStateRetrieverTest {
     private fun givenLocationIsEnabled() {
         whenever(locationRepository.isLocationEnabledFlow)
             .thenReturn(flowOf(true))
+    }
+
+    private fun service(id: Int): ServiceDescriptor {
+        return FakeServiceDescriptor(
+            serviceName = id.toString(),
+            operatorCode = "TEST$id"
+        )
     }
 }

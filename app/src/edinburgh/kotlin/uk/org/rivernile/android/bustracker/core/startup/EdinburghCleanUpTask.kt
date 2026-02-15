@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -54,7 +54,9 @@ class EdinburghCleanUpTask @Inject constructor(
                 context.getDatabasePath("busstops2.db"),
                 context.getDatabasePath("busstops2.db-journal"),
                 context.getDatabasePath("busstops8.db"),
-                context.getDatabasePath("busstops8.db-journal")
+                context.getDatabasePath("busstops8.db-journal"),
+                context.getDatabasePath("busstops10.db"),
+                context.getDatabasePath("busstops10.db-journal")
             ).forEach { it.delete() }
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -42,8 +42,8 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemServiceC
  */
 class ServicesChooserAdapter(
     context: Context,
-    private val clickListener: OnServiceClickedListener)
-    : ListAdapter<UiService, ServiceViewHolder>(ItemEquator()) {
+    private val clickListener: OnServiceClickedListener
+) : ListAdapter<UiService, ServiceViewHolder>(ItemEquator()) {
 
     private val inflater = LayoutInflater.from(context)
 
@@ -54,7 +54,8 @@ class ServicesChooserAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         ServiceViewHolder(
             ListItemServiceChooserServiceBinding.inflate(inflater, parent, false),
-            clickListener)
+            clickListener
+        )
 
     override fun onBindViewHolder(holder: ServiceViewHolder, position: Int) {
         onBindViewHolder(holder, position, emptyList())
@@ -63,13 +64,14 @@ class ServicesChooserAdapter(
     override fun onBindViewHolder(
         holder: ServiceViewHolder,
         position: Int,
-        payloads: List<Any>) {
+        payloads: List<Any>
+    ) {
         val oldItem = payloads.firstOrNull() as? UiService
         holder.populate(oldItem, getItem(position))
     }
 
     override fun getItemId(position: Int) =
-        getItem(position)?.serviceName?.hashCode()?.toLong() ?: -1L
+        getItem(position)?.serviceDescriptor?.hashCode()?.toLong() ?: -1L
 
     /**
      * This is used to compare [UiService]s to determine recycler changes.
@@ -77,7 +79,7 @@ class ServicesChooserAdapter(
     private class ItemEquator : DiffUtil.ItemCallback<UiService>() {
 
         override fun areItemsTheSame(oldItem: UiService, newItem: UiService) =
-            oldItem.serviceName == newItem.serviceName
+            oldItem.serviceDescriptor == newItem.serviceDescriptor
 
         override fun areContentsTheSame(oldItem: UiService, newItem: UiService) =
             oldItem == newItem

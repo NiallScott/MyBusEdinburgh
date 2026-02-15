@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -61,11 +61,11 @@ internal class RemoveFavouriteStopViewModel @Inject constructor(
      * This is called when the user has confirmed they wish to remove the favourite stop.
      */
     fun onUserConfirmRemoval() {
-        arguments.stopCode?.ifEmpty { null }?.let { stopCode ->
+        arguments.stopIdentifier?.let { stopIdentifier ->
             // Uses the application CoroutineScope as the Dialog dismisses immediately, and we need
             // this task to finish. Fire and forget is fine here.
             applicationCoroutineScope.launch(defaultDispatcher) {
-                favouritesRepository.removeFavouriteStop(stopCode = stopCode)
+                favouritesRepository.removeFavouriteStop(stopIdentifier = stopIdentifier)
             }
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,6 +43,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.os.BundleCompat
 import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -59,6 +60,12 @@ import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.ui.RequiresContentPadding
 import uk.org.rivernile.android.bustracker.core.bundle.getParcelableCompat
 import uk.org.rivernile.android.bustracker.core.bundle.getSerializableCompat
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableServiceDescriptorList
+import uk.org.rivernile.android.bustracker.core.domain.toStopIdentifier
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
@@ -81,7 +88,7 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
 
     companion object {
 
-        private const val ARG_STOP_CODE = "stopCode"
+        private const val ARG_STOP_IDENTIFIER = "stopIdentifier"
         private const val ARG_LOCATION = "location"
 
         private const val DIALOG_SERVICES_CHOOSER = "dialogServicesChooser"
@@ -98,13 +105,13 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
          * Create a new instance of [BusStopMapFragment], specifying the initially selected stop
          * code.
          *
-         * @param stopCode The initially selected stop code.
+         * @param stopIdentifier The initially selected stop.
          * @return A new instance of [BusStopMapFragment].
          */
-        fun newInstance(stopCode: String?) = BusStopMapFragment().apply {
-            stopCode?.ifBlank { null }?.let {
+        fun newInstance(stopIdentifier: ParcelableStopIdentifier?) = BusStopMapFragment().apply {
+            stopIdentifier?.let {
                 arguments = Bundle().apply {
-                    putString(ARG_STOP_CODE, it)
+                    putParcelable(ARG_STOP_IDENTIFIER, it)
                 }
             }
         }
@@ -166,8 +173,11 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
         if (savedInstanceState == null) {
             arguments?.let { args ->
                 when {
-                    args.containsKey(ARG_STOP_CODE) ->
-                        args.getString(ARG_STOP_CODE)?.let(viewModel::showStop)
+                    args.containsKey(ARG_STOP_IDENTIFIER) ->
+                        args.getParcelableCompat<ParcelableStopIdentifier>(ARG_STOP_IDENTIFIER)
+                            ?.let {
+                                viewModel.showStop(it.toStopIdentifier())
+                            }
                     args.containsKey(ARG_LOCATION) ->
                         args.getParcelableCompat<UiLatLon>(ARG_LOCATION)
                                 ?.let(viewModel::showLocation)
@@ -208,8 +218,13 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
                 ServicesChooserDialogFragment.REQUEST_KEY,
                 viewLifecycleOwner
             ) { _, result ->
-                val selectedServices = result
-                    .getStringArrayList(ServicesChooserDialogFragment.RESULT_CHOSEN_SERVICES)
+                val selectedServices = BundleCompat
+                    .getParcelableArrayList(
+                        result,
+                        ServicesChooserDialogFragment.RESULT_CHOSEN_SERVICES,
+                        ParcelableServiceDescriptor::class.java
+                    )
+
                 viewModel.onServicesSelected(selectedServices)
         }
 
@@ -313,14 +328,14 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
     }
 
     /**
-     * This should be called by the hosting [android.app.Activity] when a new stop code has been
-     * selected. For example, the hosting [android.app.Activity] may receive a call to
-     * [android.app.Activity.onNewIntent]. Set the newly supplied stop code here in this case.
+     * This should be called by the hosting [android.app.Activity] when a new stop identifier has
+     * been selected. For example, the hosting [android.app.Activity] may receive a call to
+     * [android.app.Activity.onNewIntent]. Set the newly supplied stop identifier here in this case.
      *
-     * @param stopCode The new stop code.
+     * @param stopIdentifier The new stop identifier.
      */
-    fun onNewStopCode(stopCode: String) {
-        viewModel.onStopSearchResult(stopCode)
+    fun onNewStopIdentifier(stopIdentifier: StopIdentifier) {
+        viewModel.onStopSearchResult(stopIdentifier)
     }
 
     /**
@@ -487,7 +502,7 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
 
             mapStyleApplicator.applyMapStyle(context, this)
 
-            ViewCompat.setOnApplyWindowInsetsListener(viewBinding.mapView) { view, windowInsets ->
+            ViewCompat.setOnApplyWindowInsetsListener(viewBinding.mapView) { _, windowInsets ->
                 val insets = windowInsets.getInsets(
                     WindowInsetsCompat.Type.systemBars() + WindowInsetsCompat.Type.displayCutout()
                 )
@@ -661,14 +676,14 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
     /**
      * Handle a request to show the map marker bubble.
      *
-     * @param stopCode The stop code to show the marker bubble for.
+     * @param stopIdentifier The stop to show the marker bubble for.
      */
-    private fun handleShowMapMarkerInfoWindow(stopCode: String?) {
+    private fun handleShowMapMarkerInfoWindow(stopIdentifier: StopIdentifier?) {
         val markers = clusterManager?.markerCollection?.markers ?: return
 
-        stopCode?.let { sc ->
+        stopIdentifier?.let { sc ->
             markers.firstOrNull {
-                (it.tag as? UiStopMarker)?.stopCode == sc
+                (it.tag as? UiStopMarker)?.stopIdentifier == sc
             }?.showInfoWindow()
         } ?: run {
             markers.forEach {
@@ -682,11 +697,11 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
      *
      * @param selectedServices The existing selected services.
      */
-    private fun showServicesChooser(selectedServices: List<String>?) {
+    private fun showServicesChooser(selectedServices: List<ServiceDescriptor>?) {
         ServicesChooserParams
             .AllServices(
                 R.string.busstopmapfragment_service_chooser_title,
-                selectedServices
+                selectedServices?.toParcelableServiceDescriptorList()
             )
             .let {
                 ServicesChooserDialogFragment

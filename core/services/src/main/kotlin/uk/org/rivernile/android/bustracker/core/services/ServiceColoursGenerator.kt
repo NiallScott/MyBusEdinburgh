@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,14 +31,14 @@ package uk.org.rivernile.android.bustracker.core.services
  *
  * @author Niall Scott
  */
-interface ServiceColoursGenerator {
+public interface ServiceColoursGenerator {
 
     /**
-     * Given a [serviceColour] (the service's primary colour), generate a [ServiceColours] instance
-     * with complimentary colours.
+     * Given a [primaryColour], generate the colour suitable for laying text upon this colour.
      *
-     * @param serviceColour The colour of the service (its primary colour).
-     * @return The generated [ServiceColours], or `null` if [serviceColour] is `null`.
+     * @param primaryColour The primary colour of the service.
+     * @return The generated colour suitable for paying text upon the primary colour. May return
+     * `null` if a suitable colour cannot be generated.
      */
-    fun generateServiceColours(serviceColour: Int?): ServiceColours?
+    public fun generateColourOnPrimary(primaryColour: Int): Int?
 }

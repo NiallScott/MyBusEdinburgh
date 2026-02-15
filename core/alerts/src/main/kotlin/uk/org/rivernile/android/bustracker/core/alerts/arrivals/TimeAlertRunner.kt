@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.alerts.arrivals
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
@@ -35,7 +36,6 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import javax.inject.Inject
-import kotlin.coroutines.coroutineContext
 
 /**
  * This class runs checks of the arrival alerts on a time period. While running, this runner will
@@ -76,7 +76,7 @@ public class TimeAlertRunner @Inject internal constructor(
      */
     private suspend fun runCheck() {
         while (true) {
-            coroutineContext.ensureActive()
+            currentCoroutineContext().ensureActive()
 
             checkTimesTask.checkTimes()
             delay(CHECK_TIMES_INTERVAL_MILLIS)

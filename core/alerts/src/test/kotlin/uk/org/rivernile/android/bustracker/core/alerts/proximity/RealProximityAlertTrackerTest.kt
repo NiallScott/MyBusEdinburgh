@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,12 +29,15 @@ package uk.org.rivernile.android.bustracker.core.alerts.proximity
 import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.alerts.ProximityAlert
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopLocation
+import uk.org.rivernile.android.bustracker.core.busstops.FakeBusStopsRepository
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopLocation
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.time.FakeTimeUtils
 import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
+import kotlin.time.Instant
 
 /**
  * Tests for [ProximityAlertTracker].
@@ -50,11 +53,16 @@ class RealProximityAlertTrackerTest {
 
     @Test
     fun trackProximityAlertWithNoLocationInBusStopDaoDoesNotAddGeofence() = runTest {
-        val alert = ProximityAlert(1, 101L, "123456", 50)
+        val alert = ProximityAlert(
+            id = 1,
+            timeAdded = Instant.fromEpochMilliseconds(101L),
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            distanceFromMeters = 50
+        )
         val tracker = createProximityAlertTracker(
             busStopsRepository = FakeBusStopsRepository(
                 onGetStopLocation = {
-                    assertEquals("123456", it)
+                    assertEquals("123456".toNaptanStopIdentifier(), it)
                     null
                 }
             ),
@@ -68,12 +76,17 @@ class RealProximityAlertTrackerTest {
 
     @Test
     fun trackProximityAlertOutwithTimeRangeDoesNotAddGeofence() = runTest {
-        val alert = ProximityAlert(1, 100L, "123456", 50)
+        val alert = ProximityAlert(
+            id = 1,
+            timeAdded = Instant.fromEpochMilliseconds(100L),
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            distanceFromMeters = 50
+        )
         val location = FakeStopLocation(1.0, 2.0)
         val tracker = createProximityAlertTracker(
             busStopsRepository = FakeBusStopsRepository(
                 onGetStopLocation = {
-                    assertEquals("123456", it)
+                    assertEquals("123456".toNaptanStopIdentifier(), it)
                     location
                 }
             ),
@@ -90,13 +103,18 @@ class RealProximityAlertTrackerTest {
 
     @Test
     fun trackProximityAlertWithinTimeRangeAddsGeofence() = runTest {
-        val alert = ProximityAlert(1, 100L, "123456", 50)
+        val alert = ProximityAlert(
+            id = 1,
+            timeAdded = Instant.fromEpochMilliseconds(100L),
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            distanceFromMeters = 50
+        )
         val location = FakeStopLocation(1.0, 2.0)
         var addGeofenceInvocationCount = 0
         val tracker = createProximityAlertTracker(
             busStopsRepository = FakeBusStopsRepository(
                 onGetStopLocation = {
-                    assertEquals("123456", it)
+                    assertEquals("123456".toNaptanStopIdentifier(), it)
                     location
                 }
             ),

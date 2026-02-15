@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.ui.deeplinks
 
 import android.content.Intent
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
  * A factory which creates [Intent]s for deep-linking to bus times.
@@ -36,10 +37,10 @@ import android.content.Intent
 public interface BusTimesIntentFactory {
 
     /**
-     * Create a new [Intent] which deep-links to show bus times for a given [stopCode].
+     * Create a new [Intent] which deep-links to show bus times for a given [stopIdentifier].
      *
-     * @param stopCode The stop code to show times for.
+     * @param stopIdentifier The stop to show times for.
      * @return An [Intent] which deep-links to show times.
      */
-    public fun createBusTimesIntent(stopCode: String): Intent
+    public fun createBusTimesIntent(stopIdentifier: StopIdentifier): Intent
 }

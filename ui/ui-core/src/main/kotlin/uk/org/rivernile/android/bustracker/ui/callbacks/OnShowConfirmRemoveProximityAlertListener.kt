@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.callbacks
 
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+
 /**
  * This listener is used to send callbacks from `Fragment`s to [android.app.Activity]s to confirm
  * with the user that they wish to remove an active proximity alert.
@@ -38,7 +40,7 @@ public interface OnShowConfirmRemoveProximityAlertListener {
      * This is called when it should be confirmed with the user that they want to remove an active
      * proximity alert.
      *
-     * @param stopCode The stop code to remove the proximity alert for.
+     * @param stopIdentifier The stop to remove the proximity alert for.
      */
-    public fun onShowConfirmRemoveProximityAlert(stopCode: String)
+    public fun onShowConfirmRemoveProximityAlert(stopIdentifier: StopIdentifier)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,8 @@
 package uk.org.rivernile.android.bustracker.core.services
 
 import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
  * A fake [ServicesRepository] to aid with testing.
@@ -34,26 +36,28 @@ import kotlinx.coroutines.flow.Flow
  * @author Niall Scott
  */
 class FakeServicesRepository(
-    private val onGetColoursForServicesFlow: (Set<String>?) -> Flow<Map<String, ServiceColours>?> =
+    private val onGetColoursForServicesFlow:
+        (Set<ServiceDescriptor>?) -> Flow<Map<ServiceDescriptor, ServiceColours>?> =
         { throw NotImplementedError() },
-    private val onGetServiceDetailsFlow: (String) -> Flow<List<ServiceDetails>?> =
+    private val onGetServiceDetailsFlow: (StopIdentifier) -> Flow<List<ServiceDetails>?> =
         { throw NotImplementedError() },
     private val onAllServiceNamesWithColourFlow: () -> Flow<List<ServiceWithColour>?> =
         { throw NotImplementedError() },
-    private val onGetServiceNamesWithColourFlow: (String) -> Flow<List<ServiceWithColour>?> =
+    private val onGetServiceNamesWithColourFlow: (StopIdentifier) -> Flow<List<ServiceWithColour>?> =
         { throw NotImplementedError() },
     private val onHasServicesFlow: () -> Flow<Boolean> = { throw NotImplementedError() }
 ) : ServicesRepository {
 
-    override fun getColoursForServicesFlow(services: Set<String>?) =
-        onGetColoursForServicesFlow(services)
+    override fun getColoursForServicesFlow(serviceDescriptors: Set<ServiceDescriptor>?) =
+        onGetColoursForServicesFlow(serviceDescriptors)
 
-    override fun getServiceDetailsFlow(stopCode: String) = onGetServiceDetailsFlow(stopCode)
+    override fun getServiceDetailsFlow(stopIdentifier: StopIdentifier) =
+        onGetServiceDetailsFlow(stopIdentifier)
 
     override val allServiceNamesWithColourFlow get() = onAllServiceNamesWithColourFlow()
 
-    override fun getServiceNamesWithColourFlow(stopCode: String) =
-        onGetServiceNamesWithColourFlow(stopCode)
+    override fun getServiceNamesWithColourFlow(stopIdentifier: StopIdentifier) =
+        onGetServiceNamesWithColourFlow(stopIdentifier)
 
     override val hasServicesFlow get() = onHasServicesFlow()
 }

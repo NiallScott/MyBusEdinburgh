@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,11 +28,10 @@ package uk.org.rivernile.android.bustracker.core.endpoints.api.json
 
 import kotlinx.serialization.SerializationException
 import okio.IOException
-import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ForInternalApiSchemaName
+import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ForInternalApiSchemaVersion
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
-import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiKeyGenerator
-import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersionResponse
+import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ForInternalApiAppName
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -42,16 +41,16 @@ import javax.net.SocketFactory
  * This class represents the JSON version of the [ApiEndpoint] that connects over HTTP(S).
  *
  * @param apiServiceFactory An implementation to retrieve instances of [ApiService].
- * @param apiKeyGenerator An implementation to generate API keys.
- * @param schemaType The schema type.
+ * @param appName The name of the app/schema to get database version information for.
+ * @param schemaVersion The version of the schema to get database information for.
  * @param exceptionLogger Used to report exceptions.
  * @author Niall Scott
  */
 @Singleton
 internal class JsonApiEndpoint @Inject constructor(
     private val apiServiceFactory: ApiServiceFactory,
-    private val apiKeyGenerator: ApiKeyGenerator,
-    @param:ForInternalApiSchemaName private val schemaType: String,
+    @param:ForInternalApiAppName private val appName: String,
+    @param:ForInternalApiSchemaVersion private val schemaVersion: Int,
     private val exceptionLogger: ExceptionLogger
 ) : ApiEndpoint {
 
@@ -59,13 +58,35 @@ internal class JsonApiEndpoint @Inject constructor(
         socketFactory: SocketFactory?
     ): DatabaseVersionResponse {
         return try {
-            val response = apiServiceFactory.getApiInstance(socketFactory)
-                .getDatabaseVersion(apiKeyGenerator.generateHashedApiKey(), schemaType)
+            val response = apiServiceFactory
+                .getApiInstance(socketFactory)
+                .getDatabaseVersion(
+                    appName = appName,
+                    schemaVersion = schemaVersion
+                )
 
             if (response.isSuccessful) {
-                mapToDatabaseVersion(response.body())?.let {
-                    DatabaseVersionResponse.Success(it)
-                } ?: DatabaseVersionResponse.Error.ServerError
+                val databaseVersion = response.body()
+
+                databaseVersion
+                    ?.takeIf {
+                        it.verify(
+                            expectedSchemaName = appName,
+                            expectedSchemaVersionCode = schemaVersion
+                        )
+                    }
+                    ?.toDatabaseVersionOrNull()
+                    ?.let {
+                        DatabaseVersionResponse.Success(it)
+                    }
+                    ?: run {
+                        exceptionLogger.log(
+                            Throwable(
+                                "Unable to accept database version data. Data = $databaseVersion"
+                            )
+                        )
+                        DatabaseVersionResponse.Error.ServerError
+                    }
             } else {
                 DatabaseVersionResponse.Error.ServerError
             }
@@ -75,29 +96,6 @@ internal class JsonApiEndpoint @Inject constructor(
         } catch (e: SerializationException) {
             exceptionLogger.log(e)
             DatabaseVersionResponse.Error.ServerError
-        }
-    }
-
-    /**
-     * Map a [JsonDatabaseVersion] to a [DatabaseVersion]. Returns `null` when the input is `null`.
-     *
-     * @param jsonDatabaseVersion The JSON representation of the database version.
-     * @return A [DatabaseVersion] of the mapped JSON, or `null` if the root object or expected
-     * fields are `null`.
-     */
-    private fun mapToDatabaseVersion(jsonDatabaseVersion: JsonDatabaseVersion?): DatabaseVersion? {
-        return jsonDatabaseVersion?.let {
-            val schemaVersion = it.schemaVersion ?: return null
-            val topologyId = it.topologyId ?: return null
-            val databaseUrl = it.databaseUrl ?: return null
-            val checksum = it.checksum ?: return null
-
-            DatabaseVersion(
-                schemaVersion,
-                topologyId,
-                databaseUrl,
-                checksum
-            )
         }
     }
 }

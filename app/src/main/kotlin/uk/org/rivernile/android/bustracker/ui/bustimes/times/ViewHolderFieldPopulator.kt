@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,6 +30,7 @@ import android.view.View
 import android.widget.TextView
 import uk.org.rivernile.edinburghbustracker.android.R
 import java.text.DateFormat
+import java.util.Date
 import javax.inject.Inject
 
 /**
@@ -89,7 +90,8 @@ class ViewHolderFieldPopulator @Inject constructor() {
             if (!vehicle.isDiverted) {
                 val minutes = vehicle.departureMinutes
                 val timeToDisplay = when {
-                    minutes > MINUTES_CUTOFF -> busTimeFormat.format(vehicle.departureTime)
+                    minutes > MINUTES_CUTOFF -> busTimeFormat
+                        .format(Date(vehicle.departureTime.toEpochMilliseconds()))
                     minutes < DUE_CUTOFF -> textView.context.getString(R.string.bustimes_due)
                     else -> minutes.toString()
                 }

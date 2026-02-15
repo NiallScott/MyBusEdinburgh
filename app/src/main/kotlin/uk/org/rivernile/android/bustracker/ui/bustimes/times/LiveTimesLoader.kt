@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import javax.inject.Inject
 
@@ -80,11 +81,11 @@ class LiveTimesLoader @Inject constructor(
      */
     private val combinedArgumentsFlow get() =
         combine(
-            arguments.stopCodeFlow,
+            arguments.stopIdentifierFlow,
             preferenceRepository.liveTimesNumberOfDeparturesFlow,
             refreshController.refreshTriggerFlow
-        ) { stopCode, numberOfDepartures, _ ->
-            LoadParams(stopCode, numberOfDepartures)
+        ) { stopIdentifier, numberOfDepartures, _ ->
+            LoadParams(stopIdentifier, numberOfDepartures)
         }
 
     /**
@@ -93,7 +94,7 @@ class LiveTimesLoader @Inject constructor(
      * @param params The parameters to load live times with.
      * @return A [Flow] of [UiResult] based upon loading the live times.
      */
-    private fun loadLiveTimes(params: LoadParams) = params.stopCode?.let {
+    private fun loadLiveTimes(params: LoadParams) = params.stopIdentifier?.let {
         liveTimesRetriever.getLiveTimesFlow(it, params.numberOfDepartures)
     } ?: flowOf(UiResult.Error(Long.MAX_VALUE, ErrorType.NO_STOP_CODE))
 
@@ -101,12 +102,12 @@ class LiveTimesLoader @Inject constructor(
      * This data class stores the live times loading parameters as it flows through the [Flow]
      * operators.
      *
-     * @param stopCode The stop code. This can be `null`, but if it is, expect the [Flow] to produce
-     * an error.
+     * @param stopIdentifier The stop identifier. This can be `null`, but if it is, expect the
+     * [Flow] to produce an error.
      * @param numberOfDepartures The number of departures per service.
      */
     private data class LoadParams(
-        val stopCode: String?,
+        val stopIdentifier: StopIdentifier?,
         val numberOfDepartures: Int
     )
 }

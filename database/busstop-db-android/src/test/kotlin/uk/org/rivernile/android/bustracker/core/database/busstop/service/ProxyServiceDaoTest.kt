@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabase
 import uk.org.rivernile.android.bustracker.core.database.busstop.FakeBusStopDatabase
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -48,14 +50,26 @@ class ProxyServiceDaoTest {
     fun allServiceNamesWithColourFlowRespondsToDatabaseOpenStatus() = runTest {
         val first = listOf(
             FakeServiceWithColour(
-                name = "1",
-                colour = 100
+                descriptor = FakeServiceDescriptor(
+                    serviceName = "1",
+                    operatorCode = "TEST"
+                ),
+                colours = FakeServiceColours(
+                    colourPrimary = 100,
+                    colourOnPrimary = 101
+                )
             )
         )
         val second = listOf(
             FakeServiceWithColour(
-                name = "2",
-                colour = 200
+                descriptor = FakeServiceDescriptor(
+                    serviceName = "2",
+                    operatorCode = "TEST"
+                ),
+                colours = FakeServiceColours(
+                    colourPrimary = 200,
+                    colourOnPrimary = 201
+                )
             )
         )
         val flows = ArrayDeque(
@@ -87,14 +101,26 @@ class ProxyServiceDaoTest {
     fun getServiceNamesWithColourFlowRespondsToDatabaseOpenStatus() = runTest {
         val first = listOf(
             FakeServiceWithColour(
-                name = "1",
-                colour = 100
+                descriptor = FakeServiceDescriptor(
+                    serviceName = "1",
+                    operatorCode = "TEST"
+                ),
+                colours = FakeServiceColours(
+                    colourPrimary = 100,
+                    colourOnPrimary = 101
+                )
             )
         )
         val second = listOf(
             FakeServiceWithColour(
-                name = "2",
-                colour = 200
+                descriptor = FakeServiceDescriptor(
+                    serviceName = "2",
+                    operatorCode = "TEST"
+                ),
+                colours = FakeServiceColours(
+                    colourPrimary = 200,
+                    colourOnPrimary = 201
+                )
             )
         )
         val flows = ArrayDeque(
@@ -149,8 +175,24 @@ class ProxyServiceDaoTest {
 
     @Test
     fun getColoursForServicesFlowRespondsToDatabaseOpenStatus() = runTest {
-        val first = mapOf("1" to 100)
-        val second = mapOf("2" to 200)
+        val first = mapOf<ServiceDescriptor, ServiceColours>(
+            FakeServiceDescriptor(
+                serviceName = "1",
+                operatorCode = "TEST"
+            ) to FakeServiceColours(
+                colourPrimary = 100,
+                colourOnPrimary = 101
+            )
+        )
+        val second = mapOf<ServiceDescriptor, ServiceColours>(
+            FakeServiceDescriptor(
+                serviceName = "2",
+                operatorCode = "TEST"
+            ) to FakeServiceColours(
+                colourPrimary = 200,
+                colourOnPrimary = 201
+            )
+        )
         val flows = ArrayDeque(
             listOf(
                 flowOf(first),
@@ -183,16 +225,28 @@ class ProxyServiceDaoTest {
     fun getServiceDetailsFlowRespondsToDatabaseOpenStatus() = runTest {
         val first = listOf(
             FakeServiceDetails(
-                name = "1",
+                descriptor = FakeServiceDescriptor(
+                    serviceName = "1",
+                    operatorCode = "TEST"
+                ),
                 description = "Description 1",
-                colour = 100
+                colours = FakeServiceColours(
+                    colourPrimary = 100,
+                    colourOnPrimary = 101
+                )
             )
         )
         val second = listOf(
             FakeServiceDetails(
-                name = "2",
+                descriptor = FakeServiceDescriptor(
+                    serviceName = "2",
+                    operatorCode = "TEST"
+                ),
                 description = "Description 2",
-                colour = 200
+                colours = FakeServiceColours(
+                    colourPrimary = 200,
+                    colourOnPrimary = 201
+                )
             )
         )
         val flows = ArrayDeque(

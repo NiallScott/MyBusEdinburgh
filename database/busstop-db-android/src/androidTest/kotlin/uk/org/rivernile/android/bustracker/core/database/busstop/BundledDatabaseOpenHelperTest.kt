@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -52,7 +52,7 @@ class BundledDatabaseOpenHelperTest {
     companion object {
 
         private const val DB_NAME = "testing-busstop-database"
-        private const val ASSET_PREPACKAGED_DATABASE_PATH = "busstops10.db"
+        private const val ASSET_PREPACKAGED_DATABASE_PATH = "busstops23.db"
     }
 
     @get:Rule
@@ -108,9 +108,9 @@ class BundledDatabaseOpenHelperTest {
 
         openHelper.readableDatabase.use { db ->
             db.query("""
-                SELECT updateTS 
-                FROM database_info 
-                ORDER BY updateTS DESC 
+                SELECT update_timestamp
+                FROM database_info
+                ORDER BY update_timestamp DESC
                 LIMIT 1
             """.trimIndent())
                 .use {
@@ -135,9 +135,9 @@ class BundledDatabaseOpenHelperTest {
 
         openHelper.readableDatabase.use { db ->
             db.query("""
-                SELECT updateTS 
-                FROM database_info 
-                ORDER BY updateTS DESC 
+                SELECT update_timestamp
+                FROM database_info
+                ORDER BY update_timestamp DESC
                 LIMIT 1
             """.trimIndent())
                 .use {
@@ -165,9 +165,9 @@ class BundledDatabaseOpenHelperTest {
 
         openHelper.readableDatabase.use { db ->
             db.query("""
-                SELECT updateTS 
-                FROM database_info 
-                ORDER BY updateTS DESC 
+                SELECT update_timestamp
+                FROM database_info
+                ORDER BY update_timestamp DESC
                 LIMIT 1
             """.trimIndent())
                 .use {
@@ -208,9 +208,9 @@ class BundledDatabaseOpenHelperTest {
 
         openHelper.readableDatabase.use { db ->
             db.query("""
-                SELECT updateTS 
-                FROM database_info 
-                ORDER BY updateTS DESC 
+                SELECT update_timestamp
+                FROM database_info
+                ORDER BY update_timestamp DESC
                 LIMIT 1
             """.trimIndent())
                 .use {
@@ -230,7 +230,7 @@ class BundledDatabaseOpenHelperTest {
     }
 
     @Test
-    fun extractsDatabaseFromAssetsWhenDatabaseHasEmptyInfoTableV1() {
+    fun extractsDatabaseFromAssetsWhenDatabaseHasEmptyInfoTable() {
         val expectedUpdateTimestamp = context
             .getString(R.string.asset_db_version)
             .toLong()
@@ -240,10 +240,9 @@ class BundledDatabaseOpenHelperTest {
             .callback(object : SupportSQLiteOpenHelper.Callback(1) {
                 override fun onCreate(db: SupportSQLiteDatabase) {
                     db.execSQL("""
-                        CREATE TABLE database_info (
-                            _id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-                            current_topo_id TEXT, 
-                            updateTS LONG)
+                        CREATE TABLE IF NOT EXISTS database_info (
+                            id INTEGER PRIMARY KEY,
+                            update_timestamp LONG NOT NULL)
                     """.trimIndent())
                 }
 
@@ -258,9 +257,9 @@ class BundledDatabaseOpenHelperTest {
 
         openHelper.readableDatabase.use { db ->
             db.query("""
-                SELECT updateTS 
-                FROM database_info 
-                ORDER BY updateTS DESC 
+                SELECT update_timestamp
+                FROM database_info
+                ORDER BY update_timestamp DESC
                 LIMIT 1
             """.trimIndent())
                 .use {
@@ -275,52 +274,7 @@ class BundledDatabaseOpenHelperTest {
     }
 
     @Test
-    fun extractsDatabaseFromAssetsWhenDatabaseHasEmptyInfoTableV2() {
-        val expectedUpdateTimestamp = context
-            .getString(R.string.asset_db_version)
-            .toLong()
-        val dbConfiguration = SupportSQLiteOpenHelper.Configuration
-            .builder(context)
-            .name(DB_NAME)
-            .callback(object : SupportSQLiteOpenHelper.Callback(2) {
-                override fun onCreate(db: SupportSQLiteDatabase) {
-                    db.execSQL("""
-                        CREATE TABLE IF NOT EXISTS database_info (
-                            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-                            topologyId TEXT, 
-                            updateTimestamp INTEGER NOT NULL)
-                    """.trimIndent())
-                }
-
-                override fun onUpgrade(
-                    db: SupportSQLiteDatabase,
-                    oldVersion: Int,
-                    newVersion: Int
-                ) = Unit
-            })
-            .build()
-        FrameworkSQLiteOpenHelperFactory().create(dbConfiguration).writableDatabase.close()
-
-        openHelper.readableDatabase.use { db ->
-            db.query("""
-                SELECT updateTS 
-                FROM database_info 
-                ORDER BY updateTS DESC 
-                LIMIT 1
-            """.trimIndent())
-                .use {
-                    assertEquals(1, it.count)
-                    assertTrue(it.moveToFirst())
-                    assertEquals(expectedUpdateTimestamp, it.getLong(0))
-                }
-
-            db.ensureExtractedDatabaseLooksSane()
-            assertEquals(2, db.version)
-        }
-    }
-
-    @Test
-    fun doesNotExtractDatabaseFromAssetsWhenNewerDatabaseIsPresentV1() {
+    fun doesNotExtractDatabaseFromAssetsWhenNewerDatabaseIsPresent() {
         val expectedUpdateTimestamp = context
             .getString(R.string.asset_db_version)
             .toLong() + 1L
@@ -330,68 +284,13 @@ class BundledDatabaseOpenHelperTest {
             .callback(object : SupportSQLiteOpenHelper.Callback(1) {
                 override fun onCreate(db: SupportSQLiteDatabase) {
                     db.execSQL("""
-                        CREATE TABLE database_info (
-                            _id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-                            current_topo_id TEXT, 
-                            updateTS LONG)
-                    """.trimIndent())
-                    db.execSQL("""
-                        INSERT INTO database_info (
-                            current_topo_id, updateTS)
-                        VALUES (
-                            'topoId', ?)
-                    """.trimIndent(), arrayOf(expectedUpdateTimestamp))
-                }
-
-                override fun onUpgrade(
-                    db: SupportSQLiteDatabase,
-                    oldVersion: Int,
-                    newVersion: Int
-                ) = Unit
-            })
-            .build()
-        FrameworkSQLiteOpenHelperFactory().create(dbConfiguration).writableDatabase.close()
-
-        openHelper.readableDatabase.use { db ->
-            db.query("""
-                SELECT updateTS 
-                FROM database_info 
-                ORDER BY updateTS DESC 
-                LIMIT 1
-            """.trimIndent())
-                .use {
-                    assertEquals(1, it.count)
-                    assertTrue(it.moveToFirst())
-                    assertEquals(expectedUpdateTimestamp, it.getLong(0))
-                }
-
-            assertEquals(2, db.version)
-        }
-
-        assertTrue(exceptionLogger.loggedThrowables.isEmpty())
-    }
-
-    @Test
-    fun doesNotExtractDatabaseFromAssetsWhenNewerDatabaseIsPresentV2() {
-        val expectedUpdateTimestamp = context
-            .getString(R.string.asset_db_version)
-            .toLong() + 1L
-        val dbConfiguration = SupportSQLiteOpenHelper.Configuration
-            .builder(context)
-            .name(DB_NAME)
-            .callback(object : SupportSQLiteOpenHelper.Callback(2) {
-                override fun onCreate(db: SupportSQLiteDatabase) {
-                    db.execSQL("""
                         CREATE TABLE IF NOT EXISTS database_info (
-                            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-                            topologyId TEXT, 
-                            updateTimestamp INTEGER NOT NULL)
+                            id INTEGER PRIMARY KEY,
+                            update_timestamp LONG NOT NULL)
                     """.trimIndent())
                     db.execSQL("""
-                        INSERT INTO database_info (
-                            topologyId, updateTimestamp)
-                        VALUES (
-                            'topoId', ?)
+                        INSERT INTO database_info (id, update_timestamp)
+                        VALUES (1, ?)
                     """.trimIndent(), arrayOf(expectedUpdateTimestamp))
                 }
 
@@ -406,9 +305,9 @@ class BundledDatabaseOpenHelperTest {
 
         openHelper.readableDatabase.use { db ->
             db.query("""
-                SELECT updateTimestamp 
-                FROM database_info 
-                ORDER BY updateTimestamp DESC 
+                SELECT update_timestamp
+                FROM database_info
+                ORDER BY update_timestamp DESC
                 LIMIT 1
             """.trimIndent())
                 .use {
@@ -424,7 +323,7 @@ class BundledDatabaseOpenHelperTest {
     }
 
     private fun SupportSQLiteDatabase.ensureExtractedDatabaseLooksSane() {
-        query("SELECT COUNT(*) FROM bus_stops").use {
+        query("SELECT COUNT(*) FROM operator").use {
             assertTrue(it.moveToFirst())
             assertTrue(it.getInt(0) > 1)
         }
@@ -434,17 +333,17 @@ class BundledDatabaseOpenHelperTest {
             assertTrue(it.getInt(0) > 1)
         }
 
-        query("SELECT COUNT(*) FROM service_colour").use {
-            assertTrue(it.moveToFirst())
-            assertTrue(it.getInt(0) > 1)
-        }
-
         query("SELECT COUNT(*) FROM service_point").use {
             assertTrue(it.moveToFirst())
             assertTrue(it.getInt(0) > 1)
         }
 
-        query("SELECT COUNT(*) FROM service_stops").use {
+        query("SELECT COUNT(*) FROM service_stop").use {
+            assertTrue(it.moveToFirst())
+            assertTrue(it.getInt(0) > 1)
+        }
+
+        query("SELECT COUNT(*) FROM stop").use {
             assertTrue(it.moveToFirst())
             assertTrue(it.getInt(0) > 1)
         }

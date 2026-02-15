@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,10 +29,18 @@ plugins {
     `java-test-fixtures`
 }
 
+kotlin {
+    explicitApi()
+}
+
 dependencies {
 
+    implementation(project(":core:core-domain"))
     implementation(project(":core:coroutines"))
 
     // Dependency injection
     implementation(libs.javax.inject)
+
+    // Testing dependencies.
+    testFixturesImplementation(project(":core:core-domain"))
 }

@@ -29,6 +29,8 @@ package uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import kotlinx.coroutines.test.runTest
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableNaptanStopIdentifier
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -41,47 +43,47 @@ import kotlin.test.assertNull
 class RealArgumentsTest {
 
     @Test
-    fun stopCodeIsNullByDefault() {
+    fun stopIdentifierIsNullByDefault() {
         val arguments = createArguments()
 
-        assertNull(arguments.stopCode)
+        assertNull(arguments.stopIdentifier)
     }
 
     @Test
-    fun stopCodeIsValueSetFromSavedStateHandle() {
+    fun stopIdentifierIsValueSetFromSavedStateHandle() {
         val arguments = createArguments(
             savedState = SavedStateHandle(
                 initialState = mapOf(
-                    ARG_STOP_CODE to "123456"
+                    ARG_STOP_IDENTIFIER to "123456".toParcelableNaptanStopIdentifier()
                 )
             )
         )
 
-        assertEquals("123456", arguments.stopCode)
+        assertEquals("123456".toNaptanStopIdentifier(), arguments.stopIdentifier)
     }
 
     @Test
-    fun stopCodeFlowEmitsNullByDefault() = runTest {
+    fun stopIdentifierFlowEmitsNullByDefault() = runTest {
         val arguments = createArguments()
 
-        arguments.stopCodeFlow.test {
+        arguments.stopIdentifierFlow.test {
             assertNull(awaitItem())
             ensureAllEventsConsumed()
         }
     }
 
     @Test
-    fun stopCodeFlowEmitsValueSetFromSavedStateHandle() = runTest {
+    fun stopIdentifierFlowEmitsValueSetFromSavedStateHandle() = runTest {
         val arguments = createArguments(
             savedState = SavedStateHandle(
                 initialState = mapOf(
-                    ARG_STOP_CODE to "123456"
+                    ARG_STOP_IDENTIFIER to "123456".toParcelableNaptanStopIdentifier()
                 )
             )
         )
 
-        arguments.stopCodeFlow.test {
-            assertEquals("123456", awaitItem())
+        arguments.stopIdentifierFlow.test {
+            assertEquals("123456".toNaptanStopIdentifier(), awaitItem())
             ensureAllEventsConsumed()
         }
     }

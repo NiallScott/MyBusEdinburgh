@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -42,6 +42,8 @@ import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
@@ -62,12 +64,15 @@ class StopDetailsFragment : Fragment() {
         /**
          * Create a new instance of this [Fragment].
          *
-         * @param stopCode The stop code this [Fragment] should show stop details for.
+         * @param stopIdentifier The stop this [Fragment] should show stop details for.
          * @return A new instance of this [Fragment].
          */
-        fun newInstance(stopCode: String?) = StopDetailsFragment().apply {
+        fun newInstance(stopIdentifier: StopIdentifier?) = StopDetailsFragment().apply {
             arguments = Bundle().apply {
-                putString(StopDetailsFragmentViewModel.STATE_STOP_CODE, stopCode)
+                putParcelable(
+                    StopDetailsFragmentViewModel.STATE_STOP_IDENTIFIER,
+                    stopIdentifier?.toParcelableStopIdentifier()
+                )
             }
         }
     }
@@ -251,8 +256,8 @@ class StopDetailsFragment : Fragment() {
          * This is called when the user wishes to see the stop map, with this stop being selected
          * by default.
          *
-         * @param stopCode The stop the map should show.
+         * @param stopIdentifier The stop the map should show.
          */
-        fun showMapForStop(stopCode: String)
+        fun showMapForStop(stopIdentifier: StopIdentifier)
     }
 }

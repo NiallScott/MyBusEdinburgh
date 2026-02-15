@@ -33,6 +33,8 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import kotlinx.collections.immutable.persistentListOf
 import org.junit.Rule
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.shortcuts.FavouriteStopShortcut
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import kotlin.test.Test
@@ -80,7 +82,7 @@ class FavouriteStopsScreenKtTest {
                         content = UiContent.Content(
                             favouriteStops = persistentListOf(
                                 UiFavouriteStop(
-                                    stopCode = "123456",
+                                    stopIdentifier = "123456".toNaptanStopIdentifier(),
                                     savedName = "Saved Name",
                                     services = null,
                                     dropdownMenu = null
@@ -160,7 +162,9 @@ class FavouriteStopsScreenKtTest {
                 FavouriteStopsScreenWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Empty,
-                        action = UiAction.ShowStopData(stopCode = "123456")
+                        action = UiAction.ShowStopData(
+                            stopIdentifier = "123456".toNaptanStopIdentifier()
+                        )
                     ),
                     onShowStopData = null,
                     onActionLaunched = actionLaunchedCounter
@@ -173,14 +177,16 @@ class FavouriteStopsScreenKtTest {
 
     @Test
     fun showStopDataActionCallsLambdaThenMarksActionAsLaunched() {
-        val actionTracker = Tracker<String>()
+        val actionTracker = Tracker<StopIdentifier>()
         val actionLaunchedCounter = InvocationCounter()
         composeTestRule.setContent {
             MyBusTheme {
                 FavouriteStopsScreenWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Empty,
-                        action = UiAction.ShowStopData(stopCode = "123456")
+                        action = UiAction.ShowStopData(
+                            stopIdentifier = "123456".toNaptanStopIdentifier()
+                        )
                     ),
                     onShowStopData = actionTracker,
                     onActionLaunched = actionLaunchedCounter
@@ -189,7 +195,7 @@ class FavouriteStopsScreenKtTest {
         }
 
         assertEquals(
-            listOf("123456"),
+            listOf("123456".toNaptanStopIdentifier()),
             actionTracker.observedValues
         )
         assertEquals(1, actionLaunchedCounter.count)
@@ -203,7 +209,9 @@ class FavouriteStopsScreenKtTest {
                 FavouriteStopsScreenWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Empty,
-                        action = UiAction.ShowEditFavouriteStop(stopCode = "123456")
+                        action = UiAction.ShowEditFavouriteStop(
+                            stopIdentifier = "123456".toNaptanStopIdentifier()
+                        )
                     ),
                     onShowEditFavouriteStop = null,
                     onActionLaunched = actionLaunchedCounter
@@ -216,14 +224,16 @@ class FavouriteStopsScreenKtTest {
 
     @Test
     fun showEditFavouriteStopActionCallsLambdaThenMarksActionAsLaunched() {
-        val actionTracker = Tracker<String>()
+        val actionTracker = Tracker<StopIdentifier>()
         val actionLaunchedCounter = InvocationCounter()
         composeTestRule.setContent {
             MyBusTheme {
                 FavouriteStopsScreenWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Empty,
-                        action = UiAction.ShowEditFavouriteStop(stopCode = "123456")
+                        action = UiAction.ShowEditFavouriteStop(
+                            stopIdentifier = "123456".toNaptanStopIdentifier()
+                        )
                     ),
                     onShowEditFavouriteStop = actionTracker,
                     onActionLaunched = actionLaunchedCounter
@@ -232,7 +242,7 @@ class FavouriteStopsScreenKtTest {
         }
 
         assertEquals(
-            listOf("123456"),
+            listOf("123456".toNaptanStopIdentifier()),
             actionTracker.observedValues
         )
         assertEquals(1, actionLaunchedCounter.count)
@@ -246,7 +256,9 @@ class FavouriteStopsScreenKtTest {
                 FavouriteStopsScreenWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Empty,
-                        action = UiAction.ShowConfirmRemoveFavourite(stopCode = "123456")
+                        action = UiAction.ShowConfirmRemoveFavourite(
+                            stopIdentifier = "123456".toNaptanStopIdentifier()
+                        )
                     ),
                     onShowConfirmRemoveFavourite = null,
                     onActionLaunched = actionLaunchedCounter
@@ -259,14 +271,16 @@ class FavouriteStopsScreenKtTest {
 
     @Test
     fun showConfirmRemoveFavouriteActionCallsLambdaThenMarksActionAsLaunched() {
-        val actionTracker = Tracker<String>()
+        val actionTracker = Tracker<StopIdentifier>()
         val actionLaunchedCounter = InvocationCounter()
         composeTestRule.setContent {
             MyBusTheme {
                 FavouriteStopsScreenWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Empty,
-                        action = UiAction.ShowConfirmRemoveFavourite(stopCode = "123456")
+                        action = UiAction.ShowConfirmRemoveFavourite(
+                            stopIdentifier = "123456".toNaptanStopIdentifier()
+                        )
                     ),
                     onShowConfirmRemoveFavourite = actionTracker,
                     onActionLaunched = actionLaunchedCounter
@@ -275,7 +289,7 @@ class FavouriteStopsScreenKtTest {
         }
 
         assertEquals(
-            listOf("123456"),
+            listOf("123456".toNaptanStopIdentifier()),
             actionTracker.observedValues
         )
         assertEquals(1, actionLaunchedCounter.count)
@@ -289,7 +303,9 @@ class FavouriteStopsScreenKtTest {
                 FavouriteStopsScreenWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Empty,
-                        action = UiAction.ShowOnMap(stopCode = "123456")
+                        action = UiAction.ShowOnMap(
+                            stopIdentifier = "123456".toNaptanStopIdentifier()
+                        )
                     ),
                     onShowOnMap = null,
                     onActionLaunched = actionLaunchedCounter
@@ -302,14 +318,16 @@ class FavouriteStopsScreenKtTest {
 
     @Test
     fun showOnMapActionCallsLambdaThenMarksActionAsLaunched() {
-        val actionTracker = Tracker<String>()
+        val actionTracker = Tracker<StopIdentifier>()
         val actionLaunchedCounter = InvocationCounter()
         composeTestRule.setContent {
             MyBusTheme {
                 FavouriteStopsScreenWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Empty,
-                        action = UiAction.ShowOnMap(stopCode = "123456")
+                        action = UiAction.ShowOnMap(
+                            stopIdentifier = "123456".toNaptanStopIdentifier()
+                        )
                     ),
                     onShowOnMap = actionTracker,
                     onActionLaunched = actionLaunchedCounter
@@ -318,7 +336,7 @@ class FavouriteStopsScreenKtTest {
         }
 
         assertEquals(
-            listOf("123456"),
+            listOf("123456".toNaptanStopIdentifier()),
             actionTracker.observedValues
         )
         assertEquals(1, actionLaunchedCounter.count)
@@ -332,7 +350,9 @@ class FavouriteStopsScreenKtTest {
                 FavouriteStopsScreenWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Empty,
-                        action = UiAction.ShowAddArrivalAlert(stopCode = "123456")
+                        action = UiAction.ShowAddArrivalAlert(
+                            stopIdentifier = "123456".toNaptanStopIdentifier()
+                        )
                     ),
                     onShowAddArrivalAlert = null,
                     onActionLaunched = actionLaunchedCounter
@@ -345,14 +365,16 @@ class FavouriteStopsScreenKtTest {
 
     @Test
     fun showAddArrivalAlertActionCallsLambdaThenMarksActionAsLaunched() {
-        val actionTracker = Tracker<String>()
+        val actionTracker = Tracker<StopIdentifier>()
         val actionLaunchedCounter = InvocationCounter()
         composeTestRule.setContent {
             MyBusTheme {
                 FavouriteStopsScreenWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Empty,
-                        action = UiAction.ShowAddArrivalAlert(stopCode = "123456")
+                        action = UiAction.ShowAddArrivalAlert(
+                            stopIdentifier = "123456".toNaptanStopIdentifier()
+                        )
                     ),
                     onShowAddArrivalAlert = actionTracker,
                     onActionLaunched = actionLaunchedCounter
@@ -361,7 +383,7 @@ class FavouriteStopsScreenKtTest {
         }
 
         assertEquals(
-            listOf("123456"),
+            listOf("123456".toNaptanStopIdentifier()),
             actionTracker.observedValues
         )
         assertEquals(1, actionLaunchedCounter.count)
@@ -375,7 +397,9 @@ class FavouriteStopsScreenKtTest {
                 FavouriteStopsScreenWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Empty,
-                        action = UiAction.ShowConfirmRemoveArrivalAlert(stopCode = "123456")
+                        action = UiAction.ShowConfirmRemoveArrivalAlert(
+                            stopIdentifier = "123456".toNaptanStopIdentifier()
+                        )
                     ),
                     onShowConfirmRemoveArrivalAlert = null,
                     onActionLaunched = actionLaunchedCounter
@@ -388,14 +412,16 @@ class FavouriteStopsScreenKtTest {
 
     @Test
     fun showConfirmRemoveArrivalAlertActionCallsLambdaThenMarksActionAsLaunched() {
-        val actionTracker = Tracker<String>()
+        val actionTracker = Tracker<StopIdentifier>()
         val actionLaunchedCounter = InvocationCounter()
         composeTestRule.setContent {
             MyBusTheme {
                 FavouriteStopsScreenWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Empty,
-                        action = UiAction.ShowConfirmRemoveArrivalAlert(stopCode = "123456")
+                        action = UiAction.ShowConfirmRemoveArrivalAlert(
+                            stopIdentifier = "123456".toNaptanStopIdentifier()
+                        )
                     ),
                     onShowConfirmRemoveArrivalAlert = actionTracker,
                     onActionLaunched = actionLaunchedCounter
@@ -404,7 +430,7 @@ class FavouriteStopsScreenKtTest {
         }
 
         assertEquals(
-            listOf("123456"),
+            listOf("123456".toNaptanStopIdentifier()),
             actionTracker.observedValues
         )
         assertEquals(1, actionLaunchedCounter.count)
@@ -418,7 +444,9 @@ class FavouriteStopsScreenKtTest {
                 FavouriteStopsScreenWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Empty,
-                        action = UiAction.ShowAddProximityAlert(stopCode = "123456")
+                        action = UiAction.ShowAddProximityAlert(
+                            stopIdentifier = "123456".toNaptanStopIdentifier()
+                        )
                     ),
                     onShowAddProximityAlert = null,
                     onActionLaunched = actionLaunchedCounter
@@ -431,14 +459,16 @@ class FavouriteStopsScreenKtTest {
 
     @Test
     fun showAddProximityAlertAlertActionCallsLambdaThenMarksActionAsLaunched() {
-        val actionTracker = Tracker<String>()
+        val actionTracker = Tracker<StopIdentifier>()
         val actionLaunchedCounter = InvocationCounter()
         composeTestRule.setContent {
             MyBusTheme {
                 FavouriteStopsScreenWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Empty,
-                        action = UiAction.ShowAddProximityAlert(stopCode = "123456")
+                        action = UiAction.ShowAddProximityAlert(
+                            stopIdentifier = "123456".toNaptanStopIdentifier()
+                        )
                     ),
                     onShowAddProximityAlert = actionTracker,
                     onActionLaunched = actionLaunchedCounter
@@ -447,7 +477,7 @@ class FavouriteStopsScreenKtTest {
         }
 
         assertEquals(
-            listOf("123456"),
+            listOf("123456".toNaptanStopIdentifier()),
             actionTracker.observedValues
         )
         assertEquals(1, actionLaunchedCounter.count)
@@ -461,7 +491,9 @@ class FavouriteStopsScreenKtTest {
                 FavouriteStopsScreenWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Empty,
-                        action = UiAction.ShowConfirmRemoveProximityAlert(stopCode = "123456")
+                        action = UiAction.ShowConfirmRemoveProximityAlert(
+                            stopIdentifier = "123456".toNaptanStopIdentifier()
+                        )
                     ),
                     onShowConfirmRemoveProximityAlert = null,
                     onActionLaunched = actionLaunchedCounter
@@ -474,14 +506,16 @@ class FavouriteStopsScreenKtTest {
 
     @Test
     fun showConfirmRemoveProximityAlertAlertActionCallsLambdaThenMarksActionAsLaunched() {
-        val actionTracker = Tracker<String>()
+        val actionTracker = Tracker<StopIdentifier>()
         val actionLaunchedCounter = InvocationCounter()
         composeTestRule.setContent {
             MyBusTheme {
                 FavouriteStopsScreenWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Empty,
-                        action = UiAction.ShowConfirmRemoveProximityAlert(stopCode = "123456")
+                        action = UiAction.ShowConfirmRemoveProximityAlert(
+                            stopIdentifier = "123456".toNaptanStopIdentifier()
+                        )
                     ),
                     onShowConfirmRemoveProximityAlert = actionTracker,
                     onActionLaunched = actionLaunchedCounter
@@ -490,7 +524,7 @@ class FavouriteStopsScreenKtTest {
         }
 
         assertEquals(
-            listOf("123456"),
+            listOf("123456".toNaptanStopIdentifier()),
             actionTracker.observedValues
         )
         assertEquals(1, actionLaunchedCounter.count)
@@ -505,7 +539,7 @@ class FavouriteStopsScreenKtTest {
                     state = UiState(
                         content = UiContent.Empty,
                         action = UiAction.AddShortcut(
-                            stopCode = "123456",
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
                             savedName = "Saved Name"
                         )
                     ),
@@ -528,7 +562,7 @@ class FavouriteStopsScreenKtTest {
                     state = UiState(
                         content = UiContent.Empty,
                         action = UiAction.AddShortcut(
-                            stopCode = "123456",
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
                             savedName = "Saved Name"
                         )
                     ),
@@ -541,7 +575,7 @@ class FavouriteStopsScreenKtTest {
         assertEquals(
             listOf(
                 FavouriteStopShortcut(
-                    stopCode = "123456",
+                    stopIdentifier = "123456".toNaptanStopIdentifier(),
                     displayName = "Saved Name"
                 )
             ),
@@ -553,26 +587,29 @@ class FavouriteStopsScreenKtTest {
     @Composable
     private fun FavouriteStopsScreenWithStateWithDefaults(
         state: UiState,
-        onItemClicked: (String, String) -> Unit = { _, _ -> throw NotImplementedError() },
-        onOpenDropdownClicked: (String) -> Unit = { throw NotImplementedError() },
+        onItemClicked: (StopIdentifier, String) -> Unit = { _, _ -> throw NotImplementedError() },
+        onOpenDropdownClicked: (StopIdentifier) -> Unit = { throw NotImplementedError() },
         onDropdownMenuDismissed: () -> Unit = { throw NotImplementedError() },
-        onEditFavouriteNameClick: (String) -> Unit = { throw NotImplementedError() },
-        onRemoveFavouriteClick: (String) -> Unit = { throw NotImplementedError() },
-        onAddShortcutClick: (String, String) -> Unit = { _, _ -> throw NotImplementedError() },
-        onAddArrivalAlertClick: (String) -> Unit = { throw NotImplementedError() },
-        onRemoveArrivalAlertClick: (String) -> Unit = { throw NotImplementedError() },
-        onAddProximityAlertClick: (String) -> Unit = { throw NotImplementedError() },
-        onRemoveProximityAlertClick: (String) -> Unit = { throw NotImplementedError() },
-        onShowOnMapClick: (String) -> Unit = { throw NotImplementedError() },
+        onEditFavouriteNameClick: (StopIdentifier) -> Unit = { throw NotImplementedError() },
+        onRemoveFavouriteClick: (StopIdentifier) -> Unit = { throw NotImplementedError() },
+        onAddShortcutClick: (StopIdentifier, String) -> Unit =
+            { _, _ -> throw NotImplementedError() },
+        onAddArrivalAlertClick: (StopIdentifier) -> Unit = { throw NotImplementedError() },
+        onRemoveArrivalAlertClick: (StopIdentifier) -> Unit = { throw NotImplementedError() },
+        onAddProximityAlertClick: (StopIdentifier) -> Unit = { throw NotImplementedError() },
+        onRemoveProximityAlertClick: (StopIdentifier) -> Unit = { throw NotImplementedError() },
+        onShowOnMapClick: (StopIdentifier) -> Unit = { throw NotImplementedError() },
         onActionLaunched: () -> Unit = { throw NotImplementedError() },
-        onShowStopData: ((String) -> Unit)? = { throw NotImplementedError() },
-        onShowEditFavouriteStop: ((String) -> Unit)? = { throw NotImplementedError() },
-        onShowConfirmRemoveFavourite: ((String) -> Unit)? = { throw NotImplementedError() },
-        onShowOnMap: ((String) -> Unit)? = { throw NotImplementedError() },
-        onShowAddArrivalAlert: ((String) -> Unit)? = { throw NotImplementedError() },
-        onShowConfirmRemoveArrivalAlert: ((String) -> Unit)? = { throw NotImplementedError() },
-        onShowAddProximityAlert: ((String) -> Unit)? = { throw NotImplementedError() },
-        onShowConfirmRemoveProximityAlert: ((String) -> Unit)? = { throw NotImplementedError() },
+        onShowStopData: ((StopIdentifier) -> Unit)? = { throw NotImplementedError() },
+        onShowEditFavouriteStop: ((StopIdentifier) -> Unit)? = { throw NotImplementedError() },
+        onShowConfirmRemoveFavourite: ((StopIdentifier) -> Unit)? = { throw NotImplementedError() },
+        onShowOnMap: ((StopIdentifier) -> Unit)? = { throw NotImplementedError() },
+        onShowAddArrivalAlert: ((StopIdentifier) -> Unit)? = { throw NotImplementedError() },
+        onShowConfirmRemoveArrivalAlert: ((StopIdentifier) -> Unit)? =
+            { throw NotImplementedError() },
+        onShowAddProximityAlert: ((StopIdentifier) -> Unit)? = { throw NotImplementedError() },
+        onShowConfirmRemoveProximityAlert: ((StopIdentifier) -> Unit)? =
+            { throw NotImplementedError() },
         onAddShortcut: ((FavouriteStopShortcut) -> Unit)? = { throw NotImplementedError() }
     ) {
         FavouriteStopsScreenWithState(

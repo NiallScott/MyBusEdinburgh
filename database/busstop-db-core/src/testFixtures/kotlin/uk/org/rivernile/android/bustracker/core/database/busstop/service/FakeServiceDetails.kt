@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,13 +26,15 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.service
 
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+
 /**
  * A fake [ServiceDetails] to be used in testing.
  *
  * @author Niall Scott
  */
 data class FakeServiceDetails(
-    override val name: String,
+    override val descriptor: ServiceDescriptor,
     override val description: String?,
-    override val colour: Int?
+    override val colours: ServiceColours
 ) : ServiceDetails

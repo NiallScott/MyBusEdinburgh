@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,45 +26,47 @@
 
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 
 /**
  * This describes a favourite stop with the attributed service listing for the stop.
  *
- * @property stopCode The stop code of the favourite stop.
+ * @property stopIdentifier The stop identifier of the favourite stop.
  * @property savedName The user's saved name for this favourite stop.
- * @property services A [List] of service names which service this favourite stop. `null` if there
- * are no known services.
+ * @property services A [List] of services which service this favourite stop. `null` if there are
+ * no known services.
  * @author Niall Scott
  */
 internal data class FavouriteStopWithServices(
-    val stopCode: String,
+    val stopIdentifier: StopIdentifier,
     val savedName: String,
-    val services: List<String>?
+    val services: List<ServiceDescriptor>?
 )
 
 /**
  * Map this [List] of [FavouriteStop]s in to a [List] of [FavouriteStopWithServices].
  *
- * @param stopServices A [Map] of stop codes to a [List] of service names.
+ * @param stopServices A [Map] of stop identifiers to a [List] of services.
  * @return This [List] as a [List] of [FavouriteStopWithServices].
  */
 internal fun List<FavouriteStop>.toFavouriteStopsWithServices(
-    stopServices: Map<String, List<String>>?
+    stopServices: Map<StopIdentifier, List<ServiceDescriptor>>?
 ) = map { favouriteStop ->
     favouriteStop
         .toFavouriteStopWithServices(
             services = stopServices
-                ?.get(favouriteStop.stopCode)
+                ?.get(favouriteStop.stopIdentifier)
                 ?.ifEmpty { null }
         )
 }
 
 private fun FavouriteStop.toFavouriteStopWithServices(
-    services: List<String>?
+    services: List<ServiceDescriptor>?
 ): FavouriteStopWithServices {
     return FavouriteStopWithServices(
-        stopCode = stopCode,
+        stopIdentifier = stopIdentifier,
         savedName = stopName,
         services = services
     )

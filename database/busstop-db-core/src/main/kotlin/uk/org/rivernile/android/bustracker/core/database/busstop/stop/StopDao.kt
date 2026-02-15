@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,58 +27,61 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 
 import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 
 /**
  * This DAO is used to access stop data in the bus stop database.
  *
  * @author Niall Scott
  */
-interface StopDao {
+public interface StopDao {
 
     /**
      * Given a stop code, return a [Flow] which emits the name for this stop.
      *
-     * @param stopCode The stop to get the name for.
+     * @param naptanStopCode The stop to get the name for.
      * @return A [Flow] which emits the name of the stop, or will emit `null` when the stop is not
      * known or the stop cannot be found.
      */
-    fun getNameForStopFlow(stopCode: String): Flow<StopName?>
+    public fun getNameForStopFlow(naptanStopCode: String): Flow<StopName?>
 
     /**
      * Given a stop code, return a [Flow] which emits the location for this stop.
      *
-     * @param stopCode The stop to get the location for.
+     * @param naptanStopCode The stop to get the location for.
      * @return A [Flow] which emits the location of the stop, or emits `null` when the stop is not
      * found.
      */
-    fun getLocationForStopFlow(stopCode: String): Flow<StopLocation?>
+    public fun getLocationForStopFlow(naptanStopCode: String): Flow<StopLocation?>
 
     /**
      * Given a stop code, return a [Flow] which emits the stop details for this stop.
      *
-     * @param stopCode The stop to get the location for.
+     * @param naptanStopCode The stop to get the location for.
      * @return A [Flow] which emits the stop details, or emits `null` when the stop is not found.
      */
-    fun getStopDetailsFlow(stopCode: String): Flow<StopDetails?>
+    public fun getStopDetailsFlow(naptanStopCode: String): Flow<StopDetails?>
 
     /**
      * Given a [Set] of stop codes, get a [Flow] which emits the details for each stop.
      *
-     * @param stopCodes The stop codes to get details for.
+     * @param naptanStopCodes The stop codes to get details for.
      * @return A [Flow] which emits the details for the given stop codes, or emits `null` if no
      * stops were found or if an error occurred.
      */
-    fun getStopDetailsFlow(stopCodes: Set<String>): Flow<Map<String, StopDetails>?>
+    public fun getStopDetailsFlow(naptanStopCodes: Set<String>): Flow<Map<String, StopDetails>?>
 
     /**
      * Return a [Flow] which emits a [List] of [StopDetails], which only contains items which
      * satisfy the supplied [serviceFilter].
      *
      * @param serviceFilter An optional [Set] which contains the service filter.
-     * @return A [Flow] which emits [List]s pf [StopDetails] which satify the supplied
+     * @return A [Flow] which emits [List]s of [StopDetails] which satisfy the supplied
      * [serviceFilter].
      */
-    fun getStopDetailsWithServiceFilterFlow(serviceFilter: Set<String>?): Flow<List<StopDetails>?>
+    public fun getStopDetailsWithServiceFilterFlow(
+        serviceFilter: Set<ServiceDescriptor>?
+    ): Flow<List<StopDetails>?>
 
     /**
      * Return a [Flow] which emits [List]s of [StopDetailsWithServices] objects which are within
@@ -91,7 +94,7 @@ interface StopDao {
      * @return A [Flow] which emits [List]s of [StopDetailsWithServices] objects which match the
      * filter parameters.
      */
-    fun getStopDetailsWithinSpanFlow(
+    public fun getStopDetailsWithinSpanFlow(
         minLatitude: Double,
         minLongitude: Double,
         maxLatitude: Double,
@@ -113,12 +116,12 @@ interface StopDao {
      * @return A [Flow] which emits [List]s of [StopDetailsWithServices] objects which match the
      * filter parameters.
      */
-    fun getStopDetailsWithinSpanFlow(
+    public fun getStopDetailsWithinSpanFlow(
         minLatitude: Double,
         minLongitude: Double,
         maxLatitude: Double,
         maxLongitude: Double,
-        serviceFilter: Set<String>
+        serviceFilter: Set<ServiceDescriptor>
     ): Flow<List<StopDetailsWithServices>?>
 
     /**
@@ -129,5 +132,5 @@ interface StopDao {
      * @return A [Flow] which emits [List]s of [StopSearchResult] objects, based upon the supplied
      * [searchTerm].
      */
-    fun getStopSearchResultsFlow(searchTerm: String): Flow<List<StopSearchResult>?>
+    public fun getStopSearchResultsFlow(searchTerm: String): Flow<List<StopSearchResult>?>
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -51,7 +51,7 @@ internal class BundledDatabaseOpenHelperFactory @Inject constructor(
 
     companion object {
 
-        private const val ASSET_PREPACKAGED_DATABASE_PATH = "busstops10.db"
+        private const val ASSET_PREPACKAGED_DATABASE_PATH = "busstops23.db"
     }
 
     override fun create(

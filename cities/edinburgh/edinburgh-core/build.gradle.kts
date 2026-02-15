@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,8 +26,8 @@
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.ksp)
-    `java-test-fixtures`
+    alias(libs.plugins.kotlin.serialization)
+    id("mybus.dagger-convention")
 }
 
 dependencies {
@@ -35,16 +35,13 @@ dependencies {
     implementation(project(":core:alphanumcomparator"))
     implementation(project(":core:config"))
     implementation(project(":core:connectivity"))
+    implementation(project(":core:core-domain"))
+    implementation(project(":core:coroutines"))
     implementation(project(":core:http-core"))
     implementation(project(":core:livetimes"))
     implementation(project(":core:logging"))
-    implementation(project(":core:services"))
     implementation(project(":core:time"))
     implementation(project(":endpoint:tracker-endpoint"))
-
-    // Dagger 2
-    implementation(libs.dagger.core)
-    ksp(libs.dagger.compiler)
 
     // Retrofit
     implementation(libs.retrofit)
@@ -55,14 +52,14 @@ dependencies {
     // (De-)serialisation
     implementation(libs.kotlin.serialization.json)
 
-    // Edinburgh APIs
-    api(libs.edinburgh.bus.tracker.api)
+    // Date/time
+    implementation(libs.kotlin.datetime)
 
     // Tests
     testImplementation(project(":testutils"))
+    testImplementation(testFixtures(project(":core:connectivity")))
+    testImplementation(testFixtures(project(":core:core-domain")))
+    testImplementation(testFixtures(project(":core:logging")))
+    testImplementation(testFixtures(project(":core:time")))
     testImplementation(libs.kotlin.test.junit)
-    testImplementation(libs.mockito)
-    testImplementation(libs.mockito.kotlin)
-
-    testFixturesImplementation(project(":core:services"))
 }

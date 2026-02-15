@@ -30,6 +30,9 @@ import app.cash.turbine.test
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.services.FakeServicesRepository
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
@@ -88,9 +91,9 @@ class RealUiFavouriteStopsRetrieverTest {
                     flowOf(
                         listOf(
                             FavouriteStopWithServices(
-                                stopCode = "123456",
+                                stopIdentifier = "123456".toNaptanStopIdentifier(),
                                 savedName = "Saved Name",
-                                services = listOf("1", "2")
+                                services = listOf(service(1), service(2))
                             )
                         )
                     )
@@ -108,7 +111,7 @@ class RealUiFavouriteStopsRetrieverTest {
             assertEquals(
                 listOf(
                     UiFavouriteStop(
-                        stopCode = "123456",
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         savedName = "Saved Name",
                         services = persistentListOf(
                             UiServiceName(
@@ -137,9 +140,9 @@ class RealUiFavouriteStopsRetrieverTest {
                     flowOf(
                         listOf(
                             FavouriteStopWithServices(
-                                stopCode = "123456",
+                                stopIdentifier = "123456".toNaptanStopIdentifier(),
                                 savedName = "Saved Name",
-                                services = listOf("1", "2")
+                                services = listOf(service(1), service(2))
                             )
                         )
                     )
@@ -157,7 +160,7 @@ class RealUiFavouriteStopsRetrieverTest {
             assertEquals(
                 listOf(
                     UiFavouriteStop(
-                        stopCode = "123456",
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         savedName = "Saved Name",
                         services = persistentListOf(
                             UiServiceName(
@@ -186,9 +189,9 @@ class RealUiFavouriteStopsRetrieverTest {
                     flowOf(
                         listOf(
                             FavouriteStopWithServices(
-                                stopCode = "123456",
+                                stopIdentifier = "123456".toNaptanStopIdentifier(),
                                 savedName = "Saved Name",
-                                services = listOf("1", "2")
+                                services = listOf(service(1), service(2))
                             )
                         )
                     )
@@ -197,10 +200,12 @@ class RealUiFavouriteStopsRetrieverTest {
             servicesRepository = FakeServicesRepository(
                 onGetColoursForServicesFlow = {
                     flowOf(
-                        mapOf("1" to ServiceColours(
-                            primaryColour = 100,
-                            colourOnPrimary = 101
-                        ))
+                        mapOf(
+                            service(1) to ServiceColours(
+                                colourPrimary = 100,
+                                colourOnPrimary = 101
+                            )
+                        )
                     )
                 }
             ),
@@ -213,7 +218,7 @@ class RealUiFavouriteStopsRetrieverTest {
             assertEquals(
                 listOf(
                     UiFavouriteStop(
-                        stopCode = "123456",
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         savedName = "Saved Name",
                         services = persistentListOf(
                             UiServiceName(
@@ -245,7 +250,7 @@ class RealUiFavouriteStopsRetrieverTest {
                     flowOf(
                         listOf(
                             FavouriteStopWithServices(
-                                stopCode = "123456",
+                                stopIdentifier = "123456".toNaptanStopIdentifier(),
                                 savedName = "Saved Name",
                                 services = null
                             )
@@ -265,7 +270,7 @@ class RealUiFavouriteStopsRetrieverTest {
             assertEquals(
                 listOf(
                     UiFavouriteStop(
-                        stopCode = "123456",
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         savedName = "Saved Name",
                         services = null,
                         dropdownMenu = null
@@ -285,7 +290,7 @@ class RealUiFavouriteStopsRetrieverTest {
                     flowOf(
                         listOf(
                             FavouriteStopWithServices(
-                                stopCode = "123456",
+                                stopIdentifier = "123456".toNaptanStopIdentifier(),
                                 savedName = "Saved Name",
                                 services = null
                             )
@@ -300,7 +305,7 @@ class RealUiFavouriteStopsRetrieverTest {
                 onGetDropdownMenuItemsForStopsFlow = {
                     flowOf(
                         mapOf(
-                            "123456" to UiFavouriteDropdownMenu()
+                            "123456".toNaptanStopIdentifier() to UiFavouriteDropdownMenu()
                         )
                     )
                 }
@@ -311,7 +316,7 @@ class RealUiFavouriteStopsRetrieverTest {
             assertEquals(
                 listOf(
                     UiFavouriteStop(
-                        stopCode = "123456",
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         savedName = "Saved Name",
                         services = null,
                         dropdownMenu = UiFavouriteDropdownMenu()
@@ -333,6 +338,13 @@ class RealUiFavouriteStopsRetrieverTest {
             favouriteStopsRetriever = favouriteStopsRetriever,
             servicesRepository = servicesRepository,
             dropdownMenuGenerator = dropdownMenuGenerator
+        )
+    }
+
+    private fun service(id: Int): ServiceDescriptor {
+        return FakeServiceDescriptor(
+            serviceName = id.toString(),
+            operatorCode = "TEST$id"
         )
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,10 +37,11 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopDetails
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopLocation
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopName
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopDetails
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopLocation
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopName
+import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import kotlin.test.BeforeTest
@@ -81,7 +82,7 @@ class UiItemRetrieverTest {
 
         retriever
             .createUiItemFlow(
-                MutableStateFlow<String?>(null),
+                MutableStateFlow(null),
                 flowOf(
                     PermissionsState(
                         PermissionState.GRANTED,
@@ -106,14 +107,14 @@ class UiItemRetrieverTest {
     fun createUiItemFlowEmitsUnknownDistanceAndNoServicesWhenStopServicesNull() = runTest {
         whenever(distanceRetriever.createDistanceFlow(any(), any()))
             .thenReturn(flowOf(UiItem.Distance.Unknown))
-        whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
+        whenever(busStopsRepository.getBusStopDetailsFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(null))
-        whenever(servicesRetriever.getServicesFlow("123456"))
+        whenever(servicesRetriever.getServicesFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(null))
 
         retriever
             .createUiItemFlow(
-                MutableStateFlow<String?>("123456"),
+                MutableStateFlow("123456".toNaptanStopIdentifier()),
                 flowOf(
                     PermissionsState(
                         PermissionState.GRANTED,
@@ -139,14 +140,14 @@ class UiItemRetrieverTest {
         val services = emptyList<UiItem.Service>()
         whenever(distanceRetriever.createDistanceFlow(any(), any()))
             .thenReturn(flowOf(UiItem.Distance.Unknown))
-        whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
+        whenever(busStopsRepository.getBusStopDetailsFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(null))
-        whenever(servicesRetriever.getServicesFlow("123456"))
+        whenever(servicesRetriever.getServicesFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(services))
 
         retriever
             .createUiItemFlow(
-                MutableStateFlow<String?>("123456"),
+                MutableStateFlow("123456".toNaptanStopIdentifier()),
                 flowOf(
                     PermissionsState(
                         PermissionState.GRANTED,
@@ -175,14 +176,14 @@ class UiItemRetrieverTest {
         val services = listOf(service1, service2, service3)
         whenever(distanceRetriever.createDistanceFlow(any(), any()))
             .thenReturn(flowOf(UiItem.Distance.Unknown))
-        whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
+        whenever(busStopsRepository.getBusStopDetailsFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(null))
-        whenever(servicesRetriever.getServicesFlow("123456"))
+        whenever(servicesRetriever.getServicesFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(services))
 
         retriever
             .createUiItemFlow(
-                MutableStateFlow<String?>("123456"),
+                MutableStateFlow("123456".toNaptanStopIdentifier()),
                 flowOf(
                     PermissionsState(
                         PermissionState.GRANTED,
@@ -210,14 +211,14 @@ class UiItemRetrieverTest {
         givenStopMapFeatureAvailability(false)
         whenever(distanceRetriever.createDistanceFlow(any(), any()))
             .thenReturn(flowOf(UiItem.Distance.Known(1.2f)))
-        whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
+        whenever(busStopsRepository.getBusStopDetailsFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(stopDetails))
-        whenever(servicesRetriever.getServicesFlow("123456"))
+        whenever(servicesRetriever.getServicesFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(null))
 
         retriever
             .createUiItemFlow(
-                MutableStateFlow<String?>("123456"),
+                MutableStateFlow("123456".toNaptanStopIdentifier()),
                 flowOf(
                     PermissionsState(
                         PermissionState.GRANTED,
@@ -244,14 +245,14 @@ class UiItemRetrieverTest {
         givenStopMapFeatureAvailability(true)
         whenever(distanceRetriever.createDistanceFlow(any(), any()))
             .thenReturn(flowOf(UiItem.Distance.Known(1.2f)))
-        whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
+        whenever(busStopsRepository.getBusStopDetailsFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(stopDetails))
-        whenever(servicesRetriever.getServicesFlow("123456"))
+        whenever(servicesRetriever.getServicesFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(null))
 
         retriever
             .createUiItemFlow(
-                MutableStateFlow<String?>("123456"),
+                MutableStateFlow("123456".toNaptanStopIdentifier()),
                 flowOf(
                     PermissionsState(
                         PermissionState.GRANTED,
@@ -287,14 +288,14 @@ class UiItemRetrieverTest {
         givenStopMapFeatureAvailability(true)
         whenever(distanceRetriever.createDistanceFlow(any(), any()))
             .thenReturn(flowOf(UiItem.Distance.Known(1.2f)))
-        whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
+        whenever(busStopsRepository.getBusStopDetailsFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(stopDetails))
-        whenever(servicesRetriever.getServicesFlow("123456"))
+        whenever(servicesRetriever.getServicesFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(services))
 
         retriever
             .createUiItemFlow(
-                MutableStateFlow<String?>("123456"),
+                MutableStateFlow("123456".toNaptanStopIdentifier()),
                 flowOf(
                     PermissionsState(
                         PermissionState.GRANTED,
@@ -328,7 +329,7 @@ class UiItemRetrieverTest {
     }
 
     private fun createStopDetails() = FakeStopDetails(
-        "123456",
+        "123456".toNaptanStopIdentifier(),
         FakeStopName(
             "Stop name",
             "Locality"

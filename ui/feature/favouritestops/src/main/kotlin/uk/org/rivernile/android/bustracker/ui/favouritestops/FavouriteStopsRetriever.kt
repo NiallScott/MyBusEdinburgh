@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -67,12 +67,12 @@ internal class RealFavouriteStopsRetriever @Inject constructor(
             ?.ifEmpty { null }
             ?.let { favourites ->
                 serviceStopsRepository
-                    .getServicesForStopsFlow(favourites.toStopCodesSet())
+                    .getServicesForStopsFlow(favourites.toStopIdentifiersSet())
                     .map(favourites::toFavouriteStopsWithServices)
             }
             ?: flowOf(null)
     }
 
-    private fun List<FavouriteStop>.toStopCodesSet() =
-        map(FavouriteStop::stopCode).toHashSet()
+    private fun List<FavouriteStop>.toStopIdentifiersSet() =
+        map(FavouriteStop::stopIdentifier).toHashSet()
 }

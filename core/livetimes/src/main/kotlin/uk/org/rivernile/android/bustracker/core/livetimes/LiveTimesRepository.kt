@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.livetimes
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
 import uk.org.rivernile.android.bustracker.core.time.TimeUtils
@@ -43,12 +44,12 @@ public interface LiveTimesRepository {
     /**
      * Get a [Flow] object which contains the [LiveTimesResult] of loading [LiveTimes].
      *
-     * @param stopCode The stop code to load [LiveTimes] for.
+     * @param stopIdentifier The stop to load [LiveTimes] for.
      * @param numberOfDepartures The number of departures per services to obtain.
      * @return A [Flow] object containing the [LiveTimesResult] of loading [LiveTimes].
      */
     public fun getLiveTimesFlow(
-        stopCode: String,
+        stopIdentifier: StopIdentifier,
         numberOfDepartures: Int
     ): Flow<LiveTimesResult>
 }
@@ -59,26 +60,27 @@ internal class RealLiveTimesRepository @Inject constructor(
 ) : LiveTimesRepository {
 
     override fun getLiveTimesFlow(
-        stopCode: String,
+        stopIdentifier: StopIdentifier,
         numberOfDepartures: Int
     ): Flow<LiveTimesResult> = flow {
         emit(LiveTimesResult.InProgress)
-        emit(fetchLiveTimes(stopCode, numberOfDepartures))
+        emit(fetchLiveTimes(stopIdentifier, numberOfDepartures))
     }
 
     /**
      * Attempts to fetch the live times from the server and returns the appropriate
      * [LiveTimesResult].
      *
-     * @param stopCode The stop code to fetch live times for.
+     * @param stopIdentifier The stop to fetch live times for.
      * @param numberOfDepartures The number of departures per service to obtain.
      * @return A [LiveTimesResult] for the response.
      */
     private suspend fun fetchLiveTimes(
-        stopCode: String,
+        stopIdentifier: StopIdentifier,
         numberOfDepartures: Int
     ): LiveTimesResult {
-        return trackerEndpoint.getLiveTimes(stopCode, numberOfDepartures)
+        return trackerEndpoint
+            .getLiveTimes(stopIdentifier, numberOfDepartures)
             .toLiveTimesResult(timeUtils)
     }
 }

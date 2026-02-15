@@ -82,6 +82,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
 import uk.org.rivernile.android.bustracker.core.shortcuts.FavouriteStopShortcut
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.text.PrimaryErrorText
@@ -120,14 +123,14 @@ internal const val TEST_TAG_EMPTY_ERROR_BODY_TEXT = "empty-error-body-text"
 internal fun FavouriteStopsScreen(
     modifier: Modifier = Modifier,
     viewModel: FavouriteStopsViewModel = viewModel(),
-    onShowStopData: ((String) -> Unit)? = null,
-    onShowEditFavouriteStop: ((String) -> Unit)? = null,
-    onShowConfirmRemoveFavourite: ((String) -> Unit)? = null,
-    onShowOnMap: ((String) -> Unit)? = null,
-    onShowAddArrivalAlert: ((String) -> Unit)? = null,
-    onShowConfirmRemoveArrivalAlert: ((String) -> Unit)? = null,
-    onShowAddProximityAlert: ((String) -> Unit)? = null,
-    onShowConfirmRemoveProximityAlert: ((String) -> Unit)? = null,
+    onShowStopData: ((StopIdentifier) -> Unit)? = null,
+    onShowEditFavouriteStop: ((StopIdentifier) -> Unit)? = null,
+    onShowConfirmRemoveFavourite: ((StopIdentifier) -> Unit)? = null,
+    onShowOnMap: ((StopIdentifier) -> Unit)? = null,
+    onShowAddArrivalAlert: ((StopIdentifier) -> Unit)? = null,
+    onShowConfirmRemoveArrivalAlert: ((StopIdentifier) -> Unit)? = null,
+    onShowAddProximityAlert: ((StopIdentifier) -> Unit)? = null,
+    onShowConfirmRemoveProximityAlert: ((StopIdentifier) -> Unit)? = null,
     onAddShortcut: ((FavouriteStopShortcut) -> Unit)? = null
 ) {
     val uiState by viewModel.uiStateFlow.collectAsStateWithLifecycle()
@@ -200,27 +203,27 @@ internal fun FavouriteStopsScreen(
 @Composable
 internal fun FavouriteStopsScreenWithState(
     state: UiState,
-    onItemClicked: (String, String) -> Unit,
-    onOpenDropdownClicked: (String) -> Unit,
+    onItemClicked: (StopIdentifier, String) -> Unit,
+    onOpenDropdownClicked: (StopIdentifier) -> Unit,
     onDropdownMenuDismissed: () -> Unit,
-    onEditFavouriteNameClick: (String) -> Unit,
-    onRemoveFavouriteClick: (String) -> Unit,
-    onAddShortcutClick: (String, String) -> Unit,
-    onAddArrivalAlertClick: (String) -> Unit,
-    onRemoveArrivalAlertClick: (String) -> Unit,
-    onAddProximityAlertClick: (String) -> Unit,
-    onRemoveProximityAlertClick: (String) -> Unit,
-    onShowOnMapClick: (String) -> Unit,
+    onEditFavouriteNameClick: (StopIdentifier) -> Unit,
+    onRemoveFavouriteClick: (StopIdentifier) -> Unit,
+    onAddShortcutClick: (StopIdentifier, String) -> Unit,
+    onAddArrivalAlertClick: (StopIdentifier) -> Unit,
+    onRemoveArrivalAlertClick: (StopIdentifier) -> Unit,
+    onAddProximityAlertClick: (StopIdentifier) -> Unit,
+    onRemoveProximityAlertClick: (StopIdentifier) -> Unit,
+    onShowOnMapClick: (StopIdentifier) -> Unit,
     onActionLaunched: () -> Unit,
     modifier: Modifier = Modifier,
-    onShowStopData: ((String) -> Unit)? = null,
-    onShowEditFavouriteStop: ((String) -> Unit)? = null,
-    onShowConfirmRemoveFavourite: ((String) -> Unit)? = null,
-    onShowOnMap: ((String) -> Unit)? = null,
-    onShowAddArrivalAlert: ((String) -> Unit)? = null,
-    onShowConfirmRemoveArrivalAlert: ((String) -> Unit)? = null,
-    onShowAddProximityAlert: ((String) -> Unit)? = null,
-    onShowConfirmRemoveProximityAlert: ((String) -> Unit)? = null,
+    onShowStopData: ((StopIdentifier) -> Unit)? = null,
+    onShowEditFavouriteStop: ((StopIdentifier) -> Unit)? = null,
+    onShowConfirmRemoveFavourite: ((StopIdentifier) -> Unit)? = null,
+    onShowOnMap: ((StopIdentifier) -> Unit)? = null,
+    onShowAddArrivalAlert: ((StopIdentifier) -> Unit)? = null,
+    onShowConfirmRemoveArrivalAlert: ((StopIdentifier) -> Unit)? = null,
+    onShowAddProximityAlert: ((StopIdentifier) -> Unit)? = null,
+    onShowConfirmRemoveProximityAlert: ((StopIdentifier) -> Unit)? = null,
     onAddShortcut: ((FavouriteStopShortcut) -> Unit)? = null
 ) {
     val paddingDouble = dimensionResource(Rcore.dimen.padding_double)
@@ -306,17 +309,17 @@ private fun IndeterminateProgress(
 @Composable
 private fun Content(
     favouriteStops: ImmutableList<UiFavouriteStop>,
-    onItemClicked: (String, String) -> Unit,
-    onOpenDropdownClicked: (String) -> Unit,
+    onItemClicked: (StopIdentifier, String) -> Unit,
+    onOpenDropdownClicked: (StopIdentifier) -> Unit,
     onDropdownMenuDismissed: () -> Unit,
-    onEditFavouriteNameClick: (String) -> Unit,
-    onRemoveFavouriteClick: (String) -> Unit,
-    onAddShortcutClick: (String, String) -> Unit,
-    onAddArrivalAlertClick: (String) -> Unit,
-    onRemoveArrivalAlertClick: (String) -> Unit,
-    onAddProximityAlertClick: (String) -> Unit,
-    onRemoveProximityAlertClick: (String) -> Unit,
-    onShowOnMapClick: (String) -> Unit,
+    onEditFavouriteNameClick: (StopIdentifier) -> Unit,
+    onRemoveFavouriteClick: (StopIdentifier) -> Unit,
+    onAddShortcutClick: (StopIdentifier, String) -> Unit,
+    onAddArrivalAlertClick: (StopIdentifier) -> Unit,
+    onRemoveArrivalAlertClick: (StopIdentifier) -> Unit,
+    onAddProximityAlertClick: (StopIdentifier) -> Unit,
+    onRemoveProximityAlertClick: (StopIdentifier) -> Unit,
+    onShowOnMapClick: (StopIdentifier) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val safeDrawingInsets = WindowInsets.safeDrawing
@@ -339,21 +342,21 @@ private fun Content(
     ) {
         items(
             items = favouriteStops,
-            key = { it.stopCode }
+            key = { it.stopIdentifier.toParcelableStopIdentifier() }
         ) {
             FavouriteStopItem(
                 favouriteStop = it,
-                onFavouriteClick = { onItemClicked(it.stopCode, it.savedName) },
-                onOpenDropdownClick = { onOpenDropdownClicked(it.stopCode) },
+                onFavouriteClick = { onItemClicked(it.stopIdentifier, it.savedName) },
+                onOpenDropdownClick = { onOpenDropdownClicked(it.stopIdentifier) },
                 onDropdownMenuDismissed = onDropdownMenuDismissed,
-                onEditFavouriteNameClick = { onEditFavouriteNameClick(it.stopCode) },
-                onRemoveFavouriteClick = { onRemoveFavouriteClick(it.stopCode) },
-                onAddShortcutClick = { onAddShortcutClick(it.stopCode, it.savedName) },
-                onAddArrivalAlertClick = { onAddArrivalAlertClick(it.stopCode) },
-                onRemoveArrivalAlertClick = { onRemoveArrivalAlertClick(it.stopCode) },
-                onAddProximityAlertClick = { onAddProximityAlertClick(it.stopCode) },
-                onRemoveProximityAlertClick = { onRemoveProximityAlertClick(it.stopCode) },
-                onShowOnMapClick = { onShowOnMapClick(it.stopCode) },
+                onEditFavouriteNameClick = { onEditFavouriteNameClick(it.stopIdentifier) },
+                onRemoveFavouriteClick = { onRemoveFavouriteClick(it.stopIdentifier) },
+                onAddShortcutClick = { onAddShortcutClick(it.stopIdentifier, it.savedName) },
+                onAddArrivalAlertClick = { onAddArrivalAlertClick(it.stopIdentifier) },
+                onRemoveArrivalAlertClick = { onRemoveArrivalAlertClick(it.stopIdentifier) },
+                onAddProximityAlertClick = { onAddProximityAlertClick(it.stopIdentifier) },
+                onRemoveProximityAlertClick = { onRemoveProximityAlertClick(it.stopIdentifier) },
+                onShowOnMapClick = { onShowOnMapClick(it.stopIdentifier) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .animateItem(),
@@ -410,32 +413,34 @@ private fun EmptyError(
 private fun LaunchAction(
     action: UiAction,
     onActionLaunched: () -> Unit,
-    onShowStopData: ((String) -> Unit)? = null,
-    onShowEditFavouriteStop: ((String) -> Unit)? = null,
-    onShowConfirmRemoveFavourite: ((String) -> Unit)? = null,
-    onShowOnMap: ((String) -> Unit)? = null,
-    onShowAddArrivalAlert: ((String) -> Unit)? = null,
-    onShowConfirmRemoveArrivalAlert: ((String) -> Unit)? = null,
-    onShowAddProximityAlert: ((String) -> Unit)? = null,
-    onShowConfirmRemoveProximityAlert: ((String) -> Unit)? = null,
+    onShowStopData: ((StopIdentifier) -> Unit)? = null,
+    onShowEditFavouriteStop: ((StopIdentifier) -> Unit)? = null,
+    onShowConfirmRemoveFavourite: ((StopIdentifier) -> Unit)? = null,
+    onShowOnMap: ((StopIdentifier) -> Unit)? = null,
+    onShowAddArrivalAlert: ((StopIdentifier) -> Unit)? = null,
+    onShowConfirmRemoveArrivalAlert: ((StopIdentifier) -> Unit)? = null,
+    onShowAddProximityAlert: ((StopIdentifier) -> Unit)? = null,
+    onShowConfirmRemoveProximityAlert: ((StopIdentifier) -> Unit)? = null,
     onAddShortcut: ((FavouriteStopShortcut) -> Unit)? = null
 ) {
     LaunchedEffect(action) {
         when (action) {
-            is UiAction.ShowStopData -> onShowStopData?.invoke(action.stopCode)
-            is UiAction.ShowEditFavouriteStop -> onShowEditFavouriteStop?.invoke(action.stopCode)
+            is UiAction.ShowStopData -> onShowStopData?.invoke(action.stopIdentifier)
+            is UiAction.ShowEditFavouriteStop ->
+                onShowEditFavouriteStop?.invoke(action.stopIdentifier)
             is UiAction.ShowConfirmRemoveFavourite ->
-                onShowConfirmRemoveFavourite?.invoke(action.stopCode)
-            is UiAction.ShowOnMap -> onShowOnMap?.invoke(action.stopCode)
-            is UiAction.ShowAddArrivalAlert -> onShowAddArrivalAlert?.invoke(action.stopCode)
+                onShowConfirmRemoveFavourite?.invoke(action.stopIdentifier)
+            is UiAction.ShowOnMap -> onShowOnMap?.invoke(action.stopIdentifier)
+            is UiAction.ShowAddArrivalAlert -> onShowAddArrivalAlert?.invoke(action.stopIdentifier)
             is UiAction.ShowConfirmRemoveArrivalAlert ->
-                onShowConfirmRemoveArrivalAlert?.invoke(action.stopCode)
-            is UiAction.ShowAddProximityAlert -> onShowAddProximityAlert?.invoke(action.stopCode)
+                onShowConfirmRemoveArrivalAlert?.invoke(action.stopIdentifier)
+            is UiAction.ShowAddProximityAlert ->
+                onShowAddProximityAlert?.invoke(action.stopIdentifier)
             is UiAction.ShowConfirmRemoveProximityAlert ->
-                onShowConfirmRemoveProximityAlert?.invoke(action.stopCode)
+                onShowConfirmRemoveProximityAlert?.invoke(action.stopIdentifier)
             is UiAction.AddShortcut -> onAddShortcut?.invoke(
                 FavouriteStopShortcut(
-                    stopCode = action.stopCode,
+                    stopIdentifier = action.stopIdentifier,
                     displayName = action.savedName
                 )
             )
@@ -506,7 +511,7 @@ private class UiStateProvider : PreviewParameterProvider<UiState> {
             content = UiContent.Content(
                 favouriteStops = persistentListOf(
                     UiFavouriteStop(
-                        stopCode = "1",
+                        stopIdentifier = "1".toNaptanStopIdentifier(),
                         savedName = "Favourite 1",
                         services = persistentListOf(
                             UiServiceName(
@@ -520,13 +525,13 @@ private class UiStateProvider : PreviewParameterProvider<UiState> {
                         dropdownMenu = UiFavouriteDropdownMenu()
                     ),
                     UiFavouriteStop(
-                        stopCode = "2",
+                        stopIdentifier = "2".toNaptanStopIdentifier(),
                         savedName = "Favourite 2",
                         services = null,
                         dropdownMenu = UiFavouriteDropdownMenu()
                     ),
                     UiFavouriteStop(
-                        stopCode = "3",
+                        stopIdentifier = "3".toNaptanStopIdentifier(),
                         savedName = "Favourite 3",
                         services = persistentListOf(
                             UiServiceName(

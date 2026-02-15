@@ -29,6 +29,8 @@ package uk.org.rivernile.android.bustracker.ui.deeplinks
 import android.content.Context
 import android.content.Intent
 import dagger.hilt.android.qualifiers.ApplicationContext
+import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import javax.inject.Inject
 
@@ -42,9 +44,20 @@ internal class IntentFactory @Inject constructor(
     @param:ApplicationContext private val context: Context
 ) : BusTimesIntentFactory {
 
-    override fun createBusTimesIntent(stopCode: String): Intent {
+    override fun createBusTimesIntent(stopIdentifier: StopIdentifier): Intent {
         return Intent(context, DisplayStopDataActivity::class.java)
             .setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA)
-            .putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
+            .putExtra(
+                DisplayStopDataActivity.EXTRA_STOP_CODE,
+                stopIdentifier.toNaptanStopCodeOrThrow()
+            )
+    }
+
+    private fun StopIdentifier.toNaptanStopCodeOrThrow(): String {
+        return if (this is NaptanStopIdentifier) {
+            naptanStopCode
+        } else {
+            throw UnsupportedOperationException("Only Naptan identifiers are supported for now.")
+        }
     }
 }

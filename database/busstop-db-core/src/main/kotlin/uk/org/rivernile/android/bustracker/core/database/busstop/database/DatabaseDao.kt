@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,21 +27,24 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop.database
 
 import kotlinx.coroutines.flow.Flow
+import kotlin.time.Instant
 
 /**
  * This DAO is used to access database information for the bus stop database.
  *
  * @author Niall Scott
  */
-interface DatabaseDao {
-
-    /**
-     * A [Flow] which emits the current topology ID.
-     */
-    val topologyIdFlow: Flow<String?>
+public interface DatabaseDao {
 
     /**
      * A [Flow] which emits database metadata.
      */
-    val databaseMetadataFlow: Flow<DatabaseMetadata?>
+    public val databaseMetadataFlow: Flow<DatabaseMetadata?>
+
+    /**
+     * Get the database update timestamp.
+     *
+     * @return The database update timestamp, or `null` if this could not be retrieved.
+     */
+    public suspend fun getDatabaseUpdateTimestamp(): Instant?
 }

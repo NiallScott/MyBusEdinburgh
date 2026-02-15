@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,6 +33,9 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.servicestops.ServiceStopsRepository
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -54,11 +57,14 @@ class ServiceListingRetrieverTest {
 
     @BeforeTest
     fun setUp() {
-        retriever = ServiceListingRetriever(serviceStopsRepository)
+        retriever = ServiceListingRetriever(
+            serviceStopsRepository,
+            naturalOrder()
+        )
     }
 
     @Test
-    fun getServiceListingFlowWithNullStopCodeReturnsFlowOfNull() = runTest {
+    fun getServiceListingFlowWithNullStopIdentifierReturnsFlowOfNull() = runTest {
         retriever.getServiceListingFlow(null).test {
             assertNull(awaitItem())
             awaitComplete()
@@ -66,52 +72,66 @@ class ServiceListingRetrieverTest {
     }
 
     @Test
-    fun getServiceListingFlowWithEmptyStopCodeReturnsFlowOfNull() = runTest {
-        retriever.getServiceListingFlow("").test {
-            assertNull(awaitItem())
-            awaitComplete()
-        }
-    }
-
-    @Test
     fun getServiceListingFlowWithNullServiceListingEmitsCorrectItems() = runTest {
-        whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
+        whenever(serviceStopsRepository.getServicesForStopFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(null))
 
-        retriever.getServiceListingFlow("123456").test {
-            assertEquals(UiServiceListing.InProgress("123456"), awaitItem())
-            assertEquals(UiServiceListing.Empty("123456"), awaitItem())
+        retriever.getServiceListingFlow("123456".toNaptanStopIdentifier()).test {
+            assertEquals(
+                UiServiceListing.InProgress(
+                    "123456".toNaptanStopIdentifier()
+                ),
+                awaitItem()
+            )
+            assertEquals(UiServiceListing.Empty("123456".toNaptanStopIdentifier()), awaitItem())
             awaitComplete()
         }
     }
 
     @Test
     fun getServiceListingFlowWithEmptyServiceListingEmitsCorrectItems() = runTest {
-        whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
+        whenever(serviceStopsRepository.getServicesForStopFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(emptyList()))
 
-        retriever.getServiceListingFlow("123456").test {
-            assertEquals(UiServiceListing.InProgress("123456"), awaitItem())
-            assertEquals(UiServiceListing.Empty("123456"), awaitItem())
+        retriever.getServiceListingFlow("123456".toNaptanStopIdentifier()).test {
+            assertEquals(
+                UiServiceListing.InProgress(
+                    "123456".toNaptanStopIdentifier()
+                ),
+                awaitItem()
+            )
+            assertEquals(UiServiceListing.Empty("123456".toNaptanStopIdentifier()), awaitItem())
             awaitComplete()
         }
     }
 
     @Test
     fun getServiceListingFlowWithServiceListingEmitsCorrectItems() = runTest {
-        whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
-            .thenReturn(flowOf(listOf("1", "2", "3")))
+        whenever(serviceStopsRepository.getServicesForStopFlow("123456".toNaptanStopIdentifier()))
+            .thenReturn(flowOf(listOf(service(3), service(1), service(2))))
 
-        retriever.getServiceListingFlow("123456").test {
-            assertEquals(UiServiceListing.InProgress("123456"), awaitItem())
+        retriever.getServiceListingFlow("123456".toNaptanStopIdentifier()).test {
+            assertEquals(
+                UiServiceListing.InProgress(
+                    "123456".toNaptanStopIdentifier()
+                ),
+                awaitItem()
+            )
             assertEquals(
                 UiServiceListing.Success(
-                    "123456",
-                    listOf("1", "2", "3")
+                    "123456".toNaptanStopIdentifier(),
+                    listOf(service(1), service(2), service(3))
                 ),
                 awaitItem()
             )
             awaitComplete()
         }
+    }
+
+    private fun service(id: Int): ServiceDescriptor {
+        return FakeServiceDescriptor(
+            serviceName = id.toString(),
+            operatorCode = "TEST$id"
+        )
     }
 }

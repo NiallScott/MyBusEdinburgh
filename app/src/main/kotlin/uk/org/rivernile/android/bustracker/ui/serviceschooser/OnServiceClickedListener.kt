@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.serviceschooser
 
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+
 /**
  * This interface is implemented by classes handling the service item being clicked.
  *
@@ -36,7 +38,7 @@ fun interface OnServiceClickedListener {
     /**
      * The service item was clicked.
      *
-     * @param serviceName The name of the service which was clicked.
+     * @param serviceDescriptor The descriptor of the service which was clicked.
      */
-    fun onServiceClicked(serviceName: String)
+    fun onServiceClicked(serviceDescriptor: ServiceDescriptor)
 }

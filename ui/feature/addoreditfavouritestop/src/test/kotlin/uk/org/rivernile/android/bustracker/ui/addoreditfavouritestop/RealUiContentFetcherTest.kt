@@ -31,9 +31,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import uk.org.rivernile.android.bustracker.core.alerts.proximity.FakeBusStopsRepository
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopName
+import uk.org.rivernile.android.bustracker.core.busstops.FakeBusStopsRepository
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopName
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.favourites.FakeFavouritesRepository
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
@@ -49,24 +50,10 @@ import kotlin.test.assertEquals
 class RealUiContentFetcherTest {
 
     @Test
-    fun uiContentFlowEmitsInProgressWhenStopCodeIsNull() = runTest {
+    fun uiContentFlowEmitsInProgressWhenStopIdentifierIsNull() = runTest {
         val fetcher = createUiContentFetcher(
             arguments = FakeArguments(
-                onStopCodeFlow = { flowOf(null) }
-            )
-        )
-
-        fetcher.uiContentFlow.test {
-            assertEquals(UiContent.InProgress, awaitItem())
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun uiContentFlowEmitsInProgressWhenStopCodeIsEmpty() = runTest {
-        val fetcher = createUiContentFetcher(
-            arguments = FakeArguments(
-                onStopCodeFlow = { flowOf("") }
+                onStopIdentifierFlow = { flowOf(null) }
             )
         )
 
@@ -80,20 +67,20 @@ class RealUiContentFetcherTest {
     fun uiContentFlowEmitsAddItemWhenStopIsNotAFavouriteWithoutStopName() = runTest {
         val fetcher = createUiContentFetcher(
             arguments = FakeArguments(
-                onStopCodeFlow = { flowOf("123456") }
+                onStopIdentifierFlow = { flowOf("123456".toNaptanStopIdentifier()) }
             ),
             state = FakeState(
                 onStopNameTextFlow = { flowOf(null) }
             ),
             favouritesRepository = FakeFavouritesRepository(
-                onGetFavouriteStopFlow = { stopCode ->
-                    assertEquals("123456", stopCode)
+                onGetFavouriteStopFlow = { stopIdentifier ->
+                    assertEquals("123456".toNaptanStopIdentifier(), stopIdentifier)
                     flowOf(null)
                 }
             ),
             busStopsRepository = FakeBusStopsRepository(
-                onGetNameForStopFlow = { stopCode ->
-                    assertEquals("123456", stopCode)
+                onGetNameForStopFlow = { stopIdentifier ->
+                    assertEquals("123456".toNaptanStopIdentifier(), stopIdentifier)
                     flowOf(null)
                 }
             )
@@ -103,7 +90,7 @@ class RealUiContentFetcherTest {
             assertEquals(UiContent.InProgress, awaitItem())
             assertEquals(
                 UiContent.Mode.Add(
-                    stopCode = "123456",
+                    stopIdentifier = "123456".toNaptanStopIdentifier(),
                     stopName = null,
                     isPositiveButtonEnabled = false
                 ),
@@ -117,20 +104,20 @@ class RealUiContentFetcherTest {
     fun uiContentFlowEmitsAddItemWhenStopIsNotAFavourite() = runTest {
         val fetcher = createUiContentFetcher(
             arguments = FakeArguments(
-                onStopCodeFlow = { flowOf("123456") }
+                onStopIdentifierFlow = { flowOf("123456".toNaptanStopIdentifier()) }
             ),
             state = FakeState(
                 onStopNameTextFlow = { flowOf(null) }
             ),
             favouritesRepository = FakeFavouritesRepository(
-                onGetFavouriteStopFlow = { stopCode ->
-                    assertEquals("123456", stopCode)
+                onGetFavouriteStopFlow = { stopIdentifier ->
+                    assertEquals("123456".toNaptanStopIdentifier(), stopIdentifier)
                     flowOf(null)
                 }
             ),
             busStopsRepository = FakeBusStopsRepository(
-                onGetNameForStopFlow = { stopCode ->
-                    assertEquals("123456", stopCode)
+                onGetNameForStopFlow = { stopIdentifier ->
+                    assertEquals("123456".toNaptanStopIdentifier(), stopIdentifier)
                     flowOf(FakeStopName(name = "Stop Name", locality = "Locality"))
                 }
             )
@@ -140,7 +127,7 @@ class RealUiContentFetcherTest {
             assertEquals(UiContent.InProgress, awaitItem())
             assertEquals(
                 UiContent.Mode.Add(
-                    stopCode = "123456",
+                    stopIdentifier = "123456".toNaptanStopIdentifier(),
                     stopName = UiStopName(
                         name = "Stop Name",
                         locality = "Locality"
@@ -157,20 +144,25 @@ class RealUiContentFetcherTest {
     fun uiContentFlowEmitsEditItemWhenStopIsAFavouriteWithoutStopName() = runTest {
         val fetcher = createUiContentFetcher(
             arguments = FakeArguments(
-                onStopCodeFlow = { flowOf("123456") }
+                onStopIdentifierFlow = { flowOf("123456".toNaptanStopIdentifier()) }
             ),
             state = FakeState(
                 onStopNameTextFlow = { flowOf(null) }
             ),
             favouritesRepository = FakeFavouritesRepository(
-                onGetFavouriteStopFlow = { stopCode ->
-                    assertEquals("123456", stopCode)
-                    flowOf(FavouriteStop(stopCode = "123456", stopName = "Saved Name"))
+                onGetFavouriteStopFlow = { stopIdentifier ->
+                    assertEquals("123456".toNaptanStopIdentifier(), stopIdentifier)
+                    flowOf(
+                        FavouriteStop(
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
+                            stopName = "Saved Name"
+                        )
+                    )
                 }
             ),
             busStopsRepository = FakeBusStopsRepository(
-                onGetNameForStopFlow = { stopCode ->
-                    assertEquals("123456", stopCode)
+                onGetNameForStopFlow = { stopIdentifier ->
+                    assertEquals("123456".toNaptanStopIdentifier(), stopIdentifier)
                     flowOf(null)
                 }
             )
@@ -180,7 +172,7 @@ class RealUiContentFetcherTest {
             assertEquals(UiContent.InProgress, awaitItem())
             assertEquals(
                 UiContent.Mode.Edit(
-                    stopCode = "123456",
+                    stopIdentifier = "123456".toNaptanStopIdentifier(),
                     stopName = null,
                     isPositiveButtonEnabled = false,
                     savedName = "Saved Name"
@@ -195,20 +187,25 @@ class RealUiContentFetcherTest {
     fun uiContentFlowEmitsEditItemWhenStopIsAFavourite() = runTest {
         val fetcher = createUiContentFetcher(
             arguments = FakeArguments(
-                onStopCodeFlow = { flowOf("123456") }
+                onStopIdentifierFlow = { flowOf("123456".toNaptanStopIdentifier()) }
             ),
             state = FakeState(
                 onStopNameTextFlow = { flowOf(null) }
             ),
             favouritesRepository = FakeFavouritesRepository(
-                onGetFavouriteStopFlow = { stopCode ->
-                    assertEquals("123456", stopCode)
-                    flowOf(FavouriteStop(stopCode = "123456", stopName = "Saved Name"))
+                onGetFavouriteStopFlow = { stopIdentifier ->
+                    assertEquals("123456".toNaptanStopIdentifier(), stopIdentifier)
+                    flowOf(
+                        FavouriteStop(
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
+                            stopName = "Saved Name"
+                        )
+                    )
                 }
             ),
             busStopsRepository = FakeBusStopsRepository(
-                onGetNameForStopFlow = { stopCode ->
-                    assertEquals("123456", stopCode)
+                onGetNameForStopFlow = { stopIdentifier ->
+                    assertEquals("123456".toNaptanStopIdentifier(), stopIdentifier)
                     flowOf(FakeStopName(name = "Stop Name", locality = "Locality"))
                 }
             )
@@ -218,7 +215,7 @@ class RealUiContentFetcherTest {
             assertEquals(UiContent.InProgress, awaitItem())
             assertEquals(
                 UiContent.Mode.Edit(
-                    stopCode = "123456",
+                    stopIdentifier = "123456".toNaptanStopIdentifier(),
                     stopName = UiStopName(
                         name = "Stop Name",
                         locality = "Locality"
@@ -236,20 +233,20 @@ class RealUiContentFetcherTest {
     fun uiContentFlowEmitsAddWithPositiveButtonDisabledWhenStopNameIsNotValid() = runTest {
         val fetcher = createUiContentFetcher(
             arguments = FakeArguments(
-                onStopCodeFlow = { flowOf("123456") }
+                onStopIdentifierFlow = { flowOf("123456".toNaptanStopIdentifier()) }
             ),
             state = FakeState(
                 onStopNameTextFlow = { flowOf("") }
             ),
             favouritesRepository = FakeFavouritesRepository(
-                onGetFavouriteStopFlow = { stopCode ->
-                    assertEquals("123456", stopCode)
+                onGetFavouriteStopFlow = { stopIdentifier ->
+                    assertEquals("123456".toNaptanStopIdentifier(), stopIdentifier)
                     flowOf(null)
                 }
             ),
             busStopsRepository = FakeBusStopsRepository(
-                onGetNameForStopFlow = { stopCode ->
-                    assertEquals("123456", stopCode)
+                onGetNameForStopFlow = { stopIdentifier ->
+                    assertEquals("123456".toNaptanStopIdentifier(), stopIdentifier)
                     flowOf(FakeStopName(name = "Stop Name", locality = "Locality"))
                 }
             )
@@ -259,7 +256,7 @@ class RealUiContentFetcherTest {
             assertEquals(UiContent.InProgress, awaitItem())
             assertEquals(
                 UiContent.Mode.Add(
-                    stopCode = "123456",
+                    stopIdentifier = "123456".toNaptanStopIdentifier(),
                     stopName = UiStopName(
                         name = "Stop Name",
                         locality = "Locality"
@@ -276,20 +273,20 @@ class RealUiContentFetcherTest {
     fun uiContentFlowEmitsAddWithPositiveButtonEnabledWhenStopNameIsValid() = runTest {
         val fetcher = createUiContentFetcher(
             arguments = FakeArguments(
-                onStopCodeFlow = { flowOf("123456") }
+                onStopIdentifierFlow = { flowOf("123456".toNaptanStopIdentifier()) }
             ),
             state = FakeState(
                 onStopNameTextFlow = { flowOf("A") }
             ),
             favouritesRepository = FakeFavouritesRepository(
-                onGetFavouriteStopFlow = { stopCode ->
-                    assertEquals("123456", stopCode)
+                onGetFavouriteStopFlow = { stopIdentifier ->
+                    assertEquals("123456".toNaptanStopIdentifier(), stopIdentifier)
                     flowOf(null)
                 }
             ),
             busStopsRepository = FakeBusStopsRepository(
-                onGetNameForStopFlow = { stopCode ->
-                    assertEquals("123456", stopCode)
+                onGetNameForStopFlow = { stopIdentifier ->
+                    assertEquals("123456".toNaptanStopIdentifier(), stopIdentifier)
                     flowOf(FakeStopName(name = "Stop Name", locality = "Locality"))
                 }
             )
@@ -299,7 +296,7 @@ class RealUiContentFetcherTest {
             assertEquals(UiContent.InProgress, awaitItem())
             assertEquals(
                 UiContent.Mode.Add(
-                    stopCode = "123456",
+                    stopIdentifier = "123456".toNaptanStopIdentifier(),
                     stopName = UiStopName(
                         name = "Stop Name",
                         locality = "Locality"
@@ -316,20 +313,25 @@ class RealUiContentFetcherTest {
     fun uiContentFlowEmitsEditWithPositiveButtonDisabledWhenStopNameIsNotValid() = runTest {
         val fetcher = createUiContentFetcher(
             arguments = FakeArguments(
-                onStopCodeFlow = { flowOf("123456") }
+                onStopIdentifierFlow = { flowOf("123456".toNaptanStopIdentifier()) }
             ),
             state = FakeState(
                 onStopNameTextFlow = { flowOf("") }
             ),
             favouritesRepository = FakeFavouritesRepository(
-                onGetFavouriteStopFlow = { stopCode ->
-                    assertEquals("123456", stopCode)
-                    flowOf(FavouriteStop(stopCode = "123456", stopName = "Saved Name"))
+                onGetFavouriteStopFlow = { stopIdentifier ->
+                    assertEquals("123456".toNaptanStopIdentifier(), stopIdentifier)
+                    flowOf(
+                        FavouriteStop(
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
+                            stopName = "Saved Name"
+                        )
+                    )
                 }
             ),
             busStopsRepository = FakeBusStopsRepository(
-                onGetNameForStopFlow = { stopCode ->
-                    assertEquals("123456", stopCode)
+                onGetNameForStopFlow = { stopIdentifier ->
+                    assertEquals("123456".toNaptanStopIdentifier(), stopIdentifier)
                     flowOf(FakeStopName(name = "Stop Name", locality = "Locality"))
                 }
             )
@@ -339,7 +341,7 @@ class RealUiContentFetcherTest {
             assertEquals(UiContent.InProgress, awaitItem())
             assertEquals(
                 UiContent.Mode.Edit(
-                    stopCode = "123456",
+                    stopIdentifier = "123456".toNaptanStopIdentifier(),
                     stopName = UiStopName(
                         name = "Stop Name",
                         locality = "Locality"
@@ -357,20 +359,25 @@ class RealUiContentFetcherTest {
     fun uiContentFlowEmitsEditWithPositiveButtonEnabledWhenStopNameIsValid() = runTest {
         val fetcher = createUiContentFetcher(
             arguments = FakeArguments(
-                onStopCodeFlow = { flowOf("123456") }
+                onStopIdentifierFlow = { flowOf("123456".toNaptanStopIdentifier()) }
             ),
             state = FakeState(
                 onStopNameTextFlow = { flowOf("A") }
             ),
             favouritesRepository = FakeFavouritesRepository(
-                onGetFavouriteStopFlow = { stopCode ->
-                    assertEquals("123456", stopCode)
-                    flowOf(FavouriteStop(stopCode = "123456", stopName = "Saved Name"))
+                onGetFavouriteStopFlow = { stopIdentifier ->
+                    assertEquals("123456".toNaptanStopIdentifier(), stopIdentifier)
+                    flowOf(
+                        FavouriteStop(
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
+                            stopName = "Saved Name"
+                        )
+                    )
                 }
             ),
             busStopsRepository = FakeBusStopsRepository(
-                onGetNameForStopFlow = { stopCode ->
-                    assertEquals("123456", stopCode)
+                onGetNameForStopFlow = { stopIdentifier ->
+                    assertEquals("123456".toNaptanStopIdentifier(), stopIdentifier)
                     flowOf(FakeStopName(name = "Stop Name", locality = "Locality"))
                 }
             )
@@ -380,7 +387,7 @@ class RealUiContentFetcherTest {
             assertEquals(UiContent.InProgress, awaitItem())
             assertEquals(
                 UiContent.Mode.Edit(
-                    stopCode = "123456",
+                    stopIdentifier = "123456".toNaptanStopIdentifier(),
                     stopName = UiStopName(
                         name = "Stop Name",
                         locality = "Locality"
@@ -395,14 +402,14 @@ class RealUiContentFetcherTest {
     }
 
     @Test
-    fun uiContentFlowEmitsExpectedValuesWhenTransitionFromNullStopCodeToPopulated() = runTest {
+    fun uiContentFlowEmitsExpectedValuesWhenTransitionFromNullStopIdToPopulated() = runTest {
         val fetcher = createUiContentFetcher(
             arguments = FakeArguments(
-                onStopCodeFlow = {
+                onStopIdentifierFlow = {
                     flow {
                         emit(null)
                         delay(1L)
-                        emit("123456")
+                        emit("123456".toNaptanStopIdentifier())
                     }
                 }
             ),
@@ -410,14 +417,14 @@ class RealUiContentFetcherTest {
                 onStopNameTextFlow = { flowOf(null) }
             ),
             favouritesRepository = FakeFavouritesRepository(
-                onGetFavouriteStopFlow = { stopCode ->
-                    assertEquals("123456", stopCode)
+                onGetFavouriteStopFlow = { stopIdentifier ->
+                    assertEquals("123456".toNaptanStopIdentifier(), stopIdentifier)
                     flowOf(null)
                 }
             ),
             busStopsRepository = FakeBusStopsRepository(
-                onGetNameForStopFlow = { stopCode ->
-                    assertEquals("123456", stopCode)
+                onGetNameForStopFlow = { stopIdentifier ->
+                    assertEquals("123456".toNaptanStopIdentifier(), stopIdentifier)
                     flowOf(FakeStopName(name = "Stop Name", locality = "Locality"))
                 }
             )
@@ -427,7 +434,7 @@ class RealUiContentFetcherTest {
             assertEquals(UiContent.InProgress, awaitItem())
             assertEquals(
                 UiContent.Mode.Add(
-                    stopCode = "123456",
+                    stopIdentifier = "123456".toNaptanStopIdentifier(),
                     stopName = UiStopName(
                         name = "Stop Name",
                         locality = "Locality"

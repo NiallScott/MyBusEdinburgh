@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,16 +26,33 @@
 
 package uk.org.rivernile.android.bustracker.core.services
 
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.ServiceColours
+    as DatabaseServiceColours
+
 /**
  * This class describes colours attributed to a service.
  *
- * @property primaryColour The primary colour of a service. This could be used, for example, as its
+ * @property colourPrimary The primary colour of a service. This could be used, for example, as its
  * background colour.
  * @property colourOnPrimary The colour to use for this service when laid on top of the primary
  * colour, with sufficient contrast. This could be used, for example, for the service name text.
  * @author Niall Scott
  */
-data class ServiceColours(
-    val primaryColour: Int,
+public data class ServiceColours(
+    val colourPrimary: Int,
     val colourOnPrimary: Int
 )
+
+internal inline fun DatabaseServiceColours.toServiceColours(
+    colourProducer: (Int) -> Int?
+): ServiceColours? {
+    val colourPrimary = colourPrimary ?: return null
+    val colourOnPrimary = colourOnPrimary
+        ?: colourProducer(colourPrimary)
+        ?: return null
+
+    return ServiceColours(
+        colourPrimary = colourPrimary,
+        colourOnPrimary = colourOnPrimary
+    )
+}

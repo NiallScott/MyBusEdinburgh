@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
 import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
  * A fake [UiFavouriteDropdownMenuGenerator] for testing.
@@ -35,9 +36,9 @@ import kotlinx.coroutines.flow.Flow
  */
 internal class FakeUiFavouriteDropdownMenuGenerator(
     private val onGetDropdownMenuItemsForStopsFlow:
-        () -> Flow<Map<String, UiFavouriteDropdownMenu>?> = { throw NotImplementedError() }
+        () -> Flow<Map<StopIdentifier, UiFavouriteDropdownMenu>?> = { throw NotImplementedError() }
 ) : UiFavouriteDropdownMenuGenerator {
 
-    override fun getDropdownMenuItemsForStopsFlow(stopCodes: Set<String>) =
+    override fun getDropdownMenuItemsForStopsFlow(stopIdentifiers: Set<StopIdentifier>) =
         onGetDropdownMenuItemsForStopsFlow()
 }

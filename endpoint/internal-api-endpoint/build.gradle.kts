@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,8 +27,12 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.ksp)
+    id("mybus.dagger-convention")
     `java-test-fixtures`
+}
+
+kotlin {
+    explicitApi()
 }
 
 dependencies {
@@ -36,10 +40,6 @@ dependencies {
     implementation(project(":core:coroutines"))
     implementation(project(":core:http-core"))
     implementation(project(":core:logging"))
-
-    // Dagger 2
-    implementation(libs.dagger.core)
-    ksp(libs.dagger.compiler)
 
     // Retrofit
     implementation(libs.retrofit)
@@ -56,6 +56,4 @@ dependencies {
     testImplementation(libs.coroutines.test)
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)
-    testImplementation(libs.mockito)
-    testImplementation(libs.mockito.kotlin)
 }

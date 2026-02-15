@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,8 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.times
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import kotlinx.coroutines.test.runTest
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableNaptanStopIdentifier
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -44,7 +46,7 @@ class ArgumentsTest {
     fun stopCodeEmitsNullByDefault() = runTest {
         val arguments = Arguments(SavedStateHandle())
 
-        arguments.stopCodeFlow.test {
+        arguments.stopIdentifierFlow.test {
             assertNull(awaitItem())
             ensureAllEventsConsumed()
         }
@@ -54,12 +56,14 @@ class ArgumentsTest {
     fun stopCodeEmitsValueSetInSavedStateHandle() = runTest {
         val arguments = Arguments(
             SavedStateHandle(
-                mapOf(Arguments.STATE_STOP_CODE to "123456")
+                mapOf(
+                    Arguments.STATE_STOP_IDENTIFIER to "123456".toParcelableNaptanStopIdentifier()
+                )
             )
         )
 
-        arguments.stopCodeFlow.test {
-            assertEquals("123456", awaitItem())
+        arguments.stopIdentifierFlow.test {
+            assertEquals("123456".toNaptanStopIdentifier(), awaitItem())
             ensureAllEventsConsumed()
         }
     }

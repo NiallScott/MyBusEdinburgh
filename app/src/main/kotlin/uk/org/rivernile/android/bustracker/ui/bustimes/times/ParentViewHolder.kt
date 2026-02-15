@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -92,7 +92,7 @@ class ParentViewHolder(
      * to `null`.
      */
     private fun populateServiceName(item: UiLiveTimesItem?) {
-        viewBinding.txtServiceName.text = item?.serviceName
+        viewBinding.txtServiceName.text = item?.serviceDescriptor?.serviceName
     }
 
     /**
@@ -105,7 +105,7 @@ class ParentViewHolder(
         viewBinding.txtServiceName.apply {
             newItem?.also {
                 if (oldItem == null || oldItem.serviceColours != it.serviceColours) {
-                    val backgroundColour = it.serviceColours?.primaryColour ?: defaultBackground
+                    val backgroundColour = it.serviceColours?.colourPrimary ?: defaultBackground
                     val textColour = it.serviceColours?.colourOnPrimary ?: defaultTextColour
                     backgroundTintList = ColorStateList.valueOf(backgroundColour)
                     setTextColor(textColour)
@@ -152,7 +152,7 @@ class ParentViewHolder(
      */
     private fun handleItemClicked() {
         item?.let {
-            clickListener.invoke(it.serviceName)
+            clickListener.invoke(it.serviceDescriptor)
         }
     }
 }

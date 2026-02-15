@@ -36,6 +36,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextInput
 import org.junit.Rule
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.text.FakeStopNameFormatter
 import uk.org.rivernile.android.bustracker.core.text.LocalStopNameFormatter
 import uk.org.rivernile.android.bustracker.core.text.UiStopName
@@ -97,7 +98,7 @@ class AddOrEditFavouriteStopDialogFragmentKtTest {
                 AddOrEditFavouriteStopDialogContentWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Mode.Add(
-                            stopCode = "123456",
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
                             stopName = UiStopName(
                                 name = "Some Name",
                                 locality = "Some Locality"
@@ -149,7 +150,7 @@ class AddOrEditFavouriteStopDialogFragmentKtTest {
                 AddOrEditFavouriteStopDialogContentWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Mode.Edit(
-                            stopCode = "123456",
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
                             stopName = UiStopName(
                                 name = "Some Name",
                                 locality = "Some Locality"
@@ -198,7 +199,7 @@ class AddOrEditFavouriteStopDialogFragmentKtTest {
                 AddOrEditFavouriteStopDialogContentWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Mode.Add(
-                            stopCode = "123456",
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
                             stopName = stopName,
                             isPositiveButtonEnabled = false
                         )
@@ -213,7 +214,7 @@ class AddOrEditFavouriteStopDialogFragmentKtTest {
             .activity
             .getString(
                 R.string.addeditfavouritestopdialog_blurb_add,
-                "stopCode=123456;stopName=$stopName"
+                "stopIdentifier=123456;stopName=$stopName"
             )
 
         composeTestRule
@@ -232,7 +233,7 @@ class AddOrEditFavouriteStopDialogFragmentKtTest {
                 AddOrEditFavouriteStopDialogContentWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Mode.Edit(
-                            stopCode = "123456",
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
                             stopName = stopName,
                             isPositiveButtonEnabled = false,
                             savedName = "Saved Name"
@@ -248,7 +249,7 @@ class AddOrEditFavouriteStopDialogFragmentKtTest {
             .activity
             .getString(
                 R.string.addeditfavouritestopdialog_blurb_edit,
-                "stopCode=123456;stopName=$stopName"
+                "stopIdentifier=123456;stopName=$stopName"
             )
 
         composeTestRule
@@ -263,7 +264,7 @@ class AddOrEditFavouriteStopDialogFragmentKtTest {
                 AddOrEditFavouriteStopDialogContentWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Mode.Add(
-                            stopCode = "123456",
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
                             stopName = UiStopName(
                                 name = "Some Name",
                                 locality = "Some Locality"
@@ -290,7 +291,7 @@ class AddOrEditFavouriteStopDialogFragmentKtTest {
                 AddOrEditFavouriteStopDialogContentWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Mode.Edit(
-                            stopCode = "123456",
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
                             stopName = UiStopName(
                                 name = "Some Name",
                                 locality = "Some Locality"
@@ -312,14 +313,14 @@ class AddOrEditFavouriteStopDialogFragmentKtTest {
     }
 
     @Test
-    fun addModeDefaultsStopNameTextFieldToStopCodeWhenStopNameIsNull() {
+    fun addModeDefaultsStopNameTextFieldToStopIdentifierWhenStopNameIsNull() {
         val stopNameTextTracker = StringTracker()
         composeTestRule.setContent {
             MyBusTheme {
                 AddOrEditFavouriteStopDialogContentWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Mode.Add(
-                            stopCode = "123456",
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
                             stopName = null,
                             isPositiveButtonEnabled = false
                         )
@@ -352,7 +353,7 @@ class AddOrEditFavouriteStopDialogFragmentKtTest {
                 AddOrEditFavouriteStopDialogContentWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Mode.Add(
-                            stopCode = "123456",
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
                             stopName = stopName,
                             isPositiveButtonEnabled = false
                         )
@@ -381,7 +382,7 @@ class AddOrEditFavouriteStopDialogFragmentKtTest {
                 AddOrEditFavouriteStopDialogContentWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Mode.Edit(
-                            stopCode = "123456",
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
                             stopName = UiStopName(
                                 name = "Some Name",
                                 locality = "Some Locality"
@@ -418,7 +419,7 @@ class AddOrEditFavouriteStopDialogFragmentKtTest {
                 AddOrEditFavouriteStopDialogContentWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Mode.Add(
-                            stopCode = "123456",
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
                             stopName = stopName,
                             isPositiveButtonEnabled = false
                         )
@@ -452,7 +453,7 @@ class AddOrEditFavouriteStopDialogFragmentKtTest {
                 AddOrEditFavouriteStopDialogContentWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Mode.Edit(
-                            stopCode = "123456",
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
                             stopName = UiStopName(
                                 name = "Some Name",
                                 locality = "Some Locality"
@@ -490,7 +491,7 @@ class AddOrEditFavouriteStopDialogFragmentKtTest {
                 AddOrEditFavouriteStopDialogContentWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Mode.Add(
-                            stopCode = "123456",
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
                             stopName = UiStopName(
                                 name = "Some Name",
                                 locality = "Some Locality"
@@ -522,7 +523,7 @@ class AddOrEditFavouriteStopDialogFragmentKtTest {
                 AddOrEditFavouriteStopDialogContentWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Mode.Edit(
-                            stopCode = "123456",
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
                             stopName = UiStopName(
                                 name = "Some Name",
                                 locality = "Some Locality"
@@ -555,7 +556,7 @@ class AddOrEditFavouriteStopDialogFragmentKtTest {
                 AddOrEditFavouriteStopDialogContentWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Mode.Add(
-                            stopCode = "123456",
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
                             stopName = UiStopName(
                                 name = "Some Name",
                                 locality = "Some Locality"
@@ -584,7 +585,7 @@ class AddOrEditFavouriteStopDialogFragmentKtTest {
                 AddOrEditFavouriteStopDialogContentWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Mode.Edit(
-                            stopCode = "123456",
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
                             stopName = UiStopName(
                                 name = "Some Name",
                                 locality = "Some Locality"
@@ -615,7 +616,7 @@ class AddOrEditFavouriteStopDialogFragmentKtTest {
                 AddOrEditFavouriteStopDialogContentWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Mode.Add(
-                            stopCode = "123456",
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
                             stopName = UiStopName(
                                 name = "Some Name",
                                 locality = "Some Locality"
@@ -664,8 +665,8 @@ class AddOrEditFavouriteStopDialogFragmentKtTest {
 
     private val stopNameFormatter get() = FakeStopNameFormatter(
         onFormatBusStopName = { it.toString() },
-        onFormatBusStopNameWithStopCode = { stopCode, stopName ->
-            "stopCode=$stopCode;stopName=$stopName"
+        onFormatBusStopNameWithStopIdentifier = { stopIdentifier, stopName ->
+            "stopIdentifier=${stopIdentifier.toHumanReadableString()};stopName=$stopName"
         }
     )
 }

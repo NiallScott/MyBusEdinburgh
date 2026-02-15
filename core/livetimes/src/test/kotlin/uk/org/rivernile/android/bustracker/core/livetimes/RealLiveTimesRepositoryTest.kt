@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.livetimes
 
 import app.cash.turbine.test
 import kotlinx.coroutines.test.runTest
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.FakeTrackerEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
@@ -36,6 +37,7 @@ import uk.org.rivernile.android.bustracker.core.time.FakeTimeUtils
 import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Instant
 
 /**
  * Tests for [LiveTimesRepository].
@@ -48,22 +50,21 @@ class RealLiveTimesRepositoryTest {
     fun getLiveTimesFlowEmitsExpectedValues() = runTest {
         val liveTimes = LiveTimes(
             stops = emptyMap(),
-            receiveTime = 123L,
-            hasGlobalDisruption = false
+            receiveTime = Instant.fromEpochMilliseconds(123L)
         )
         val response = LiveTimesResponse.Success(liveTimes)
         val expected = LiveTimesResult.Success(liveTimes)
         val repository = createLiveTimesRepository(
             trackerEndpoint = FakeTrackerEndpoint(
-                onGetLiveTimesWithSingleStop = { stopCode, numberOfDepartures ->
-                    assertEquals("123456", stopCode)
+                onGetLiveTimesWithSingleStop = { stopIdentifier, numberOfDepartures ->
+                    assertEquals("123456".toNaptanStopIdentifier(), stopIdentifier)
                     assertEquals(4, numberOfDepartures)
                     response
                 }
             )
         )
 
-        repository.getLiveTimesFlow("123456", 4).test {
+        repository.getLiveTimesFlow("123456".toNaptanStopIdentifier(), 4).test {
             assertEquals(LiveTimesResult.InProgress, awaitItem())
             assertEquals(expected, awaitItem())
             awaitComplete()

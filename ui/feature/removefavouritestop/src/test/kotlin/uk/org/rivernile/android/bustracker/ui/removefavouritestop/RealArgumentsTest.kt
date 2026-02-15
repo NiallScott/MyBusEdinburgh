@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,8 @@
 package uk.org.rivernile.android.bustracker.ui.removefavouritestop
 
 import androidx.lifecycle.SavedStateHandle
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableNaptanStopIdentifier
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -39,23 +41,23 @@ import kotlin.test.assertNull
 class RealArgumentsTest {
 
     @Test
-    fun stopCodeIsNullByDefault() {
+    fun stopIdentifierIsNullByDefault() {
         val arguments = createArguments()
 
-        assertNull(arguments.stopCode)
+        assertNull(arguments.stopIdentifier)
     }
 
     @Test
-    fun stopCodeIsPopulatedWhenSavedStateValueIsPopulated() {
+    fun stopIdentifierIsPopulatedWhenSavedStateValueIsPopulated() {
         val arguments = createArguments(
             SavedStateHandle(
                 mapOf(
-                    ARG_STOP_CODE to "123456"
+                    ARG_STOP_IDENTIFIER to "123456".toParcelableNaptanStopIdentifier()
                 )
             )
         )
 
-        assertEquals("123456", arguments.stopCode)
+        assertEquals("123456".toNaptanStopIdentifier(), arguments.stopIdentifier)
     }
 
     private fun createArguments(

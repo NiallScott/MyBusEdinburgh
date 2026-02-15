@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -47,8 +47,10 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.transformLatest
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopSearchResult
+import uk.org.rivernile.android.bustracker.core.busstops.StopSearchResult
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.sortByServiceName
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import javax.inject.Inject
 
@@ -57,6 +59,7 @@ import javax.inject.Inject
  *
  * @param savedState Saved instance state.
  * @param busStopsRepository Used to query the search term to obtain results.
+ * @param serviceNameComparator Used to sort services by name.
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
@@ -64,6 +67,7 @@ import javax.inject.Inject
 class SearchFragmentViewModel @Inject constructor(
     private val savedState: SavedStateHandle,
     private val busStopsRepository: BusStopsRepository,
+    private val serviceNameComparator: Comparator<String>,
     @param:ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
@@ -127,8 +131,8 @@ class SearchFragmentViewModel @Inject constructor(
     /**
      * This [LiveData] emits when the stop details should be shown.
      */
-    val showStopLiveData: LiveData<String> get() = showStop
-    private val showStop = SingleLiveEvent<String>()
+    val showStopLiveData: LiveData<StopIdentifier> get() = showStop
+    private val showStop = SingleLiveEvent<StopIdentifier>()
 
     /**
      * This is called when a search result item has been clicked.
@@ -136,7 +140,7 @@ class SearchFragmentViewModel @Inject constructor(
      * @param item The search result which has been clicked.
      */
     fun onItemClicked(item: UiSearchResult) {
-        showStop.value = item.stopCode
+        showStop.value = item.stopIdentifier
     }
 
     /**
@@ -187,8 +191,9 @@ class SearchFragmentViewModel @Inject constructor(
      */
     private fun mapToSearchResult(result: StopSearchResult) =
         UiSearchResult(
-            result.stopCode,
+            result.stopIdentifier,
             result.stopName,
             result.orientation,
-            result.serviceListing)
+            result.serviceListing?.sortByServiceName(serviceNameComparator)
+        )
 }

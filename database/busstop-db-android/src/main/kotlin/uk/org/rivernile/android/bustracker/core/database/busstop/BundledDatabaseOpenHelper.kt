@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -72,8 +72,6 @@ internal class BundledDatabaseOpenHelper(
     companion object {
 
         private const val TABLE_DATABASE_INFO = "database_info"
-        private const val COLUMN_UPDATE_TIMESTAMP_V1 = "updateTS"
-        private const val COLUMN_UPDATE_TIMESTAMP_V2 = "updateTimestamp"
     }
 
     private var verified = false
@@ -246,13 +244,10 @@ internal class BundledDatabaseOpenHelper(
      */
     @get:Throws(SQLException::class)
     private val SupportSQLiteDatabase.updateTimestamp: Long? get() {
-        val updateTimestampColumn =
-            if (version < 2) COLUMN_UPDATE_TIMESTAMP_V1 else COLUMN_UPDATE_TIMESTAMP_V2
-
         return query("""
-            SELECT $updateTimestampColumn 
-            FROM $TABLE_DATABASE_INFO 
-            ORDER BY $updateTimestampColumn DESC 
+            SELECT update_timestamp
+            FROM $TABLE_DATABASE_INFO
+            ORDER BY update_timestamp DESC
             LIMIT 1
         """.trimIndent())
             .use {

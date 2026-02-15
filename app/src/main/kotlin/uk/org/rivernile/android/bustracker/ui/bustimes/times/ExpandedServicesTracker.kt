@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,7 +28,11 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
 import androidx.lifecycle.SavedStateHandle
 import dagger.hilt.android.scopes.ViewModelScoped
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableServiceDescriptor
 import javax.inject.Inject
 
 /**
@@ -59,8 +63,8 @@ class ExpandedServicesTracker @Inject constructor(
     /**
      * The [kotlinx.coroutines.flow.Flow] of expanded services, exposed as a [Set] of [String].
      */
-    val expandedServicesFlow get() = savedState
-        .getStateFlow<List<String>?>(STATE_KEY_EXPANDED_SERVICES, null)
+    val expandedServicesFlow: Flow<Set<ServiceDescriptor>> get() = savedState
+        .getStateFlow<List<ParcelableServiceDescriptor>?>(STATE_KEY_EXPANDED_SERVICES, null)
         .map {
             it?.toSet() ?: emptySet()
         }
@@ -71,16 +75,16 @@ class ExpandedServicesTracker @Inject constructor(
      * propagate the new state via [expandedServicesFlow] and save the new state in the
      * [SavedStateHandle].
      *
-     * @param serviceName The name of the service which was clicked.
+     * @param serviceDescriptor The descriptor of the service which was clicked.
      */
-    fun onServiceClicked(serviceName: String) {
+    fun onServiceClicked(serviceDescriptor: ServiceDescriptor) {
         val expandedItems = savedState
-            .get<List<String>?>(STATE_KEY_EXPANDED_SERVICES)
+            .get<List<ParcelableServiceDescriptor>?>(STATE_KEY_EXPANDED_SERVICES)
             ?.toMutableSet()
             ?: mutableSetOf()
 
-        if (!expandedItems.add(serviceName)) {
-            expandedItems.remove(serviceName)
+        if (!expandedItems.add(serviceDescriptor.toParcelableServiceDescriptor())) {
+            expandedItems.remove(serviceDescriptor.toParcelableServiceDescriptor())
         }
 
         savedState[STATE_KEY_EXPANDED_SERVICES] = ArrayList(expandedItems)

@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop
 
 import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
  * A fake [Arguments] for testing.
@@ -34,11 +35,11 @@ import kotlinx.coroutines.flow.Flow
  * @author Niall Scott
  */
 class FakeArguments(
-    private val onGetStopCode: () -> String? = { throw NotImplementedError() },
-    private val onStopCodeFlow: () -> Flow<String?> = { throw NotImplementedError() }
+    private val onGetStopIdentifier: () -> StopIdentifier? = { throw NotImplementedError() },
+    private val onStopIdentifierFlow: () -> Flow<StopIdentifier?> = { throw NotImplementedError() }
 ) : Arguments {
 
-    override val stopCode get() = onGetStopCode()
+    override val stopIdentifier get() = onGetStopIdentifier()
 
-    override val stopCodeFlow get() = onStopCodeFlow()
+    override val stopIdentifierFlow get() = onStopIdentifierFlow()
 }

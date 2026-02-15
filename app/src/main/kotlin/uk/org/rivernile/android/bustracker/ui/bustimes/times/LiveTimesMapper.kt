@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Stop
@@ -46,20 +48,21 @@ class LiveTimesMapper @Inject constructor() {
      * Given a [LiveTimesResult] from attempting to load [LiveTimes], map it to a [UiResult].
      * Optionally, [serviceColours] may be provided to assign colours to services.
      *
-     * @param stopCode The stop code to retrieve from the [LiveTimes].
+     * @param stopIdentifier The stop to retrieve from the [LiveTimes].
      * @param result The [LiveTimesResult] from attempting to load [LiveTimes].
      * @param serviceColours Optional service colours to assign against services in the mapping
      * process. This is used in the UI to give services their own colours.
      * @return A [UiResult] representing the [LiveTimesResult], but corrected for UI display.
      */
     fun mapLiveTimesAndColoursToUiResult(
-        stopCode: String,
+        stopIdentifier: StopIdentifier,
         result: LiveTimesResult,
-        serviceColours: Map<String, ServiceColours>?
+        serviceColours: Map<ServiceDescriptor, ServiceColours>?
     ): UiResult {
         return when (result) {
             is LiveTimesResult.InProgress -> UiResult.InProgress
-            is LiveTimesResult.Success -> mapSuccess(stopCode, result.liveTimes, serviceColours)
+            is LiveTimesResult.Success ->
+                mapSuccess(stopIdentifier, result.liveTimes, serviceColours)
             is LiveTimesResult.Error -> mapError(result)
         }
     }
@@ -70,7 +73,7 @@ class LiveTimesMapper @Inject constructor() {
      * successful response from the endpoint which contains no data, but we consider that as an
      * error here.
      *
-     * @param stopCode The stop code we're retrieving live times for. This is required here as the
+     * @param stopIdentifier The stop we're retrieving live times for. This is required here as the
      * response contains a [Map] of stop code -> [LiveTimes], as more than one stop can be
      * requested at a time. We need the stop code to get the right stop out of the [Map].
      * @param liveTimes The [LiveTimes] data.
@@ -79,22 +82,22 @@ class LiveTimesMapper @Inject constructor() {
      * [LiveTimesResult].
      */
     private fun mapSuccess(
-        stopCode: String,
+        stopIdentifier: StopIdentifier,
         liveTimes: LiveTimes,
-        serviceColours: Map<String, ServiceColours>?
+        serviceColours: Map<ServiceDescriptor, ServiceColours>?
     ): UiResult {
         return liveTimes
-            .stops[stopCode]
+            .stops[stopIdentifier]
             ?.let {
                 val stop = mapStopToUiStop(it, serviceColours)
 
                 if (stop.services.isNotEmpty()) {
-                    UiResult.Success(liveTimes.receiveTime, stop)
+                    UiResult.Success(liveTimes.receiveTime.toEpochMilliseconds(), stop)
                 } else {
-                    createNoDataError(liveTimes.receiveTime)
+                    createNoDataError(liveTimes.receiveTime.toEpochMilliseconds())
                 }
             }
-            ?: createNoDataError(liveTimes.receiveTime)
+            ?: createNoDataError(liveTimes.receiveTime.toEpochMilliseconds())
     }
 
     /**
@@ -104,14 +107,15 @@ class LiveTimesMapper @Inject constructor() {
      * @param serviceColours The service colours to be used in service mapping.
      * @return The mapped [Stop] as a [UiStop].
      */
-    private fun mapStopToUiStop(stop: Stop, serviceColours: Map<String, ServiceColours>?) =
-        UiStop(
-            stop.stopCode,
-            stop.stopName,
-            stop.services.mapNotNull {
-                mapServiceToUiService(it, serviceColours)
-            }
-        )
+    private fun mapStopToUiStop(
+        stop: Stop,
+        serviceColours: Map<ServiceDescriptor, ServiceColours>?
+    ) = UiStop(
+        stop.stopIdentifier,
+        stop.services.mapNotNull {
+            mapServiceToUiService(it, serviceColours)
+        }
+    )
 
     /**
      * Given a [Service], map it to a [UiService]. Also combine this with [serviceColours], if
@@ -125,15 +129,15 @@ class LiveTimesMapper @Inject constructor() {
      */
     private fun mapServiceToUiService(
         service: Service,
-        serviceColours: Map<String, ServiceColours>?
+        serviceColours: Map<ServiceDescriptor, ServiceColours>?
     ): UiService? {
         return service
             .vehicles
             .ifEmpty { null }
             ?.let {
                 UiService(
-                    service.serviceName,
-                    serviceColours?.get(service.serviceName),
+                    service.serviceDescriptor,
+                    serviceColours?.get(service.serviceDescriptor),
                     it.map(this::mapVehicleToUiVehicle)
                 )
             }

@@ -83,10 +83,10 @@ internal class RealAndroidShortcutsRepository @Inject constructor(
     }
 
     private fun createFavouriteShortcutInfo(shortcut: FavouriteStopShortcut): ShortcutInfoCompat {
-        val busTimesIntent = busTimesIntentFactory.createBusTimesIntent(shortcut.stopCode)
+        val busTimesIntent = busTimesIntentFactory.createBusTimesIntent(shortcut.stopIdentifier)
 
         return ShortcutInfoCompat
-            .Builder(context, shortcut.stopCode)
+            .Builder(context, shortcut.stopIdentifier.toHumanReadableString())
             .setIntent(busTimesIntent)
             .setShortLabel(shortcut.displayName)
             .setLongLabel(shortcut.displayName)

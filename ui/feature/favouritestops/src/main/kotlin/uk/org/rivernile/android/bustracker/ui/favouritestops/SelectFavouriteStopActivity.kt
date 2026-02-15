@@ -59,6 +59,7 @@ import androidx.lifecycle.viewmodel.MutableCreationExtras
 import androidx.savedstate.SavedState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.collections.immutable.persistentListOf
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.shortcuts.AndroidShortcutsRepository
 import uk.org.rivernile.android.bustracker.core.shortcuts.FavouriteStopShortcut
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
@@ -203,7 +204,7 @@ private fun SelectFavouriteStopScreenPreview() {
                     content = UiContent.Content(
                         favouriteStops = persistentListOf(
                             UiFavouriteStop(
-                                stopCode = "1",
+                                stopIdentifier = "1".toNaptanStopIdentifier(),
                                 savedName = "Favourite 1",
                                 services = persistentListOf(
                                     UiServiceName(
@@ -217,13 +218,13 @@ private fun SelectFavouriteStopScreenPreview() {
                                 dropdownMenu = null
                             ),
                             UiFavouriteStop(
-                                stopCode = "2",
+                                stopIdentifier = "2".toNaptanStopIdentifier(),
                                 savedName = "Favourite 2",
                                 services = null,
                                 dropdownMenu = null
                             ),
                             UiFavouriteStop(
-                                stopCode = "3",
+                                stopIdentifier = "3".toNaptanStopIdentifier(),
                                 savedName = "Favourite 3",
                                 services = persistentListOf(
                                     UiServiceName(

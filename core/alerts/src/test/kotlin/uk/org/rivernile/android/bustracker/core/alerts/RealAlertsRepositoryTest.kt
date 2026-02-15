@@ -34,10 +34,19 @@ import uk.org.rivernile.android.bustracker.core.alerts.arrivals.FakeArrivalAlert
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.FakeProximityAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertRequest
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertTaskLauncher
-import uk.org.rivernile.android.bustracker.core.database.settings.alerts.AlertsDao
-import uk.org.rivernile.android.bustracker.core.database.settings.alerts.ArrivalAlertEntity
-import uk.org.rivernile.android.bustracker.core.database.settings.alerts.FakeAlertsDao
-import uk.org.rivernile.android.bustracker.core.database.settings.alerts.ProximityAlertEntity
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.arrival.ArrivalAlert
+    as DatabaseArrivalAlert
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.arrival.ArrivalAlertDao
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.arrival.FakeArrivalAlertDao
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.arrival.InsertableArrivalAlert
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.proximity.FakeProximityAlertDao
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.proximity.InsertableProximityAlert
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.proximity.ProximityAlert
+    as DatabaseProximityAlert
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.proximity.ProximityAlertDao
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.time.FakeTimeUtils
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import kotlin.test.Test
@@ -46,6 +55,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.test.fail
+import kotlin.time.Instant
 
 /**
  * Tests for [AlertsRepository].
@@ -62,17 +72,47 @@ class RealAlertsRepositoryTest {
             arrivalAlertTaskLauncher = FakeArrivalAlertTaskLauncher(
                 onLaunchArrivalAlertTask = launchArrivalAlertTaskInvocationTracker
             ),
-            alertsDao = FakeAlertsDao(
+            arrivalAlertDao = FakeArrivalAlertDao(
                 onAddArrivalAlert = addArrivalAlertTracker
             )
         )
-        val request = ArrivalAlertRequest("123456", listOf("1", "2", "3"), 5)
-        val expected = ArrivalAlertEntity(
-            0,
-            123L,
-            "123456",
-            listOf("1", "2", "3"),
-            5
+        val request = ArrivalAlertRequest(
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            services = setOf(
+                FakeServiceDescriptor(
+                    serviceName = "1",
+                    operatorCode = "TEST1"
+                ),
+                FakeServiceDescriptor(
+                    serviceName = "2",
+                    operatorCode = "TEST2"
+                ),
+                FakeServiceDescriptor(
+                    serviceName = "3",
+                    operatorCode = "TEST3"
+                )
+            ),
+            timeTrigger = 5
+        )
+        val expected = InsertableArrivalAlert(
+            id = 0,
+            timeAdded = Instant.fromEpochMilliseconds(123L),
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            timeTriggerMinutes = 5,
+            services = setOf(
+                FakeServiceDescriptor(
+                    serviceName = "1",
+                    operatorCode = "TEST1"
+                ),
+                FakeServiceDescriptor(
+                    serviceName = "2",
+                    operatorCode = "TEST2"
+                ),
+                FakeServiceDescriptor(
+                    serviceName = "3",
+                    operatorCode = "TEST3"
+                )
+            )
         )
 
         repository.addArrivalAlert(request)
@@ -89,16 +129,16 @@ class RealAlertsRepositoryTest {
             proximityAlertTaskLauncher = FakeProximityAlertTaskLauncher(
                 onLaunchProximityAlertTask = launchProximityAlertTaskInvocationTracker
             ),
-            alertsDao = FakeAlertsDao(
+            proximityAlertDao = FakeProximityAlertDao(
                 onAddProximityAlert = addedProximityAlertTracker
             )
         )
-        val request = ProximityAlertRequest("123456", 50)
-        val expected = ProximityAlertEntity(
-            0,
-            123L,
-            "123456",
-            50
+        val request = ProximityAlertRequest("123456".toNaptanStopIdentifier(), 50)
+        val expected = InsertableProximityAlert(
+            id = 0,
+            timeAdded = Instant.fromEpochMilliseconds(123L),
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            radiusTriggerMeters = 50
         )
 
         repository.addProximityAlert(request)
@@ -108,24 +148,27 @@ class RealAlertsRepositoryTest {
     }
 
     @Test
-    fun removeArrivalAlertWithStopCodeRemovesArrivalAlert() = runTest {
-        val removeArrivalAlertTracker = RemoveAlertByStopCodeTracker()
+    fun removeArrivalAlertWithStopIdentifierRemovesArrivalAlert() = runTest {
+        val removeArrivalAlertTracker = RemoveAlertByStopIdentifierTracker()
         val repository = createAlertsRepository(
-            alertsDao = FakeAlertsDao(
-                onRemoveArrivalAlertByStopCode = removeArrivalAlertTracker
+            arrivalAlertDao = FakeArrivalAlertDao(
+                onRemovalArrivalAlertByStopIdentifier = removeArrivalAlertTracker
             )
         )
 
-        repository.removeArrivalAlert("123456")
+        repository.removeArrivalAlert("123456".toNaptanStopIdentifier())
 
-        assertEquals(listOf("123456"), removeArrivalAlertTracker.stopCodes)
+        assertEquals(
+            listOf("123456".toNaptanStopIdentifier()),
+            removeArrivalAlertTracker.stopIdentifiers
+        )
     }
 
     @Test
     fun removeArrivalAlertWithIdRemovesArrivalAlert() = runTest {
         val removeArrivalAlertTracker = RemoveAlertByIdTracker()
         val repository = createAlertsRepository(
-            alertsDao = FakeAlertsDao(
+            arrivalAlertDao = FakeArrivalAlertDao(
                 onRemoveArrivalAlertById = removeArrivalAlertTracker
             )
         )
@@ -139,7 +182,7 @@ class RealAlertsRepositoryTest {
     fun removeAllArrivalAlertsRemovesAllArrivalAlertsInDao() = runTest {
         val removeAllArrivalAlertsTracker = InvocationTracker()
         val repository = createAlertsRepository(
-            alertsDao = FakeAlertsDao(
+            arrivalAlertDao = FakeArrivalAlertDao(
                 onRemoveAllArrivalAlerts = removeAllArrivalAlertsTracker
             )
         )
@@ -150,24 +193,27 @@ class RealAlertsRepositoryTest {
     }
 
     @Test
-    fun removeProximityAlertWithStopCodeRemovesProximityAlert() = runTest {
-        val removeProximityAlertTracker = RemoveAlertByStopCodeTracker()
+    fun removeProximityAlertWithStopIdentifierRemovesProximityAlert() = runTest {
+        val removeProximityAlertTracker = RemoveAlertByStopIdentifierTracker()
         val repository = createAlertsRepository(
-            alertsDao = FakeAlertsDao(
-                onRemoveProximityAlertByStopCode = removeProximityAlertTracker
+            proximityAlertDao = FakeProximityAlertDao(
+                onRemoveProximityAlertByStopIdentifier = removeProximityAlertTracker
             )
         )
 
-        repository.removeProximityAlert("123456")
+        repository.removeProximityAlert("123456".toNaptanStopIdentifier())
 
-        assertEquals(listOf("123456"), removeProximityAlertTracker.stopCodes)
+        assertEquals(
+            listOf("123456".toNaptanStopIdentifier()),
+            removeProximityAlertTracker.stopIdentifiers
+        )
     }
 
     @Test
     fun removeProximityAlertWithIdRemovesProximityAlert() = runTest {
         val removeProximityAlertTracker = RemoveAlertByIdTracker()
         val repository = createAlertsRepository(
-            alertsDao = FakeAlertsDao(
+            proximityAlertDao = FakeProximityAlertDao(
                 onRemoveProximityAlertById = removeProximityAlertTracker
             )
         )
@@ -181,7 +227,7 @@ class RealAlertsRepositoryTest {
     fun removeAllProximityAlertsRemovesAllProximityAlertsInDao() = runTest {
         val removeAllProximityAlertsTracker = InvocationTracker()
         val repository = createAlertsRepository(
-            alertsDao = FakeAlertsDao(
+            proximityAlertDao = FakeProximityAlertDao(
                 onRemoveAllProximityAlerts = removeAllProximityAlertsTracker
             )
         )
@@ -194,7 +240,7 @@ class RealAlertsRepositoryTest {
     @Test
     fun getAllArrivalAlertsMapsNullResult() = runTest {
         val repository = createAlertsRepository(
-            alertsDao = FakeAlertsDao(
+            arrivalAlertDao = FakeArrivalAlertDao(
                 onGetAllArrivalAlerts = { null }
             )
         )
@@ -207,53 +253,107 @@ class RealAlertsRepositoryTest {
     @Test
     fun getAllArrivalAlertsMapsNonNullResult() = runTest {
         val items = listOf(
-            ArrivalAlertEntity(
-                1,
-                10L,
-                "1",
-                listOf("1"),
-                1
+            InsertableArrivalAlert(
+                id = 1,
+                timeAdded = Instant.fromEpochMilliseconds(10L),
+                stopIdentifier = "1".toNaptanStopIdentifier(),
+                services = setOf(
+                    FakeServiceDescriptor(
+                        serviceName = "1",
+                        operatorCode = "TEST1"
+                    )
+                ),
+                timeTriggerMinutes = 1
             ),
-            ArrivalAlertEntity(
-                2,
-                20L,
-                "2",
-                listOf("1", "2"),
-                2
+            InsertableArrivalAlert(
+                id = 2,
+                timeAdded = Instant.fromEpochMilliseconds(20L),
+                stopIdentifier = "2".toNaptanStopIdentifier(),
+                services = setOf(
+                    FakeServiceDescriptor(
+                        serviceName = "1",
+                        operatorCode = "TEST1"
+                    ),
+                    FakeServiceDescriptor(
+                        serviceName = "2",
+                        operatorCode = "TEST2"
+                    )
+                ),
+                timeTriggerMinutes = 2
             ),
-            ArrivalAlertEntity(
-                3,
-                30L,
-                "3",
-                listOf("1", "2", "3"),
-                3
+            InsertableArrivalAlert(
+                id = 3,
+                timeAdded = Instant.fromEpochMilliseconds(30L),
+                stopIdentifier = "3".toNaptanStopIdentifier(),
+                services = setOf(
+                    FakeServiceDescriptor(
+                        serviceName = "1",
+                        operatorCode = "TEST1"
+                    ),
+                    FakeServiceDescriptor(
+                        serviceName = "2",
+                        operatorCode = "TEST2"
+                    ),
+                    FakeServiceDescriptor(
+                        serviceName = "3",
+                        operatorCode = "TEST3"
+                    )
+                ),
+                timeTriggerMinutes = 3
             )
         )
         val expected = listOf(
             ArrivalAlert(
-                1,
-                10L,
-                "1",
-                listOf("1"),
-                1
+                id = 1,
+                timeAdded = Instant.fromEpochMilliseconds(10L),
+                stopIdentifier = "1".toNaptanStopIdentifier(),
+                services = setOf(
+                    FakeServiceDescriptor(
+                        serviceName = "1",
+                        operatorCode = "TEST1"
+                    )
+                ),
+                timeTriggerMinutes = 1
             ),
             ArrivalAlert(
-                2,
-                20L,
-                "2",
-                listOf("1", "2"),
-                2
+                id = 2,
+                timeAdded = Instant.fromEpochMilliseconds(20L),
+                stopIdentifier = "2".toNaptanStopIdentifier(),
+                services = setOf(
+                    FakeServiceDescriptor(
+                        serviceName = "1",
+                        operatorCode = "TEST1"
+                    ),
+                    FakeServiceDescriptor(
+                        serviceName = "2",
+                        operatorCode = "TEST2"
+                    )
+                ),
+                timeTriggerMinutes = 2
             ),
             ArrivalAlert(
-                3,
-                30L,
-                "3",
-                listOf("1", "2", "3"),
-                3
+                id = 3,
+                timeAdded = Instant.fromEpochMilliseconds(30L),
+                stopIdentifier = "3".toNaptanStopIdentifier(),
+                services = setOf(
+                    FakeServiceDescriptor(
+                        serviceName = "1",
+                        operatorCode = "TEST1"
+                    ),
+                    FakeServiceDescriptor(
+                        serviceName = "2",
+                        operatorCode = "TEST2"
+                    ),
+                    FakeServiceDescriptor(
+                        serviceName = "3",
+                        operatorCode = "TEST3"
+                    )
+                ),
+                timeTriggerMinutes = 3
             )
         )
         val repository = createAlertsRepository(
-            alertsDao = FakeAlertsDao(
+            arrivalAlertDao = FakeArrivalAlertDao(
                 onGetAllArrivalAlerts = { items }
             )
         )
@@ -264,29 +364,37 @@ class RealAlertsRepositoryTest {
     }
 
     @Test
-    fun getAllArrivalAlertStopCodesMapsNullResult() = runTest {
+    fun getAllArrivalAlertStopsMapsNullResult() = runTest {
         val repository = createAlertsRepository(
-            alertsDao = FakeAlertsDao(
-                onGetAllArrivalAlertStopCodes = { null }
+            arrivalAlertDao = FakeArrivalAlertDao(
+                onGetAllArrivalAlertStops = { null }
             )
         )
 
-        val result = repository.getAllArrivalAlertStopCodes()
+        val result = repository.getAllArrivalAlertStops()
 
         assertNull(result)
     }
 
     @Test
-    fun getAllArrivalAlertStopCodesMapsNonNullResult() = runTest {
-        val items = listOf("1", "2", "3")
-        val expected = setOf("1", "2", "3")
+    fun getAllArrivalAlertStopsMapsNonNullResult() = runTest {
+        val items = setOf(
+            "1".toNaptanStopIdentifier(),
+            "2".toNaptanStopIdentifier(),
+            "3".toNaptanStopIdentifier()
+        )
+        val expected = setOf(
+            "1".toNaptanStopIdentifier(),
+            "2".toNaptanStopIdentifier(),
+            "3".toNaptanStopIdentifier()
+        )
         val repository = createAlertsRepository(
-            alertsDao = FakeAlertsDao(
-                onGetAllArrivalAlertStopCodes = { items }
+            arrivalAlertDao = FakeArrivalAlertDao(
+                onGetAllArrivalAlertStops = { items }
             )
         )
 
-        val result = repository.getAllArrivalAlertStopCodes()
+        val result = repository.getAllArrivalAlertStops()
 
         assertEquals(expected, result)
     }
@@ -294,7 +402,7 @@ class RealAlertsRepositoryTest {
     @Test
     fun getProximityAlertMapsNullResult() = runTest {
         val repository = createAlertsRepository(
-            alertsDao = FakeAlertsDao(
+            proximityAlertDao = FakeProximityAlertDao(
                 onGetProximityAlert = { null }
             )
         )
@@ -307,15 +415,15 @@ class RealAlertsRepositoryTest {
     @Test
     fun hasArrivalAlertFlowEmitsDistinctValues() = runTest {
         val repository = createAlertsRepository(
-            alertsDao = FakeAlertsDao(
+            arrivalAlertDao = FakeArrivalAlertDao(
                 onGetHasArrivalAlertFlow = {
-                    assertEquals("123456", it)
+                    assertEquals("123456".toNaptanStopIdentifier(), it)
                     intervalFlowOf(0L, 10L, false, false, true, true, false)
                 }
             )
         )
 
-        repository.hasArrivalAlertFlow("123456").test {
+        repository.hasArrivalAlertFlow("123456".toNaptanStopIdentifier()).test {
             assertFalse(awaitItem())
             assertTrue(awaitItem())
             assertFalse(awaitItem())
@@ -326,14 +434,14 @@ class RealAlertsRepositoryTest {
     @Test
     fun hasProximityAlertFlowEmitsDistinctValues() = runTest {
         val repository = createAlertsRepository(
-            alertsDao = FakeAlertsDao(
+            proximityAlertDao = FakeProximityAlertDao(
                 onGetHasProximityAlertFlow = {
                     intervalFlowOf(0L, 10L, false, false, true, true, false)
                 }
             )
         )
 
-        repository.hasProximityAlertFlow("123456").test {
+        repository.hasProximityAlertFlow("123456".toNaptanStopIdentifier()).test {
             assertFalse(awaitItem())
             assertTrue(awaitItem())
             assertFalse(awaitItem())
@@ -344,7 +452,7 @@ class RealAlertsRepositoryTest {
     @Test
     fun getArrivalAlertCountReturnsValueFromDao() = runTest {
         val repository = createAlertsRepository(
-            alertsDao = FakeAlertsDao(
+            arrivalAlertDao = FakeArrivalAlertDao(
                 onGetArrivalAlertCount = { 123 }
             )
         )
@@ -357,7 +465,7 @@ class RealAlertsRepositoryTest {
     @Test
     fun getProximityAlertCountReturnsValueFromDao() = runTest {
         val repository = createAlertsRepository(
-            alertsDao = FakeAlertsDao(
+            proximityAlertDao = FakeProximityAlertDao(
                 onGetProximityAlertCount = { 123 }
             )
         )
@@ -370,7 +478,7 @@ class RealAlertsRepositoryTest {
     @Test
     fun arrivalAlertCountFlowEmitsDistinctValues() = runTest {
         val repository = createAlertsRepository(
-            alertsDao = FakeAlertsDao(
+            arrivalAlertDao = FakeArrivalAlertDao(
                 onArrivalAlertCountFlow = { intervalFlowOf(0L, 10L, 0, 0, 1, 1, 2, 2, 3) }
             )
         )
@@ -384,35 +492,76 @@ class RealAlertsRepositoryTest {
     }
 
     @Test
-    fun arrivalAlertStopCodesFlowEmitsDistinctValues() = runTest {
+    fun arrivalAlertStopIdentifiersFlowEmitsDistinctValues() = runTest {
         val repository = createAlertsRepository(
-            alertsDao = FakeAlertsDao(
-                onArrivalAlertStopCodesFlow = {
+            arrivalAlertDao = FakeArrivalAlertDao(
+                onGetAllArrivalAlertStopsFlow = {
                     intervalFlowOf(
                         initialDelay = 0L,
                         interval = 10L,
-                        listOf("123", "456"),
-                        listOf("123", "456"),
-                        listOf("123", "789")
+                        listOf("123".toNaptanStopIdentifier(), "456".toNaptanStopIdentifier()),
+                        listOf("123".toNaptanStopIdentifier(), "456".toNaptanStopIdentifier()),
+                        listOf("123".toNaptanStopIdentifier(), "789".toNaptanStopIdentifier())
                     )
                 }
             )
         )
 
-        repository.arrivalAlertStopCodesFlow.test {
-            assertEquals(setOf("123", "456"), awaitItem())
-            assertEquals(setOf("123", "789"), awaitItem())
+        repository.arrivalAlertStopIdentifiersFlow.test {
+            assertEquals(
+                setOf(
+                    "123".toNaptanStopIdentifier(),
+                    "456".toNaptanStopIdentifier()
+                ),
+                awaitItem())
+            assertEquals(
+                setOf(
+                    "123".toNaptanStopIdentifier(),
+                    "789".toNaptanStopIdentifier()
+                ),
+                awaitItem()
+            )
         }
     }
 
     @Test
     fun allProximityAlertsFlowEmitsDistinctValues() = runTest {
-        val alert1 = ProximityAlertEntity(1, 1L, "1", 1)
-        val alert2 = ProximityAlertEntity(2, 2L, "2", 2)
-        val alert3 = ProximityAlertEntity(3, 3L, "3", 3)
-        val expected1 = ProximityAlert(1, 1L, "1", 1)
-        val expected2 = ProximityAlert(2, 2L, "2", 2)
-        val expected3 = ProximityAlert(3, 3L, "3", 3)
+        val alert1 = InsertableProximityAlert(
+            id = 1,
+            timeAdded = Instant.fromEpochMilliseconds(1L),
+            stopIdentifier = "1".toNaptanStopIdentifier(),
+            radiusTriggerMeters = 1
+        )
+        val alert2 = InsertableProximityAlert(
+            id = 2,
+            timeAdded = Instant.fromEpochMilliseconds(2L),
+            stopIdentifier = "2".toNaptanStopIdentifier(),
+            radiusTriggerMeters = 2
+        )
+        val alert3 = InsertableProximityAlert(
+            id = 3,
+            timeAdded = Instant.fromEpochMilliseconds(3L),
+            stopIdentifier = "3".toNaptanStopIdentifier(),
+            radiusTriggerMeters = 3
+        )
+        val expected1 = ProximityAlert(
+            id = 1,
+            timeAdded = Instant.fromEpochMilliseconds(1L),
+            stopIdentifier = "1".toNaptanStopIdentifier(),
+            distanceFromMeters = 1
+        )
+        val expected2 = ProximityAlert(
+            id = 2,
+            timeAdded = Instant.fromEpochMilliseconds(2L),
+            stopIdentifier = "2".toNaptanStopIdentifier(),
+            distanceFromMeters = 2
+        )
+        val expected3 = ProximityAlert(
+            id = 3,
+            timeAdded = Instant.fromEpochMilliseconds(3L),
+            stopIdentifier = "3".toNaptanStopIdentifier(),
+            distanceFromMeters = 3
+        )
         val flow = intervalFlowOf(
             0L,
             10L,
@@ -424,7 +573,7 @@ class RealAlertsRepositoryTest {
             listOf(alert2)
         )
         val repository = createAlertsRepository(
-            alertsDao = FakeAlertsDao(
+            proximityAlertDao = FakeProximityAlertDao(
                 onAllProximityAlertsFlow = { flow }
             )
         )
@@ -441,58 +590,191 @@ class RealAlertsRepositoryTest {
     @Test
     fun proximityAlertStopCodesFlowEmitsDistinctValues() = runTest {
         val repository = createAlertsRepository(
-            alertsDao = FakeAlertsDao(
-                onProximityAlertStopCodesFlow = {
+            proximityAlertDao = FakeProximityAlertDao(
+                onAllProximityAlertStopsFlow = {
                     intervalFlowOf(
                         initialDelay = 0L,
                         interval = 10L,
-                        listOf("123", "456"),
-                        listOf("123", "456"),
-                        listOf("123", "789")
+                        listOf("123".toNaptanStopIdentifier(), "456".toNaptanStopIdentifier()),
+                        listOf("123".toNaptanStopIdentifier(), "456".toNaptanStopIdentifier()),
+                        listOf("123".toNaptanStopIdentifier(), "789".toNaptanStopIdentifier())
                     )
                 }
             )
         )
 
-        repository.proximityAlertStopCodesFlow.test {
-            assertEquals(setOf("123", "456"), awaitItem())
-            assertEquals(setOf("123", "789"), awaitItem())
+        repository.proximityAlertStopIdentifiersFlow.test {
+            assertEquals(
+                setOf(
+                    "123".toNaptanStopIdentifier(),
+                    "456".toNaptanStopIdentifier()
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                setOf(
+                    "123".toNaptanStopIdentifier(),
+                    "789".toNaptanStopIdentifier()
+                ),
+                awaitItem()
+            )
         }
     }
 
     @Test
     fun allAlertsFlowEmitsDistinctValues() = runTest {
-        val arrivalAlert1 = ArrivalAlertEntity(1, 1L, "1", listOf("1", "2", "3"), 1)
-        val arrivalAlert2 = ArrivalAlertEntity(2, 2L, "2", listOf("4", "5", "6"), 6)
-        val proximityAlert1 = ProximityAlertEntity(3, 3L, "3", 3)
-        val proximityAlert2 = ProximityAlertEntity(4, 4L, "4", 4)
-        val expectedArrivalAlert1 = ArrivalAlert(1, 1L, "1", listOf("1", "2", "3"), 1)
-        val expectedArrivalAlert2 = ArrivalAlert(2, 2L, "2", listOf("4", "5", "6"), 6)
-        val expectedProximityAlert1 = ProximityAlert(3, 3L, "3", 3)
-        val expectedProximityAlert2 = ProximityAlert(4, 4L, "4", 4)
-        val flow = intervalFlowOf(
+        val arrivalAlert1 = InsertableArrivalAlert(
+            id = 1,
+            timeAdded = Instant.fromEpochMilliseconds(1L),
+            stopIdentifier = "1".toNaptanStopIdentifier(),
+            services = setOf(
+                FakeServiceDescriptor(
+                    serviceName = "1",
+                    operatorCode = "TEST1"
+                ),
+                FakeServiceDescriptor(
+                    serviceName = "2",
+                    operatorCode = "TEST2"
+                ),
+                FakeServiceDescriptor(
+                    serviceName = "3",
+                    operatorCode = "TEST3"
+                )
+            ),
+            timeTriggerMinutes = 1
+        )
+        val arrivalAlert2 = InsertableArrivalAlert(
+            id = 2,
+            timeAdded = Instant.fromEpochMilliseconds(2L),
+            stopIdentifier = "2".toNaptanStopIdentifier(),
+            services = setOf(
+                FakeServiceDescriptor(
+                    serviceName = "4",
+                    operatorCode = "TEST4"
+                ),
+                FakeServiceDescriptor(
+                    serviceName = "5",
+                    operatorCode = "TEST5"
+                ),
+                FakeServiceDescriptor(
+                    serviceName = "6",
+                    operatorCode = "TEST6"
+                )
+            ),
+            timeTriggerMinutes = 6
+        )
+        val proximityAlert1 = InsertableProximityAlert(
+            id = 3,
+            timeAdded = Instant.fromEpochMilliseconds(3L),
+            stopIdentifier = "3".toNaptanStopIdentifier(),
+            radiusTriggerMeters = 3
+        )
+        val proximityAlert2 = InsertableProximityAlert(
+            id = 4,
+            timeAdded = Instant.fromEpochMilliseconds(4L),
+            stopIdentifier = "4".toNaptanStopIdentifier(),
+            radiusTriggerMeters = 4
+        )
+        val expectedArrivalAlert1 = ArrivalAlert(
+            id = 1,
+            timeAdded = Instant.fromEpochMilliseconds(1L),
+            stopIdentifier = "1".toNaptanStopIdentifier(),
+            setOf(
+                FakeServiceDescriptor(
+                    serviceName = "1",
+                    operatorCode = "TEST1"
+                ),
+                FakeServiceDescriptor(
+                    serviceName = "2",
+                    operatorCode = "TEST2"
+                ),
+                FakeServiceDescriptor(
+                    serviceName = "3",
+                    operatorCode = "TEST3"
+                )
+            ),
+            1
+        )
+        val expectedArrivalAlert2 = ArrivalAlert(
+            id = 2,
+            timeAdded = Instant.fromEpochMilliseconds(2L),
+            stopIdentifier = "2".toNaptanStopIdentifier(),
+            services = setOf(
+                FakeServiceDescriptor(
+                    serviceName = "4",
+                    operatorCode = "TEST4"
+                ),
+                FakeServiceDescriptor(
+                    serviceName = "5",
+                    operatorCode = "TEST5"
+                ),
+                FakeServiceDescriptor(
+                    serviceName = "6",
+                    operatorCode = "TEST6"
+                )
+            ),
+            timeTriggerMinutes = 6
+        )
+        val expectedProximityAlert1 = ProximityAlert(
+            id = 3,
+            timeAdded = Instant.fromEpochMilliseconds(3L),
+            stopIdentifier = "3".toNaptanStopIdentifier(),
+            distanceFromMeters = 3
+        )
+        val expectedProximityAlert2 = ProximityAlert(
+            id = 4,
+            timeAdded = Instant.fromEpochMilliseconds(4L),
+            stopIdentifier = "4".toNaptanStopIdentifier(),
+            distanceFromMeters = 4
+        )
+        val arrivalAlertsFlow = intervalFlowOf(
             0L,
             10L,
             null,
             null,
             listOf(arrivalAlert1),
-            listOf(arrivalAlert1),
+            listOf(arrivalAlert1, arrivalAlert2),
+            listOf(arrivalAlert2)
+        )
+        val proximityAlertsFlow = intervalFlowOf(
+            5L,
+            10L,
+            null,
+            null,
             listOf(proximityAlert1),
-            listOf(proximityAlert1),
-            listOf(arrivalAlert1, arrivalAlert2, proximityAlert1, proximityAlert2),
-            listOf(arrivalAlert1, arrivalAlert2, proximityAlert1, proximityAlert2),
-            listOf(arrivalAlert2, proximityAlert2)
+            listOf(proximityAlert1, proximityAlert2),
+            listOf(proximityAlert2)
         )
         val repository = createAlertsRepository(
-            alertsDao = FakeAlertsDao(
-                onAllAlertsFlow = { flow }
+            arrivalAlertDao = FakeArrivalAlertDao(
+                onGetAllArrivalAlertsFlow = { arrivalAlertsFlow }
+            ),
+            proximityAlertDao = FakeProximityAlertDao(
+                onAllProximityAlertsFlow = { proximityAlertsFlow }
             )
         )
 
         repository.allAlertsFlow.test {
             assertNull(awaitItem())
-            assertEquals(listOf(expectedArrivalAlert1), awaitItem())
-            assertEquals(listOf(expectedProximityAlert1), awaitItem())
+            assertEquals(
+                listOf(expectedArrivalAlert1),
+                awaitItem()
+            )
+            assertEquals(
+                listOf(
+                    expectedArrivalAlert1,
+                    expectedProximityAlert1
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                listOf(
+                    expectedArrivalAlert1,
+                    expectedArrivalAlert2,
+                    expectedProximityAlert1
+                ),
+                awaitItem()
+            )
             assertEquals(
                 listOf(
                     expectedArrivalAlert1,
@@ -502,7 +784,21 @@ class RealAlertsRepositoryTest {
                 ),
                 awaitItem()
             )
-            assertEquals(listOf(expectedArrivalAlert2, expectedProximityAlert2), awaitItem())
+            assertEquals(
+                listOf(
+                    expectedArrivalAlert2,
+                    expectedProximityAlert1,
+                    expectedProximityAlert2
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                listOf(
+                    expectedArrivalAlert2,
+                    expectedProximityAlert2
+                ),
+                awaitItem()
+            )
             awaitComplete()
         }
     }
@@ -516,8 +812,10 @@ class RealAlertsRepositoryTest {
             proximityAlertTaskLauncher = FakeProximityAlertTaskLauncher(
                 onLaunchProximityAlertTask = { fail("Should not launch the proximity alert task") }
             ),
-            alertsDao = FakeAlertsDao(
-                onGetArrivalAlertCount = { 0 },
+            arrivalAlertDao = FakeArrivalAlertDao(
+                onGetArrivalAlertCount = { 0 }
+            ),
+            proximityAlertDao = FakeProximityAlertDao(
                 onGetProximityAlertCount = { 0 }
             )
         )
@@ -554,8 +852,10 @@ class RealAlertsRepositoryTest {
             proximityAlertTaskLauncher = FakeProximityAlertTaskLauncher(
                 onLaunchProximityAlertTask = { fail("Should not launch the proximity alert task") }
             ),
-            alertsDao = FakeAlertsDao(
-                onGetArrivalAlertCount = { 1 },
+            arrivalAlertDao = FakeArrivalAlertDao(
+                onGetArrivalAlertCount = { 1 }
+            ),
+            proximityAlertDao = FakeProximityAlertDao(
                 onGetProximityAlertCount = { 0 }
             )
         )
@@ -574,8 +874,10 @@ class RealAlertsRepositoryTest {
             proximityAlertTaskLauncher = FakeProximityAlertTaskLauncher(
                 onLaunchProximityAlertTask = { fail("Should not launch the proximity alert task") }
             ),
-            alertsDao = FakeAlertsDao(
-                onGetArrivalAlertCount = { 0 },
+            arrivalAlertDao = FakeArrivalAlertDao(
+                onGetArrivalAlertCount = { 0 }
+            ),
+            proximityAlertDao = FakeProximityAlertDao(
                 onGetProximityAlertCount = { 0 }
             )
         )
@@ -593,8 +895,10 @@ class RealAlertsRepositoryTest {
             proximityAlertTaskLauncher = FakeProximityAlertTaskLauncher(
                 onLaunchProximityAlertTask = launchProximityAlertTaskInvocationTracker
             ),
-            alertsDao = FakeAlertsDao(
-                onGetArrivalAlertCount = { 0 },
+            arrivalAlertDao = FakeArrivalAlertDao(
+                onGetArrivalAlertCount = { 0 }
+            ),
+            proximityAlertDao = FakeProximityAlertDao(
                 onGetProximityAlertCount = { 1 }
             )
         )
@@ -607,14 +911,17 @@ class RealAlertsRepositoryTest {
     private fun createAlertsRepository(
         arrivalAlertTaskLauncher: ArrivalAlertTaskLauncher = FakeArrivalAlertTaskLauncher(),
         proximityAlertTaskLauncher: ProximityAlertTaskLauncher = FakeProximityAlertTaskLauncher(),
-        alertsDao: AlertsDao = FakeAlertsDao()
+        arrivalAlertDao: ArrivalAlertDao = FakeArrivalAlertDao(),
+        proximityAlertDao: ProximityAlertDao = FakeProximityAlertDao()
     ): RealAlertsRepository {
         return RealAlertsRepository(
             arrivalAlertTaskLauncher = arrivalAlertTaskLauncher,
             proximityAlertTaskLauncher = proximityAlertTaskLauncher,
-            alertsDao = alertsDao,
+            arrivalAlertDao = arrivalAlertDao,
+            proximityAlertDao = proximityAlertDao,
             timeUtils = FakeTimeUtils(
-                onGetCurrentTimeMillis = { 123L }
+                onGetCurrentTimeMillis = { 123L },
+                onNow = { Instant.fromEpochMilliseconds(123L) }
             )
         )
     }
@@ -629,33 +936,33 @@ class RealAlertsRepositoryTest {
         }
     }
 
-    private class AddArrivalAlertTracker : (ArrivalAlertEntity) -> Unit {
+    private class AddArrivalAlertTracker : (DatabaseArrivalAlert) -> Unit {
 
         val addedArrivalAlerts get() = _addedArrivalAlerts.toList()
-        private val _addedArrivalAlerts = mutableListOf<ArrivalAlertEntity>()
+        private val _addedArrivalAlerts = mutableListOf<DatabaseArrivalAlert>()
 
-        override fun invoke(p1: ArrivalAlertEntity) {
+        override fun invoke(p1: DatabaseArrivalAlert) {
             _addedArrivalAlerts += p1
         }
     }
 
-    private class AddProximityAlertTracker : (ProximityAlertEntity) -> Unit {
+    private class AddProximityAlertTracker : (DatabaseProximityAlert) -> Unit {
 
         val addedProximityAlerts get() = _addedProximityAlerts.toList()
-        private val _addedProximityAlerts = mutableListOf<ProximityAlertEntity>()
+        private val _addedProximityAlerts = mutableListOf<DatabaseProximityAlert>()
 
-        override fun invoke(p1: ProximityAlertEntity) {
+        override fun invoke(p1: DatabaseProximityAlert) {
             _addedProximityAlerts += p1
         }
     }
 
-    private class RemoveAlertByStopCodeTracker : (String) -> Unit {
+    private class RemoveAlertByStopIdentifierTracker : (StopIdentifier) -> Unit {
 
-        val stopCodes get() = _stopCodes.toList()
-        private val _stopCodes = mutableListOf<String>()
+        val stopIdentifiers get() = _stopIdentifiers.toList()
+        private val _stopIdentifiers = mutableListOf<StopIdentifier>()
 
-        override fun invoke(p1: String) {
-            _stopCodes += p1
+        override fun invoke(p1: StopIdentifier) {
+            _stopIdentifiers += p1
         }
     }
 

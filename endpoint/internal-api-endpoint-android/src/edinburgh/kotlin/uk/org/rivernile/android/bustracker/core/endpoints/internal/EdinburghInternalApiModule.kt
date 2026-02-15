@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,7 +34,7 @@ import uk.org.rivernile.android.bustracker.core.endpoint.internal.BuildConfig
 import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ForInternalApi
 import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ForInternalApiAppName
 import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ForInternalApiKey
-import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ForInternalApiSchemaName
+import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ForInternalApiSchemaVersion
 
 /**
  * This [Module] provides dependencies for the Edinburgh version of the internal API.
@@ -47,7 +47,7 @@ internal class EdinburghInternalApiModule {
 
     @Provides
     @ForInternalApi
-    fun provideApiBaseUrl(): String = "http://edinb.us/api/"
+    fun provideApiBaseUrl(): String = "https://api.edinburgh.mybusapp.net/api/"
 
     @Provides
     @ForInternalApiKey
@@ -55,9 +55,9 @@ internal class EdinburghInternalApiModule {
 
     @Provides
     @ForInternalApiAppName
-    fun provideApiAppName(): String = "MBE"
+    fun provideApiAppName(): String = "MyBusEdinburgh"
 
     @Provides
-    @ForInternalApiSchemaName
-    fun provideApiSchemaName(): String = "MBE_10"
+    @ForInternalApiSchemaVersion
+    fun provideApiSchemaVersion(): Int = 23
 }

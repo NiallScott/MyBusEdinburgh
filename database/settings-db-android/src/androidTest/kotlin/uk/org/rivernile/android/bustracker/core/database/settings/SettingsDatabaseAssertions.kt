@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,36 +27,72 @@
 package uk.org.rivernile.android.bustracker.core.database.settings
 
 import androidx.sqlite.db.SupportSQLiteDatabase
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
- * Assert that after a migration, the `active_alerts` triggers still exist.
- *
- * @param database The [SupportSQLiteDatabase] to assert upon.
+ * Assert that after a migration, the `active_alerts` triggers still exist. This only applies up to
+ * version 4 of the database.
  */
-fun assertAlertTriggersExist(database: SupportSQLiteDatabase) {
-    database.query("""
-        SELECT name, tbl_name 
-        FROM sqlite_master 
-        WHERE type = 'trigger' 
+internal fun SupportSQLiteDatabase.assertAlertTriggersExistUpToVersion4() {
+    query("""
+        SELECT name, tbl_name
+        FROM sqlite_master
+        WHERE type = 'trigger'
         ORDER BY name ASC
         """)
-        .apply {
-            assertEquals(3, count)
+        .use { result ->
+            assertEquals(3, result.count)
 
-            assertTrue(moveToNext())
-            assertEquals("delete_alert", getString(0))
-            assertEquals("active_alerts", getString(1))
+            assertTrue(result.moveToNext())
+            assertEquals("delete_alert", result.getString(0))
+            assertEquals("active_alerts", result.getString(1))
 
-            assertTrue(moveToNext())
-            assertEquals("insert_alert", getString(0))
-            assertEquals("active_alerts", getString(1))
+            assertTrue(result.moveToNext())
+            assertEquals("insert_alert", result.getString(0))
+            assertEquals("active_alerts", result.getString(1))
 
-            assertTrue(moveToNext())
-            assertEquals("update_alert", getString(0))
-            assertEquals("active_alerts", getString(1))
-
-            close()
+            assertTrue(result.moveToNext())
+            assertEquals("update_alert", result.getString(0))
+            assertEquals("active_alerts", result.getString(1))
         }
+}
+
+/**
+ * Assert that after a migration, the alert tables triggers exist. This applies after version 5 of
+ * the database.
+ */
+internal fun SupportSQLiteDatabase.assertAlertTablesTriggersExist() {
+    query("""
+            SELECT name, tbl_name
+            FROM sqlite_master
+            WHERE type = 'trigger'
+            ORDER BY name ASC
+        """.trimIndent()).use { result ->
+        assertEquals(6, result.count)
+
+        assertTrue(result.moveToNext())
+        assertEquals("delete_arrival_alert", result.getString(0))
+        assertEquals("arrival_alert", result.getString(1))
+
+        assertTrue(result.moveToNext())
+        assertEquals("delete_proximity_alert", result.getString(0))
+        assertEquals("proximity_alert", result.getString(1))
+
+        assertTrue(result.moveToNext())
+        assertEquals("insert_arrival_alert", result.getString(0))
+        assertEquals("arrival_alert", result.getString(1))
+
+        assertTrue(result.moveToNext())
+        assertEquals("insert_proximity_alert", result.getString(0))
+        assertEquals("proximity_alert", result.getString(1))
+
+        assertTrue(result.moveToNext())
+        assertEquals("update_arrival_alert", result.getString(0))
+        assertEquals("arrival_alert", result.getString(1))
+
+        assertTrue(result.moveToNext())
+        assertEquals("update_proximity_alert", result.getString(0))
+        assertEquals("proximity_alert", result.getString(1))
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,12 +28,12 @@ package uk.org.rivernile.android.bustracker.core.busstops
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetailsWithServices
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopLocation
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopSearchResult
+import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -45,31 +45,33 @@ import javax.inject.Singleton
 public interface BusStopsRepository {
 
     /**
-     * Get a [Flow] which returns [StopName] for the given `stopCode`. If the stop name is updated
-     * later, these will be emitted.
+     * Get a [Flow] which returns [StopName] for the given [stopIdentifier]. If the stop name is
+     * updated later, these will be emitted.
      *
-     * @param stopCode The stop code to get details for.
+     * @param stopIdentifier The stop to get details for.
      * @return The [Flow] which emits the [StopName] for the given stop code.
      */
-    public fun getNameForStopFlow(stopCode: String): Flow<StopName?>
+    public fun getNameForStopFlow(stopIdentifier: StopIdentifier): Flow<StopName?>
 
     /**
-     * Get a [Flow] which returns [StopDetails] for the given `stopCode`. If stop details are
+     * Get a [Flow] which returns [StopDetails] for the given [StopIdentifier]. If stop details are
      * updated later, these will be emitted.
      *
-     * @param stopCode The stop code to get details for.
+     * @param stopIdentifier The stop to get details for.
      * @return The [Flow] which emits [StopDetails] for the given stop code.
      */
-    public fun getBusStopDetailsFlow(stopCode: String): Flow<StopDetails?>
+    public fun getBusStopDetailsFlow(stopIdentifier: StopIdentifier): Flow<StopDetails?>
 
     /**
-     * Get a [Flow] which returns [StopDetails] for the given `stopCodes`. If stop details are
+     * Get a [Flow] which returns [StopDetails] for the given [stopIdentifiers]. If stop details are
      * updated later, these will be emitted.
      *
-     * @param stopCodes The stop codes to get details for.
+     * @param stopIdentifiers The stops to get details for.
      * @return The [Flow] which emits [StopDetails] for the given stop codes.
      */
-    public fun getBusStopDetailsFlow(stopCodes: Set<String>): Flow<Map<String, StopDetails>?>
+    public fun getBusStopDetailsFlow(
+        stopIdentifiers: Set<StopIdentifier>
+    ): Flow<Map<StopIdentifier, StopDetails>?>
 
     /**
      * Return a [Flow] which emits [List]s of [StopDetailsWithServices] objects for stops which
@@ -86,7 +88,7 @@ public interface BusStopsRepository {
         minLongitude: Double,
         maxLatitude: Double,
         maxLongitude: Double,
-        serviceFilter: Set<String>?
+        serviceFilter: Set<ServiceDescriptor>?
     ): Flow<List<StopDetailsWithServices>?>
 
     /**
@@ -94,11 +96,11 @@ public interface BusStopsRepository {
      * satisfy the supplied [serviceFilter].
      *
      * @param serviceFilter An optional [Set] which contains the service filter.
-     * @return A [Flow] which emits [List]s pf [StopDetails] which satisfy the supplied
+     * @return A [Flow] which emits [List]s of [StopDetails] which satisfy the supplied
      * [serviceFilter].
      */
     public fun getStopDetailsWithServiceFilterFlow(
-        serviceFilter: Set<String>?
+        serviceFilter: Set<ServiceDescriptor>?
     ): Flow<List<StopDetails>?>
 
     /**
@@ -112,21 +114,21 @@ public interface BusStopsRepository {
     public fun getStopSearchResultsFlow(searchTerm: String): Flow<List<StopSearchResult>?>
 
     /**
-     * Get a [StopLocation] for a given [stopCode].
+     * Get a [StopLocation] for a given [stopIdentifier].
      *
-     * @param stopCode The stop code to get a location for.
+     * @param stopIdentifier The stop to get a location for.
      * @return The [StopLocation] for the given stop code, or `null` if there is no location for
      * this stop.
      */
-    public suspend fun getStopLocation(stopCode: String): StopLocation?
+    public suspend fun getStopLocation(stopIdentifier: StopIdentifier): StopLocation?
 
     /**
-     * Get the [StopName] for the given [stopCode].
+     * Get the [StopName] for the given [stopIdentifier].
      *
-     * @param stopCode The stop code to get the name for.
+     * @param stopIdentifier The stop to get the name for.
      * @return The [StopName] for the stop, or `null` if it's not available.
      */
-    public suspend fun getNameForStop(stopCode: String): StopName?
+    public suspend fun getNameForStop(stopIdentifier: StopIdentifier): StopName?
 }
 
 @Singleton
@@ -134,43 +136,97 @@ internal class RealBusStopsRepository @Inject constructor(
     private val stopDao: StopDao
 ) : BusStopsRepository {
 
-    override fun getNameForStopFlow(stopCode: String) = stopDao.getNameForStopFlow(stopCode)
+    override fun getNameForStopFlow(stopIdentifier: StopIdentifier): Flow<StopName?> {
+        return stopDao
+            .getNameForStopFlow(stopIdentifier.getNaptanCodeOrThrow())
+            .map { it?.toStopName() }
+    }
 
-    override fun getBusStopDetailsFlow(stopCode: String) = stopDao.getStopDetailsFlow(stopCode)
+    override fun getBusStopDetailsFlow(stopIdentifier: StopIdentifier): Flow<StopDetails?> {
+        return stopDao
+            .getStopDetailsFlow(stopIdentifier.getNaptanCodeOrThrow())
+            .map { it?.toStopDetails() }
+    }
 
-    override fun getBusStopDetailsFlow(stopCodes: Set<String>) =
-        stopDao.getStopDetailsFlow(stopCodes)
+    override fun getBusStopDetailsFlow(
+        stopIdentifiers: Set<StopIdentifier>
+    ): Flow<Map<StopIdentifier, StopDetails>?> {
+        val stopCodes = stopIdentifiers
+            .map { it.getNaptanCodeOrThrow() }
+            .toSet()
+
+        return stopDao
+            .getStopDetailsFlow(stopCodes)
+            .map { stopDetails ->
+                stopDetails
+                    ?.map { (key, value) ->
+                        key.toNaptanStopIdentifier() to value.toStopDetails()
+                    }
+                    ?.toMap()
+            }
+    }
 
     override fun getStopDetailsWithinSpanFlow(
         minLatitude: Double,
         minLongitude: Double,
         maxLatitude: Double,
         maxLongitude: Double,
-        serviceFilter: Set<String>?
-    ) = serviceFilter?.ifEmpty { null }?.let {
-        stopDao.getStopDetailsWithinSpanFlow(
+        serviceFilter: Set<ServiceDescriptor>?
+    ): Flow<List<StopDetailsWithServices>?> {
+        val flow = serviceFilter?.ifEmpty { null }?.let {
+            stopDao.getStopDetailsWithinSpanFlow(
+                minLatitude,
+                minLongitude,
+                maxLatitude,
+                maxLongitude,
+                it
+            )
+        } ?: stopDao.getStopDetailsWithinSpanFlow(
             minLatitude,
             minLongitude,
             maxLatitude,
-            maxLongitude,
-            it
+            maxLongitude
         )
-    } ?: stopDao.getStopDetailsWithinSpanFlow(
-        minLatitude,
-        minLongitude,
-        maxLatitude,
-        maxLongitude
-    )
 
-    override fun getStopDetailsWithServiceFilterFlow(serviceFilter: Set<String>?) =
-        stopDao.getStopDetailsWithServiceFilterFlow(serviceFilter)
+        return flow
+            .map {
+                it?.toStopDetailsWithServicesList()
+            }
+    }
+
+    override fun getStopDetailsWithServiceFilterFlow(
+        serviceFilter: Set<ServiceDescriptor>?
+    ): Flow<List<StopDetails>?> {
+        return stopDao
+            .getStopDetailsWithServiceFilterFlow(serviceFilter)
+            .map { it?.toStopDetailsList() }
+    }
 
     override fun getStopSearchResultsFlow(searchTerm: String) =
-        stopDao.getStopSearchResultsFlow(searchTerm)
+        stopDao
+            .getStopSearchResultsFlow(searchTerm)
+            .map { it?.toStopSearchResults() }
 
-    override suspend fun getStopLocation(stopCode: String) =
-        stopDao.getLocationForStopFlow(stopCode).first()
+    override suspend fun getStopLocation(stopIdentifier: StopIdentifier): StopLocation? {
+        return stopDao
+            .getLocationForStopFlow(stopIdentifier.getNaptanCodeOrThrow())
+            .first()
+            ?.toStopLocation()
+    }
 
-    override suspend fun getNameForStop(stopCode: String) =
-        stopDao.getNameForStopFlow(stopCode).first()
+    override suspend fun getNameForStop(stopIdentifier: StopIdentifier): StopName? {
+        return stopDao
+            .getNameForStopFlow(stopIdentifier.getNaptanCodeOrThrow())
+            .first()
+            ?.toStopName()
+    }
+
+    private fun StopIdentifier.getNaptanCodeOrThrow(): String {
+        return if (this is NaptanStopIdentifier) {
+            naptanStopCode
+        } else {
+            throw UnsupportedOperationException("Only Naptan stop identifiers are supported for " +
+                "now.")
+        }
+    }
 }

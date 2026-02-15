@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,6 +38,7 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.testutils.test
 
@@ -201,9 +202,9 @@ class AlertManagerFragmentViewModelTest {
     @Test
     fun showRemoveArrivalAlertLiveDataEmitsEventWhenRemoveArrivalAlertClickedIsCalled() {
         val observer = viewModel.showRemoveArrivalAlertLiveData.test()
-        viewModel.onRemoveArrivalAlertClicked("123456")
+        viewModel.onRemoveArrivalAlertClicked("123456".toNaptanStopIdentifier())
 
-        observer.assertValues("123456")
+        observer.assertValues("123456".toNaptanStopIdentifier())
     }
 
     @Test
@@ -216,8 +217,8 @@ class AlertManagerFragmentViewModelTest {
     @Test
     fun showRemoveProximityAlertLiveDataEmitsEventWhenRemoveArrivalAlertClickedIsCalled() {
         val observer = viewModel.showRemoveProximityAlertLiveData.test()
-        viewModel.onRemoveProximityAlertClicked("123456")
+        viewModel.onRemoveProximityAlertClicked("123456".toNaptanStopIdentifier())
 
-        observer.assertValues("123456")
+        observer.assertValues("123456".toNaptanStopIdentifier())
     }
 }

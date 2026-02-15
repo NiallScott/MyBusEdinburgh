@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.alerts
 
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+
 /**
  * Classes which wish to be informed when click events happen should implement this interface.
  *
@@ -41,14 +43,14 @@ interface OnAlertItemClickListener {
     /**
      * This is called when the user wishes to remove a previously set arrival alert.
      *
-     * @param stopCode The stop code the arrival alert should be removed for.
+     * @param stopIdentifier The stop the arrival alert should be removed for.
      */
-    fun onRemoveArrivalAlertClicked(stopCode: String)
+    fun onRemoveArrivalAlertClicked(stopIdentifier: StopIdentifier)
 
     /**
      * This is called when the user wishes to remove a previously set proximity alert.
      *
-     * @param stopCode The stop code the proximity alert should be removed for.
+     * @param stopIdentifier The stop the proximity alert should be removed for.
      */
-    fun onRemoveProximityAlertClicked(stopCode: String)
+    fun onRemoveProximityAlertClicked(stopIdentifier: StopIdentifier)
 }

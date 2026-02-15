@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,6 +30,8 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.turbineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableServiceDescriptor
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -59,8 +61,9 @@ class StateTest {
             SavedStateHandle(
                 mapOf(
                     Arguments.STATE_PARAMS to ServicesChooserParams.AllServices(
-                        0,
-                        emptyList())
+                        titleResId = 0,
+                        selectedServices = emptyList()
+                    )
                 )
             )
         )
@@ -76,12 +79,39 @@ class StateTest {
             SavedStateHandle(
                 mapOf(
                     Arguments.STATE_PARAMS to ServicesChooserParams.AllServices(
-                        0,
-                        listOf("1", "2", "3"))
+                        titleResId = 0,
+                        selectedServices = listOf(
+                            ParcelableServiceDescriptor(
+                                serviceName = "1",
+                                operatorCode = "TEST1"
+                            ),
+                            ParcelableServiceDescriptor(
+                                serviceName = "2",
+                                operatorCode = "TEST2"
+                            ),
+                            ParcelableServiceDescriptor(
+                                serviceName = "3",
+                                operatorCode = "TEST3"
+                            )
+                        )
+                    )
                 )
             )
         )
-        val expected = setOf("1", "2", "3")
+        val expected = setOf(
+            ParcelableServiceDescriptor(
+                serviceName = "1",
+                operatorCode = "TEST1"
+            ),
+            ParcelableServiceDescriptor(
+                serviceName = "2",
+                operatorCode = "TEST2"
+            ),
+            ParcelableServiceDescriptor(
+                serviceName = "3",
+                operatorCode = "TEST3"
+            )
+        )
 
         val result = state.selectedServicesFlow.first()
 
@@ -121,8 +151,22 @@ class StateTest {
             SavedStateHandle(
                 mapOf(
                     Arguments.STATE_PARAMS to ServicesChooserParams.AllServices(
-                        0,
-                        listOf("1", "2", "3"))
+                        titleResId = 0,
+                        selectedServices = listOf(
+                            ParcelableServiceDescriptor(
+                                serviceName = "1",
+                                operatorCode = "TEST1"
+                            ),
+                            ParcelableServiceDescriptor(
+                                serviceName = "2",
+                                operatorCode = "TEST2"
+                            ),
+                            ParcelableServiceDescriptor(
+                                serviceName = "3",
+                                operatorCode = "TEST3"
+                            )
+                        )
+                    )
                 )
             )
         )
@@ -164,12 +208,39 @@ class StateTest {
             SavedStateHandle(
                 mapOf(
                     Arguments.STATE_PARAMS to ServicesChooserParams.AllServices(
-                        0,
-                        listOf("1", "2", "3"))
+                        titleResId = 0,
+                        selectedServices = listOf(
+                            ParcelableServiceDescriptor(
+                                serviceName = "1",
+                                operatorCode = "TEST1"
+                            ),
+                            ParcelableServiceDescriptor(
+                                serviceName = "2",
+                                operatorCode = "TEST2"
+                            ),
+                            ParcelableServiceDescriptor(
+                                serviceName = "3",
+                                operatorCode = "TEST3"
+                            )
+                        )
+                    )
                 )
             )
         )
-        val expected = arrayListOf("1", "2", "3")
+        val expected = arrayListOf(
+            ParcelableServiceDescriptor(
+                serviceName = "1",
+                operatorCode = "TEST1"
+            ),
+            ParcelableServiceDescriptor(
+                serviceName = "2",
+                operatorCode = "TEST2"
+            ),
+            ParcelableServiceDescriptor(
+                serviceName = "3",
+                operatorCode = "TEST3"
+            )
+        )
 
         val result = state.selectedServices
 
@@ -179,9 +250,19 @@ class StateTest {
     @Test
     fun onServiceClickedWithServiceAddsService() {
         val state = State(SavedStateHandle())
-        val expected = arrayListOf("1")
+        val expected = arrayListOf(
+            ParcelableServiceDescriptor(
+                serviceName = "1",
+                operatorCode = "TEST1"
+            )
+        )
 
-        state.onServiceClicked("1")
+        state.onServiceClicked(
+            FakeServiceDescriptor(
+                serviceName = "1",
+                operatorCode = "TEST1"
+            )
+        )
 
         assertEquals(expected, state.selectedServices)
     }
@@ -189,9 +270,13 @@ class StateTest {
     @Test
     fun onServiceClickedWhenServiceAlreadyAddedRemovesService() {
         val state = State(SavedStateHandle())
+        val serviceDescriptor = FakeServiceDescriptor(
+            serviceName = "1",
+            operatorCode = "TEST1"
+        )
 
-        state.onServiceClicked("1")
-        state.onServiceClicked("1")
+        state.onServiceClicked(serviceDescriptor)
+        state.onServiceClicked(serviceDescriptor)
 
         assertNull(state.selectedServices)
     }
@@ -202,14 +287,50 @@ class StateTest {
             SavedStateHandle(
                 mapOf(
                     Arguments.STATE_PARAMS to ServicesChooserParams.AllServices(
-                        0,
-                        listOf("1", "2", "3"))
+                        titleResId = 0,
+                        selectedServices = listOf(
+                            ParcelableServiceDescriptor(
+                                serviceName = "1",
+                                operatorCode = "TEST1"
+                            ),
+                            ParcelableServiceDescriptor(
+                                serviceName = "2",
+                                operatorCode = "TEST2"
+                            ),
+                            ParcelableServiceDescriptor(
+                                serviceName = "3",
+                                operatorCode = "TEST3"
+                            )
+                        )
+                    )
                 )
             )
         )
-        val expected = arrayListOf("1", "2", "3", "4")
+        val expected = arrayListOf(
+            ParcelableServiceDescriptor(
+                serviceName = "1",
+                operatorCode = "TEST1"
+            ),
+            ParcelableServiceDescriptor(
+                serviceName = "2",
+                operatorCode = "TEST2"
+            ),
+            ParcelableServiceDescriptor(
+                serviceName = "3",
+                operatorCode = "TEST3"
+            ),
+            ParcelableServiceDescriptor(
+                serviceName = "4",
+                operatorCode = "TEST4"
+            )
+        )
 
-        state.onServiceClicked("4")
+        state.onServiceClicked(
+            FakeServiceDescriptor(
+                serviceName = "4",
+                operatorCode = "TEST4"
+            )
+        )
 
         assertEquals(expected, state.selectedServices)
     }
@@ -220,14 +341,42 @@ class StateTest {
             SavedStateHandle(
                 mapOf(
                     Arguments.STATE_PARAMS to ServicesChooserParams.AllServices(
-                        0,
-                        listOf("1", "2", "3"))
+                        titleResId = 0,
+                        selectedServices = listOf(
+                            ParcelableServiceDescriptor(
+                                serviceName = "1",
+                                operatorCode = "TEST1"
+                            ),
+                            ParcelableServiceDescriptor(
+                                serviceName = "2",
+                                operatorCode = "TEST2"
+                            ),
+                            ParcelableServiceDescriptor(
+                                serviceName = "3",
+                                operatorCode = "TEST3"
+                            )
+                        )
+                    )
                 )
             )
         )
-        val expected = arrayListOf("1", "3")
+        val expected = arrayListOf(
+            ParcelableServiceDescriptor(
+                serviceName = "1",
+                operatorCode = "TEST1"
+            ),
+            ParcelableServiceDescriptor(
+                serviceName = "3",
+                operatorCode = "TEST3"
+            )
+        )
 
-        state.onServiceClicked("2")
+        state.onServiceClicked(
+            FakeServiceDescriptor(
+                serviceName = "2",
+                operatorCode = "TEST2"
+            )
+        )
 
         assertEquals(expected, state.selectedServices)
     }
@@ -236,7 +385,12 @@ class StateTest {
     fun onClearAllClickedClearsAllServicesAfterServicesClicked() {
         val state = State(SavedStateHandle())
 
-        state.onServiceClicked("1")
+        state.onServiceClicked(
+            FakeServiceDescriptor(
+                serviceName = "1",
+                operatorCode = "TEST1"
+            )
+        )
         state.onClearAllClicked()
 
         assertNull(state.selectedServices)
@@ -248,8 +402,22 @@ class StateTest {
             SavedStateHandle(
                 mapOf(
                     Arguments.STATE_PARAMS to ServicesChooserParams.AllServices(
-                        0,
-                        listOf("1", "2", "3"))
+                        titleResId = 0,
+                        selectedServices = listOf(
+                            ParcelableServiceDescriptor(
+                                serviceName = "1",
+                                operatorCode = "TEST1"
+                            ),
+                            ParcelableServiceDescriptor(
+                                serviceName = "2",
+                                operatorCode = "TEST2"
+                            ),
+                            ParcelableServiceDescriptor(
+                                serviceName = "3",
+                                operatorCode = "TEST3"
+                            )
+                        )
+                    )
                 )
             )
         )
@@ -266,20 +434,59 @@ class StateTest {
         turbineScope {
             val selectedServicesTurbine = state.selectedServicesFlow.testIn(backgroundScope)
             val hasSelectedServicesTurbine = state.hasSelectedServicesFlow.testIn(backgroundScope)
-            state.onServiceClicked("1")
-            state.onServiceClicked("2")
-            state.onServiceClicked("3")
-            state.onServiceClicked("2")
+            val service1 = FakeServiceDescriptor(
+                serviceName = "1",
+                operatorCode = "TEST1"
+            )
+            val parcelableService1 = ParcelableServiceDescriptor(
+                serviceName = "1",
+                operatorCode = "TEST1"
+            )
+            val service2 = FakeServiceDescriptor(
+                serviceName = "2",
+                operatorCode = "TEST2"
+            )
+            val parcelableService2 = ParcelableServiceDescriptor(
+                serviceName = "2",
+                operatorCode = "TEST2"
+            )
+            val service3 = FakeServiceDescriptor(
+                serviceName = "3",
+                operatorCode = "TEST3"
+            )
+            val parcelableService3 = ParcelableServiceDescriptor(
+                serviceName = "3",
+                operatorCode = "TEST3"
+            )
+            state.onServiceClicked(service1)
+            state.onServiceClicked(service2)
+            state.onServiceClicked(service3)
+            state.onServiceClicked(service2)
             state.onClearAllClicked()
-            state.onServiceClicked("3")
+            state.onServiceClicked(service3)
 
             assertEquals(emptySet(), selectedServicesTurbine.awaitItem())
-            assertEquals(setOf("1"), selectedServicesTurbine.awaitItem())
-            assertEquals(setOf("1", "2"), selectedServicesTurbine.awaitItem())
-            assertEquals(setOf("1", "2", "3"), selectedServicesTurbine.awaitItem())
-            assertEquals(setOf("1", "3"), selectedServicesTurbine.awaitItem())
+            assertEquals(
+                setOf(parcelableService1),
+                selectedServicesTurbine.awaitItem()
+            )
+            assertEquals(
+                setOf(parcelableService1, parcelableService2),
+                selectedServicesTurbine.awaitItem()
+            )
+            assertEquals(
+                setOf(parcelableService1, parcelableService2, parcelableService3),
+                selectedServicesTurbine.awaitItem()
+            )
+            assertEquals(
+                setOf(parcelableService1, parcelableService3),
+                selectedServicesTurbine.awaitItem()
+            )
             assertEquals(emptySet(), selectedServicesTurbine.awaitItem())
-            assertEquals(setOf("3"), selectedServicesTurbine.awaitItem())
+            assertEquals(
+                setOf(parcelableService3),
+                selectedServicesTurbine.awaitItem()
+            )
             selectedServicesTurbine.ensureAllEventsConsumed()
 
             assertFalse(hasSelectedServicesTurbine.awaitItem())
@@ -296,8 +503,22 @@ class StateTest {
             SavedStateHandle(
                 mapOf(
                     Arguments.STATE_PARAMS to ServicesChooserParams.AllServices(
-                        0,
-                        listOf("1", "2", "3"))
+                        titleResId = 0,
+                        selectedServices = listOf(
+                            ParcelableServiceDescriptor(
+                                serviceName = "1",
+                                operatorCode = "TEST1"
+                            ),
+                            ParcelableServiceDescriptor(
+                                serviceName = "2",
+                                operatorCode = "TEST2"
+                            ),
+                            ParcelableServiceDescriptor(
+                                serviceName = "3",
+                                operatorCode = "TEST3"
+                            )
+                        )
+                    )
                 )
             )
         )
@@ -305,14 +526,43 @@ class StateTest {
         turbineScope {
             val selectedServicesTurbine = state.selectedServicesFlow.testIn(backgroundScope)
             val hasSelectedServicesTurbine = state.hasSelectedServicesFlow.testIn(backgroundScope)
-            state.onServiceClicked("2")
+            val parcelableService1 = ParcelableServiceDescriptor(
+                serviceName = "1",
+                operatorCode = "TEST1"
+            )
+            val service2 = FakeServiceDescriptor(
+                serviceName = "2",
+                operatorCode = "TEST2"
+            )
+            val parcelableService2 = ParcelableServiceDescriptor(
+                serviceName = "2",
+                operatorCode = "TEST2"
+            )
+            val service3 = FakeServiceDescriptor(
+                serviceName = "3",
+                operatorCode = "TEST3"
+            )
+            val parcelableService3 = ParcelableServiceDescriptor(
+                serviceName = "3",
+                operatorCode = "TEST3"
+            )
+            state.onServiceClicked(service2)
             state.onClearAllClicked()
-            state.onServiceClicked("3")
+            state.onServiceClicked(service3)
 
-            assertEquals(setOf("1", "2", "3"), selectedServicesTurbine.awaitItem())
-            assertEquals(setOf("1", "3"), selectedServicesTurbine.awaitItem())
+            assertEquals(
+                setOf(parcelableService1, parcelableService2, parcelableService3),
+                selectedServicesTurbine.awaitItem()
+            )
+            assertEquals(
+                setOf(parcelableService1, parcelableService3),
+                selectedServicesTurbine.awaitItem()
+            )
             assertEquals(emptySet(), selectedServicesTurbine.awaitItem())
-            assertEquals(setOf("3"), selectedServicesTurbine.awaitItem())
+            assertEquals(
+                setOf(parcelableService3),
+                selectedServicesTurbine.awaitItem()
+            )
             selectedServicesTurbine.ensureAllEventsConsumed()
 
             assertTrue(hasSelectedServicesTurbine.awaitItem())

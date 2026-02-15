@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,28 +27,31 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint
 
 import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 
 /**
  * This DAO is used to access service point data in the bus stop database.
  *
  * @author Niall Scott
  */
-interface ServicePointDao {
+public interface ServicePointDao {
 
     /**
-     * This is a [Flow] which emits a [List] of [ServicePoint]s for the given [serviceNames]. `null`
-     * may be omitted if there are no results.
+     * This is a [Flow] which emits a [List] of [ServicePoint]s for the given [services].
+     * `null` may be omitted if there are no results.
      *
      * Ordering is in the following precedence;
      *
-     * - [ServicePoint.serviceName]
-     * - [ServicePoint.chainage]
+     * - [ServicePoint.serviceDescriptor]
+     * - [ServicePoint.routeSection]
      * - Then ordered by an internal ordering value, so the points are in the correct order.
      *
-     * @param serviceNames Only [ServicePoint]s for the supplied [Set] of service names are
+     * @param services Only [ServicePoint]s for the supplied [Set] of service descriptors are
      * returned. `null` means all [ServicePoint]s are returned - this could be an expensive
      * operation.
-     * @return A [List] of [ServicePoint]s for the given [serviceNames].
+     * @return A [List] of [ServicePoint]s for the given [services].
      */
-    fun getServicePointsFlow(serviceNames: Set<String>?): Flow<List<ServicePoint>?>
+    public fun getServicePointsFlow(
+        services: Set<ServiceDescriptor>?
+    ): Flow<List<ServicePoint>?>
 }

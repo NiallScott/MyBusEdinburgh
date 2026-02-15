@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,9 +29,8 @@ package uk.org.rivernile.android.bustracker.core.favourites
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops.FavouriteStopEntity
-import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops.FavouriteStopEntityFactory
 import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops.FavouriteStopsDao
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -52,27 +51,27 @@ public interface FavouritesRepository {
     /**
      * Remove an existing favourite stop.
      *
-     * @param stopCode The saved favourite with this stop code to remove.
+     * @param stopIdentifier The saved favourite with this stop identifier to remove.
      */
-    public suspend fun removeFavouriteStop(stopCode: String)
+    public suspend fun removeFavouriteStop(stopIdentifier: StopIdentifier)
 
     /**
-     * Get a [Flow] which returns whether the given `stopCode` is added as a favourite or not, and
-     * will emit further items when the status changes.
+     * Get a [Flow] which returns whether the given [stopIdentifier] is added as a favourite or not,
+     * and will emit further items when the status changes.
      *
-     * @param stopCode The `stopCode` to watch.
-     * @return The [Flow] which emits the favourite status of the given `stopCode`.
+     * @param stopIdentifier The stop identifier to watch.
+     * @return The [Flow] which emits the favourite status of the given [stopIdentifier].
      */
-    public fun isStopAddedAsFavouriteFlow(stopCode: String): Flow<Boolean>
+    public fun isStopAddedAsFavouriteFlow(stopIdentifier: StopIdentifier): Flow<Boolean>
 
     /**
-     * Get a [Flow] which emits [FavouriteStop] objects for the given `stopCode`. `null` will be
-     * emitted if the [FavouriteStop] does not exist.
+     * Get a [Flow] which emits [FavouriteStop] objects for the given [stopIdentifier]. `null` will
+     * be emitted if the [FavouriteStop] does not exist.
      *
-     * @param stopCode The `stopCode` to watch.
-     * @return The [Flow] which emits the [FavouriteStop]s for the given `stopCode`.
+     * @param stopIdentifier The stop identifier to watch.
+     * @return The [Flow] which emits the [FavouriteStop]s for the given [stopIdentifier].
      */
-    public fun getFavouriteStopFlow(stopCode: String): Flow<FavouriteStop?>
+    public fun getFavouriteStopFlow(stopIdentifier: StopIdentifier): Flow<FavouriteStop?>
 
     /**
      * Get a [Flow] which emits [List]s of the user saved [FavouriteStop]s. `null` will be emitted
@@ -83,31 +82,25 @@ public interface FavouritesRepository {
 
 @Singleton
 internal class DefaultFavouritesRepository @Inject constructor(
-    private val favouriteStopsDao: FavouriteStopsDao,
-    private val entityFactory: FavouriteStopEntityFactory
+    private val favouriteStopsDao: FavouriteStopsDao
 ) : FavouritesRepository {
 
     override suspend fun addOrUpdateFavouriteStop(favouriteStop: FavouriteStop) {
-        val entity = entityFactory.createFavouriteStopEntity(
-            favouriteStop.stopCode,
-            favouriteStop.stopName
-        )
-
-        favouriteStopsDao.addOrUpdateFavouriteStop(entity)
+        favouriteStopsDao.addOrUpdateFavouriteStop(favouriteStop.toDatabaseFavouriteStop())
     }
 
-    override suspend fun removeFavouriteStop(stopCode: String) {
-        favouriteStopsDao.removeFavouriteStop(stopCode)
+    override suspend fun removeFavouriteStop(stopIdentifier: StopIdentifier) {
+        favouriteStopsDao.removeFavouriteStop(stopIdentifier)
     }
 
-    override fun isStopAddedAsFavouriteFlow(stopCode: String) =
+    override fun isStopAddedAsFavouriteFlow(stopIdentifier: StopIdentifier) =
         favouriteStopsDao
-            .isStopAddedAsFavouriteFlow(stopCode)
+            .isStopAddedAsFavouriteFlow(stopIdentifier)
             .distinctUntilChanged()
 
-    override fun getFavouriteStopFlow(stopCode: String) =
+    override fun getFavouriteStopFlow(stopIdentifier: StopIdentifier) =
         favouriteStopsDao
-            .getFavouriteStopFlow(stopCode)
+            .getFavouriteStopFlow(stopIdentifier)
             .distinctUntilChanged()
             .map { it?.toFavouriteStop() }
 
@@ -120,11 +113,4 @@ internal class DefaultFavouritesRepository @Inject constructor(
                     ?.map { it.toFavouriteStop() }
                     ?.ifEmpty { null }
             }
-
-    private fun FavouriteStopEntity.toFavouriteStop(): FavouriteStop {
-        return FavouriteStop(
-            stopCode = stopCode,
-            stopName = stopName
-        )
-    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,7 +36,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.shareIn
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
+import uk.org.rivernile.android.bustracker.core.busstops.StopDetails
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import javax.inject.Inject
 
@@ -61,25 +62,27 @@ class UiItemRetriever @Inject constructor(
     /**
      * Create a [Flow] which emits a [List] of [UiItem]s.
      *
-     * @param stopCodeFlow This provides the stop code for the data to be loaded.
+     * @param stopIdentifierFlow This provides the stop code for the data to be loaded.
      * @param permissionsStateFlow This provides the current permissions state.
      * @param coroutineScope The [CoroutineScope] to execute shared [Flow]s under.
      * @return A [Flow] which emits a [List] of [UiItem]s.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun createUiItemFlow(
-            stopCodeFlow: SharedFlow<String?>,
-            permissionsStateFlow: Flow<PermissionsState>,
-            coroutineScope: CoroutineScope): Flow<List<UiItem>> {
-        val busStopDetailsFlow = stopCodeFlow
+        stopIdentifierFlow: SharedFlow<StopIdentifier?>,
+        permissionsStateFlow: Flow<PermissionsState>,
+        coroutineScope: CoroutineScope
+    ): Flow<List<UiItem>> {
+        val busStopDetailsFlow = stopIdentifierFlow
             .flatMapLatest(this::loadStop)
             .shareIn(coroutineScope, SharingStarted.WhileSubscribed(), 1)
 
         val distanceFlow = distanceRetriever.createDistanceFlow(
             permissionsStateFlow,
-            busStopDetailsFlow)
+            busStopDetailsFlow
+        )
 
-        val servicesFlow = stopCodeFlow
+        val servicesFlow = stopIdentifierFlow
             .flatMapLatest(this::loadServices)
 
         return combine(
@@ -90,24 +93,24 @@ class UiItemRetriever @Inject constructor(
     }
 
     /**
-     * Given a [stopCode], load the stop details for this stop code.
+     * Given a [stopIdentifier], load the stop details for this stop code.
      *
-     * @param stopCode The stop code to load stop details for.
-     * @return A [Flow] which emits details for the given [stopCode], or emits `null` when
-     * [stopCode] is `null` or empty.
+     * @param stopIdentifier The stop code to load stop details for.
+     * @return A [Flow] which emits details for the given [stopIdentifier], or emits `null` when
+     * [stopIdentifier] is `null`.
      */
-    private fun loadStop(stopCode: String?) = stopCode?.ifEmpty { null }?.let {
+    private fun loadStop(stopIdentifier: StopIdentifier?) = stopIdentifier?.let {
         busStopsRepository.getBusStopDetailsFlow(it)
     } ?: flowOf(null)
 
     /**
-     * Given a [stopCode], load services for that stop.
+     * Given a [stopIdentifier], load services for that stop.
      *
-     * @param stopCode The stop code to load services for.
+     * @param stopIdentifier The stop code to load services for.
      * @return A [Flow] containing service details for this stop, or a [Flow] which emits `null`
-     * when the [stopCode] is `null` or empty.
+     * when the [stopIdentifier] is `null`.
      */
-    private fun loadServices(stopCode: String?) = stopCode?.ifEmpty { null }?.let {
+    private fun loadServices(stopIdentifier: StopIdentifier?) = stopIdentifier?.let {
         servicesRetriever.getServicesFlow(it)
     } ?: flowOf(null)
 
@@ -123,7 +126,8 @@ class UiItemRetriever @Inject constructor(
     private fun assembleItems(
         stopDetails: StopDetails?,
         distance: UiItem.Distance,
-        services: List<UiItem.Service>?): List<UiItem> {
+        services: List<UiItem.Service>?
+    ): List<UiItem> {
         val items = mutableListOf<UiItem>()
 
         stopDetails?.let {

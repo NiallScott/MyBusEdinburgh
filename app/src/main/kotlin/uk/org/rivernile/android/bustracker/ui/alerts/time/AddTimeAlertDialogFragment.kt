@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,11 +41,18 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.core.os.BundleCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableServiceDescriptorList
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.permission.AndroidPermissionChecker
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
@@ -70,34 +77,46 @@ class AddTimeAlertDialogFragment : DialogFragment() {
         private const val DIALOG_TIME_ALERT_LIMITATIONS = "timeLimitationsDialog"
 
         /**
-         * Create a new [AddTimeAlertDialogFragment], supplying only the stop code.
+         * Create a new [AddTimeAlertDialogFragment], supplying only the stop identifier.
          *
-         * @param stopCode The stop code to add a time alert for.
+         * @param stopIdentifier The stop to add a time alert for.
          * @return A new [AddTimeAlertDialogFragment].
          */
-        fun newInstance(stopCode: String) = AddTimeAlertDialogFragment().apply {
-            arguments = Bundle().apply {
-                putString(AddTimeAlertDialogFragmentViewModel.STATE_STOP_CODE, stopCode)
+        fun newInstance(stopIdentifier: StopIdentifier) =
+            AddTimeAlertDialogFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable(
+                        AddTimeAlertDialogFragmentViewModel.STATE_STOP_IDENTIFIER,
+                        stopIdentifier.toParcelableStopIdentifier()
+                    )
+                }
             }
-        }
 
         /**
-         * Create a new [AddTimeAlertDialogFragment], supplying the stop code and services that
-         * are to be selected by default.
+         * Create a new [AddTimeAlertDialogFragment], supplying the stop identifier and services
+         * that are to be selected by default.
          *
-         * @param stopCode The stop code to add a time alert for.
+         * @param stopIdentifier The stop to add a time alert for.
          * @param defaultServices Services that are to be selected by default.
          * @return A new [AddTimeAlertDialogFragment].
          */
-        fun newInstance(stopCode: String, defaultServices: Array<String>?) =
-                AddTimeAlertDialogFragment().apply {
-                    arguments = Bundle().apply {
-                        putString(AddTimeAlertDialogFragmentViewModel.STATE_STOP_CODE, stopCode)
-                        putStringArray(
-                            AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES,
-                            defaultServices)
-                    }
+        fun newInstance(
+            stopIdentifier: StopIdentifier,
+            defaultServices: List<ServiceDescriptor>?
+        ) = AddTimeAlertDialogFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable(
+                        AddTimeAlertDialogFragmentViewModel.STATE_STOP_IDENTIFIER,
+                        stopIdentifier.toParcelableStopIdentifier()
+                    )
+                    putParcelableArrayList(
+                        AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES,
+                        defaultServices
+                            ?.map { it.toParcelableServiceDescriptor() }
+                            ?.let { ArrayList(it) }
+                    )
                 }
+            }
     }
 
     @Inject
@@ -219,7 +238,7 @@ class AddTimeAlertDialogFragment : DialogFragment() {
             when (uiState) {
                 UiState.PROGRESS -> contentView.showProgressLayout()
                 UiState.CONTENT -> contentView.showContentLayout()
-                UiState.ERROR_NO_STOP_CODE -> {
+                UiState.ERROR_NO_STOP_IDENTIFIER -> {
                     txtErrorBlurb.setText(R.string.addtimealertdialog_error_no_stop_code)
                     btnResolve.isVisible = false
                     contentView.showErrorLayout()
@@ -227,7 +246,7 @@ class AddTimeAlertDialogFragment : DialogFragment() {
                 UiState.ERROR_NO_SERVICES -> {
                     viewModel.stopDetailsLiveData.value?.let {
                         val formattedName =
-                                textFormattingUtils.formatBusStopNameWithStopCode(it.stopCode,
+                                textFormattingUtils.formatBusStopNameWithStopCode(it.stopIdentifier,
                                         it.stopName)
                         txtErrorBlurb.text =
                                 getString(R.string.addtimealertdialog_error_no_services,
@@ -264,7 +283,7 @@ class AddTimeAlertDialogFragment : DialogFragment() {
     private fun handleStopDetailsLoaded(stopDetails: StopDetails?) {
         viewBinding.txtBlurb.text = stopDetails?.let {
             val formattedName = textFormattingUtils.formatBusStopNameWithStopCode(
-                    it.stopCode, it.stopName)
+                    it.stopIdentifier, it.stopName)
             getString(R.string.addtimealertdialog_blurb, formattedName)
         }
     }
@@ -274,10 +293,11 @@ class AddTimeAlertDialogFragment : DialogFragment() {
      *
      * @param selectedServices The current [List] of selected services.
      */
-    private fun handleSelectedServicesChanged(selectedServices: List<String>?) {
+    private fun handleSelectedServicesChanged(selectedServices: List<ServiceDescriptor>?) {
         viewBinding.apply {
-            selectedServices?.ifEmpty { null }?.let {
-                txtSelectedServices.text = it.joinToString(separator = ", ")
+            selectedServices?.ifEmpty { null }?.let { services ->
+                txtSelectedServices.text = services
+                    .joinToString(separator = ", ") { it.serviceName }
             } ?: txtSelectedServices.setText(R.string.addtimealertdialog_no_services_selected)
         }
     }
@@ -309,8 +329,8 @@ class AddTimeAlertDialogFragment : DialogFragment() {
     private fun showServicesChooser(params: UiServicesChooserParams) {
         ServicesChooserParams.Stop(
             R.string.addtimealertdialog_services_chooser_dialog_title,
-            params.selectedServices,
-            params.stopCode)
+            params.selectedServices?.toParcelableServiceDescriptorList(),
+            params.stopIdentifier.toParcelableStopIdentifier())
             .let {
                 ServicesChooserDialogFragment.newInstance(it)
                     .show(childFragmentManager, DIALOG_SELECT_SERVICES)
@@ -323,8 +343,12 @@ class AddTimeAlertDialogFragment : DialogFragment() {
      * @param result The [Bundle] result generated by [ServicesChooserDialogFragment].
      */
     private fun handleServicesChosen(result: Bundle) {
-        viewModel.selectedServices = result.getStringArrayList(
-                ServicesChooserDialogFragment.RESULT_CHOSEN_SERVICES)
+        viewModel.selectedServices = BundleCompat
+            .getParcelableArrayList(
+                result,
+                ServicesChooserDialogFragment.RESULT_CHOSEN_SERVICES,
+                ParcelableServiceDescriptor::class.java
+            )
     }
 
     /**

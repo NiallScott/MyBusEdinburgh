@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,22 +36,22 @@ import androidx.room.TypeConverter
 internal class StopTypeConverter {
 
     /**
-     * Convert an integer value representing the stop orientation to the [StopOrientation] enum
+     * Convert a [String] value representing the stop bearing to the [StopOrientation] enum
      * value.
      *
-     * @param value The integer value from the database.
+     * @param value The [String] value from the database.
      * @return The value mapped to its [StopOrientation] value.
      */
     @TypeConverter
-    fun convertToStopOrientation(value: Int?) = when (value) {
-        0 -> StopOrientation.NORTH
-        1 -> StopOrientation.NORTH_EAST
-        2 -> StopOrientation.EAST
-        3 -> StopOrientation.SOUTH_EAST
-        4 -> StopOrientation.SOUTH
-        5 -> StopOrientation.SOUTH_WEST
-        6 -> StopOrientation.WEST
-        7 -> StopOrientation.NORTH_WEST
+    fun convertToStopOrientation(value: String?) = when (value?.uppercase()) {
+        "N" -> StopOrientation.NORTH
+        "NE" -> StopOrientation.NORTH_EAST
+        "E" -> StopOrientation.EAST
+        "SE" -> StopOrientation.SOUTH_EAST
+        "S" -> StopOrientation.SOUTH
+        "SW" -> StopOrientation.SOUTH_WEST
+        "W" -> StopOrientation.WEST
+        "NW" -> StopOrientation.NORTH_WEST
         else -> StopOrientation.UNKNOWN
     }
 }

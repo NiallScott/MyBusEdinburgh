@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,13 +43,13 @@ internal class ProxyServiceStopDao @Inject constructor(
     private val database: BusStopDatabase
 ) : ServiceStopDao {
 
-    override fun getServicesForStopFlow(stopCode: String) = database
+    override fun getServicesForStopFlow(naptanStopCode: String) = database
         .withFlowIfDatabaseIsOpenOrEmptyFlow {
-            serviceStopDao.getServicesForStopFlow(stopCode)
+            serviceStopDao.getServicesForStopFlow(naptanStopCode)
         }
 
-    override fun getServicesForStopsFlow(stopCodes: Set<String>) = database
+    override fun getServicesForStopsFlow(naptanStopCodes: Set<String>) = database
         .withFlowIfDatabaseIsOpenOrEmptyFlow {
-            serviceStopDao.getServicesForStopsFlow(stopCodes)
+            serviceStopDao.getServicesForStopsFlow(naptanStopCodes)
         }
 }

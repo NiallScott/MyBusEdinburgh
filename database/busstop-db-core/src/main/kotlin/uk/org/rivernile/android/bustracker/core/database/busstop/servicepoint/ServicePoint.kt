@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,30 +26,32 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint
 
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+
 /**
  * This is a service point, which is a point on a route line.
  *
  * @author Niall Scott
  */
-interface ServicePoint {
+public interface ServicePoint {
 
     /**
-     * The name of the service this point is for.
+     * The descriptor that this service point is for.
      */
-    val serviceName: String
+    public val serviceDescriptor: ServiceDescriptor
 
     /**
      * The ordering element.
      */
-    val chainage: Int
+    public val routeSection: Int
 
     /**
      * The latitude of the point.
      */
-    val latitude: Double
+    public val latitude: Double
 
     /**
      * The longitude of the point.
      */
-    val longitude: Double
+    public val longitude: Double
 }

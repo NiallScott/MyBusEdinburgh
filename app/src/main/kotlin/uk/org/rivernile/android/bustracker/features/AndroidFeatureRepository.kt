@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.features
 
 import android.content.Context
-import android.content.pm.PackageManager
 import androidx.core.content.pm.ShortcutManagerCompat
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
@@ -43,15 +42,14 @@ import javax.inject.Singleton
  * @param googleApiAvailability A [GoogleApiAvailability] instance which we can use to determine if
  * Google Play Services is available and ready on the device.
  * @param locationRepository Used to obtain location service information.
- * @param packageManager Used to query the package manager for device features.
  * @author Niall Scott
  */
 @Singleton
 class AndroidFeatureRepository @Inject constructor(
     private val context: Context,
     private val googleApiAvailability: GoogleApiAvailability,
-    private val locationRepository: LocationRepository,
-    private val packageManager: PackageManager) : FeatureRepository {
+    private val locationRepository: LocationRepository
+) : FeatureRepository {
 
     override val hasStopMapUiFeature get() =
         googleApiAvailability.isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
@@ -60,9 +58,6 @@ class AndroidFeatureRepository @Inject constructor(
 
     override val hasProximityAlertFeature get() =
         locationRepository.hasLocationFeature
-
-    override val hasCameraFeature get() =
-        packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
 
     override val hasPinShortcutFeature get() =
         ShortcutManagerCompat.isRequestPinShortcutSupported(context)

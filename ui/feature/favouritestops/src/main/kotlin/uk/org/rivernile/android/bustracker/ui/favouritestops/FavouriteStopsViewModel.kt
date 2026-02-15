@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForViewModelCoroutineScope
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.shortcuts.FavouriteStopShortcut
 import uk.org.rivernile.android.bustracker.core.shortcuts.ShortcutsRepository
 import javax.inject.Inject
@@ -78,28 +79,29 @@ internal class FavouriteStopsViewModel @Inject constructor(
     /**
      * This is called when a favourite stop has been clicked.
      *
-     * @param stopCode The code of the clicked favourite stop.
+     * @param stopIdentifier The identifier of the clicked favourite stop.
      * @param savedName The name the stop is saved as.
      */
-    fun onItemClicked(stopCode: String, savedName: String) {
+    fun onItemClicked(stopIdentifier: StopIdentifier, savedName: String) {
         if (arguments.isShortcutMode) {
             state.action = UiAction.AddShortcut(
-                stopCode = stopCode,
+                stopIdentifier = stopIdentifier,
                 savedName = savedName
             )
         } else {
-            state.action = UiAction.ShowStopData(stopCode = stopCode)
+            state.action = UiAction.ShowStopData(stopIdentifier = stopIdentifier)
         }
     }
 
     /**
      * This is called when the dropdown has been clicked for a favourite stop.
      *
-     * @param stopCode The code of the favourite stop for which a dropdown should be shown.
+     * @param stopIdentifier The identifier of the favourite stop for which a dropdown should be
+     * shown.
      */
-    fun onItemOpenDropdownClicked(stopCode: String) {
+    fun onItemOpenDropdownClicked(stopIdentifier: StopIdentifier) {
         if (!arguments.isShortcutMode) {
-            state.selectedStopCode = stopCode
+            state.selectedStopIdentifier = stopIdentifier
         }
     }
 
@@ -115,11 +117,11 @@ internal class FavouriteStopsViewModel @Inject constructor(
     /**
      * This is called when the edit favourite dropdown item has been clicked.
      *
-     * @param stopCode The code of the stop which is to be edited.
+     * @param stopIdentifier The identifier of the stop which is to be edited.
      */
-    fun onEditFavouriteNameClicked(stopCode: String) {
+    fun onEditFavouriteNameClicked(stopIdentifier: StopIdentifier) {
         if (!arguments.isShortcutMode) {
-            state.action = UiAction.ShowEditFavouriteStop(stopCode = stopCode)
+            state.action = UiAction.ShowEditFavouriteStop(stopIdentifier = stopIdentifier)
             dismissDropdownMenu()
         }
     }
@@ -127,11 +129,11 @@ internal class FavouriteStopsViewModel @Inject constructor(
     /**
      * This is called when the remove favourite dropdown item has been clicked.
      *
-     * @param stopCode The code of the stop which is to removed.
+     * @param stopIdentifier The identifier of the stop which is to removed.
      */
-    fun onRemoveFavouriteClicked(stopCode: String) {
+    fun onRemoveFavouriteClicked(stopIdentifier: StopIdentifier) {
         if (!arguments.isShortcutMode) {
-            state.action = UiAction.ShowConfirmRemoveFavourite(stopCode = stopCode)
+            state.action = UiAction.ShowConfirmRemoveFavourite(stopIdentifier = stopIdentifier)
             dismissDropdownMenu()
         }
     }
@@ -139,16 +141,16 @@ internal class FavouriteStopsViewModel @Inject constructor(
     /**
      * This is called when the add shortcut favourite dropdown item has been clicked.
      *
-     * @param stopCode The stop code of the clicked favourite.
+     * @param stopIdentifier The stop identifier of the clicked favourite.
      * @param savedName The name the stop is saved as.
      */
-    fun onAddShortcutClicked(stopCode: String, savedName: String) {
+    fun onAddShortcutClicked(stopIdentifier: StopIdentifier, savedName: String) {
         if (!arguments.isShortcutMode) {
             // Just to clear up the confusion: this method is called when we are not in shortcut
             // mode as this is the way to create shortcuts when we are not in shortcut mode.
             shortcutsRepository.pinFavouriteStopShortcut(
                 shortcut = FavouriteStopShortcut(
-                    stopCode = stopCode,
+                    stopIdentifier = stopIdentifier,
                     displayName = savedName
                 )
             )
@@ -159,11 +161,11 @@ internal class FavouriteStopsViewModel @Inject constructor(
     /**
      * This is called when the add arrival alert dropdown item has been clicked.
      *
-     * @param stopCode The code of the stop for which an arrival alert is to be added.
+     * @param stopIdentifier The identifier of the stop for which an arrival alert is to be added.
      */
-    fun onAddArrivalAlertClicked(stopCode: String) {
+    fun onAddArrivalAlertClicked(stopIdentifier: StopIdentifier) {
         if (!arguments.isShortcutMode) {
-            state.action = UiAction.ShowAddArrivalAlert(stopCode = stopCode)
+            state.action = UiAction.ShowAddArrivalAlert(stopIdentifier = stopIdentifier)
             dismissDropdownMenu()
         }
     }
@@ -171,11 +173,11 @@ internal class FavouriteStopsViewModel @Inject constructor(
     /**
      * This is called when the remove arrival alert dropdown item has been clicked.
      *
-     * @param stopCode The code of the stop for which an arrival alert is to be removed.
+     * @param stopIdentifier The identifier of the stop for which an arrival alert is to be removed.
      */
-    fun onRemoveArrivalAlertClicked(stopCode: String) {
+    fun onRemoveArrivalAlertClicked(stopIdentifier: StopIdentifier) {
         if (!arguments.isShortcutMode) {
-            state.action = UiAction.ShowConfirmRemoveArrivalAlert(stopCode = stopCode)
+            state.action = UiAction.ShowConfirmRemoveArrivalAlert(stopIdentifier = stopIdentifier)
             dismissDropdownMenu()
         }
     }
@@ -183,11 +185,11 @@ internal class FavouriteStopsViewModel @Inject constructor(
     /**
      * This is called when the add proximity alert dropdown item has been clicked.
      *
-     * @param stopCode The code of the stop for which a proximity alert is to be added.
+     * @param stopIdentifier The identifier of the stop for which a proximity alert is to be added.
      */
-    fun onAddProximityAlertClicked(stopCode: String) {
+    fun onAddProximityAlertClicked(stopIdentifier: StopIdentifier) {
         if (!arguments.isShortcutMode) {
-            state.action = UiAction.ShowAddProximityAlert(stopCode = stopCode)
+            state.action = UiAction.ShowAddProximityAlert(stopIdentifier = stopIdentifier)
             dismissDropdownMenu()
         }
     }
@@ -195,11 +197,12 @@ internal class FavouriteStopsViewModel @Inject constructor(
     /**
      * This is called when the remove proximity alert dropdown item has been clicked.
      *
-     * @param stopCode The code of the stop for which a proximity alert is to be removed.
+     * @param stopIdentifier The identifier of the stop for which a proximity alert is to be
+     * removed.
      */
-    fun onRemoveProximityAlertClicked(stopCode: String) {
+    fun onRemoveProximityAlertClicked(stopIdentifier: StopIdentifier) {
         if (!arguments.isShortcutMode) {
-            state.action = UiAction.ShowConfirmRemoveProximityAlert(stopCode = stopCode)
+            state.action = UiAction.ShowConfirmRemoveProximityAlert(stopIdentifier = stopIdentifier)
             dismissDropdownMenu()
         }
     }
@@ -207,11 +210,11 @@ internal class FavouriteStopsViewModel @Inject constructor(
     /**
      * This is called when the 'Show on map' dropdown item has been clicked.
      *
-     * @param stopCode The stop code for which the map is to be shown.
+     * @param stopIdentifier The stop identifier for which the map is to be shown.
      */
-    fun onShowOnMapClicked(stopCode: String) {
+    fun onShowOnMapClicked(stopIdentifier: StopIdentifier) {
         if (!arguments.isShortcutMode) {
-            state.action = UiAction.ShowOnMap(stopCode = stopCode)
+            state.action = UiAction.ShowOnMap(stopIdentifier = stopIdentifier)
             dismissDropdownMenu()
         }
     }
@@ -247,6 +250,6 @@ internal class FavouriteStopsViewModel @Inject constructor(
     }
 
     private fun dismissDropdownMenu() {
-        state.selectedStopCode = null
+        state.selectedStopIdentifier = null
     }
 }

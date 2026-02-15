@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,7 +28,8 @@ package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
-import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.ServicePoint
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.servicepoints.ServicePoint
 import uk.org.rivernile.android.bustracker.core.servicepoints.ServicePointsRepository
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
@@ -54,7 +55,7 @@ class RouteLineRetriever @Inject constructor(
      * @return The [List] of [UiServiceRoute] for the given [selectedServices], or `null` if
      * [selectedServices] is `null` or empty, or `null` if no route lines could be found.
      */
-    fun getRouteLinesFlow(selectedServices: Set<String>?) =
+    fun getRouteLinesFlow(selectedServices: Set<ServiceDescriptor>?) =
         selectedServices?.ifEmpty { null }?.let {
             combine(
                 servicePointsRepository.getServicePointsFlow(it),
@@ -68,26 +69,26 @@ class RouteLineRetriever @Inject constructor(
      * to the output structure, to be consumed by the UI.
      *
      * @param servicePoints The input [List] of [ServicePoint]s to be mapped.
-     * @param serviceColours A [Map]ping of service names to colour.
+     * @param serviceColours A [Map]ping of service to colour.
      * @return The inputs mapped to a [List] of [UiServiceRoute], or `null` if there were no
      * [servicePoints].
      */
     private fun mapToRouteLines(
         servicePoints: List<ServicePoint>?,
-        serviceColours: Map<String, ServiceColours>?
+        serviceColours: Map<ServiceDescriptor, ServiceColours>?
     ): List<UiServiceRoute>? {
         return servicePoints?.ifEmpty { null }?.let { points ->
-            val result = mutableMapOf<String, MutableUiServiceRoute>()
+            val result = mutableMapOf<ServiceDescriptor, MutableUiServiceRoute>()
 
             points.forEach { point ->
-                val service = result.getOrPut(point.serviceName) {
+                val service = result.getOrPut(point.serviceDescriptor) {
                     MutableUiServiceRoute(
-                        point.serviceName,
-                        serviceColours?.get(point.serviceName)?.primaryColour
+                        point.serviceDescriptor,
+                        serviceColours?.get(point.serviceDescriptor)?.colourPrimary
                     )
                 }
 
-                val mutablePoints = service.lines.getOrPut(point.chainage) {
+                val mutablePoints = service.lines.getOrPut(point.routeSection) {
                     mutableListOf()
                 }
 
@@ -104,13 +105,13 @@ class RouteLineRetriever @Inject constructor(
      * This is a mutable version of [UiServiceRoute] used to store route line properties while it
      * is being built.
      *
-     * @property serviceName The name of the service for this route line.
+     * @property serviceDescriptor The descriptor of the service for this route line.
      * @property serviceColour An optional colour for this service. If `null`, a colour will be
      * assigned downstream.
      * @property lines The route lines for this service.
      */
     private data class MutableUiServiceRoute(
-        val serviceName: String,
+        val serviceDescriptor: ServiceDescriptor,
         val serviceColour: Int?,
         val lines: MutableMap<Int, MutableList<UiLatLon>> = mutableMapOf()
     ) {
@@ -131,7 +132,7 @@ class RouteLineRetriever @Inject constructor(
             .ifEmpty { null }
             ?.let {
                 UiServiceRoute(
-                    serviceName,
+                    serviceDescriptor,
                     serviceColour,
                     it
                 )

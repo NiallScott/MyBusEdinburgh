@@ -32,6 +32,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import javax.inject.Inject
@@ -70,7 +72,7 @@ internal class RealUiFavouriteStopsRetriever @Inject constructor(
 
     private fun createUiFavouriteStops(
         favouriteStopsWithDropdownMenus: FavouritesWithDropdownMenus?,
-        serviceColours: Map<String, ServiceColours>?
+        serviceColours: Map<ServiceDescriptor, ServiceColours>?
     ): List<UiFavouriteStop>? {
         return favouriteStopsWithDropdownMenus
             ?.favouriteStops
@@ -84,11 +86,11 @@ internal class RealUiFavouriteStopsRetriever @Inject constructor(
     private fun getFavouritesWithDropdownMenusFlow(
         favouriteStops: List<FavouriteStopWithServices>?
     ): Flow<FavouritesWithDropdownMenus?> {
-        val stopCodes = favouriteStops?.map { it.stopCode }?.toSet()
+        val stopIdentifiers = favouriteStops?.map { it.stopIdentifier }?.toSet()
 
-        return if (!stopCodes.isNullOrEmpty()) {
+        return if (!stopIdentifiers.isNullOrEmpty()) {
             dropdownMenuGenerator
-                .getDropdownMenuItemsForStopsFlow(stopCodes)
+                .getDropdownMenuItemsForStopsFlow(stopIdentifiers)
                 .map {
                     FavouritesWithDropdownMenus(
                         favouriteStops = favouriteStops,
@@ -102,6 +104,6 @@ internal class RealUiFavouriteStopsRetriever @Inject constructor(
 
     private data class FavouritesWithDropdownMenus(
         val favouriteStops: List<FavouriteStopWithServices>,
-        val dropdownMenus: Map<String, UiFavouriteDropdownMenu>?
+        val dropdownMenus: Map<StopIdentifier, UiFavouriteDropdownMenu>?
     )
 }

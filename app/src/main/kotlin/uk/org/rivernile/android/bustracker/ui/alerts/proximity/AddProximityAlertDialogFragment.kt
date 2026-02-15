@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,6 +46,8 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.permission.AndroidPermissionChecker
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
@@ -69,14 +71,18 @@ class AddProximityAlertDialogFragment : DialogFragment() {
         /**
          * Create a new instance of this [DialogFragment].
          *
-         * @param stopCode The stop code to add a proximity alert for.
+         * @param stopIdentifier The stop to add a proximity alert for.
          * @return A new instance of this [DialogFragment].
          */
-        fun newInstance(stopCode: String) = AddProximityAlertDialogFragment().apply {
-            arguments = Bundle().apply {
-                putString(AddProximityAlertDialogFragmentViewModel.STATE_STOP_CODE, stopCode)
+        fun newInstance(stopIdentifier: StopIdentifier) =
+            AddProximityAlertDialogFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable(
+                        AddProximityAlertDialogFragmentViewModel.STATE_STOP_IDENTIFIER,
+                        stopIdentifier.toParcelableStopIdentifier()
+                    )
+                }
             }
-        }
     }
 
     @Inject
@@ -231,7 +237,7 @@ class AddProximityAlertDialogFragment : DialogFragment() {
         viewBinding.txtBlurb.text = getString(
             R.string.addproxalertdialog_blurb,
             stopDetails?.let {
-                textFormattingUtils.formatBusStopNameWithStopCode(it.stopCode, it.stopName)
+                textFormattingUtils.formatBusStopNameWithStopCode(it.stopIdentifier, it.stopName)
             }
         )
     }

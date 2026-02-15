@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -53,6 +53,12 @@ import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRequ
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.sortByServiceName
+import uk.org.rivernile.android.bustracker.core.domain.toStopIdentifier
 import uk.org.rivernile.android.bustracker.core.servicestops.ServiceStopsRepository
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import javax.inject.Inject
@@ -63,9 +69,10 @@ import javax.inject.Inject
  * @param savedState The saved state to obtain state from previous instances.
  * @param permissionsTracker Used to track the state of the user permissions.
  * @param busStopsRepository Used to get stop details.
- * @param serviceStopsRepository Used to get the services for the selected stop code.
+ * @param serviceStopsRepository Used to get the services for the selected stop identifier.
  * @param uiStateCalculator Used to calculate the current [UiState].
  * @param alertsRepository Used to add the arrival alert.
+ * @param serviceNameComparator Used to sort services by name.
  * @param applicationCoroutineScope The [CoroutineScope] to add the alert under.
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
@@ -78,6 +85,7 @@ class AddTimeAlertDialogFragmentViewModel @Inject constructor(
     private val serviceStopsRepository: ServiceStopsRepository,
     uiStateCalculator: UiStateCalculator,
     private val alertsRepository: AlertsRepository,
+    private val serviceNameComparator: Comparator<String>,
     @param:ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
     @param:ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
 ) : ViewModel() {
@@ -85,9 +93,9 @@ class AddTimeAlertDialogFragmentViewModel @Inject constructor(
     companion object {
 
         /**
-         * This constant contains the key where the stop code is stored in the saved state.
+         * This constant contains the key where the stop identifier is stored in the saved state.
          */
-        const val STATE_STOP_CODE = "stopCode"
+        const val STATE_STOP_IDENTIFIER = "stopIdentifier"
 
         /**
          * This constant contains the key where the selected services are stored in the saved state.
@@ -96,22 +104,21 @@ class AddTimeAlertDialogFragmentViewModel @Inject constructor(
     }
 
     /**
-     * This property is used to get and set the stop code the arrival alert alert should be added
-     * for.
+     * This property is used to get and set the stop the arrival alert alert should be added for.
      */
-    var stopCode: String?
-        get() = savedState[STATE_STOP_CODE]
+    var stopIdentifier: ParcelableStopIdentifier?
+        get() = savedState[STATE_STOP_IDENTIFIER]
         set(value) {
-            savedState[STATE_STOP_CODE] = value
+            savedState[STATE_STOP_IDENTIFIER] = value
         }
 
     /**
      * This property is used to get and set the current selected services.
      */
-    var selectedServices: List<String>?
-        get() = selectedServicesLiveData.value
+    var selectedServices: List<ParcelableServiceDescriptor>?
+        get() = savedState[STATE_SELECTED_SERVICES]
         set(value) {
-            savedState[STATE_SELECTED_SERVICES] = value?.ifEmpty { null }?.toTypedArray()
+            savedState[STATE_SELECTED_SERVICES] = value?.ifEmpty { null }
         }
 
     /**
@@ -119,15 +126,19 @@ class AddTimeAlertDialogFragmentViewModel @Inject constructor(
      */
     val requestPermissionsLiveData get() = permissionsTracker.requestPermissionsLiveData
 
-    private val stopCodeFlow = savedState.getStateFlow<String?>(STATE_STOP_CODE, null)
+    private val parcelableStopIdentifierFlow = savedState
+        .getStateFlow<ParcelableStopIdentifier?>(STATE_STOP_IDENTIFIER, null)
+
+    private val stopIdentifierFlow get() = parcelableStopIdentifierFlow
+        .map { it?.toStopIdentifier() }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val stopDetailsFlow = stopCodeFlow
+    private val stopDetailsFlow = stopIdentifierFlow
         .flatMapLatest(this::loadStopDetails)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val availableServicesFlow = stopCodeFlow
+    private val availableServicesFlow = stopIdentifierFlow
         .flatMapLatest(this::loadServicesForStop)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
@@ -135,23 +146,23 @@ class AddTimeAlertDialogFragmentViewModel @Inject constructor(
      * This [LiveData] emits the user's selected services.
      */
     val selectedServicesLiveData = savedState
-        .getStateFlow<Array<String>?>(STATE_SELECTED_SERVICES, null)
-        .map { it?.ifEmpty { null }?.asList() }
+        .getStateFlow<List<ParcelableServiceDescriptor>?>(STATE_SELECTED_SERVICES, null)
+        .map { it?.ifEmpty { null }?.sortByServiceName(serviceNameComparator) }
         .asLiveData(viewModelScope.coroutineContext)
 
     /**
-     * This [LiveData] emits the current [StopDetails] for the given stop code.
+     * This [LiveData] emits the current [StopDetails] for the given stop identifier.
      */
     val stopDetailsLiveData = stopDetailsFlow
         .asLiveData(viewModelScope.coroutineContext)
         .distinctUntilChanged()
 
     private val uiStateFlow = uiStateCalculator.createUiStateFlow(
-            stopCodeFlow,
+            stopIdentifierFlow,
             stopDetailsFlow,
             availableServicesFlow,
             permissionsTracker.permissionsStateFlow)
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), UiState.ERROR_NO_STOP_CODE)
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), UiState.ERROR_NO_STOP_IDENTIFIER)
     /**
      * This [LiveData] emits the current [UiState].
      */
@@ -227,47 +238,53 @@ class AddTimeAlertDialogFragmentViewModel @Inject constructor(
      */
     fun onSelectServicesClicked() {
         if (!availableServicesFlow.value.isNullOrEmpty()) {
-            val stopCode = stopCode?.ifBlank { null } ?: return
-            showServicesChooser.value = UiServicesChooserParams(stopCode, selectedServices)
+            val stopIdentifier = stopIdentifier?.toStopIdentifier() ?: return
+            showServicesChooser.value = UiServicesChooserParams(stopIdentifier, selectedServices)
         }
     }
 
     /**
      * Handle the user clicking on the 'Add' button which signals their intent to add a new arrival
-     * alert for the given stop code.
+     * alert for the given stop identifier.
      *
      * @param timeTrigger The number of minutes to be used as the time trigger.
      */
     fun onAddClicked(timeTrigger: Int) {
-        stopCode?.ifEmpty { null }?.let { sc ->
+        stopIdentifier?.toStopIdentifier()?.let { si ->
             selectedServices?.ifEmpty { null }?.let { ss ->
                 // Uses the application CoroutineScope as the Dialog dismisses immediately, and we
                 // need this task to finish. Fire and forget is fine here.
                 applicationCoroutineScope.launch(defaultDispatcher) {
-                    alertsRepository.addArrivalAlert(ArrivalAlertRequest(sc, ss, timeTrigger))
+                    alertsRepository.addArrivalAlert(
+                        ArrivalAlertRequest(
+                            stopIdentifier = si,
+                            services = ss.toSet(),
+                            timeTrigger = timeTrigger
+                        )
+                    )
                 }
             }
         }
     }
 
     /**
-     * Load the details for the given [stopCode].
+     * Load the details for the given [stopIdentifier].
      *
-     * @param stopCode The stop code to load details for.
+     * @param stopIdentifier The stop to load details for.
      * @return A [kotlinx.coroutines.flow.Flow] containing the [StopDetails] (which emits new items
      * if the stop details change), or a [kotlinx.coroutines.flow.Flow] of `null` if the stop
-     * code is `null` or empty.
+     * identifier is `null`.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun loadStopDetails(stopCode: String?) = if (stopCode?.isNotEmpty() == true) {
-        busStopsRepository.getNameForStopFlow(stopCode)
+    private fun loadStopDetails(stopIdentifier: StopIdentifier?) = if (stopIdentifier != null) {
+        busStopsRepository.getNameForStopFlow(stopIdentifier)
                 .mapLatest {
-                    StopDetails(stopCode, it)
+                    StopDetails(stopIdentifier, it)
                 }
                 .onStart {
-                    // Emit just the stop code initially. If the name is available, it should
+                    // Emit just the stop identifier initially. If the name is available, it should
                     // asynchronously follow behind.
-                    emit(StopDetails(stopCode, null))
+                    emit(StopDetails(stopIdentifier, null))
                 }
                 .distinctUntilChanged()
                 .flowOn(defaultDispatcher)
@@ -276,17 +293,17 @@ class AddTimeAlertDialogFragmentViewModel @Inject constructor(
     }
 
     /**
-     * Load the services for the given [stopCode].
+     * Load the services for the given [stopIdentifier].
      *
-     * @param stopCode The stop code to load services for.
+     * @param stopIdentifier The stop to load services for.
      * @return A [kotlinx.coroutines.flow.Flow] containing the [List] of services (which emits new
-     * items if the data changes), or a [kotlinx.coroutines.flow.Flow] of `null` if the stop code is
-     * `null` or empty.
+     * items if the data changes), or a [kotlinx.coroutines.flow.Flow] of `null` if the stop
+     * identifier is `null`.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun loadServicesForStop(stopCode: String?) = if (stopCode?.isNotEmpty() == true) {
-        serviceStopsRepository.getServicesForStopFlow(stopCode)
-                .mapLatest<List<String>?, List<String>?> {
+    private fun loadServicesForStop(stopIdentifier: StopIdentifier?) = if (stopIdentifier != null) {
+        serviceStopsRepository.getServicesForStopFlow(stopIdentifier)
+                .mapLatest<List<ServiceDescriptor>?, List<ServiceDescriptor>?> {
                     // If upstream gives us a null, convert it to an emptyList() as null denotes
                     // loading here.
                     it ?: emptyList()

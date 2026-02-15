@@ -34,6 +34,8 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.alerts.FakeAlertsRepository
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.features.FakeFeatureRepository
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import kotlin.test.Test
@@ -56,7 +58,7 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onIsShortcutModeFlow = { flowOf(false) }
             ),
             state = FakeState(
-                onSelectedStopCodeFlow = { flowOf(null) }
+                onSelectedStopIdentifierFlow = { flowOf(null) }
             ),
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { true },
@@ -65,8 +67,8 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onHasPinShortcutFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
-                onArrivalAlertStopCodesFlow = { flowOf(null) },
-                onProximityAlertStopCodesFlow = { flowOf(null) }
+                onArrivalAlertStopIdentifiersFlow = { flowOf(null) },
+                onProximityAlertStopIdentifiersFlow = { flowOf(null) }
             )
         )
 
@@ -83,7 +85,7 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onIsShortcutModeFlow = { flowOf(true) }
             ),
             state = FakeState(
-                onSelectedStopCodeFlow = { flowOf(null) }
+                onSelectedStopIdentifierFlow = { flowOf(null) }
             ),
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { true },
@@ -92,12 +94,12 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onHasPinShortcutFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
-                onArrivalAlertStopCodesFlow = { flowOf(null) },
-                onProximityAlertStopCodesFlow = { flowOf(null) }
+                onArrivalAlertStopIdentifiersFlow = { flowOf(null) },
+                onProximityAlertStopIdentifiersFlow = { flowOf(null) }
             )
         )
 
-        generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
+        generator.getDropdownMenuItemsForStopsFlow(setOf("123456".toNaptanStopIdentifier())).test {
             assertNull(awaitItem())
             awaitComplete()
         }
@@ -110,7 +112,7 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onIsShortcutModeFlow = { flowOf(false) }
             ),
             state = FakeState(
-                onSelectedStopCodeFlow = { flowOf(null) }
+                onSelectedStopIdentifierFlow = { flowOf(null) }
             ),
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { false },
@@ -119,17 +121,17 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onHasPinShortcutFeature = { false }
             ),
             alertsRepository = FakeAlertsRepository(
-                onArrivalAlertStopCodesFlow = {
-                    fail("Not expecting to get the arrival alerts stop codes Flow.")
+                onArrivalAlertStopIdentifiersFlow = {
+                    fail("Not expecting to get the arrival alerts stop identifiers Flow.")
                 },
-                onProximityAlertStopCodesFlow = { flowOf(null) }
+                onProximityAlertStopIdentifiersFlow = { flowOf(null) }
             )
         )
 
-        generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
+        generator.getDropdownMenuItemsForStopsFlow(setOf("123456".toNaptanStopIdentifier())).test {
             assertEquals(
-                mapOf(
-                    "123456" to UiFavouriteDropdownMenu(
+                mapOf<StopIdentifier, UiFavouriteDropdownMenu>(
+                    "123456".toNaptanStopIdentifier() to UiFavouriteDropdownMenu(
                         isShown = false,
                         isShortcutItemShown = false,
                         arrivalAlertDropdownItem = null,
@@ -152,7 +154,7 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onIsShortcutModeFlow = { flowOf(false) }
             ),
             state = FakeState(
-                onSelectedStopCodeFlow = { flowOf(null) }
+                onSelectedStopIdentifierFlow = { flowOf(null) }
             ),
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { false },
@@ -161,17 +163,17 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onHasPinShortcutFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
-                onArrivalAlertStopCodesFlow = {
-                    fail("Not expecting to get the arrival alerts stop codes Flow.")
+                onArrivalAlertStopIdentifiersFlow = {
+                    fail("Not expecting to get the arrival alerts stop identifiers Flow.")
                 },
-                onProximityAlertStopCodesFlow = { flowOf(null) }
+                onProximityAlertStopIdentifiersFlow = { flowOf(null) }
             )
         )
 
-        generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
+        generator.getDropdownMenuItemsForStopsFlow(setOf("123456".toNaptanStopIdentifier())).test {
             assertEquals(
-                mapOf(
-                    "123456" to UiFavouriteDropdownMenu(
+                mapOf<StopIdentifier, UiFavouriteDropdownMenu>(
+                    "123456".toNaptanStopIdentifier() to UiFavouriteDropdownMenu(
                         isShown = false,
                         isShortcutItemShown = true,
                         arrivalAlertDropdownItem = null,
@@ -194,7 +196,7 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onIsShortcutModeFlow = { flowOf(false) }
             ),
             state = FakeState(
-                onSelectedStopCodeFlow = { flowOf(null) }
+                onSelectedStopIdentifierFlow = { flowOf(null) }
             ),
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { true },
@@ -203,17 +205,17 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onHasPinShortcutFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
-                onArrivalAlertStopCodesFlow = { flowOf(null) },
-                onProximityAlertStopCodesFlow = {
-                    fail("Not expecting to get the arrival alerts stop codes Flow.")
+                onArrivalAlertStopIdentifiersFlow = { flowOf(null) },
+                onProximityAlertStopIdentifiersFlow = {
+                    fail("Not expecting to get the arrival alerts stop identifiers Flow.")
                 }
             )
         )
 
-        generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
+        generator.getDropdownMenuItemsForStopsFlow(setOf("123456".toNaptanStopIdentifier())).test {
             assertEquals(
-                mapOf(
-                    "123456" to UiFavouriteDropdownMenu(
+                mapOf<StopIdentifier, UiFavouriteDropdownMenu>(
+                    "123456".toNaptanStopIdentifier() to UiFavouriteDropdownMenu(
                         isShown = false,
                         isShortcutItemShown = true,
                         arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
@@ -236,7 +238,7 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onIsShortcutModeFlow = { flowOf(false) }
             ),
             state = FakeState(
-                onSelectedStopCodeFlow = { flowOf(null) }
+                onSelectedStopIdentifierFlow = { flowOf(null) }
             ),
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { true },
@@ -245,15 +247,15 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onHasPinShortcutFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
-                onArrivalAlertStopCodesFlow = { flowOf(null) },
-                onProximityAlertStopCodesFlow = { flowOf(null) }
+                onArrivalAlertStopIdentifiersFlow = { flowOf(null) },
+                onProximityAlertStopIdentifiersFlow = { flowOf(null) }
             )
         )
 
-        generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
+        generator.getDropdownMenuItemsForStopsFlow(setOf("123456".toNaptanStopIdentifier())).test {
             assertEquals(
-                mapOf(
-                    "123456" to UiFavouriteDropdownMenu(
+                mapOf<StopIdentifier, UiFavouriteDropdownMenu>(
+                    "123456".toNaptanStopIdentifier() to UiFavouriteDropdownMenu(
                         isShown = false,
                         isShortcutItemShown = true,
                         arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
@@ -278,7 +280,7 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onIsShortcutModeFlow = { flowOf(false) }
             ),
             state = FakeState(
-                onSelectedStopCodeFlow = { flowOf(null) }
+                onSelectedStopIdentifierFlow = { flowOf(null) }
             ),
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { true },
@@ -287,15 +289,15 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onHasPinShortcutFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
-                onArrivalAlertStopCodesFlow = { flowOf(null) },
-                onProximityAlertStopCodesFlow = { flowOf(null) }
+                onArrivalAlertStopIdentifiersFlow = { flowOf(null) },
+                onProximityAlertStopIdentifiersFlow = { flowOf(null) }
             )
         )
 
-        generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
+        generator.getDropdownMenuItemsForStopsFlow(setOf("123456".toNaptanStopIdentifier())).test {
             assertEquals(
-                mapOf(
-                    "123456" to UiFavouriteDropdownMenu(
+                mapOf<StopIdentifier, UiFavouriteDropdownMenu>(
+                    "123456".toNaptanStopIdentifier() to UiFavouriteDropdownMenu(
                         isShown = false,
                         isShortcutItemShown = true,
                         arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
@@ -320,7 +322,7 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onIsShortcutModeFlow = { flowOf(false) }
             ),
             state = FakeState(
-                onSelectedStopCodeFlow = { flowOf(null) }
+                onSelectedStopIdentifierFlow = { flowOf(null) }
             ),
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { true },
@@ -329,15 +331,15 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onHasPinShortcutFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
-                onArrivalAlertStopCodesFlow = { flowOf(emptySet()) },
-                onProximityAlertStopCodesFlow = { flowOf(emptySet()) }
+                onArrivalAlertStopIdentifiersFlow = { flowOf(emptySet()) },
+                onProximityAlertStopIdentifiersFlow = { flowOf(emptySet()) }
             )
         )
 
-        generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
+        generator.getDropdownMenuItemsForStopsFlow(setOf("123456".toNaptanStopIdentifier())).test {
             assertEquals(
-                mapOf(
-                    "123456" to UiFavouriteDropdownMenu(
+                mapOf<StopIdentifier, UiFavouriteDropdownMenu>(
+                    "123456".toNaptanStopIdentifier() to UiFavouriteDropdownMenu(
                         isShown = false,
                         isShortcutItemShown = true,
                         arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
@@ -362,7 +364,7 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onIsShortcutModeFlow = { flowOf(false) }
             ),
             state = FakeState(
-                onSelectedStopCodeFlow = { flowOf(null) }
+                onSelectedStopIdentifierFlow = { flowOf(null) }
             ),
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { true },
@@ -371,15 +373,19 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onHasPinShortcutFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
-                onArrivalAlertStopCodesFlow = { flowOf(setOf("987654")) },
-                onProximityAlertStopCodesFlow = { flowOf(setOf("987654")) }
+                onArrivalAlertStopIdentifiersFlow = {
+                    flowOf(setOf("987654".toNaptanStopIdentifier()))
+                },
+                onProximityAlertStopIdentifiersFlow = {
+                    flowOf(setOf("987654".toNaptanStopIdentifier()))
+                }
             )
         )
 
-        generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
+        generator.getDropdownMenuItemsForStopsFlow(setOf("123456".toNaptanStopIdentifier())).test {
             assertEquals(
-                mapOf(
-                    "123456" to UiFavouriteDropdownMenu(
+                mapOf<StopIdentifier, UiFavouriteDropdownMenu>(
+                    "123456".toNaptanStopIdentifier() to UiFavouriteDropdownMenu(
                         isShown = false,
                         isShortcutItemShown = true,
                         arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
@@ -404,7 +410,7 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onIsShortcutModeFlow = { flowOf(false) }
             ),
             state = FakeState(
-                onSelectedStopCodeFlow = { flowOf(null) }
+                onSelectedStopIdentifierFlow = { flowOf(null) }
             ),
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { true },
@@ -413,15 +419,19 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onHasPinShortcutFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
-                onArrivalAlertStopCodesFlow = { flowOf(setOf("123456")) },
-                onProximityAlertStopCodesFlow = { flowOf(setOf("123456")) }
+                onArrivalAlertStopIdentifiersFlow = {
+                    flowOf(setOf("123456".toNaptanStopIdentifier()))
+                },
+                onProximityAlertStopIdentifiersFlow = {
+                    flowOf(setOf("123456".toNaptanStopIdentifier()))
+                }
             )
         )
 
-        generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
+        generator.getDropdownMenuItemsForStopsFlow(setOf("123456".toNaptanStopIdentifier())).test {
             assertEquals(
-                mapOf(
-                    "123456" to UiFavouriteDropdownMenu(
+                mapOf<StopIdentifier, UiFavouriteDropdownMenu>(
+                    "123456".toNaptanStopIdentifier() to UiFavouriteDropdownMenu(
                         isShown = false,
                         isShortcutItemShown = true,
                         arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
@@ -446,7 +456,7 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onIsShortcutModeFlow = { flowOf(false) }
             ),
             state = FakeState(
-                onSelectedStopCodeFlow = { flowOf("987654") }
+                onSelectedStopIdentifierFlow = { flowOf("987654".toNaptanStopIdentifier()) }
             ),
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { true },
@@ -455,15 +465,19 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onHasPinShortcutFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
-                onArrivalAlertStopCodesFlow = { flowOf(setOf("123456")) },
-                onProximityAlertStopCodesFlow = { flowOf(setOf("123456")) }
+                onArrivalAlertStopIdentifiersFlow = {
+                    flowOf(setOf("123456".toNaptanStopIdentifier()))
+                },
+                onProximityAlertStopIdentifiersFlow = {
+                    flowOf(setOf("123456".toNaptanStopIdentifier()))
+                }
             )
         )
 
-        generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
+        generator.getDropdownMenuItemsForStopsFlow(setOf("123456".toNaptanStopIdentifier())).test {
             assertEquals(
-                mapOf(
-                    "123456" to UiFavouriteDropdownMenu(
+                mapOf<StopIdentifier, UiFavouriteDropdownMenu>(
+                    "123456".toNaptanStopIdentifier() to UiFavouriteDropdownMenu(
                         isShown = false,
                         isShortcutItemShown = true,
                         arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
@@ -488,7 +502,7 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onIsShortcutModeFlow = { flowOf(false) }
             ),
             state = FakeState(
-                onSelectedStopCodeFlow = { flowOf("123456") }
+                onSelectedStopIdentifierFlow = { flowOf("123456".toNaptanStopIdentifier()) }
             ),
             featureRepository = FakeFeatureRepository(
                 onHasArrivalAlertFeature = { true },
@@ -497,15 +511,19 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
                 onHasPinShortcutFeature = { true }
             ),
             alertsRepository = FakeAlertsRepository(
-                onArrivalAlertStopCodesFlow = { flowOf(setOf("123456")) },
-                onProximityAlertStopCodesFlow = { flowOf(setOf("123456")) }
+                onArrivalAlertStopIdentifiersFlow = {
+                    flowOf(setOf("123456".toNaptanStopIdentifier()))
+                },
+                onProximityAlertStopIdentifiersFlow = {
+                    flowOf(setOf("123456".toNaptanStopIdentifier()))
+                }
             )
         )
 
-        generator.getDropdownMenuItemsForStopsFlow(setOf("123456")).test {
+        generator.getDropdownMenuItemsForStopsFlow(setOf("123456".toNaptanStopIdentifier())).test {
             assertEquals(
-                mapOf(
-                    "123456" to UiFavouriteDropdownMenu(
+                mapOf<StopIdentifier, UiFavouriteDropdownMenu>(
+                    "123456".toNaptanStopIdentifier() to UiFavouriteDropdownMenu(
                         isShown = true,
                         isShortcutItemShown = true,
                         arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(

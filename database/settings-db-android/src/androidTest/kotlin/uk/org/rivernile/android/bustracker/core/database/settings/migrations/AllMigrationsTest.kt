@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -249,6 +249,7 @@ class AllMigrationsTest {
         arrayOf(
             Migration1To4(),
             Migration2To4(),
-            Migration3To4()
+            Migration3To4(),
+            Migration4To5()
         )
 }

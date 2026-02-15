@@ -28,6 +28,8 @@ package uk.org.rivernile.android.bustracker.ui.favouritestops
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
@@ -35,7 +37,7 @@ import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 /**
  * A favourite stop which is displayed on the UI.
  *
- * @property stopCode The stop code of the favourite stop.
+ * @property stopIdentifier The stop identifier of the favourite stop.
  * @property savedName The user's saved name for this favourite stop.
  * @property services An [ImmutableList] of [UiServiceName]s which stop at this stop.
  * @property dropdownMenu Data for any [UiFavouriteDropdownMenu] which could be shown. If this is
@@ -43,7 +45,7 @@ import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
  * @author Niall Scott
  */
 internal data class UiFavouriteStop(
-    val stopCode: String,
+    val stopIdentifier: StopIdentifier,
     val savedName: String,
     val services: ImmutableList<UiServiceName>?,
     val dropdownMenu: UiFavouriteDropdownMenu?
@@ -52,28 +54,28 @@ internal data class UiFavouriteStop(
 /**
  * Map this [List] of [FavouriteStopWithServices] to a [List] of [UiFavouriteStop].
  *
- * @param serviceColours A [Map] of service names to [ServiceColours].
- * @param dropdownMenus A mapping of stop codes to [UiFavouriteDropdownMenu]s, used to populate the
- * dropdown menu for each [UiFavouriteStop].
+ * @param serviceColours A [Map] of services to [ServiceColours].
+ * @param dropdownMenus A mapping of stop identifiers to [UiFavouriteDropdownMenu]s, used to
+ * populate the dropdown menu for each [UiFavouriteStop].
  * @return This [List] of [FavouriteStopWithServices] mapped to a [List] of [UiFavouriteStop]s.
  */
 internal fun List<FavouriteStopWithServices>.toUiFavouriteStops(
-    serviceColours: Map<String, ServiceColours>?,
-    dropdownMenus: Map<String, UiFavouriteDropdownMenu>?
+    serviceColours: Map<ServiceDescriptor, ServiceColours>?,
+    dropdownMenus: Map<StopIdentifier, UiFavouriteDropdownMenu>?
 ) = map { favouriteStop ->
     favouriteStop
         .toUiFavouriteStop(
             serviceColours = serviceColours,
-            dropdownMenu = dropdownMenus?.get(favouriteStop.stopCode)
+            dropdownMenu = dropdownMenus?.get(favouriteStop.stopIdentifier)
         )
 }
 
 private fun FavouriteStopWithServices.toUiFavouriteStop(
-    serviceColours: Map<String, ServiceColours>?,
+    serviceColours: Map<ServiceDescriptor, ServiceColours>?,
     dropdownMenu: UiFavouriteDropdownMenu?
 ): UiFavouriteStop {
     return UiFavouriteStop(
-        stopCode = stopCode,
+        stopIdentifier = stopIdentifier,
         savedName = savedName,
         services = services
             ?.ifEmpty { null }
@@ -86,18 +88,18 @@ private fun FavouriteStopWithServices.toUiFavouriteStop(
 }
 
 private fun toUiServiceName(
-    serviceName: String,
+    serviceDescriptor: ServiceDescriptor,
     serviceColours: ServiceColours?
 ): UiServiceName {
     return UiServiceName(
-        serviceName = serviceName,
+        serviceName = serviceDescriptor.serviceName,
         colours = serviceColours?.toUiServiceColours()
     )
 }
 
 private fun ServiceColours.toUiServiceColours(): UiServiceColours {
     return UiServiceColours(
-        backgroundColour = primaryColour,
+        backgroundColour = colourPrimary,
         textColour = colourOnPrimary
     )
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,50 +26,94 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.datetime.TimeZone
 import kotlinx.serialization.SerializationException
 import okio.IOException
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesMapper
+import uk.org.rivernile.android.bustracker.core.domain.AtcoStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.EdinburghOpenApi
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Stop
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.emptyLiveTimes
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.toLiveTimes
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
-import uk.org.rivernile.edinburghbustrackerapi.ApiKeyGenerator
-import uk.org.rivernile.edinburghbustrackerapi.EdinburghBusTrackerApi
+import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 import javax.inject.Inject
+import kotlin.time.Instant
+
+private const val HTTP_UNAUTHORISED = 401
 
 /**
  * This class is the Edinburgh-specific implementation of a [TrackerEndpoint].
  *
- * @param api An instance of the [EdinburghBusTrackerApi].
- * @param apiKeyGenerator An implementation to generate API keys for the API.
- * @param liveTimesMapper An implementation used to map the API objects to our model objects.
- * @param errorMapper An implementation used to map errors.
+ * @param api An instance of the [EdinburghOpenApi].
  * @param connectivityRepository Used to check connectivity.
  * @param exceptionLogger Used to log exceptions.
+ * @param timeUtils Time utilities, to access time functionality.
  * @author Niall Scott
  */
 internal class EdinburghTrackerEndpoint @Inject constructor(
-    private val api: EdinburghBusTrackerApi,
-    private val apiKeyGenerator: ApiKeyGenerator,
-    private val liveTimesMapper: LiveTimesMapper,
-    private val errorMapper: ErrorMapper,
-    private val responseHandler: ResponseHandler,
+    private val api: EdinburghOpenApi,
     private val connectivityRepository: ConnectivityRepository,
-    private val exceptionLogger: ExceptionLogger
+    private val exceptionLogger: ExceptionLogger,
+    private val timeUtils: TimeUtils
 ): TrackerEndpoint {
 
+    private val timeZone = TimeZone.of("Europe/London")
+
     override suspend fun getLiveTimes(
-        stopCode: String,
+        stopIdentifier: StopIdentifier,
         numberOfDepartures: Int
     ): LiveTimesResponse {
         return if (connectivityRepository.hasInternetConnectivity) {
             try {
-                val response = api.getBusTimes(
-                    apiKeyGenerator.hashedApiKey,
-                    numberOfDepartures,
-                    stopCode
-                )
+                val response = when (stopIdentifier) {
+                    is AtcoStopIdentifier -> {
+                        api.getStopEventsWithAtcoCode(
+                            atcoCode = stopIdentifier.atcoCode,
+                            numberOfDepartures = numberOfDepartures
+                        )
+                    }
+                    is NaptanStopIdentifier -> {
+                        api.getStopEventsWithSmsCode(
+                            smsCode = stopIdentifier.naptanStopCode,
+                            numberOfDepartures = numberOfDepartures
+                        )
+                    }
+                }
 
-                responseHandler.handleLiveTimesResponse(response)
+                if (response.isSuccessful) {
+                    val receiveTime = timeUtils.now
+                    val liveTimes = response
+                        .body()
+                        ?.toLiveTimes(
+                            stopIdentifier = stopIdentifier,
+                            numberOfDepartures = numberOfDepartures,
+                            receiveTime = receiveTime,
+                            timeZone = timeZone
+                        )
+                        ?: emptyLiveTimes(receiveTime = receiveTime)
+
+                    LiveTimesResponse.Success(
+                        liveTimes = liveTimes
+                    )
+                } else {
+                    val errorBody = response.errorBody()?.string()?.take(256)
+                    val error = "Status code = ${response.code()}; Body = $errorBody"
+
+                    exceptionLogger.log(RuntimeException(error))
+
+                    when (response.code()) {
+                        HTTP_UNAUTHORISED -> LiveTimesResponse.Error.ServerError.Authentication
+                        else -> LiveTimesResponse.Error.ServerError.Other(error = errorBody)
+                    }
+                }
             } catch (e: IOException) {
                 exceptionLogger.log(e)
                 LiveTimesResponse.Error.Io(e)
@@ -83,31 +127,41 @@ internal class EdinburghTrackerEndpoint @Inject constructor(
     }
 
     override suspend fun getLiveTimes(
-        stopCodes: List<String>,
+        stopIdentifiers: List<StopIdentifier>,
         numberOfDepartures: Int
-    ): LiveTimesResponse {
-        return if (connectivityRepository.hasInternetConnectivity) {
-            try {
-                val response = api.getBusTimes(
-                    apiKeyGenerator.hashedApiKey,
-                    numberOfDepartures,
-                    stopCodes[0],
-                    stopCodes.getOrNull(1),
-                    stopCodes.getOrNull(2),
-                    stopCodes.getOrNull(3),
-                    stopCodes.getOrNull(4)
-                )
+    ) = coroutineScope {
+        var minReceiveTime = Instant.DISTANT_FUTURE
+        val stops = mutableMapOf<StopIdentifier, Stop>()
 
-                responseHandler.handleLiveTimesResponse(response)
-            } catch (e: IOException) {
-                exceptionLogger.log(e)
-                LiveTimesResponse.Error.Io(e)
-            } catch (e: SerializationException) {
-                exceptionLogger.log(e)
-                LiveTimesResponse.Error.Io(e)
+        stopIdentifiers
+            .map { stopIdentifier ->
+                async {
+                    getLiveTimes(
+                        stopIdentifier = stopIdentifier,
+                        numberOfDepartures = numberOfDepartures
+                    )
+                }
             }
-        } else {
-            LiveTimesResponse.Error.NoConnectivity
-        }
+            .awaitAll()
+            .forEach { response ->
+                if (response is LiveTimesResponse.Success) {
+                    val liveTimes = response.liveTimes
+
+                    if (liveTimes.receiveTime < minReceiveTime) {
+                        minReceiveTime = liveTimes.receiveTime
+                    }
+
+                    stops += liveTimes.stops
+                } else {
+                    return@coroutineScope response
+                }
+            }
+
+        LiveTimesResponse.Success(
+            liveTimes = LiveTimes(
+                stops = stops.toMap(),
+                receiveTime = minReceiveTime
+            )
+        )
     }
 }

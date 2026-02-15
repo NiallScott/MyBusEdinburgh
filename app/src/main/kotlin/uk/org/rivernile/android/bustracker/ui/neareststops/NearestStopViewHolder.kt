@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,12 +45,12 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemNearestS
  * @author Niall Scott
  */
 class NearestStopViewHolder(
-        private val viewBinding: ListItemNearestStopBinding,
-        private val clickListener: OnNearStopItemClickListener,
-        private val stopMapMarkerDecorator: StopMapMarkerDecorator,
-        private val textFormattingUtils: TextFormattingUtils,
-        private val directionStrings: Array<String>)
-    : RecyclerView.ViewHolder(viewBinding.root) {
+    private val viewBinding: ListItemNearestStopBinding,
+    private val clickListener: OnNearStopItemClickListener,
+    private val stopMapMarkerDecorator: StopMapMarkerDecorator,
+    private val textFormattingUtils: TextFormattingUtils,
+    private val directionStrings: Array<String>
+) : RecyclerView.ViewHolder(viewBinding.root) {
 
     private var item: UiNearestStop? = null
 
@@ -84,11 +84,15 @@ class NearestStopViewHolder(
                 imgDirection.contentDescription = getDirectionString(orientation)
 
                 text1.text = textFormattingUtils.formatBusStopNameWithStopCode(
-                        it.stopCode,
-                        it.stopName)
+                    it.stopIdentifier,
+                    it.stopName
+                )
 
-                text2.text = it.services?.ifBlank { null }
-                        ?: viewBinding.root.context.getString(R.string.neareststops_no_services)
+                text2.text = it
+                    .services
+                    ?.ifEmpty { null }
+                    ?.joinToString { service -> service.serviceName }
+                    ?: viewBinding.root.context.getString(R.string.neareststops_no_services)
 
                 txtDistance.text = viewBinding.root.context.getString(
                         R.string.neareststops_distance_format,
@@ -117,7 +121,7 @@ class NearestStopViewHolder(
      * @return `true` if the long click was handled, otherwise `false`.
      */
     private fun handleLongClick() = item?.let {
-        clickListener.onNearestStopLongClicked(it.stopCode)
+        clickListener.onNearestStopLongClicked(it.stopIdentifier)
     } ?: false
 
     /**

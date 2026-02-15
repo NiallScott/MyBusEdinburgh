@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,9 @@ package uk.org.rivernile.android.bustracker.ui.removefavouritestop
 
 import androidx.lifecycle.SavedStateHandle
 import dagger.hilt.android.scopes.ViewModelScoped
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toStopIdentifier
 import javax.inject.Inject
 
 /**
@@ -38,17 +41,19 @@ import javax.inject.Inject
 internal interface Arguments {
 
     /**
-     * The supplied stop code.
+     * The supplied stop identifier.
      */
-    val stopCode: String?
+    val stopIdentifier: StopIdentifier?
 }
 
-internal const val ARG_STOP_CODE = "stopCode"
+internal const val ARG_STOP_IDENTIFIER = "stopIdentifier"
 
 @ViewModelScoped
 internal class RealArguments @Inject constructor(
     private val savedState: SavedStateHandle
 ) : Arguments {
 
-    override val stopCode: String? get() = savedState[ARG_STOP_CODE]
+    override val stopIdentifier: StopIdentifier? get() = savedState
+        .get<ParcelableStopIdentifier>(ARG_STOP_IDENTIFIER)
+        ?.toStopIdentifier()
 }

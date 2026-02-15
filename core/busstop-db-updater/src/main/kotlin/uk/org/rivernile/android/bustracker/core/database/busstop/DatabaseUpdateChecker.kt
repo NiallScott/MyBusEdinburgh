@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -63,9 +63,12 @@ internal class RealDatabaseUpdateChecker @Inject constructor(
             return false
         }
 
-        val currentTopologyId = databaseRepository.getTopologyVersionId()
+        val updateTimeSeconds = databaseRepository
+            .getDatabaseUpdateTimestamp()
+            ?.epochSeconds
 
-        return if (!databaseVersion.topologyId.equals(currentTopologyId, true)) {
+        return if (updateTimeSeconds == null ||
+            databaseVersion.timestampInSeconds > updateTimeSeconds) {
             databaseUpdater.updateDatabase(databaseVersion, socketFactory)
         } else {
             true

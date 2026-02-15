@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,15 +27,15 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop.database
 
 import androidx.room.ColumnInfo
+import kotlin.time.Instant
 
 /**
  * This is the Room specific implementation of [DatabaseMetadata].
  *
  * @property updateTimestamp See [DatabaseMetadata.updateTimestamp].
- * @property topologyVersionId See [DatabaseMetadata.topologyVersionId].
  * @author Niall Scott
  */
-internal data class RoomDatabaseMetadata(
-    override val updateTimestamp: Long,
-    @ColumnInfo("topologyId") override val topologyVersionId: String?
+@JvmInline
+internal value class RoomDatabaseMetadata(
+    @ColumnInfo("update_timestamp") override val updateTimestamp: Instant
 ) : DatabaseMetadata

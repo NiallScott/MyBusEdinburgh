@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.details
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.services.ServiceDetails
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import javax.inject.Inject
@@ -46,14 +47,14 @@ class ServicesRetriever @Inject constructor(
 
     /**
      * Get a [Flow] of the [UiItem.Service] for each known service for the given stop. If there are
-     * no services for the given [stopCode] then `null` will be emitted.
+     * no services for the given [stopIdentifier] then `null` will be emitted.
      *
-     * @param stopCode The stop code to get services for.
+     * @param stopIdentifier The stop code to get services for.
      * @return A [Flow] which emits a [List] of [UiItem.Service] for all known services at this
      * stop or `null` is emitted when there are no services for this stop.
      */
-    fun getServicesFlow(stopCode: String): Flow<List<UiItem.Service>?> =
-        servicesRepository.getServiceDetailsFlow(stopCode)
+    fun getServicesFlow(stopIdentifier: StopIdentifier): Flow<List<UiItem.Service>?> =
+        servicesRepository.getServiceDetailsFlow(stopIdentifier)
             .map(this::mapToUiItemServices)
 
     /**
@@ -77,8 +78,8 @@ class ServicesRetriever @Inject constructor(
      */
     private fun mapToUiItemService(serviceDetails: ServiceDetails): UiItem.Service {
         return UiItem.Service(
-            serviceDetails.name.hashCode().toLong(),
-            serviceDetails.name,
+            serviceDetails.serviceDescriptor.hashCode().toLong(),
+            serviceDetails.serviceDescriptor.serviceName,
             serviceDetails.description,
             serviceDetails.colours
         )

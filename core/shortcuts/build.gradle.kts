@@ -32,3 +32,8 @@ plugins {
 kotlin {
     explicitApi()
 }
+
+dependencies {
+
+    implementation(project(":core:core-domain"))
+}

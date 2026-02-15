@@ -36,6 +36,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.shortcuts.FakeShortcutsRepository
 import uk.org.rivernile.android.bustracker.core.shortcuts.FavouriteStopShortcut
 import uk.org.rivernile.android.bustracker.core.shortcuts.ShortcutsRepository
@@ -130,7 +132,7 @@ class FavouriteStopsViewModelTest {
                         emit(
                             listOf(
                                 UiFavouriteStop(
-                                    stopCode = "123456",
+                                    stopIdentifier = "123456".toNaptanStopIdentifier(),
                                     savedName = "Saved Name",
                                     services = null,
                                     dropdownMenu = null
@@ -149,7 +151,7 @@ class FavouriteStopsViewModelTest {
                     content = UiContent.Content(
                         favouriteStops = persistentListOf(
                             UiFavouriteStop(
-                                stopCode = "123456",
+                                stopIdentifier = "123456".toNaptanStopIdentifier(),
                                 savedName = "Saved Name",
                                 services = null,
                                 dropdownMenu = null
@@ -171,7 +173,9 @@ class FavouriteStopsViewModelTest {
                     flow {
                         emit(null)
                         delay(2L)
-                        emit(UiAction.ShowStopData(stopCode = "123456"))
+                        emit(UiAction.ShowStopData(
+                            stopIdentifier = "123456".toNaptanStopIdentifier())
+                        )
                     }
                 }
             ),
@@ -182,7 +186,7 @@ class FavouriteStopsViewModelTest {
                         emit(
                             listOf(
                                 UiFavouriteStop(
-                                    stopCode = "123456",
+                                    stopIdentifier = "123456".toNaptanStopIdentifier(),
                                     savedName = "Saved Name",
                                     services = null,
                                     dropdownMenu = null
@@ -201,7 +205,7 @@ class FavouriteStopsViewModelTest {
                     content = UiContent.Content(
                         favouriteStops = persistentListOf(
                             UiFavouriteStop(
-                                stopCode = "123456",
+                                stopIdentifier = "123456".toNaptanStopIdentifier(),
                                 savedName = "Saved Name",
                                 services = null,
                                 dropdownMenu = null
@@ -216,14 +220,16 @@ class FavouriteStopsViewModelTest {
                     content = UiContent.Content(
                         favouriteStops = persistentListOf(
                             UiFavouriteStop(
-                                stopCode = "123456",
+                                stopIdentifier = "123456".toNaptanStopIdentifier(),
                                 savedName = "Saved Name",
                                 services = null,
                                 dropdownMenu = null
                             )
                         )
                     ),
-                    action = UiAction.ShowStopData(stopCode = "123456")
+                    action = UiAction.ShowStopData(
+                        stopIdentifier = "123456".toNaptanStopIdentifier()
+                    )
                 ),
                 awaitItem()
             )
@@ -244,11 +250,11 @@ class FavouriteStopsViewModelTest {
             )
         )
 
-        viewModel.onItemClicked("123456", "Saved Name")
+        viewModel.onItemClicked("123456".toNaptanStopIdentifier(), "Saved Name")
 
         assertEquals(
             listOf(
-                UiAction.ShowStopData(stopCode = "123456")
+                UiAction.ShowStopData(stopIdentifier = "123456".toNaptanStopIdentifier())
             ),
             itemTracker.items
         )
@@ -267,12 +273,12 @@ class FavouriteStopsViewModelTest {
             )
         )
 
-        viewModel.onItemClicked("123456", "Saved Name")
+        viewModel.onItemClicked("123456".toNaptanStopIdentifier(), "Saved Name")
 
         assertEquals(
             listOf(
                 UiAction.AddShortcut(
-                    stopCode = "123456",
+                    stopIdentifier = "123456".toNaptanStopIdentifier(),
                     savedName = "Saved Name"
                 )
             ),
@@ -281,51 +287,51 @@ class FavouriteStopsViewModelTest {
     }
 
     @Test
-    fun onItemOpenDropdownClickedSetsSelectedStopCodeWhenNotInShortcutMode() = runTest {
-        val itemTracker = ItemTracker<String?>()
+    fun onItemOpenDropdownClickedSetsSelectedStopIdentifierWhenNotInShortcutMode() = runTest {
+        val itemTracker = ItemTracker<StopIdentifier?>()
         val viewModel = createViewModel(
             arguments = FakeArguments(
                 onIsShortcutMode = { false }
             ),
             state = FakeState(
                 onActionFlow = { emptyFlow() },
-                onSetSelectedStopCode = itemTracker
+                onSetSelectedStopIdentifier = itemTracker
             )
         )
 
-        viewModel.onItemOpenDropdownClicked("123456")
+        viewModel.onItemOpenDropdownClicked("123456".toNaptanStopIdentifier())
 
-        assertEquals(listOf("123456"), itemTracker.items)
+        assertEquals(listOf("123456".toNaptanStopIdentifier()), itemTracker.items)
     }
 
     @Test
     fun onItemOpenDropdownClickedDoesNothingWhenInShortcutMode() = runTest {
-        val itemTracker = ItemTracker<String?>()
+        val itemTracker = ItemTracker<StopIdentifier?>()
         val viewModel = createViewModel(
             arguments = FakeArguments(
                 onIsShortcutMode = { true }
             ),
             state = FakeState(
                 onActionFlow = { emptyFlow() },
-                onSetSelectedStopCode = itemTracker
+                onSetSelectedStopIdentifier = itemTracker
             )
         )
 
-        viewModel.onItemOpenDropdownClicked("123456")
+        viewModel.onItemOpenDropdownClicked("123456".toNaptanStopIdentifier())
 
         assertTrue(itemTracker.items.isEmpty())
     }
 
     @Test
-    fun onDropdownMenuDismissedSetsSelectedStopCodeToNullWhenNotInShortcutMode() = runTest {
-        val itemTracker = ItemTracker<String?>()
+    fun onDropdownMenuDismissedSetsSelectedStopIdentifierToNullWhenNotInShortcutMode() = runTest {
+        val itemTracker = ItemTracker<StopIdentifier?>()
         val viewModel = createViewModel(
             arguments = FakeArguments(
                 onIsShortcutMode = { false }
             ),
             state = FakeState(
                 onActionFlow = { emptyFlow() },
-                onSetSelectedStopCode = itemTracker
+                onSetSelectedStopIdentifier = itemTracker
             )
         )
 
@@ -336,14 +342,14 @@ class FavouriteStopsViewModelTest {
 
     @Test
     fun onDropdownMenuDismissedDoesNothingWhenInShortcutMode() = runTest {
-        val itemTracker = ItemTracker<String?>()
+        val itemTracker = ItemTracker<StopIdentifier?>()
         val viewModel = createViewModel(
             arguments = FakeArguments(
                 onIsShortcutMode = { true }
             ),
             state = FakeState(
                 onActionFlow = { emptyFlow() },
-                onSetSelectedStopCode = itemTracker
+                onSetSelectedStopIdentifier = itemTracker
             )
         )
 
@@ -355,7 +361,7 @@ class FavouriteStopsViewModelTest {
     @Test
     fun onEditFavouriteNameClickedSetsShowEditActionAndDismissesDropdownMenu() = runTest {
         val actionTracker = ItemTracker<UiAction?>()
-        val selectedStopCodeTracker = ItemTracker<String?>()
+        val selectedStopIdentifierTracker = ItemTracker<StopIdentifier?>()
         val viewModel = createViewModel(
             arguments = FakeArguments(
                 onIsShortcutMode = { false }
@@ -363,19 +369,19 @@ class FavouriteStopsViewModelTest {
             state = FakeState(
                 onActionFlow = { emptyFlow() },
                 onSetAction = actionTracker,
-                onSetSelectedStopCode = selectedStopCodeTracker
+                onSetSelectedStopIdentifier = selectedStopIdentifierTracker
             )
         )
 
-        viewModel.onEditFavouriteNameClicked("123456")
+        viewModel.onEditFavouriteNameClicked("123456".toNaptanStopIdentifier())
 
         assertEquals(
             listOf(
-                UiAction.ShowEditFavouriteStop(stopCode = "123456")
+                UiAction.ShowEditFavouriteStop(stopIdentifier = "123456".toNaptanStopIdentifier())
             ),
             actionTracker.items
         )
-        assertEquals(listOf(null), selectedStopCodeTracker.items)
+        assertEquals(listOf(null), selectedStopIdentifierTracker.items)
     }
 
     @Test
@@ -391,7 +397,7 @@ class FavouriteStopsViewModelTest {
             )
         )
 
-        viewModel.onEditFavouriteNameClicked("123456")
+        viewModel.onEditFavouriteNameClicked("123456".toNaptanStopIdentifier())
 
         assertTrue(actionTracker.items.isEmpty())
     }
@@ -399,7 +405,7 @@ class FavouriteStopsViewModelTest {
     @Test
     fun onRemoveFavouriteClickedSetsShowConfirmRemoveActionAndDismissesDropdownMenu() = runTest {
         val actionTracker = ItemTracker<UiAction?>()
-        val selectedStopCodeTracker = ItemTracker<String?>()
+        val selectedStopIdentifierTracker = ItemTracker<StopIdentifier?>()
         val viewModel = createViewModel(
             arguments = FakeArguments(
                 onIsShortcutMode = { false }
@@ -407,19 +413,21 @@ class FavouriteStopsViewModelTest {
             state = FakeState(
                 onActionFlow = { emptyFlow() },
                 onSetAction = actionTracker,
-                onSetSelectedStopCode = selectedStopCodeTracker
+                onSetSelectedStopIdentifier = selectedStopIdentifierTracker
             )
         )
 
-        viewModel.onRemoveFavouriteClicked("123456")
+        viewModel.onRemoveFavouriteClicked("123456".toNaptanStopIdentifier())
 
         assertEquals(
             listOf(
-                UiAction.ShowConfirmRemoveFavourite(stopCode = "123456")
+                UiAction.ShowConfirmRemoveFavourite(
+                    stopIdentifier = "123456".toNaptanStopIdentifier()
+                )
             ),
             actionTracker.items
         )
-        assertEquals(listOf(null), selectedStopCodeTracker.items)
+        assertEquals(listOf(null), selectedStopIdentifierTracker.items)
     }
 
     @Test
@@ -435,7 +443,7 @@ class FavouriteStopsViewModelTest {
             )
         )
 
-        viewModel.onRemoveFavouriteClicked("123456")
+        viewModel.onRemoveFavouriteClicked("123456".toNaptanStopIdentifier())
 
         assertTrue(actionTracker.items.isEmpty())
     }
@@ -443,32 +451,32 @@ class FavouriteStopsViewModelTest {
     @Test
     fun onAddShortcutClickedAddsShortcutAndDismissesDropdownMenu() = runTest {
         val addShortcutTracker = ItemTracker<FavouriteStopShortcut>()
-        val selectedStopCodeTracker = ItemTracker<String?>()
+        val selectedStopIdentifierTracker = ItemTracker<StopIdentifier?>()
         val viewModel = createViewModel(
             arguments = FakeArguments(
                 onIsShortcutMode = { false }
             ),
             state = FakeState(
                 onActionFlow = { emptyFlow() },
-                onSetSelectedStopCode = selectedStopCodeTracker
+                onSetSelectedStopIdentifier = selectedStopIdentifierTracker
             ),
             shortcutsRepository = FakeShortcutsRepository(
                 onPinFavouriteShortcut = addShortcutTracker
             )
         )
 
-        viewModel.onAddShortcutClicked("123456", "Saved Name")
+        viewModel.onAddShortcutClicked("123456".toNaptanStopIdentifier(), "Saved Name")
 
         assertEquals(
             listOf(
                 FavouriteStopShortcut(
-                    stopCode = "123456",
+                    stopIdentifier = "123456".toNaptanStopIdentifier(),
                     displayName = "Saved Name"
                 )
             ),
             addShortcutTracker.items
         )
-        assertEquals(listOf(null), selectedStopCodeTracker.items)
+        assertEquals(listOf(null), selectedStopIdentifierTracker.items)
     }
 
     @Test
@@ -486,7 +494,7 @@ class FavouriteStopsViewModelTest {
             )
         )
 
-        viewModel.onAddShortcutClicked("123456", "Saved Name")
+        viewModel.onAddShortcutClicked("123456".toNaptanStopIdentifier(), "Saved Name")
 
         assertTrue(addShortcutTracker.items.isEmpty())
     }
@@ -494,7 +502,7 @@ class FavouriteStopsViewModelTest {
     @Test
     fun onAddArrivalAlertClickedSetsShowAddArrivalAlertActionAndDismissesDropdownMenu() = runTest {
         val actionTracker = ItemTracker<UiAction?>()
-        val selectedStopCodeTracker = ItemTracker<String?>()
+        val selectedStopIdentifierTracker = ItemTracker<StopIdentifier?>()
         val viewModel = createViewModel(
             arguments = FakeArguments(
                 onIsShortcutMode = { false }
@@ -502,19 +510,19 @@ class FavouriteStopsViewModelTest {
             state = FakeState(
                 onActionFlow = { emptyFlow() },
                 onSetAction = actionTracker,
-                onSetSelectedStopCode = selectedStopCodeTracker
+                onSetSelectedStopIdentifier = selectedStopIdentifierTracker
             )
         )
 
-        viewModel.onAddArrivalAlertClicked("123456")
+        viewModel.onAddArrivalAlertClicked("123456".toNaptanStopIdentifier())
 
         assertEquals(
             listOf(
-                UiAction.ShowAddArrivalAlert(stopCode = "123456")
+                UiAction.ShowAddArrivalAlert(stopIdentifier = "123456".toNaptanStopIdentifier())
             ),
             actionTracker.items
         )
-        assertEquals(listOf(null), selectedStopCodeTracker.items)
+        assertEquals(listOf(null), selectedStopIdentifierTracker.items)
     }
 
     @Test
@@ -530,7 +538,7 @@ class FavouriteStopsViewModelTest {
             )
         )
 
-        viewModel.onAddArrivalAlertClicked("123456")
+        viewModel.onAddArrivalAlertClicked("123456".toNaptanStopIdentifier())
 
         assertTrue(actionTracker.items.isEmpty())
     }
@@ -539,7 +547,7 @@ class FavouriteStopsViewModelTest {
     fun onRemoveArrivalAlertClickedSetsShowConfirmRemoveAlertActionAndDismissesDropdownMenu() =
         runTest {
             val actionTracker = ItemTracker<UiAction?>()
-            val selectedStopCodeTracker = ItemTracker<String?>()
+            val selectedStopIdentifierTracker = ItemTracker<StopIdentifier?>()
             val viewModel = createViewModel(
                 arguments = FakeArguments(
                     onIsShortcutMode = { false }
@@ -547,19 +555,21 @@ class FavouriteStopsViewModelTest {
                 state = FakeState(
                     onActionFlow = { emptyFlow() },
                     onSetAction = actionTracker,
-                    onSetSelectedStopCode = selectedStopCodeTracker
+                    onSetSelectedStopIdentifier = selectedStopIdentifierTracker
                 )
             )
 
-            viewModel.onRemoveArrivalAlertClicked("123456")
+            viewModel.onRemoveArrivalAlertClicked("123456".toNaptanStopIdentifier())
 
             assertEquals(
                 listOf(
-                    UiAction.ShowConfirmRemoveArrivalAlert(stopCode = "123456")
+                    UiAction.ShowConfirmRemoveArrivalAlert(
+                        stopIdentifier = "123456".toNaptanStopIdentifier()
+                    )
                 ),
                 actionTracker.items
             )
-            assertEquals(listOf(null), selectedStopCodeTracker.items)
+            assertEquals(listOf(null), selectedStopIdentifierTracker.items)
         }
 
     @Test
@@ -575,7 +585,7 @@ class FavouriteStopsViewModelTest {
             )
         )
 
-        viewModel.onRemoveArrivalAlertClicked("123456")
+        viewModel.onRemoveArrivalAlertClicked("123456".toNaptanStopIdentifier())
 
         assertTrue(actionTracker.items.isEmpty())
     }
@@ -583,7 +593,7 @@ class FavouriteStopsViewModelTest {
     @Test
     fun onAddProxAlertClickedSetsShowAddProxAlertActionAndDismissesDropdownMenu() = runTest {
         val actionTracker = ItemTracker<UiAction?>()
-        val selectedStopCodeTracker = ItemTracker<String?>()
+        val selectedStopIdentifierTracker = ItemTracker<StopIdentifier?>()
         val viewModel = createViewModel(
             arguments = FakeArguments(
                 onIsShortcutMode = { false }
@@ -591,19 +601,19 @@ class FavouriteStopsViewModelTest {
             state = FakeState(
                 onActionFlow = { emptyFlow() },
                 onSetAction = actionTracker,
-                onSetSelectedStopCode = selectedStopCodeTracker
+                onSetSelectedStopIdentifier = selectedStopIdentifierTracker
             )
         )
 
-        viewModel.onAddProximityAlertClicked("123456")
+        viewModel.onAddProximityAlertClicked("123456".toNaptanStopIdentifier())
 
         assertEquals(
             listOf(
-                UiAction.ShowAddProximityAlert(stopCode = "123456")
+                UiAction.ShowAddProximityAlert(stopIdentifier = "123456".toNaptanStopIdentifier())
             ),
             actionTracker.items
         )
-        assertEquals(listOf(null), selectedStopCodeTracker.items)
+        assertEquals(listOf(null), selectedStopIdentifierTracker.items)
     }
 
     @Test
@@ -619,7 +629,7 @@ class FavouriteStopsViewModelTest {
             )
         )
 
-        viewModel.onAddProximityAlertClicked("123456")
+        viewModel.onAddProximityAlertClicked("123456".toNaptanStopIdentifier())
 
         assertTrue(actionTracker.items.isEmpty())
     }
@@ -628,7 +638,7 @@ class FavouriteStopsViewModelTest {
     fun onRemoveProxAlertClickedSetsShowConfirmRemoveAlertActionAndDismissesDropdownMenu() =
         runTest {
             val actionTracker = ItemTracker<UiAction?>()
-            val selectedStopCodeTracker = ItemTracker<String?>()
+            val selectedStopIdentifierTracker = ItemTracker<StopIdentifier?>()
             val viewModel = createViewModel(
                 arguments = FakeArguments(
                     onIsShortcutMode = { false }
@@ -636,19 +646,21 @@ class FavouriteStopsViewModelTest {
                 state = FakeState(
                     onActionFlow = { emptyFlow() },
                     onSetAction = actionTracker,
-                    onSetSelectedStopCode = selectedStopCodeTracker
+                    onSetSelectedStopIdentifier = selectedStopIdentifierTracker
                 )
             )
 
-            viewModel.onRemoveProximityAlertClicked("123456")
+            viewModel.onRemoveProximityAlertClicked("123456".toNaptanStopIdentifier())
 
             assertEquals(
                 listOf(
-                    UiAction.ShowConfirmRemoveProximityAlert(stopCode = "123456")
+                    UiAction.ShowConfirmRemoveProximityAlert(
+                        stopIdentifier = "123456".toNaptanStopIdentifier()
+                    )
                 ),
                 actionTracker.items
             )
-            assertEquals(listOf(null), selectedStopCodeTracker.items)
+            assertEquals(listOf(null), selectedStopIdentifierTracker.items)
         }
 
     @Test
@@ -664,7 +676,7 @@ class FavouriteStopsViewModelTest {
             )
         )
 
-        viewModel.onRemoveProximityAlertClicked("123456")
+        viewModel.onRemoveProximityAlertClicked("123456".toNaptanStopIdentifier())
 
         assertTrue(actionTracker.items.isEmpty())
     }
@@ -672,7 +684,7 @@ class FavouriteStopsViewModelTest {
     @Test
     fun onShowOnMapClickedSetsShowOnMapActionAndDismissesDropdownMenu() = runTest {
         val actionTracker = ItemTracker<UiAction?>()
-        val selectedStopCodeTracker = ItemTracker<String?>()
+        val selectedStopIdentifierTracker = ItemTracker<StopIdentifier?>()
         val viewModel = createViewModel(
             arguments = FakeArguments(
                 onIsShortcutMode = { false }
@@ -680,19 +692,19 @@ class FavouriteStopsViewModelTest {
             state = FakeState(
                 onActionFlow = { emptyFlow() },
                 onSetAction = actionTracker,
-                onSetSelectedStopCode = selectedStopCodeTracker
+                onSetSelectedStopIdentifier = selectedStopIdentifierTracker
             )
         )
 
-        viewModel.onShowOnMapClicked("123456")
+        viewModel.onShowOnMapClicked("123456".toNaptanStopIdentifier())
 
         assertEquals(
             listOf(
-                UiAction.ShowOnMap(stopCode = "123456")
+                UiAction.ShowOnMap(stopIdentifier = "123456".toNaptanStopIdentifier())
             ),
             actionTracker.items
         )
-        assertEquals(listOf(null), selectedStopCodeTracker.items)
+        assertEquals(listOf(null), selectedStopIdentifierTracker.items)
     }
 
     @Test
@@ -708,7 +720,7 @@ class FavouriteStopsViewModelTest {
             )
         )
 
-        viewModel.onShowOnMapClicked("123456")
+        viewModel.onShowOnMapClicked("123456".toNaptanStopIdentifier())
 
         assertTrue(actionTracker.items.isEmpty())
     }

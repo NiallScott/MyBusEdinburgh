@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.ui.alerts
 
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
+import uk.org.rivernile.android.bustracker.core.busstops.StopDetails
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
  * The base class for a UI alert.
@@ -44,29 +46,31 @@ sealed interface UiAlert {
      * An arrival alert.
      *
      * @property id The ID of the alert.
-     * @property stopCode The stop code of the alert.
+     * @property stopIdentifier The stop of the alert.
      * @property stopDetails Details of the stop this alert is for.
      * @property services The [List] of service names this alert triggers for.
      * @property timeTrigger The time trigger this alert triggers for.
      */
     data class ArrivalAlert(
         override val id: Int,
-        val stopCode: String,
+        val stopIdentifier: StopIdentifier,
         val stopDetails: StopDetails?,
-        val services: List<String>,
-        val timeTrigger: Int) : UiAlert
+        val services: List<ServiceDescriptor>,
+        val timeTrigger: Int
+    ) : UiAlert
 
     /**
      * A proximity alert.
      *
      * @property id The ID of the alert.
-     * @property stopCode The stop code of the alert.
+     * @property stopIdentifier The stop of the alert.
      * @property stopDetails Details of the stop this alert is for.
      * @property distanceFrom The distance trigger this alert triggers for.
      */
     data class ProximityAlert(
         override val id: Int,
-        val stopCode: String,
+        val stopIdentifier: StopIdentifier,
         val stopDetails: StopDetails?,
-        val distanceFrom: Int) : UiAlert
+        val distanceFrom: Int
+    ) : UiAlert
 }

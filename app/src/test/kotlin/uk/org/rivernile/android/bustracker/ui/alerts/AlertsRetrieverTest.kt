@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,14 +37,18 @@ import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.alerts.ArrivalAlert
 import uk.org.rivernile.android.bustracker.core.alerts.ProximityAlert
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopDetails
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopLocation
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopName
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopDetails
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopLocation
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopName
+import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.time.Instant
 
 /**
  * Tests for [AlertsRetriever].
@@ -63,7 +67,11 @@ class AlertsRetrieverTest {
 
     @BeforeTest
     fun setUp() {
-        alertsRetriever = AlertsRetriever(alertsRepository, busStopsRepository)
+        alertsRetriever = AlertsRetriever(
+            alertsRepository,
+            busStopsRepository,
+            naturalOrder()
+        )
     }
 
     @Test
@@ -92,13 +100,25 @@ class AlertsRetrieverTest {
 
     @Test
     fun allAlertsFlowWithArrivalAlertAndNullStopDetailsEmitsAlertWithoutStopDetails() = runTest {
-        val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
+        val arrivalAlert = ArrivalAlert(
+            id = 1,
+            timeAdded = Instant.fromEpochMilliseconds(123L),
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            services = setOf(service(1)),
+            timeTriggerMinutes = 5
+        )
         whenever(alertsRepository.allAlertsFlow)
             .thenReturn(flowOf(listOf(arrivalAlert)))
-        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
+        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456".toNaptanStopIdentifier())))
             .thenReturn(flowOf(null))
         val expected = listOf(
-            UiAlert.ArrivalAlert(1, "123456", null, listOf("1"), 5)
+            UiAlert.ArrivalAlert(
+                id = 1,
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
+                stopDetails = null,
+                services = listOf(service(1)),
+                5
+            )
         )
 
         alertsRetriever.allAlertsFlow.test {
@@ -110,13 +130,25 @@ class AlertsRetrieverTest {
 
     @Test
     fun allAlertsFlowWithArrivalAlertAndEmptyStopDetailsEmitsAlertWithoutStopDetails() = runTest {
-        val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
+        val arrivalAlert = ArrivalAlert(
+            id = 1,
+            timeAdded = Instant.fromEpochMilliseconds(123L),
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            services = setOf(service(1)),
+            timeTriggerMinutes = 5
+        )
         whenever(alertsRepository.allAlertsFlow)
             .thenReturn(flowOf(listOf(arrivalAlert)))
-        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
+        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456".toNaptanStopIdentifier())))
             .thenReturn(flowOf(emptyMap()))
         val expected = listOf(
-            UiAlert.ArrivalAlert(1, "123456", null, listOf("1"), 5)
+            UiAlert.ArrivalAlert(
+                id = 1,
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
+                stopDetails = null,
+                services = listOf(service(1)),
+                timeTrigger = 5
+            )
         )
 
         alertsRetriever.allAlertsFlow.test {
@@ -128,9 +160,15 @@ class AlertsRetrieverTest {
 
     @Test
     fun allAlertsWithArrivalAlertAndStopDetailsEmitsFullObject() = runTest {
-        val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
+        val arrivalAlert = ArrivalAlert(
+            id = 1,
+            timeAdded = Instant.fromEpochMilliseconds(123L),
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            services = setOf(service(3), service(1), service(2)),
+            timeTriggerMinutes = 5
+        )
         val stopDetails = FakeStopDetails(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name",
                 "Locality"
@@ -143,10 +181,20 @@ class AlertsRetrieverTest {
         )
         whenever(alertsRepository.allAlertsFlow)
             .thenReturn(flowOf(listOf(arrivalAlert)))
-        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
-            .thenReturn(flowOf(mapOf("123456" to stopDetails)))
+        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456".toNaptanStopIdentifier())))
+            .thenReturn(
+                flowOf(
+                    mapOf("123456".toNaptanStopIdentifier() to stopDetails)
+                )
+            )
         val expected = listOf(
-            UiAlert.ArrivalAlert(1, "123456", stopDetails, listOf("1"), 5)
+            UiAlert.ArrivalAlert(
+                id = 1,
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
+                stopDetails = stopDetails,
+                services = listOf(service(1), service(2), service(3)),
+                timeTrigger = 5
+            )
         )
 
         alertsRetriever.allAlertsFlow.test {
@@ -158,10 +206,22 @@ class AlertsRetrieverTest {
 
     @Test
     fun allAlertsWithArrivalAlertsEmitsUpdatedArrivalAlertDetails() = runTest {
-        val arrivalAlert1 = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
-        val arrivalAlert2 = ArrivalAlert(1, 123L, "123456", listOf("1"), 10)
+        val arrivalAlert1 = ArrivalAlert(
+            id = 1,
+            timeAdded = Instant.fromEpochMilliseconds(123L),
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            services = setOf(service(1)),
+            timeTriggerMinutes = 5
+        )
+        val arrivalAlert2 = ArrivalAlert(
+            id = 1,
+            timeAdded = Instant.fromEpochMilliseconds(123L),
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            services = setOf(service(1)),
+            timeTriggerMinutes = 10
+        )
         val stopDetails = FakeStopDetails(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name",
                 "Locality"
@@ -174,13 +234,25 @@ class AlertsRetrieverTest {
         )
         whenever(alertsRepository.allAlertsFlow)
             .thenReturn(flowOf(listOf(arrivalAlert1), listOf(arrivalAlert2)))
-        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
-            .thenReturn(flowOf(mapOf("123456" to stopDetails)))
+        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456".toNaptanStopIdentifier())))
+            .thenReturn(flowOf(mapOf("123456".toNaptanStopIdentifier() to stopDetails)))
         val expected1 = listOf(
-            UiAlert.ArrivalAlert(1, "123456", stopDetails, listOf("1"), 5)
+            UiAlert.ArrivalAlert(
+                id = 1,
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
+                stopDetails = stopDetails,
+                services = listOf(service(1)),
+                timeTrigger = 5
+            )
         )
         val expected2 = listOf(
-            UiAlert.ArrivalAlert(1, "123456", stopDetails, listOf("1"), 10)
+            UiAlert.ArrivalAlert(
+                id = 1,
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
+                stopDetails = stopDetails,
+                services = listOf(service(1)),
+                timeTrigger = 10
+            )
         )
 
         alertsRetriever.allAlertsFlow.test {
@@ -193,9 +265,15 @@ class AlertsRetrieverTest {
 
     @Test
     fun allAlertsWithArrivalAlertEmitsUpdatedStopDetails() = runTest {
-        val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
+        val arrivalAlert = ArrivalAlert(
+            id = 1,
+            timeAdded = Instant.fromEpochMilliseconds(123L),
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            services = setOf(service(1)),
+            timeTriggerMinutes = 5
+        )
         val stopDetails1 = FakeStopDetails(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name",
                 "Locality"
@@ -207,7 +285,7 @@ class AlertsRetrieverTest {
             StopOrientation.SOUTH
         )
         val stopDetails2 = FakeStopDetails(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "New stop name",
                 "New locality"
@@ -220,15 +298,31 @@ class AlertsRetrieverTest {
         )
         whenever(alertsRepository.allAlertsFlow)
             .thenReturn(flowOf(listOf(arrivalAlert)))
-        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
+        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456".toNaptanStopIdentifier())))
             .thenReturn(
                 flowOf(
-                    mapOf("123456" to stopDetails1),
-                    mapOf("123456" to stopDetails2)
+                    mapOf("123456".toNaptanStopIdentifier() to stopDetails1),
+                    mapOf("123456".toNaptanStopIdentifier() to stopDetails2)
                 )
             )
-        val expected1 = listOf(UiAlert.ArrivalAlert(1, "123456", stopDetails1, listOf("1"), 5))
-        val expected2 = listOf(UiAlert.ArrivalAlert(1, "123456", stopDetails2, listOf("1"), 5))
+        val expected1 = listOf(
+            UiAlert.ArrivalAlert(
+                id = 1,
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
+                stopDetails = stopDetails1,
+                services = listOf(service(1)),
+                timeTrigger = 5
+            )
+        )
+        val expected2 = listOf(
+            UiAlert.ArrivalAlert(
+                id = 1,
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
+                stopDetails = stopDetails2,
+                services = listOf(service(1)),
+                timeTrigger = 5
+            )
+        )
 
         alertsRetriever.allAlertsFlow.test {
             assertNull(awaitItem())
@@ -240,12 +334,24 @@ class AlertsRetrieverTest {
 
     @Test
     fun allAlertsFlowWithProximityAlertAndNullStopDetailsEmitsAlertWithoutStopDetails() = runTest {
-        val proximityAlert = ProximityAlert(1, 123L, "123456", 250)
+        val proximityAlert = ProximityAlert(
+            id = 1,
+            timeAdded = Instant.fromEpochMilliseconds(123L),
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            distanceFromMeters = 250
+        )
         whenever(alertsRepository.allAlertsFlow)
             .thenReturn(flowOf(listOf(proximityAlert)))
-        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
+        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456".toNaptanStopIdentifier())))
             .thenReturn(flowOf(null))
-        val expected = listOf(UiAlert.ProximityAlert(1, "123456", null, 250))
+        val expected = listOf(
+            UiAlert.ProximityAlert(
+                id = 1,
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
+                stopDetails = null,
+                distanceFrom = 250
+            )
+        )
 
         alertsRetriever.allAlertsFlow.test {
             assertNull(awaitItem())
@@ -256,12 +362,24 @@ class AlertsRetrieverTest {
 
     @Test
     fun allAlertsFlowWithProximityAlertAndEmptyStopDetailsEmitsAlertWithoutStopDetails() = runTest {
-        val proximityAlert = ProximityAlert(1, 123L, "123456", 250)
+        val proximityAlert = ProximityAlert(
+            id = 1,
+            timeAdded = Instant.fromEpochMilliseconds(123L),
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            distanceFromMeters = 250
+        )
         whenever(alertsRepository.allAlertsFlow)
             .thenReturn(flowOf(listOf(proximityAlert)))
-        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
+        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456".toNaptanStopIdentifier())))
             .thenReturn(flowOf(emptyMap()))
-        val expected = listOf(UiAlert.ProximityAlert(1, "123456", null, 250))
+        val expected = listOf(
+            UiAlert.ProximityAlert(
+                id = 1,
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
+                stopDetails = null,
+                distanceFrom = 250
+            )
+        )
 
         alertsRetriever.allAlertsFlow.test {
             assertNull(awaitItem())
@@ -272,9 +390,14 @@ class AlertsRetrieverTest {
 
     @Test
     fun allAlertsWithProximityAlertAndStopDetailsEmitsFullObject() = runTest {
-        val proximityAlert = ProximityAlert(1, 123L, "123456", 250)
+        val proximityAlert = ProximityAlert(
+            id = 1,
+            timeAdded = Instant.fromEpochMilliseconds(123L),
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            distanceFromMeters = 250
+        )
         val stopDetails = FakeStopDetails(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name",
                 "Locality"
@@ -287,9 +410,16 @@ class AlertsRetrieverTest {
         )
         whenever(alertsRepository.allAlertsFlow)
             .thenReturn(flowOf(listOf(proximityAlert)))
-        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
-            .thenReturn(flowOf(mapOf("123456" to stopDetails)))
-        val expected = listOf(UiAlert.ProximityAlert(1, "123456", stopDetails, 250))
+        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456".toNaptanStopIdentifier())))
+            .thenReturn(flowOf(mapOf("123456".toNaptanStopIdentifier() to stopDetails)))
+        val expected = listOf(
+            UiAlert.ProximityAlert(
+                id = 1,
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
+                stopDetails = stopDetails,
+                distanceFrom = 250
+            )
+        )
 
         alertsRetriever.allAlertsFlow.test {
             assertNull(awaitItem())
@@ -300,10 +430,20 @@ class AlertsRetrieverTest {
 
     @Test
     fun allAlertsWithProximityAlertsEmitsUpdatedProximityAlertDetails() = runTest {
-        val proximityAlert1 = ProximityAlert(1, 123L, "123456", 250)
-        val proximityAlert2 = ProximityAlert(1, 123L, "123456", 500)
+        val proximityAlert1 = ProximityAlert(
+            id = 1,
+            timeAdded = Instant.fromEpochMilliseconds(123L),
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            distanceFromMeters = 250
+        )
+        val proximityAlert2 = ProximityAlert(
+            id = 1,
+            timeAdded = Instant.fromEpochMilliseconds(123L),
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            distanceFromMeters = 500
+        )
         val stopDetails = FakeStopDetails(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name",
                 "Locality"
@@ -316,10 +456,24 @@ class AlertsRetrieverTest {
         )
         whenever(alertsRepository.allAlertsFlow)
             .thenReturn(flowOf(listOf(proximityAlert1), listOf(proximityAlert2)))
-        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
-            .thenReturn(flowOf(mapOf("123456" to stopDetails)))
-        val expected1 = listOf(UiAlert.ProximityAlert(1, "123456", stopDetails, 250))
-        val expected2 = listOf(UiAlert.ProximityAlert(1, "123456", stopDetails, 500))
+        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456".toNaptanStopIdentifier())))
+            .thenReturn(flowOf(mapOf("123456".toNaptanStopIdentifier() to stopDetails)))
+        val expected1 = listOf(
+            UiAlert.ProximityAlert(
+                id = 1,
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
+                stopDetails = stopDetails,
+                distanceFrom = 250
+            )
+        )
+        val expected2 = listOf(
+            UiAlert.ProximityAlert(
+                id = 1,
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
+                stopDetails = stopDetails,
+                distanceFrom = 500
+            )
+        )
 
         alertsRetriever.allAlertsFlow.test {
             assertNull(awaitItem())
@@ -331,9 +485,14 @@ class AlertsRetrieverTest {
 
     @Test
     fun allAlertsWithProximityAlertEmitsUpdatedStopDetails() = runTest {
-        val proximityAlert = ProximityAlert(1, 123L, "123456", 250)
+        val proximityAlert = ProximityAlert(
+            id = 1,
+            timeAdded = Instant.fromEpochMilliseconds(123L),
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            distanceFromMeters = 250
+        )
         val stopDetails1 = FakeStopDetails(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name",
                 "Locality"
@@ -345,7 +504,7 @@ class AlertsRetrieverTest {
             StopOrientation.SOUTH
         )
         val stopDetails2 = FakeStopDetails(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "New stop name",
                 "New locality"
@@ -358,15 +517,29 @@ class AlertsRetrieverTest {
         )
         whenever(alertsRepository.allAlertsFlow)
             .thenReturn(flowOf(listOf(proximityAlert)))
-        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
+        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456".toNaptanStopIdentifier())))
             .thenReturn(
                 flowOf(
-                    mapOf("123456" to stopDetails1),
-                    mapOf("123456" to stopDetails2)
+                    mapOf("123456".toNaptanStopIdentifier() to stopDetails1),
+                    mapOf("123456".toNaptanStopIdentifier() to stopDetails2)
                 )
             )
-        val expected1 = listOf(UiAlert.ProximityAlert(1, "123456", stopDetails1, 250))
-        val expected2 = listOf(UiAlert.ProximityAlert(1, "123456", stopDetails2, 250))
+        val expected1 = listOf(
+            UiAlert.ProximityAlert(
+                id = 1,
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
+                stopDetails = stopDetails1,
+                distanceFrom = 250
+            )
+        )
+        val expected2 = listOf(
+            UiAlert.ProximityAlert(
+                id = 1,
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
+                stopDetails = stopDetails2,
+                distanceFrom = 250
+            )
+        )
 
         alertsRetriever.allAlertsFlow.test {
             assertNull(awaitItem())
@@ -378,10 +551,21 @@ class AlertsRetrieverTest {
 
     @Test
     fun allAlertsPropagatesStopDetailsUpdateToAllRelevantStops() = runTest {
-        val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
-        val proximityAlert = ProximityAlert(2, 124L, "123456", 250)
+        val arrivalAlert = ArrivalAlert(
+            id = 1,
+            timeAdded = Instant.fromEpochMilliseconds(123L),
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            services = setOf(service(1)),
+            timeTriggerMinutes = 5
+        )
+        val proximityAlert = ProximityAlert(
+            id = 2,
+            timeAdded = Instant.fromEpochMilliseconds(124L),
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            distanceFromMeters = 250
+        )
         val stopDetails1 = FakeStopDetails(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name",
                 "Locality"
@@ -393,7 +577,7 @@ class AlertsRetrieverTest {
             StopOrientation.SOUTH
         )
         val stopDetails2 = FakeStopDetails(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "New stop name",
                 "New locality"
@@ -406,20 +590,42 @@ class AlertsRetrieverTest {
         )
         whenever(alertsRepository.allAlertsFlow)
             .thenReturn(flowOf(listOf(arrivalAlert, proximityAlert)))
-        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
+        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456".toNaptanStopIdentifier())))
             .thenReturn(
                 flowOf(
-                    mapOf("123456" to stopDetails1),
-                    mapOf("123456" to stopDetails2)
+                    mapOf("123456".toNaptanStopIdentifier() to stopDetails1),
+                    mapOf("123456".toNaptanStopIdentifier() to stopDetails2)
                 )
             )
         val expected1 = listOf(
-            UiAlert.ArrivalAlert(1, "123456", stopDetails1, listOf("1"), 5),
-            UiAlert.ProximityAlert(2, "123456", stopDetails1, 250)
+            UiAlert.ArrivalAlert(
+                id = 1,
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
+                stopDetails = stopDetails1,
+                services = listOf(service(1)),
+                timeTrigger = 5
+            ),
+            UiAlert.ProximityAlert(
+                id = 2,
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
+                stopDetails = stopDetails1,
+                distanceFrom = 250
+            )
         )
         val expected2 = listOf(
-            UiAlert.ArrivalAlert(1, "123456", stopDetails2, listOf("1"), 5),
-            UiAlert.ProximityAlert(2, "123456", stopDetails2, 250)
+            UiAlert.ArrivalAlert(
+                id = 1,
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
+                stopDetails = stopDetails2,
+                services = listOf(service(1)),
+                timeTrigger = 5
+            ),
+            UiAlert.ProximityAlert(
+                id = 2,
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
+                stopDetails = stopDetails2,
+                distanceFrom = 250
+            )
         )
 
         alertsRetriever.allAlertsFlow.test {
@@ -432,10 +638,21 @@ class AlertsRetrieverTest {
 
     @Test
     fun allAlertsPropagatesStopDetailsUpdateOnlyToRelevantStops() = runTest {
-        val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
-        val proximityAlert = ProximityAlert(2, 124L, "987654", 250)
+        val arrivalAlert = ArrivalAlert(
+            id = 1,
+            timeAdded = Instant.fromEpochMilliseconds(123L),
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            services = setOf(service(1)),
+            timeTriggerMinutes = 5
+        )
+        val proximityAlert = ProximityAlert(
+            id = 2,
+            timeAdded = Instant.fromEpochMilliseconds(124L),
+            stopIdentifier = "987654".toNaptanStopIdentifier(),
+            distanceFromMeters = 250
+        )
         val stopDetails1 = FakeStopDetails(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name",
                 "Locality"
@@ -447,7 +664,7 @@ class AlertsRetrieverTest {
             StopOrientation.SOUTH
         )
         val stopDetails2 = FakeStopDetails(
-            "987654",
+            "987654".toNaptanStopIdentifier(),
             FakeStopName(
                 "Stop name 2",
                 "Locality 2"
@@ -459,7 +676,7 @@ class AlertsRetrieverTest {
             StopOrientation.UNKNOWN
         )
         val stopDetails3 = FakeStopDetails(
-            "123456",
+            "123456".toNaptanStopIdentifier(),
             FakeStopName(
                 "New stop name",
                 "New locality"
@@ -472,25 +689,48 @@ class AlertsRetrieverTest {
         )
         whenever(alertsRepository.allAlertsFlow)
             .thenReturn(flowOf(listOf(arrivalAlert, proximityAlert)))
-        whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456", "987654")))
+        whenever(busStopsRepository.getBusStopDetailsFlow(
+            setOf("123456".toNaptanStopIdentifier(), "987654".toNaptanStopIdentifier())))
             .thenReturn(
                 flowOf(
                     mapOf(
-                        "123456" to stopDetails1,
-                        "987654" to stopDetails2
+                        "123456".toNaptanStopIdentifier() to stopDetails1,
+                        "987654".toNaptanStopIdentifier() to stopDetails2
                     ),
                     mapOf(
-                        "123456" to stopDetails3,
-                        "987654" to stopDetails2)
+                        "123456".toNaptanStopIdentifier() to stopDetails3,
+                        "987654".toNaptanStopIdentifier() to stopDetails2)
                 )
             )
         val expected1 = listOf(
-            UiAlert.ArrivalAlert(1, "123456", stopDetails1, listOf("1"), 5),
-            UiAlert.ProximityAlert(2, "987654", stopDetails2, 250)
+            UiAlert.ArrivalAlert(
+                id = 1,
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
+                stopDetails = stopDetails1,
+                services = listOf(service(1)),
+                timeTrigger = 5
+            ),
+            UiAlert.ProximityAlert(
+                id = 2,
+                stopIdentifier = "987654".toNaptanStopIdentifier(),
+                stopDetails = stopDetails2,
+                distanceFrom = 250
+            )
         )
         val expected2 = listOf(
-            UiAlert.ArrivalAlert(1, "123456", stopDetails3, listOf("1"), 5),
-            UiAlert.ProximityAlert(2, "987654", stopDetails2, 250)
+            UiAlert.ArrivalAlert(
+                id = 1,
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
+                stopDetails = stopDetails3,
+                services = listOf(service(1)),
+                timeTrigger = 5
+            ),
+            UiAlert.ProximityAlert(
+                id = 2,
+                stopIdentifier = "987654".toNaptanStopIdentifier(),
+                stopDetails = stopDetails2,
+                distanceFrom = 250
+            )
         )
 
         alertsRetriever.allAlertsFlow.test {
@@ -499,5 +739,12 @@ class AlertsRetrieverTest {
             assertEquals(expected2, awaitItem())
             awaitComplete()
         }
+    }
+
+    private fun service(id: Int): ServiceDescriptor {
+        return FakeServiceDescriptor(
+            serviceName = id.toString(),
+            operatorCode = "TEST$id"
+        )
     }
 }

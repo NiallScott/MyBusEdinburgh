@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,6 +30,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.favourites.FakeFavouritesRepository
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import kotlin.test.Test
@@ -45,10 +46,10 @@ import kotlin.test.fail
 class RemoveFavouriteStopViewModelTest {
 
     @Test
-    fun onUserConfirmRemovalDoesNotCauseRemovalWhenStopCodeIsNull() = runTest {
+    fun onUserConfirmRemovalDoesNotCauseRemovalWhenStopIdentifierIsNull() = runTest {
         val viewModel = createViewModel(
             arguments = FakeArguments(
-                onGetStopCode = { null }
+                onGetStopIdentifier = { null }
             ),
             favouritesRepository = FakeFavouritesRepository(
                 onRemoveFavouriteStop = {
@@ -61,31 +62,15 @@ class RemoveFavouriteStopViewModelTest {
     }
 
     @Test
-    fun onUserConfirmRemovalDoesNotCauseRemovalWhenStopCodeIsEmpty() = runTest {
-        val viewModel = createViewModel(
-            arguments = FakeArguments(
-                onGetStopCode = { "" }
-            ),
-            favouritesRepository = FakeFavouritesRepository(
-                onRemoveFavouriteStop = {
-                    fail("Not expecting any favourites to be removed.")
-                }
-            )
-        )
-
-        viewModel.onUserConfirmRemoval()
-    }
-
-    @Test
-    fun onUserConfirmRemovalCausesRemovalWhenStopCodeIsPopulated() = runTest {
+    fun onUserConfirmRemovalCausesRemovalWhenStopIdentifierIsPopulated() = runTest {
         var removalCount = 0
         val viewModel = createViewModel(
             arguments = FakeArguments(
-                onGetStopCode = { "123456" }
+                onGetStopIdentifier = { "123456".toNaptanStopIdentifier() }
             ),
             favouritesRepository = FakeFavouritesRepository(
-                onRemoveFavouriteStop = { stopCode ->
-                    assertEquals("123456", stopCode)
+                onRemoveFavouriteStop = { stopIdentifier ->
+                    assertEquals("123456".toNaptanStopIdentifier(), stopIdentifier)
                     removalCount++
                 }
             )

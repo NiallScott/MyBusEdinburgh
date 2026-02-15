@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,9 +27,15 @@
 package uk.org.rivernile.android.bustracker.core.servicestops
 
 import app.cash.turbine.test
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.FakeServiceStopDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.ServiceStopDao
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toAtcoStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -42,8 +48,17 @@ import kotlin.test.assertNull
  */
 class DefaultServiceStopsRepositoryTest {
 
+    @Test(expected = UnsupportedOperationException::class)
+    fun getServicesForStopFlowWithNonNaptanStopCodeThrowsException() = runTest {
+        val repository = createServiceStopsRepository()
+
+        repository.getServicesForStopFlow("123456".toAtcoStopIdentifier()).first()
+    }
+
     @Test
     fun getServicesForStopFlowReturnsFlowFromDao() = runTest {
+        val service1 = FakeServiceDescriptor(serviceName = "1", operatorCode = "TEST1")
+        val service2 = FakeServiceDescriptor(serviceName = "2", operatorCode = "TEST2")
         val repository = createServiceStopsRepository(
             serviceStopDao = FakeServiceStopDao(
                 onGetServicesForStopFlow = {
@@ -52,23 +67,37 @@ class DefaultServiceStopsRepositoryTest {
                         0L,
                         10L,
                         null,
-                        listOf("1"),
-                        listOf("1", "2")
+                        listOf(service1),
+                        listOf(service1, service2)
                     )
                 }
             )
         )
 
-        repository.getServicesForStopFlow("123456").test {
+        repository.getServicesForStopFlow("123456".toNaptanStopIdentifier()).test {
             assertNull(awaitItem())
-            assertEquals(listOf("1"), awaitItem())
-            assertEquals(listOf("1", "2"), awaitItem())
+            assertEquals(listOf(service1), awaitItem())
+            assertEquals(listOf(service1, service2), awaitItem())
             awaitComplete()
         }
     }
 
+    @Test(expected = UnsupportedOperationException::class)
+    fun getServicesForStopsFlowWithNonNaptanStopCodeThrowsException() = runTest {
+        val repository = createServiceStopsRepository()
+
+        repository.getServicesForStopsFlow(
+            setOf(
+                "123456".toAtcoStopIdentifier(),
+                "987654".toAtcoStopIdentifier()
+            )
+        ).first()
+    }
+
     @Test
     fun getServicesForStopsFlowReturnsFlowFromDao() = runTest {
+        val service1 = FakeServiceDescriptor(serviceName = "1", operatorCode = "TEST1")
+        val service2 = FakeServiceDescriptor(serviceName = "2", operatorCode = "TEST2")
         val repository = createServiceStopsRepository(
             serviceStopDao = FakeServiceStopDao(
                 onGetServicesForStopsFlow = {
@@ -77,23 +106,33 @@ class DefaultServiceStopsRepositoryTest {
                         0L,
                         10L,
                         null,
-                        mapOf("123456" to listOf("1")),
+                        mapOf("123456" to listOf(service1)),
                         mapOf(
-                            "123456" to listOf("1"),
-                            "987654" to listOf("1", "2")
+                            "123456" to listOf(service1),
+                            "987654" to listOf(service1, service2)
                         )
                     )
                 }
             )
         )
 
-        repository.getServicesForStopsFlow(setOf("123456", "987654")).test {
+        repository.getServicesForStopsFlow(
+            setOf(
+                "123456".toNaptanStopIdentifier(),
+                "987654".toNaptanStopIdentifier()
+            )
+        ).test {
             assertNull(awaitItem())
-            assertEquals(mapOf("123456" to listOf("1")), awaitItem())
             assertEquals(
-                mapOf(
-                    "123456" to listOf("1"),
-                    "987654" to listOf("1", "2")
+                mapOf<StopIdentifier, List<ServiceDescriptor>>(
+                    "123456".toNaptanStopIdentifier() to listOf(service1)
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                mapOf<StopIdentifier, List<ServiceDescriptor>>(
+                    "123456".toNaptanStopIdentifier() to listOf(service1),
+                    "987654".toNaptanStopIdentifier() to listOf(service1, service2)
                 ),
                 awaitItem()
             )

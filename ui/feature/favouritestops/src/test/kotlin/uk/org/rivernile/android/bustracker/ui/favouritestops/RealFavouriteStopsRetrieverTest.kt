@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,9 @@ package uk.org.rivernile.android.bustracker.ui.favouritestops
 import app.cash.turbine.test
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.favourites.FakeFavouritesRepository
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
@@ -81,15 +84,15 @@ class RealFavouriteStopsRetrieverTest {
                     flowOf(
                         listOf(
                             FavouriteStop(
-                                stopCode = "1",
+                                stopIdentifier = "1".toNaptanStopIdentifier(),
                                 stopName = "One"
                             ),
                             FavouriteStop(
-                                stopCode = "2",
+                                stopIdentifier = "2".toNaptanStopIdentifier(),
                                 stopName = "Two"
                             ),
                             FavouriteStop(
-                                stopCode = "3",
+                                stopIdentifier = "3".toNaptanStopIdentifier(),
                                 stopName = "Three"
                             )
                         )
@@ -97,12 +100,19 @@ class RealFavouriteStopsRetrieverTest {
                 }
             ),
             serviceStopsRepository = FakeServiceStopsRepository(
-                onGetServicesForStopsFlow = { stopCodes ->
-                    assertEquals(setOf("1", "2", "3"), stopCodes)
+                onGetServicesForStopsFlow = { stopIdentifiers ->
+                    assertEquals(
+                        setOf(
+                            "1".toNaptanStopIdentifier(),
+                            "2".toNaptanStopIdentifier(),
+                            "3".toNaptanStopIdentifier()
+                        ),
+                        stopIdentifiers
+                    )
                     flowOf(
                         mapOf(
-                            "1" to listOf("100", "200"),
-                            "3" to listOf("300", "400")
+                            "1".toNaptanStopIdentifier() to listOf(service(100), service(200)),
+                            "3".toNaptanStopIdentifier() to listOf(service(300), service(400))
                         )
                     )
                 }
@@ -113,19 +123,19 @@ class RealFavouriteStopsRetrieverTest {
             assertEquals(
                 listOf(
                     FavouriteStopWithServices(
-                        stopCode = "1",
+                        stopIdentifier = "1".toNaptanStopIdentifier(),
                         savedName = "One",
-                        services = listOf("100", "200")
+                        services = listOf(service(100), service(200))
                     ),
                     FavouriteStopWithServices(
-                        stopCode = "2",
+                        stopIdentifier = "2".toNaptanStopIdentifier(),
                         savedName = "Two",
                         services = null
                     ),
                     FavouriteStopWithServices(
-                        stopCode = "3",
+                        stopIdentifier = "3".toNaptanStopIdentifier(),
                         savedName = "Three",
-                        services = listOf("300", "400")
+                        services = listOf(service(300), service(400))
                     )
                 ),
                 awaitItem()
@@ -141,6 +151,13 @@ class RealFavouriteStopsRetrieverTest {
         return RealFavouriteStopsRetriever(
             favouritesRepository = favouritesRepository,
             serviceStopsRepository = serviceStopsRepository
+        )
+    }
+
+    private fun service(id: Int): ServiceDescriptor {
+        return FakeServiceDescriptor(
+            serviceName = id.toString(),
+            operatorCode = "TEST$id"
         )
     }
 }

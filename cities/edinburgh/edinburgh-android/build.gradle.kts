@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,10 +25,8 @@
  */
 
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
+    id("mybus.android-library")
+    id("mybus.hilt-convention")
 }
 
 android {
@@ -40,7 +38,7 @@ android {
         buildConfigField(
             "String",
             "BUSTRACKER_API_KEY",
-            "\"${project.findProperty("mybus.edinburgh.apiKey") ?: "undefined"}\"")
+            "\"${project.findProperty("mybus.edinburgh.bustracker.apiKey") ?: "undefined"}\"")
     }
 
     buildTypes {
@@ -63,12 +61,7 @@ dependencies {
 
     implementation(project(":cities:edinburgh:edinburgh-core"))
     implementation(project(":core:http-core-android"))
-    implementation(project(":core:services-android"))
     implementation(project(":endpoint:tracker-endpoint"))
-
-    // Hilt (dependency injection)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
 
     // Testing dependencies
     androidTestImplementation(libs.androidx.test.runner)

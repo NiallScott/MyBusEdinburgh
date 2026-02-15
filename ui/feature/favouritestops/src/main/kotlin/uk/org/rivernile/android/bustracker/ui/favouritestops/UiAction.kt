@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+
 /**
  * This describes the possible actions that can be taken within the favourites screen.
  *
@@ -36,85 +38,85 @@ internal sealed interface UiAction {
     /**
      * Show stop data.
      *
-     * @property stopCode The stop code that data should be shown for.
+     * @property stopIdentifier The stop identifier that data should be shown for.
      */
     data class ShowStopData(
-        val stopCode: String
+        val stopIdentifier: StopIdentifier
     ) : UiAction
 
     /**
      * Show UI which allows the user to edit a favourite stop.
      *
-     * @property stopCode The stop code to be edited.
+     * @property stopIdentifier The stop identifier to be edited.
      */
     data class ShowEditFavouriteStop(
-        val stopCode: String
+        val stopIdentifier: StopIdentifier
     ) : UiAction
 
     /**
      * Show UI where the user can confirm they wish to delete a favourite stop.
      *
-     * @property stopCode The stop code to be confirmed for deletion.
+     * @property stopIdentifier The stop identifier to be confirmed for deletion.
      */
     data class ShowConfirmRemoveFavourite(
-        val stopCode: String
+        val stopIdentifier: StopIdentifier
     ) : UiAction
 
     /**
      * Show the favourite stop on a map.
      *
-     * @property stopCode The code of the stop to show on a map.
+     * @property stopIdentifier The code of the stop to show on a map.
      */
     data class ShowOnMap(
-        val stopCode: String
+        val stopIdentifier: StopIdentifier
     ) : UiAction
 
     /**
      * Show UI to allow the user to add an arrival alert for a favourite stop.
      *
-     * @property stopCode The code of the stop to add an arrival alert for.
+     * @property stopIdentifier The code of the stop to add an arrival alert for.
      */
     data class ShowAddArrivalAlert(
-        val stopCode: String
+        val stopIdentifier: StopIdentifier
     ) : UiAction
 
     /**
      * Show UI to confirm with the user if they wish to remove an arrival alert for a favourite
      * stop.
      *
-     * @property stopCode The code of the stop to confirm removal of the arrival alert.
+     * @property stopIdentifier The code of the stop to confirm removal of the arrival alert.
      */
     data class ShowConfirmRemoveArrivalAlert(
-        val stopCode: String
+        val stopIdentifier: StopIdentifier
     ) : UiAction
 
     /**
      * Show UI to allow the user to add a proximity alert for a favourite stop.
      *
-     * @property stopCode The code of the stop to add a proximity alert for.
+     * @property stopIdentifier The code of the stop to add a proximity alert for.
      */
     data class ShowAddProximityAlert(
-        val stopCode: String
+        val stopIdentifier: StopIdentifier
     ) : UiAction
 
     /**
      * Show UI to confirm with the user if they wish to remove a proximity alert for a favourite
      * stop.
      *
-     * @property stopCode The code of the stop to confirm removal of a proximity alert.
+     * @property stopIdentifier The code of the stop to confirm removal of a proximity alert.
      */
     data class ShowConfirmRemoveProximityAlert(
-        val stopCode: String
+        val stopIdentifier: StopIdentifier
     ) : UiAction
 
     /**
      * A shortcut should be added for a favourite stop.
      *
-     * @property stopCode The code of the stop to add a shortcut for.
+     * @property stopIdentifier The code of the stop to add a shortcut for.
      * @property savedName The name of the stop which will have a shortcut created for.
      */
     data class AddShortcut(
-        val stopCode: String,
+        val stopIdentifier: StopIdentifier,
         val savedName: String
     ) : UiAction
 }

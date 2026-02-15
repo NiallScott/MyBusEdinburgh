@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -86,7 +86,7 @@ class ArrivalAlertViewHolder(
         this.alert = alert
 
         viewBinding.txtDescription.text = alert?.let {
-            val stopName = textFormattingUtils.formatBusStopNameWithStopCode(it.stopCode,
+            val stopName = textFormattingUtils.formatBusStopNameWithStopCode(it.stopIdentifier,
                     it.stopDetails?.stopName)
             val services = it.services
             val timeTrigger = it.timeTrigger
@@ -96,8 +96,13 @@ class ArrivalAlertViewHolder(
                 R.plurals.alertmanager_time_subtitle_single_service
             }
 
-            viewBinding.root.resources.getQuantityString(descriptionTextRes, timeTrigger,
-                    services.joinToString(", "), stopName, timeTrigger)
+            viewBinding.root.resources.getQuantityString(
+                descriptionTextRes,
+                timeTrigger,
+                services.joinToString(", ") { service -> service.serviceName },
+                stopName,
+                timeTrigger
+            )
         }
 
         map?.let {
@@ -140,7 +145,7 @@ class ArrivalAlertViewHolder(
      */
     private fun handleRemoveClicked() {
         alert?.let {
-            clickListener.onRemoveArrivalAlertClicked(it.stopCode)
+            clickListener.onRemoveArrivalAlertClicked(it.stopIdentifier)
         }
     }
 }

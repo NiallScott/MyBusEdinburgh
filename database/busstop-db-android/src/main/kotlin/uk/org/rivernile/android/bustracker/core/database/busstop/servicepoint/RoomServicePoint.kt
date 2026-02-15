@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,18 +26,22 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint
 
+import androidx.room.ColumnInfo
+import androidx.room.Embedded
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.RoomServiceDescriptor
+
 /**
  * This is the Room specific implementation of [ServicePoint].
  *
- * @property serviceName See [ServicePoint.serviceName].
- * @property chainage See [ServicePoint.chainage].
+ * @property serviceDescriptor See [ServicePoint.serviceDescriptor].
+ * @property routeSection See [ServicePoint.routeSection].
  * @property latitude See [ServicePoint.latitude].
  * @property longitude See [ServicePoint.longitude].
  * @author Niall Scott
  */
 internal data class RoomServicePoint(
-    override val serviceName: String,
-    override val chainage: Int,
+    @Embedded override val serviceDescriptor: RoomServiceDescriptor,
+    @ColumnInfo("route_section") override val routeSection: Int,
     override val latitude: Double,
     override val longitude: Double
 ) : ServicePoint

@@ -127,14 +127,14 @@ internal class AddOrEditFavouriteStopViewModel @Inject constructor(
     )
 
     private fun addOrUpdateFavouriteStop(stopNameText: String) {
-        val stopCode = arguments.stopCode?.ifBlank { null } ?: return
+        val stopIdentifier = arguments.stopIdentifier ?: return
 
         val favouriteStop = FavouriteStop(
-            stopCode = stopCode,
+            stopIdentifier = stopIdentifier,
             stopName = stopNameText
         )
         val favouriteStopShortcut = FavouriteStopShortcut(
-            stopCode = stopCode,
+            stopIdentifier = stopIdentifier,
             displayName = stopNameText
         )
 

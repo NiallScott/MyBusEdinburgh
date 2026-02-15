@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,171 +27,515 @@
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.LocalTime
 import kotlinx.serialization.SerializationException
+import okhttp3.ResponseBody.Companion.toResponseBody
 import okio.IOException
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.any
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesMapper
+import retrofit2.Response
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toAtcoStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.ArrivalDepartureTime
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.EdinburghOpenApi
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.JsonStopEvent
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.JsonStopEvents
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Stop
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Vehicle
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.emptyLiveTimes
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
+import uk.org.rivernile.android.bustracker.core.log.FakeExceptionLogger
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
-import uk.org.rivernile.edinburghbustrackerapi.ApiKeyGenerator
-import uk.org.rivernile.edinburghbustrackerapi.EdinburghBusTrackerApi
-import kotlin.test.BeforeTest
+import uk.org.rivernile.android.bustracker.core.networking.FakeConnectivityRepository
+import uk.org.rivernile.android.bustracker.core.time.FakeTimeUtils
+import uk.org.rivernile.android.bustracker.core.time.TimeUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
+import kotlin.test.assertSame
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 /**
  * Tests for [EdinburghTrackerEndpoint].
  *
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner::class)
 class EdinburghTrackerEndpointTest {
 
-    companion object {
+    @Test
+    fun getLiveTimesSingleAtcoReturnsNoConnectivityWhenNoConnectivity() = runTest {
+        val endpoint = createEndpoint(
+            connectivityRepository = FakeConnectivityRepository(
+                onHasInternetConnectivity = { false }
+            )
+        )
 
-        private const val MOCK_API_KEY = "api_key"
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toAtcoStopIdentifier(),
+            numberOfDepartures = 4
+        )
+
+        assertEquals(LiveTimesResponse.Error.NoConnectivity, result)
     }
 
-    @Mock
-    private lateinit var api: EdinburghBusTrackerApi
-    @Mock
-    private lateinit var apiKeyGenerator: ApiKeyGenerator
-    @Mock
-    private lateinit var liveTimesMapper: LiveTimesMapper
-    @Mock
-    private lateinit var errorMapper: ErrorMapper
-    @Mock
-    private lateinit var responseHandler: ResponseHandler
-    @Mock
-    private lateinit var connectivityRepository: ConnectivityRepository
-    @Mock
-    private lateinit var exceptionLogger: ExceptionLogger
+    @Test
+    fun getLiveTimesSingleNaptanReturnsNoConnectivityWhenNoConnectivity() = runTest {
+        val endpoint = createEndpoint(
+            connectivityRepository = FakeConnectivityRepository(
+                onHasInternetConnectivity = { false }
+            )
+        )
 
-    private lateinit var endpoint: EdinburghTrackerEndpoint
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            numberOfDepartures = 4
+        )
 
-    @BeforeTest
-    fun setUp() {
-        endpoint = EdinburghTrackerEndpoint(
-            api,
-            apiKeyGenerator,
-            liveTimesMapper,
-            errorMapper,
-            responseHandler,
-            connectivityRepository,
-            exceptionLogger
+        assertEquals(LiveTimesResponse.Error.NoConnectivity, result)
+    }
+
+    @Test
+    fun getLiveTimesSingleAtcoReturnsIoErrorWhenSerializationExceptionIsThrown() = runTest {
+        val exception = SerializationException()
+        val exceptionLogger = FakeExceptionLogger()
+        val endpoint = createEndpoint(
+            api = FakeEdinburghOpenApi(
+                onGetStopEventsWithAtcoCode = { atcoCode, numberOfDepartures ->
+                    assertEquals("123456", atcoCode)
+                    assertEquals(4, numberOfDepartures)
+                    throw exception
+                }
+            ),
+            connectivityRepository = connectivityRepositoryHasConnectivity,
+            exceptionLogger = exceptionLogger
+        )
+
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toAtcoStopIdentifier(),
+            numberOfDepartures = 4
+        )
+
+        assertEquals(
+            LiveTimesResponse.Error.Io(throwable = exception),
+            result
+        )
+        assertEquals(1, exceptionLogger.loggedThrowables.size)
+        assertSame(exception, exceptionLogger.loggedThrowables.last())
+    }
+
+    @Test
+    fun getLiveTimesSingleNaptanReturnsIoErrorWhenSerializationExceptionIsThrown() = runTest {
+        val exception = SerializationException()
+        val exceptionLogger = FakeExceptionLogger()
+        val endpoint = createEndpoint(
+            api = FakeEdinburghOpenApi(
+                onGetStopEventsWithSmsCode = { smsCode, numberOfDepartures ->
+                    assertEquals("123456", smsCode)
+                    assertEquals(4, numberOfDepartures)
+                    throw exception
+                }
+            ),
+            connectivityRepository = connectivityRepositoryHasConnectivity,
+            exceptionLogger = exceptionLogger
+        )
+
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            numberOfDepartures = 4
+        )
+
+        assertEquals(
+            LiveTimesResponse.Error.Io(throwable = exception),
+            result
+        )
+        assertEquals(1, exceptionLogger.loggedThrowables.size)
+        assertSame(exception, exceptionLogger.loggedThrowables.last())
+    }
+
+    @Test
+    fun getLiveTimesSingleAtcoReturnsIoErrorWhenIoExceptionIsThrown() = runTest {
+        val exception = IOException()
+        val exceptionLogger = FakeExceptionLogger()
+        val endpoint = createEndpoint(
+            api = FakeEdinburghOpenApi(
+                onGetStopEventsWithAtcoCode = { atcoCode, numberOfDepartures ->
+                    assertEquals("123456", atcoCode)
+                    assertEquals(4, numberOfDepartures)
+                    throw exception
+                }
+            ),
+            connectivityRepository = connectivityRepositoryHasConnectivity,
+            exceptionLogger = exceptionLogger
+        )
+
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toAtcoStopIdentifier(),
+            numberOfDepartures = 4
+        )
+
+        assertEquals(
+            LiveTimesResponse.Error.Io(throwable = exception),
+            result
+        )
+        assertEquals(1, exceptionLogger.loggedThrowables.size)
+        assertSame(exception, exceptionLogger.loggedThrowables.last())
+    }
+
+    @Test
+    fun getLiveTimesSingleNaptanReturnsIoErrorWhenIoExceptionIsThrown() = runTest {
+        val exception = IOException()
+        val exceptionLogger = FakeExceptionLogger()
+        val endpoint = createEndpoint(
+            api = FakeEdinburghOpenApi(
+                onGetStopEventsWithSmsCode = { smsCode, numberOfDepartures ->
+                    assertEquals("123456", smsCode)
+                    assertEquals(4, numberOfDepartures)
+                    throw exception
+                }
+            ),
+            connectivityRepository = connectivityRepositoryHasConnectivity,
+            exceptionLogger = exceptionLogger
+        )
+
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            numberOfDepartures = 4
+        )
+
+        assertEquals(
+            LiveTimesResponse.Error.Io(throwable = exception),
+            result
+        )
+        assertEquals(1, exceptionLogger.loggedThrowables.size)
+        assertSame(exception, exceptionLogger.loggedThrowables.last())
+    }
+
+    @Test
+    fun getLiveTimesSingleAtcoReturnsAuthenticationErrorWhenUnauthorisedIsReturned() = runTest {
+        val exceptionLogger = FakeExceptionLogger()
+        val endpoint = createEndpoint(
+            api = FakeEdinburghOpenApi(
+                onGetStopEventsWithAtcoCode = { atcoCode, numberOfDepartures ->
+                    assertEquals("123456", atcoCode)
+                    assertEquals(4, numberOfDepartures)
+                    Response.error(401, "Unauthorized".toResponseBody())
+                }
+            ),
+            connectivityRepository = connectivityRepositoryHasConnectivity,
+            exceptionLogger = exceptionLogger
+        )
+
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toAtcoStopIdentifier(),
+            numberOfDepartures = 4
+        )
+
+        assertEquals(
+            LiveTimesResponse.Error.ServerError.Authentication,
+            result
+        )
+        assertEquals(1, exceptionLogger.loggedThrowables.size)
+        assertIs<RuntimeException>(exceptionLogger.loggedThrowables.last())
+    }
+
+    @Test
+    fun getLiveTimesSingleNaptanReturnsAuthenticationErrorWhenUnauthorisedIsReturned() = runTest {
+        val exceptionLogger = FakeExceptionLogger()
+        val endpoint = createEndpoint(
+            api = FakeEdinburghOpenApi(
+                onGetStopEventsWithSmsCode = { smsCode, numberOfDepartures ->
+                    assertEquals("123456", smsCode)
+                    assertEquals(4, numberOfDepartures)
+                    Response.error(401, "Unauthorized".toResponseBody())
+                }
+            ),
+            connectivityRepository = connectivityRepositoryHasConnectivity,
+            exceptionLogger = exceptionLogger
+        )
+
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            numberOfDepartures = 4
+        )
+
+        assertEquals(
+            LiveTimesResponse.Error.ServerError.Authentication,
+            result
+        )
+        assertEquals(1, exceptionLogger.loggedThrowables.size)
+        assertIs<RuntimeException>(exceptionLogger.loggedThrowables.last())
+    }
+
+    @Test
+    fun getLiveTimesSingleAtcoReturnsOtherServerErrorOnAnyOtherServerError() = runTest {
+        val exceptionLogger = FakeExceptionLogger()
+        val endpoint = createEndpoint(
+            api = FakeEdinburghOpenApi(
+                onGetStopEventsWithAtcoCode = { atcoCode, numberOfDepartures ->
+                    assertEquals("123456", atcoCode)
+                    assertEquals(4, numberOfDepartures)
+                    Response.error(404, "Not found".toResponseBody())
+                }
+            ),
+            connectivityRepository = connectivityRepositoryHasConnectivity,
+            exceptionLogger = exceptionLogger
+        )
+
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toAtcoStopIdentifier(),
+            numberOfDepartures = 4
+        )
+
+        assertEquals(
+            LiveTimesResponse.Error.ServerError.Other(error = "Not found"),
+            result
+        )
+        assertEquals(1, exceptionLogger.loggedThrowables.size)
+        assertIs<RuntimeException>(exceptionLogger.loggedThrowables.last())
+    }
+
+    @Test
+    fun getLiveTimesSingleNaptanReturnsOtherServerErrorOnAnyOtherServerError() = runTest {
+        val exceptionLogger = FakeExceptionLogger()
+        val endpoint = createEndpoint(
+            api = FakeEdinburghOpenApi(
+                onGetStopEventsWithSmsCode = { smsCode, numberOfDepartures ->
+                    assertEquals("123456", smsCode)
+                    assertEquals(4, numberOfDepartures)
+                    Response.error(404, "Not found".toResponseBody())
+                }
+            ),
+            connectivityRepository = connectivityRepositoryHasConnectivity,
+            exceptionLogger = exceptionLogger
+        )
+
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            numberOfDepartures = 4
+        )
+
+        assertEquals(
+            LiveTimesResponse.Error.ServerError.Other(error = "Not found"),
+            result
+        )
+        assertEquals(1, exceptionLogger.loggedThrowables.size)
+        assertIs<RuntimeException>(exceptionLogger.loggedThrowables.last())
+    }
+
+    @Test
+    fun getLiveTimesSingleAtcoReturnsSuccessWithEmptyLiveTimesWhenBodyIsNull() = runTest {
+        val endpoint = createEndpoint(
+            api = FakeEdinburghOpenApi(
+                onGetStopEventsWithAtcoCode = { atcoCode, numberOfDepartures ->
+                    assertEquals("123456", atcoCode)
+                    assertEquals(4, numberOfDepartures)
+                    Response.success(null)
+                }
+            ),
+            connectivityRepository = connectivityRepositoryHasConnectivity,
+            timeUtils = FakeTimeUtils(
+                onNow = { Instant.fromEpochMilliseconds(123L) }
+            )
+        )
+
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toAtcoStopIdentifier(),
+            numberOfDepartures = 4
+        )
+
+        assertEquals(
+            LiveTimesResponse.Success(
+                liveTimes = emptyLiveTimes(
+                    receiveTime = Instant.fromEpochMilliseconds(123L)
+                )
+            ),
+            result
         )
     }
 
     @Test
-    fun getLiveBusTimesSingleWithNoConnectivityReturnsNoConnectivity() = runTest {
-        whenever(connectivityRepository.hasInternetConnectivity)
-            .thenReturn(false)
+    fun getLiveTimesSingleNaptanReturnsSuccessWithEmptyLiveTimesWhenBodyIsNull() = runTest {
+        val endpoint = createEndpoint(
+            api = FakeEdinburghOpenApi(
+                onGetStopEventsWithSmsCode = { smsCode, numberOfDepartures ->
+                    assertEquals("123456", smsCode)
+                    assertEquals(4, numberOfDepartures)
+                    Response.success(null)
+                }
+            ),
+            connectivityRepository = connectivityRepositoryHasConnectivity,
+            timeUtils = FakeTimeUtils(
+                onNow = { Instant.fromEpochMilliseconds(123L) }
+            )
+        )
 
-        val result = endpoint.getLiveTimes("123456", 1)
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            numberOfDepartures = 4
+        )
 
-        assertEquals(LiveTimesResponse.Error.NoConnectivity, result)
-        verify(exceptionLogger, never())
-            .log(any())
+        assertEquals(
+            LiveTimesResponse.Success(
+                liveTimes = emptyLiveTimes(
+                    receiveTime = Instant.fromEpochMilliseconds(123L)
+                )
+            ),
+            result
+        )
     }
 
     @Test
-    fun getLiveBusTimesSingleWithIoExceptionReturnsIoError() = runTest {
-        whenever(connectivityRepository.hasInternetConnectivity)
-            .thenReturn(true)
-        whenever(apiKeyGenerator.hashedApiKey)
-            .thenReturn(MOCK_API_KEY)
-        val throwable = IOException()
-        whenever(api.getBusTimes(MOCK_API_KEY, 1, "123456"))
-            .thenAnswer { throw throwable }
+    fun getLiveTimesSingleAtcoReturnsSuccessWithLiveTimesWhenBodyIsPopulated() = runTest {
+        val endpoint = createEndpoint(
+            api = FakeEdinburghOpenApi(
+                onGetStopEventsWithAtcoCode = { atcoCode, numberOfDepartures ->
+                    assertEquals("123456", atcoCode)
+                    assertEquals(4, numberOfDepartures)
+                    Response.success(
+                        JsonStopEvents(
+                            time = Instant.fromEpochMilliseconds(122L),
+                            events = listOf(
+                                JsonStopEvent(
+                                    publicServiceName = "100",
+                                    operator = "TEST1",
+                                    destination = "Destination",
+                                    scheduledDepartureTime = LocalTime(hour = 12, minute = 34),
+                                    departureTime = ArrivalDepartureTime.Seconds(999)
+                                )
+                            )
+                        )
+                    )
+                }
+            ),
+            connectivityRepository = connectivityRepositoryHasConnectivity,
+            timeUtils = FakeTimeUtils(
+                onNow = { Instant.fromEpochMilliseconds(123L) }
+            )
+        )
 
-        val result = endpoint.getLiveTimes("123456", 1)
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toAtcoStopIdentifier(),
+            numberOfDepartures = 4
+        )
 
-        assertEquals(LiveTimesResponse.Error.Io(throwable), result)
-        verify(exceptionLogger)
-            .log(throwable)
+        assertEquals(
+            LiveTimesResponse.Success(
+                liveTimes = LiveTimes(
+                    stops = mapOf(
+                        "123456".toAtcoStopIdentifier() to Stop(
+                            stopIdentifier = "123456".toAtcoStopIdentifier(),
+                            services = listOf(
+                                Service(
+                                    serviceDescriptor = FakeServiceDescriptor(
+                                        serviceName = "100",
+                                        operatorCode = "TEST1"
+                                    ),
+                                    vehicles = listOf(
+                                        Vehicle(
+                                            destination = "Destination",
+                                            departureTime = Instant.fromEpochMilliseconds(122L) +
+                                                999.seconds,
+                                            departureMinutes = 16,
+                                            isEstimatedTime = false,
+                                            isDiverted = false
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    receiveTime = Instant.fromEpochMilliseconds(123L)
+                )
+            ),
+            result
+        )
     }
 
     @Test
-    fun getLiveBusTimesSingleWithSerializationExceptionReturnsIoError() = runTest {
-        whenever(connectivityRepository.hasInternetConnectivity)
-            .thenReturn(true)
-        whenever(apiKeyGenerator.hashedApiKey)
-            .thenReturn(MOCK_API_KEY)
-        val throwable = SerializationException()
-        whenever(api.getBusTimes(MOCK_API_KEY, 1, "123456"))
-            .thenAnswer { throw throwable }
+    fun getLiveTimesSingleNaptanReturnsSuccessWithLiveTimesWhenBodyIsPopulated() = runTest {
+        val endpoint = createEndpoint(
+            api = FakeEdinburghOpenApi(
+                onGetStopEventsWithSmsCode = { smsCode, numberOfDepartures ->
+                    assertEquals("123456", smsCode)
+                    assertEquals(4, numberOfDepartures)
+                    Response.success(
+                        JsonStopEvents(
+                            time = Instant.fromEpochMilliseconds(122L),
+                            events = listOf(
+                                JsonStopEvent(
+                                    publicServiceName = "100",
+                                    operator = "TEST1",
+                                    destination = "Destination",
+                                    scheduledDepartureTime = LocalTime(hour = 12, minute = 34),
+                                    departureTime = ArrivalDepartureTime.Seconds(999)
+                                )
+                            )
+                        )
+                    )
+                }
+            ),
+            connectivityRepository = connectivityRepositoryHasConnectivity,
+            timeUtils = FakeTimeUtils(
+                onNow = { Instant.fromEpochMilliseconds(123L) }
+            )
+        )
 
-        val result = endpoint.getLiveTimes("123456", 1)
+        val result = endpoint.getLiveTimes(
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            numberOfDepartures = 4
+        )
 
-        assertEquals(LiveTimesResponse.Error.Io(throwable), result)
-        verify(exceptionLogger)
-            .log(throwable)
+        assertEquals(
+            LiveTimesResponse.Success(
+                liveTimes = LiveTimes(
+                    stops = mapOf(
+                        "123456".toNaptanStopIdentifier() to Stop(
+                            stopIdentifier = "123456".toNaptanStopIdentifier(),
+                            services = listOf(
+                                Service(
+                                    serviceDescriptor = FakeServiceDescriptor(
+                                        serviceName = "100",
+                                        operatorCode = "TEST1"
+                                    ),
+                                    vehicles = listOf(
+                                        Vehicle(
+                                            destination = "Destination",
+                                            departureTime = Instant.fromEpochMilliseconds(122L) +
+                                                999.seconds,
+                                            departureMinutes = 16,
+                                            isEstimatedTime = false,
+                                            isDiverted = false
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    receiveTime = Instant.fromEpochMilliseconds(123L)
+                )
+            ),
+            result
+        )
     }
 
-    @Test
-    fun getLiveBusTimesMultipleWithNoConnectivityReturnsNoConnectivity() = runTest {
-        whenever(connectivityRepository.hasInternetConnectivity)
-            .thenReturn(false)
+    private val connectivityRepositoryHasConnectivity get() = FakeConnectivityRepository(
+        onHasInternetConnectivity = { true }
+    )
 
-        val result = endpoint.getLiveTimes(listOf("1", "2", "3", "4", "5"), 1)
-
-        assertEquals(LiveTimesResponse.Error.NoConnectivity, result)
-        verify(exceptionLogger, never())
-            .log(any())
-    }
-
-    @Test
-    fun getLiveBusTimesMultipleWithIoExceptionReturnsIoError() = runTest {
-        whenever(connectivityRepository.hasInternetConnectivity)
-            .thenReturn(true)
-        whenever(apiKeyGenerator.hashedApiKey)
-            .thenReturn(MOCK_API_KEY)
-        val throwable = IOException()
-        whenever(api.getBusTimes(
-            MOCK_API_KEY,
-            1,
-            "1",
-            "2",
-            "3",
-            "4",
-            "5"))
-            .thenAnswer { throw throwable }
-
-        val result = endpoint.getLiveTimes(listOf("1", "2", "3", "4", "5"), 1)
-
-        assertEquals(LiveTimesResponse.Error.Io(throwable), result)
-        verify(exceptionLogger)
-            .log(throwable)
-    }
-
-    @Test
-    fun getLiveBusTimesMultipleWithSerializationExceptionReturnsIoError() = runTest {
-        whenever(connectivityRepository.hasInternetConnectivity)
-            .thenReturn(true)
-        whenever(apiKeyGenerator.hashedApiKey)
-            .thenReturn(MOCK_API_KEY)
-        val throwable = SerializationException()
-        whenever(api.getBusTimes(
-            MOCK_API_KEY,
-            1,
-            "1",
-            "2",
-            "3",
-            "4",
-            "5"))
-            .thenAnswer { throw throwable }
-
-        val result = endpoint.getLiveTimes(listOf("1", "2", "3", "4", "5"), 1)
-
-        assertEquals(LiveTimesResponse.Error.Io(throwable), result)
-        verify(exceptionLogger)
-            .log(throwable)
+    private fun createEndpoint(
+        api: EdinburghOpenApi = FakeEdinburghOpenApi(),
+        connectivityRepository: ConnectivityRepository = FakeConnectivityRepository(),
+        exceptionLogger: ExceptionLogger = FakeExceptionLogger(),
+        timeUtils: TimeUtils = FakeTimeUtils()
+    ): EdinburghTrackerEndpoint {
+        return EdinburghTrackerEndpoint(
+            api = api,
+            connectivityRepository = connectivityRepository,
+            exceptionLogger = exceptionLogger,
+            timeUtils = timeUtils
+        )
     }
 }

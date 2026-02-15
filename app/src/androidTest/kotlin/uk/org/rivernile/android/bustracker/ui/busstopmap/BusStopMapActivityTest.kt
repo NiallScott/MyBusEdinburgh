@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,6 +40,9 @@ import androidx.test.rule.GrantPermissionRule
 import org.hamcrest.CoreMatchers.allOf
 import org.junit.Rule
 import uk.org.rivernile.android.bustracker.core.bundle.getParcelableCompat
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableNaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.edinburghbustracker.android.R
 import kotlin.test.Test
@@ -79,7 +82,10 @@ class BusStopMapActivityTest {
         launchActivity<BusStopMapActivity>(intent).use { scenario ->
             scenario.onActivity { activity ->
                 val arguments = requireNotNull(activity.busStopMapFragment.arguments)
-                assertEquals("123456", arguments.getString("stopCode"))
+                assertEquals(
+                    "123456".toParcelableNaptanStopIdentifier(),
+                    arguments.getParcelableCompat<ParcelableNaptanStopIdentifier>("stopIdentifier")
+                )
                 assertFalse(arguments.containsKey("latitude"))
                 assertFalse(arguments.containsKey("longitude"))
             }
@@ -130,7 +136,7 @@ class BusStopMapActivityTest {
     fun showBusTimesLaunchesBusTimesActivity() {
         launchActivity<BusStopMapActivity>().use { scenario ->
             scenario.onActivity { activity ->
-                activity.onShowBusTimes("123456")
+                activity.onShowBusTimes("123456".toNaptanStopIdentifier())
             }
         }
 

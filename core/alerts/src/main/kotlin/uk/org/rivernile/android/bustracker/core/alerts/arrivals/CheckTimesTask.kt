@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -66,8 +66,8 @@ internal class RealCheckTimesTask @Inject constructor(
 ) : CheckTimesTask {
 
     override suspend fun checkTimes() {
-        alertsRepository.getAllArrivalAlertStopCodes()
-            ?.takeIf(Set<String>::isNotEmpty)
+        alertsRepository.getAllArrivalAlertStops()
+            ?.takeIf { it.isNotEmpty() }
             ?.let {
                 val response = trackerEndpoint.getLiveTimes(it.toList(), 1)
 
@@ -85,7 +85,7 @@ internal class RealCheckTimesTask @Inject constructor(
      */
     private suspend fun handleResponse(liveTimes: LiveTimes) {
         alertsRepository.getAllArrivalAlerts()?.forEach { alert ->
-            liveTimes.stops[alert.stopCode]?.let { stop ->
+            liveTimes.stops[alert.stopIdentifier]?.let { stop ->
                 checkArrivalsForStop(alert, stop)
             }
         }
@@ -99,11 +99,11 @@ internal class RealCheckTimesTask @Inject constructor(
      * @param stop The loaded [Stop].
      */
     private suspend fun checkArrivalsForStop(arrivalAlert: ArrivalAlert, stop: Stop) {
-        val servicesToLookFor = arrivalAlert.serviceNames.toSet()
-        val timeTrigger = arrivalAlert.timeTrigger
+        val servicesToLookFor = arrivalAlert.services
+        val timeTrigger = arrivalAlert.timeTriggerMinutes
 
         val qualifyingServices = stop.services.filter {
-            servicesToLookFor.contains(it.serviceName) &&
+            servicesToLookFor.contains(it.serviceDescriptor) &&
                     isServiceArrivingWithinTimeTrigger(it, timeTrigger)
         }
 

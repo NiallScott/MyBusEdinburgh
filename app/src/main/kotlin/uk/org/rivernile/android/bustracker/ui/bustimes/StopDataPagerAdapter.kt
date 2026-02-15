@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,6 +32,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.commitNow
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.ui.bustimes.details.StopDetailsFragment
 import uk.org.rivernile.android.bustracker.ui.bustimes.times.BusTimesFragment
 import uk.org.rivernile.edinburghbustracker.android.R
@@ -40,15 +41,15 @@ import uk.org.rivernile.edinburghbustracker.android.R
  * This [FragmentStateAdapter] provides the pages and tab titles for [DisplayStopDataActivity].
  *
  * @param activity The hosting [FragmentActivity].
- * @param stopCode The stop code to show pages for. As the [android.content.Intent] of
- * [DisplayStopDataActivity] cannot be updated after it has been started, the stop code is locked
- * in. Therefore, there is no mechanism to update the stop code later.
+ * @param stopIdentifier The stop to show pages for. As the [android.content.Intent] of
+ * [DisplayStopDataActivity] cannot be updated after it has been started, the stop identifier is
+ * locked in. Therefore, there is no mechanism to update the stop code later.
  * @author Niall Scott
  */
 class StopDataPagerAdapter(
-        activity: FragmentActivity,
-        private val stopCode: String?)
-    : FragmentStateAdapter(activity) {
+    activity: FragmentActivity,
+    private val stopIdentifier: StopIdentifier?
+) : FragmentStateAdapter(activity) {
 
     companion object {
 
@@ -65,8 +66,8 @@ class StopDataPagerAdapter(
     override fun getItemCount() = PAGE_COUNT
 
     override fun createFragment(position: Int) = when (position) {
-        PAGE_TIMES -> BusTimesFragment.newInstance(stopCode)
-        PAGE_DETAILS -> StopDetailsFragment.newInstance(stopCode)
+        PAGE_TIMES -> BusTimesFragment.newInstance(stopIdentifier)
+        PAGE_DETAILS -> StopDetailsFragment.newInstance(stopIdentifier)
         else -> throw IllegalArgumentException()
     }
 

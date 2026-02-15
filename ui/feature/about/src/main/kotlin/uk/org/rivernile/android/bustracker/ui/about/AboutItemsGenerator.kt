@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -77,9 +77,12 @@ internal class RealAboutItemsGenerator @Inject constructor(
             UiAboutItem.TwoLinesItem.Website,
             UiAboutItem.TwoLinesItem.Bluesky,
             UiAboutItem.TwoLinesItem.DatabaseVersion(
-                databaseMetadata?.updateTimestamp?.let(::Date)
+                databaseMetadata
+                    ?.updateTimestamp
+                    ?.let {
+                        Date(it.toEpochMilliseconds())
+                    }
             ),
-            UiAboutItem.TwoLinesItem.TopologyVersion(databaseMetadata?.topologyVersionId),
             UiAboutItem.OneLineItem.Credits,
             UiAboutItem.OneLineItem.PrivacyPolicy,
             UiAboutItem.OneLineItem.OpenSourceLicences

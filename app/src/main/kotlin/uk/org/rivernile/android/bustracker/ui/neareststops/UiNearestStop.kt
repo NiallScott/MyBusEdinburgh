@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,13 +26,15 @@
 
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
+import uk.org.rivernile.android.bustracker.core.busstops.StopName
+import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
  * This class describes a nearest stop item.
  *
- * @property stopCode The stop code.
+ * @property stopIdentifier The stop identifier.
  * @property stopName The stop name.
  * @property services The service listing for this stop.
  * @property distance The computed distance between the device and the stop.
@@ -41,9 +43,10 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrient
  * @author Niall Scott
  */
 data class UiNearestStop(
-    val stopCode: String,
+    val stopIdentifier: StopIdentifier,
     val stopName: StopName?,
-    val services: String?,
+    val services: List<ServiceDescriptor>?,
     val distance: Int,
     val orientation: StopOrientation,
-    val isSelected: Boolean)
+    val isSelected: Boolean
+)

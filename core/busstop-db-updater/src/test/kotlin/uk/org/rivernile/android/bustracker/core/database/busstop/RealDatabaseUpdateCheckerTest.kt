@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,6 +36,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.test.fail
+import kotlin.time.Instant
 
 /**
  * Tests for [DatabaseUpdateChecker].
@@ -58,14 +59,14 @@ class RealDatabaseUpdateCheckerTest {
     }
 
     @Test
-    fun returnTrueButDontUpdateDatabaseWhenTopologyIdsAreSame() = runTest {
+    fun returnTrueButDontUpdateDatabaseWhenUpdateTimestampsAreSame() = runTest {
         val databaseVersion = createDatabaseVersion()
         val checker = createDatabaseUpdaterChecker(
             apiEndpoint = FakeApiEndpoint(
                 onGetDatabaseVersion = { DatabaseVersionResponse.Success(databaseVersion) }
             ),
             databaseRepository = FakeBusStopDatabaseRepository(
-                onGetTopologyVersionId = { "abc123" }
+                onGetDatabaseUpdateTimestamp = { Instant.fromEpochMilliseconds(123123L) },
             ),
             databaseUpdater = FakeDatabaseUpdater(
                 onUpdateDatabase = { _, _ -> fail("Database should not be updated.") }
@@ -78,7 +79,27 @@ class RealDatabaseUpdateCheckerTest {
     }
 
     @Test
-    fun returnTrueWhenTopologyIdsAreDifferentAndDatabaseUpdateIsSuccessful() = runTest {
+    fun returnTrueButDontUpdateDatabaseWhenUpdateTimestampIsLess() = runTest {
+        val databaseVersion = createDatabaseVersion()
+        val checker = createDatabaseUpdaterChecker(
+            apiEndpoint = FakeApiEndpoint(
+                onGetDatabaseVersion = { DatabaseVersionResponse.Success(databaseVersion) }
+            ),
+            databaseRepository = FakeBusStopDatabaseRepository(
+                onGetDatabaseUpdateTimestamp = { Instant.fromEpochMilliseconds(124000L) },
+            ),
+            databaseUpdater = FakeDatabaseUpdater(
+                onUpdateDatabase = { _, _ -> fail("Database should not be updated.") }
+            )
+        )
+
+        val result = checker.checkForDatabaseUpdates()
+
+        assertTrue(result)
+    }
+
+    @Test
+    fun returnTrueWhenDatabaseTimestampIsNullAndDatabaseUpdateIsSuccessful() = runTest {
         val databaseVersion = createDatabaseVersion()
         var updateDatabaseInvocationCount = 0
         val checker = createDatabaseUpdaterChecker(
@@ -86,7 +107,7 @@ class RealDatabaseUpdateCheckerTest {
                 onGetDatabaseVersion = { DatabaseVersionResponse.Success(databaseVersion) }
             ),
             databaseRepository = FakeBusStopDatabaseRepository(
-                onGetTopologyVersionId = { "xyz789" }
+                onGetDatabaseUpdateTimestamp = { null }
             ),
             databaseUpdater = FakeDatabaseUpdater(
                 onUpdateDatabase = { version, _ ->
@@ -104,7 +125,7 @@ class RealDatabaseUpdateCheckerTest {
     }
 
     @Test
-    fun returnFalseWhenTopologyIdsAreDifferentAndDatabaseUpdateFails() = runTest {
+    fun returnTrueWhenUpdateTimestampIsGreaterAndDatabaseUpdateIsSuccessful() = runTest {
         val databaseVersion = createDatabaseVersion()
         var updateDatabaseInvocationCount = 0
         val checker = createDatabaseUpdaterChecker(
@@ -112,7 +133,33 @@ class RealDatabaseUpdateCheckerTest {
                 onGetDatabaseVersion = { DatabaseVersionResponse.Success(databaseVersion) }
             ),
             databaseRepository = FakeBusStopDatabaseRepository(
-                onGetTopologyVersionId = { "xyz789" }
+                onGetDatabaseUpdateTimestamp = { Instant.fromEpochMilliseconds(122999) }
+            ),
+            databaseUpdater = FakeDatabaseUpdater(
+                onUpdateDatabase = { version, _ ->
+                    assertEquals(databaseVersion, version)
+                    updateDatabaseInvocationCount++
+                    true
+                }
+            )
+        )
+
+        val result = checker.checkForDatabaseUpdates()
+
+        assertTrue(result)
+        assertEquals(1, updateDatabaseInvocationCount)
+    }
+
+    @Test
+    fun returnFalseWhenUpdateTimestampsAreDifferentAndDatabaseUpdateFails() = runTest {
+        val databaseVersion = createDatabaseVersion()
+        var updateDatabaseInvocationCount = 0
+        val checker = createDatabaseUpdaterChecker(
+            apiEndpoint = FakeApiEndpoint(
+                onGetDatabaseVersion = { DatabaseVersionResponse.Success(databaseVersion) }
+            ),
+            databaseRepository = FakeBusStopDatabaseRepository(
+                onGetDatabaseUpdateTimestamp = { Instant.fromEpochMilliseconds(122999) }
             ),
             databaseUpdater = FakeDatabaseUpdater(
                 onUpdateDatabase = { version, _ ->
@@ -141,6 +188,9 @@ class RealDatabaseUpdateCheckerTest {
         )
     }
 
-    private fun createDatabaseVersion() =
-        DatabaseVersion("MBE", "abc123", "http://host/db.db", "abcdef1234567890")
+    private fun createDatabaseVersion() = DatabaseVersion(
+        timestampInSeconds = 123L,
+        databaseUrl = "http://host/db.db",
+        sha256Checksum = "abcdef1234567890"
+    )
 }

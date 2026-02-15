@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.alerts
 
 import android.content.Intent
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
  * This class is used to create [Intent]s used for deeplinking in to various parts of the app, e.g.
@@ -39,19 +40,19 @@ interface DeeplinkIntentFactory {
     /**
      * Create an [Intent] used for deeplinking the user in to the bus times display for a bus stop.
      *
-     * @param stopCode The stop code to show times for.
+     * @param stopIdentifier The stop to show times for.
      * @return The [Intent] to launch the bus times display.
      */
-    fun createShowBusTimesIntent(stopCode: String): Intent
+    fun createShowBusTimesIntent(stopIdentifier: StopIdentifier): Intent
 
     /**
-     * Create an [Intent] used for deeplinking the user in to the stop map with the given `stopCode`
-     * as the selected item.
+     * Create an [Intent] used for deeplinking the user in to the stop map with the given
+     * [stopIdentifier] as the selected item.
      *
-     * @param stopCode The stop code to center the map upon.
+     * @param stopIdentifier The stop to center the map upon.
      * @return The [Intent] to launch the map, or `null` if the map is not available.
      */
-    fun createShowStopOnMapIntent(stopCode: String): Intent?
+    fun createShowStopOnMapIntent(stopIdentifier: StopIdentifier): Intent?
 
     /**
      * Create an [Intent] used for deeplinking the user in to managing their alerts.

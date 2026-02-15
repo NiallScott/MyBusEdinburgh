@@ -34,7 +34,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onStart
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.busstops.StopName
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import uk.org.rivernile.android.bustracker.core.text.UiStopName
@@ -62,26 +63,26 @@ internal class RealUiContentFetcher @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val uiContentFlow get() = arguments
-        .stopCodeFlow
+        .stopIdentifierFlow
         .flatMapLatest(::loadUiContent)
         .distinctUntilChanged()
 
-    private fun loadUiContent(stopCode: String?): Flow<UiContent> {
-        return if (!stopCode.isNullOrBlank()) {
-            loadFavouriteStopAndDetails(stopCode = stopCode)
+    private fun loadUiContent(stopIdentifier: StopIdentifier?): Flow<UiContent> {
+        return if (stopIdentifier != null) {
+            loadFavouriteStopAndDetails(stopIdentifier = stopIdentifier)
                 .onStart { emit(UiContent.InProgress) }
         } else {
             flowOf(UiContent.InProgress)
         }
     }
 
-    private fun loadFavouriteStopAndDetails(stopCode: String) = combine(
-        favouritesRepository.getFavouriteStopFlow(stopCode),
-        busStopsRepository.getNameForStopFlow(stopCode),
+    private fun loadFavouriteStopAndDetails(stopIdentifier: StopIdentifier) = combine(
+        favouritesRepository.getFavouriteStopFlow(stopIdentifier),
+        busStopsRepository.getNameForStopFlow(stopIdentifier),
         state.stopNameTextFlow
     ) { favouriteStop, stopName, editableStopNameText ->
         createUiContent(
-            stopCode = stopCode,
+            stopIdentifier = stopIdentifier,
             favouriteStop = favouriteStop,
             stopName = stopName,
             editableStopNameText = editableStopNameText
@@ -89,21 +90,21 @@ internal class RealUiContentFetcher @Inject constructor(
     }
 
     private fun createUiContent(
-        stopCode: String,
+        stopIdentifier: StopIdentifier,
         favouriteStop: FavouriteStop?,
         stopName: StopName?,
         editableStopNameText: String?
     ): UiContent {
         return if (favouriteStop != null) {
             UiContent.Mode.Edit(
-                stopCode = stopCode,
+                stopIdentifier = stopIdentifier,
                 stopName = stopName?.toUiStopName(),
                 isPositiveButtonEnabled = isStopNameValid(editableStopNameText),
                 savedName = favouriteStop.stopName
             )
         } else {
             UiContent.Mode.Add(
-                stopCode = stopCode,
+                stopIdentifier = stopIdentifier,
                 stopName = stopName?.toUiStopName(),
                 isPositiveButtonEnabled = isStopNameValid(editableStopNameText)
             )

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,8 @@ package uk.org.rivernile.android.bustracker.ui.serviceschooser
 import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableNaptanStopIdentifier
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -51,7 +53,23 @@ class ArgumentsTest {
 
     @Test
     fun paramsFlowEmitsAllServicesWhenSetAsArgument() = runTest {
-        val allServices = ServicesChooserParams.AllServices(1, listOf("1", "2", "3"))
+        val allServices = ServicesChooserParams.AllServices(
+            titleResId = 1,
+            selectedServices = listOf(
+                ParcelableServiceDescriptor(
+                    serviceName = "1",
+                    operatorCode = "TEST1"
+                ),
+                ParcelableServiceDescriptor(
+                    serviceName = "2",
+                    operatorCode = "TEST2"
+                ),
+                ParcelableServiceDescriptor(
+                    serviceName = "3",
+                    operatorCode = "TEST3"
+                )
+            )
+        )
         val arguments = Arguments(
             SavedStateHandle(
                 mapOf(
@@ -67,7 +85,24 @@ class ArgumentsTest {
 
     @Test
     fun paramsFlowEmitsStopWhenSetAsArgument() = runTest {
-        val stop = ServicesChooserParams.Stop(1, listOf("1", "2", "3"), "123456")
+        val stop = ServicesChooserParams.Stop(
+            titleResId = 1,
+            selectedServices = listOf(
+                ParcelableServiceDescriptor(
+                    serviceName = "1",
+                    operatorCode = "TEST1"
+                ),
+                ParcelableServiceDescriptor(
+                    serviceName = "2",
+                    operatorCode = "TEST2"
+                ),
+                ParcelableServiceDescriptor(
+                    serviceName = "3",
+                    operatorCode = "TEST3"
+                )
+            ),
+            stopIdentifier = "123456".toParcelableNaptanStopIdentifier()
+        )
         val arguments = Arguments(
             SavedStateHandle(
                 mapOf(

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -86,7 +86,7 @@ internal class RealDatabaseUpdater @Inject constructor(
             return false
         }
 
-        if (!doesPassConsistencyCheck(downloadFile, databaseVersion.checksum)) {
+        if (!doesPassConsistencyCheck(downloadFile, databaseVersion.sha256Checksum)) {
             downloadFile.deleteSuspend()
 
             return false
@@ -105,14 +105,19 @@ internal class RealDatabaseUpdater @Inject constructor(
      * Does the downloaded [File] pass the file consistency check?
      *
      * @param downloadFile A [File] object describing the downloaded file.
-     * @param checksum The expected checksum to check for.
+     * @param sha256Checksum The expected SHA-256 checksum to check for.
      * @return `true` if the file consistency check passes, otherwise `false`.
      */
-    private suspend fun doesPassConsistencyCheck(downloadFile: File, checksum: String) = try {
-        fileConsistencyChecker.checkFileMatchesHash(downloadFile, checksum)
-    } catch (e: IOException) {
-        exceptionLogger.log(e)
-        false
+    private suspend fun doesPassConsistencyCheck(
+        downloadFile: File,
+        sha256Checksum: String
+    ): Boolean {
+        return try {
+            fileConsistencyChecker.checkFileMatchesHash(downloadFile, sha256Checksum)
+        } catch (e: IOException) {
+            exceptionLogger.log(e)
+            false
+        }
     }
 
     /**

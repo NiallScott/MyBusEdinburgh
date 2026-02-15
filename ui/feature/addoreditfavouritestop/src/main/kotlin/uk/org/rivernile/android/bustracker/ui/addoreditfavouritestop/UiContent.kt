@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop
 
 import androidx.compose.runtime.Immutable
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.text.UiStopName
 
 /**
@@ -59,7 +60,7 @@ internal sealed interface UiContent {
         /**
          * The code of the stop we're concerned with.
          */
-        val stopCode: String
+        val stopIdentifier: StopIdentifier
 
         /**
          * The name data of the stop we're concerned with.
@@ -69,12 +70,12 @@ internal sealed interface UiContent {
         /**
          * The content is in 'add' mode.
          *
-         * @property stopCode See [Mode.stopCode].
+         * @property stopIdentifier See [Mode.stopIdentifier].
          * @property stopName See [Mode.stopName].
          * @property isPositiveButtonEnabled Is the positive button on the dialog enabled?
          */
         data class Add(
-            override val stopCode: String,
+            override val stopIdentifier: StopIdentifier,
             override val stopName: UiStopName?,
             override val isPositiveButtonEnabled: Boolean
         ) : Mode
@@ -82,13 +83,13 @@ internal sealed interface UiContent {
         /**
          * The content is in 'edit' mode.
          *
-         * @property stopCode See [Mode.stopCode].
+         * @property stopIdentifier See [Mode.stopIdentifier].
          * @property stopName See [Mode.stopName].
          * @property isPositiveButtonEnabled Is the positive button on the dialog enabled?
          * @property savedName The name the stop is currently saved as.
          */
         data class Edit(
-            override val stopCode: String,
+            override val stopIdentifier: StopIdentifier,
             override val stopName: UiStopName?,
             override val isPositiveButtonEnabled: Boolean,
             val savedName: String,

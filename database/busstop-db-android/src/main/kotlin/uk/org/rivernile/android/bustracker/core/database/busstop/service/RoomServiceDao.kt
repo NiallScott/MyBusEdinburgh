@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,10 +27,13 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop.service
 
 import androidx.room.Dao
-import androidx.room.MapColumn
 import androidx.room.Query
+import androidx.room.RawQuery
+import androidx.room.RoomRawQuery
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import uk.org.rivernile.android.bustracker.core.database.busstop.operator.RoomOperatorEntity
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 
 /**
  * This is the Room implementation of [ServiceDao].
@@ -41,74 +44,107 @@ import kotlinx.coroutines.flow.map
 internal abstract class RoomServiceDao : ServiceDao {
 
     @get:Query("""
-        SELECT name, hexColour 
-        FROM service 
+        SELECT name, operator_code, colour_primary, colour_on_primary
+        FROM service_view
         ORDER BY CASE WHEN name GLOB '[^0-9.]*' THEN name ELSE cast(name AS int) END
     """)
-    abstract override val allServiceNamesWithColourFlow: Flow<List<RoomServiceWithColour>?>
+    abstract override val allServiceNamesWithColourFlow: Flow<List<RoomServiceWithColour>>
 
-    @Query("""
-        SELECT name, hexColour 
-        FROM service 
-        WHERE name IN (
-            SELECT serviceName  
-            FROM service_stop 
-            WHERE stopCode = :stopCode
+    @Query(
+        """
+        SELECT name, operator_code, colour_primary, colour_on_primary
+        FROM service_view
+        WHERE id IN (
+            SELECT service_id
+            FROM service_stop
+            WHERE stop_id = (
+                SELECT stop.id
+                FROM stop
+                WHERE naptan_code = :stopNaptanCode
+                LIMIT 1
+            )
         )
         ORDER BY CASE WHEN name GLOB '[^0-9.]*' THEN name ELSE cast(name AS int) END
-    """)
+    """
+    )
     abstract override fun getServiceNamesWithColourFlow(
-        stopCode: String
-    ): Flow<List<RoomServiceWithColour>?>
+        stopNaptanCode: String
+    ): Flow<List<RoomServiceWithColour>>
 
     @get:Query("""
-        SELECT COUNT(*) 
+        SELECT COUNT(*)
         FROM service
     """)
     abstract override val serviceCountFlow: Flow<Int?>
 
-    override fun getColoursForServicesFlow(services: Set<String>?): Flow<Map<String, Int?>?> {
+    override fun getColoursForServicesFlow(
+        services: Set<ServiceDescriptor>?
+    ): Flow<Map<ServiceDescriptor, ServiceColours>> {
         val flow = services
             ?.ifEmpty { null }
             ?.let {
-                getColoursForServicesFlowInternal(it)
+                getColoursForServicesFlowInternal(createGetColoursForServicesRawQuery(services))
             }
-            ?: coloursForAllServicesFlow
+            ?: allServiceNamesWithColourFlow
 
-        return flow.map { serviceColours ->
-            serviceColours?.mapValues {
-                it.value?.colour
+        return flow
+            .map { serviceColours ->
+                serviceColours.associate {
+                    it.descriptor to it.colours
+                }
             }
-        }
     }
 
-    @get:Query("""
-        SELECT name, hexColour 
-        FROM service
-    """)
-    abstract val coloursForAllServicesFlow: Flow<Map<
-            @MapColumn(columnName = "name") String,
-            RoomServiceColour?>?>
-
     @Query("""
-        SELECT name, description, hexColour 
-        FROM service 
-        WHERE name IN (
-            SELECT serviceName 
-            FROM service_stop 
-            WHERE stopCode = :stopCode
+        SELECT name, operator_code, description, colour_primary, colour_on_primary
+        FROM service_view
+        WHERE id IN (
+            SELECT service_id
+            FROM service_stop
+            WHERE stop_id = (
+                SELECT stop.id
+                FROM stop
+                WHERE naptan_code = :naptanCode
+                LIMIT 1
+            )
         )
         ORDER BY CASE WHEN name GLOB '[^0-9.]*' THEN name ELSE cast(name AS int) END
     """)
-    abstract override fun getServiceDetailsFlow(stopCode: String): Flow<List<RoomServiceDetails>?>
+    abstract override fun getServiceDetailsFlow(naptanCode: String): Flow<List<RoomServiceDetails>>
 
-    @Query("""
-        SELECT name, hexColour 
-        FROM service 
-        WHERE name IN (:services) 
-        AND hexColour NOT NULL
-    """)
+    @RawQuery(
+        observedEntities = [
+            RoomOperatorEntity::class,
+            RoomServiceEntity::class
+        ]
+    )
     abstract fun getColoursForServicesFlowInternal(
-        services: Set<String>
-    ): Flow<Map<@MapColumn(columnName = "name") String, RoomServiceColour?>?>
+        query: RoomRawQuery
+    ): Flow<List<RoomServiceWithColour>>
+
+    private fun createGetColoursForServicesRawQuery(
+        services: Set<ServiceDescriptor>
+    ): RoomRawQuery {
+        val sqlQuery = buildString {
+            append("""
+                SELECT name, operator_code, colour_primary, colour_on_primary
+                FROM service_view
+                WHERE (name, operator_code) IN (VALUES
+            """.trimIndent())
+
+            append(services.createPlaceholders())
+
+            append("""
+                )
+                ORDER BY CASE WHEN name GLOB '[^0-9.]*' THEN name ELSE cast(name AS int) END
+            """.trimIndent())
+        }
+
+        return RoomRawQuery(
+            sql = sqlQuery,
+            onBindStatement = {
+                services.bindStatement(it)
+            }
+        )
+    }
 }

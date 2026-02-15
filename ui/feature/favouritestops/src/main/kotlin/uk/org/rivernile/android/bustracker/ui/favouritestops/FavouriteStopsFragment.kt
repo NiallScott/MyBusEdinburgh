@@ -40,10 +40,11 @@ import androidx.compose.ui.Modifier
 import androidx.fragment.app.Fragment
 import androidx.fragment.compose.content
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddOrEditFavouriteStopListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddProximityAlertListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddArrivalAlertListener
-import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusStopMapWithStopCodeListener
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusStopMapWithStopIdentifierListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmRemoveProximityAlertListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmRemoveArrivalAlertListener
@@ -93,36 +94,36 @@ public class FavouriteStopsFragment : Fragment() {
         callbacks = null
     }
 
-    private fun handleOnShowStopData(stopCode: String) {
-        callbacks?.onShowBusTimes(stopCode)
+    private fun handleOnShowStopData(stopIdentifier: StopIdentifier) {
+        callbacks?.onShowBusTimes(stopIdentifier)
     }
 
-    private fun handleOnShowEditFavouriteStop(stopCode: String) {
-        callbacks?.onShowAddOrEditFavouriteStop(stopCode)
+    private fun handleOnShowEditFavouriteStop(stopIdentifier: StopIdentifier) {
+        callbacks?.onShowAddOrEditFavouriteStop(stopIdentifier)
     }
 
-    private fun handleOnShowConfirmRemoveFavourite(stopCode: String) {
-        callbacks?.onShowConfirmFavouriteRemoval(stopCode)
+    private fun handleOnShowConfirmRemoveFavourite(stopIdentifier: StopIdentifier) {
+        callbacks?.onShowConfirmFavouriteRemoval(stopIdentifier)
     }
 
-    private fun handleOnShowOnMap(stopCode: String) {
-        callbacks?.onShowBusStopMapWithStopCode(stopCode)
+    private fun handleOnShowOnMap(stopIdentifier: StopIdentifier) {
+        callbacks?.onShowBusStopMapWithStopIdentifier(stopIdentifier)
     }
 
-    private fun handleOnShowAddArrivalAlert(stopCode: String) {
-        callbacks?.onShowAddArrivalAlert(stopCode, null)
+    private fun handleOnShowAddArrivalAlert(stopIdentifier: StopIdentifier) {
+        callbacks?.onShowAddArrivalAlert(stopIdentifier, null)
     }
 
-    private fun handleOnShowConfirmRemoveArrivalAlert(stopCode: String) {
-        callbacks?.onShowConfirmRemoveArrivalAlert(stopCode)
+    private fun handleOnShowConfirmRemoveArrivalAlert(stopIdentifier: StopIdentifier) {
+        callbacks?.onShowConfirmRemoveArrivalAlert(stopIdentifier)
     }
 
-    private fun handleOnShowAddProximityAlert(stopCode: String) {
-        callbacks?.onShowAddProximityAlert(stopCode)
+    private fun handleOnShowAddProximityAlert(stopIdentifier: StopIdentifier) {
+        callbacks?.onShowAddProximityAlert(stopIdentifier)
     }
 
-    private fun handleOnShowConfirmRemoveProximityAlert(stopCode: String) {
-        callbacks?.onShowConfirmRemoveProximityAlert(stopCode)
+    private fun handleOnShowConfirmRemoveProximityAlert(stopIdentifier: StopIdentifier) {
+        callbacks?.onShowConfirmRemoveProximityAlert(stopIdentifier)
     }
 
     /**
@@ -136,6 +137,6 @@ public class FavouriteStopsFragment : Fragment() {
         OnShowConfirmRemoveArrivalAlertListener,
         OnShowAddProximityAlertListener,
         OnShowAddArrivalAlertListener,
-        OnShowBusStopMapWithStopCodeListener,
+        OnShowBusStopMapWithStopIdentifierListener,
         OnShowBusTimesListener
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,6 +34,8 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 
 /**
@@ -50,12 +52,12 @@ public class RemoveFavouriteStopDialogFragment : DialogFragment() {
         /**
          * Create a new instance of [RemoveFavouriteStopDialogFragment].
          *
-         * @param stopCode The stop code to delete the favourite stop for.
+         * @param stopIdentifier The stop identifier to delete the favourite stop for.
          */
-        public fun newInstance(stopCode: String): RemoveFavouriteStopDialogFragment {
+        public fun newInstance(stopIdentifier: StopIdentifier): RemoveFavouriteStopDialogFragment {
             return RemoveFavouriteStopDialogFragment().apply {
                 arguments = bundleOf(
-                    ARG_STOP_CODE to stopCode
+                    ARG_STOP_IDENTIFIER to stopIdentifier.toParcelableStopIdentifier()
                 )
             }
         }

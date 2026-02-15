@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,19 +46,22 @@ import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
  * @author Niall Scott
  */
 class StopClusterRenderer(
-        context: Context,
-        map: GoogleMap,
-        clusterManager: ClusterManager<UiStopMarker>,
-        private val stopMapMarkerDecorator: StopMapMarkerDecorator,
-        private val textFormattingUtils: TextFormattingUtils)
-    : DefaultClusterRenderer<UiStopMarker>(context, map, clusterManager) {
+    context: Context,
+    map: GoogleMap,
+    clusterManager: ClusterManager<UiStopMarker>,
+    private val stopMapMarkerDecorator: StopMapMarkerDecorator,
+    private val textFormattingUtils: TextFormattingUtils
+) : DefaultClusterRenderer<UiStopMarker>(context, map, clusterManager) {
 
     override fun onBeforeClusterItemRendered(item: UiStopMarker, markerOptions: MarkerOptions) {
-        markerOptions.apply {
+        with(markerOptions) {
             stopMapMarkerDecorator.applyStopDirectionToMarker(this, item.orientation)
-            title(textFormattingUtils.formatBusStopNameWithStopCode(
-                    item.stopCode,
-                    item.stopName))
+            title(
+                textFormattingUtils.formatBusStopNameWithStopCode(
+                    item.stopIdentifier,
+                    item.stopName
+                )
+            )
             anchor(0.5f, 1f)
             draggable(false)
         }
@@ -82,8 +85,9 @@ class StopClusterRenderer(
                 tag = item
                 stopMapMarkerDecorator.applyStopDirectionToMarker(this, item.orientation)
                 title = textFormattingUtils.formatBusStopNameWithStopCode(
-                        item.stopCode,
-                        item.stopName)
+                    item.stopIdentifier,
+                    item.stopName
+                )
                 setAnchor(0.5f, 1f)
                 isDraggable = false
                 position = item.position

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,6 +30,7 @@ import androidx.room.Dao
 import androidx.room.MapColumn
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.RoomServiceDescriptor
 
 /**
  * This is the Room implementation of [ServiceStopDao].
@@ -40,24 +41,33 @@ import kotlinx.coroutines.flow.Flow
 internal interface RoomServiceStopDao : ServiceStopDao {
 
     @Query("""
-        SELECT serviceName 
-        FROM service_stop 
-        WHERE stopCode = :stopCode 
-        ORDER BY CASE WHEN serviceName GLOB '[^0-9.]*' THEN 
-            serviceName ELSE cast(serviceName AS int) END
+        SELECT service.name AS name, service.operator_code AS operator_code
+        FROM service_stop
+        LEFT JOIN service_view AS service ON service_id = service.id
+        WHERE stop_id = (
+            SELECT id
+            FROM stop
+            WHERE naptan_code = :naptanStopCode
+        )
+        ORDER BY CASE WHEN service.name GLOB '[^0-9.]*' THEN
+            service.name ELSE cast(service.name AS int) END
     """)
-    override fun getServicesForStopFlow(stopCode: String): Flow<List<String>?>
+    abstract override fun getServicesForStopFlow(
+        naptanStopCode: String
+    ): Flow<List<RoomServiceDescriptor>>
 
     @Query("""
-        SELECT stopCode, serviceName
+        SELECT stop.naptan_code AS naptan_code, service.name AS name,
+            service.operator_code AS operator_code
         FROM service_stop
-        WHERE stopCode IN (:stopCodes)
-        ORDER BY stopCode ASC, 
-            CASE WHEN serviceName GLOB '[^0-9.]*' THEN serviceName ELSE cast(serviceName AS int) END
+        LEFT JOIN stop ON stop.id = stop_id
+        LEFT JOIN service_view AS service ON service.id = service_id
+        WHERE stop.naptan_code IN (:naptanStopCodes)
+        ORDER BY stop.naptan_code ASC,
+            CASE WHEN service.name GLOB '[^0-9.]*' THEN service.name
+            ELSE cast(service.name AS int) END
     """)
     override fun getServicesForStopsFlow(
-        stopCodes: Set<String>
-    ): Flow<Map<
-            @MapColumn(columnName = "stopCode") String,
-            List<@MapColumn(columnName = "serviceName") String>>?>
+        naptanStopCodes: Set<String>
+    ): Flow<Map<@MapColumn(columnName = "naptan_code") String, List<RoomServiceDescriptor>>>
 }

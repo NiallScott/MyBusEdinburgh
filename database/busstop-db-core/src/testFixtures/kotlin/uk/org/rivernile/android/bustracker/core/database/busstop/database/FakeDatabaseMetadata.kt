@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,14 +26,14 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.database
 
+import kotlin.time.Instant
+
 /**
  * This is a fake [DatabaseMetadata] for use in testing.
  *
  * @property updateTimestamp See [DatabaseMetadata.updateTimestamp].
- * @property topologyVersionId See [DatabaseMetadata.topologyVersionId].
  * @author Niall Scott
  */
 data class FakeDatabaseMetadata(
-    override val updateTimestamp: Long,
-    override val topologyVersionId: String?
+    override val updateTimestamp: Instant
 ) : DatabaseMetadata

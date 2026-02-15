@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,6 +40,8 @@ import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.testutils.test
@@ -55,7 +57,7 @@ class StopDetailsFragmentViewModelTest {
 
     companion object {
 
-        private const val STATE_STOP_CODE = "stopCode"
+        private const val STATE_STOP_IDENTIFIER = "stopIdentifier"
         private const val STATE_ASKED_FOR_PERMISSIONS = "askedForPermissions"
     }
 
@@ -162,7 +164,7 @@ class StopDetailsFragmentViewModelTest {
                 .thenReturn(flowOf(items1, items2))
         val viewModel = createViewModel(
             SavedStateHandle(
-                mapOf(STATE_STOP_CODE to "123456")))
+                mapOf(STATE_STOP_IDENTIFIER to "123456".toParcelableNaptanStopIdentifier())))
 
         val observer = viewModel.itemsLiveData.test()
         viewModel.permissionsState = PermissionsState(
@@ -207,7 +209,7 @@ class StopDetailsFragmentViewModelTest {
         val viewModel = createViewModel(
             SavedStateHandle(
                 mapOf(
-                    STATE_STOP_CODE to "123456")))
+                    STATE_STOP_IDENTIFIER to "123456".toParcelableNaptanStopIdentifier())))
 
         val observer = viewModel.uiStateLiveData.test()
         viewModel.permissionsState = PermissionsState(
@@ -223,7 +225,7 @@ class StopDetailsFragmentViewModelTest {
         val viewModel = createViewModel(
             SavedStateHandle(
                 mapOf(
-                    STATE_STOP_CODE to null)))
+                    STATE_STOP_IDENTIFIER to null)))
 
         val observer = viewModel.showStopMapLiveData.test()
         viewModel.onMapClicked()
@@ -236,12 +238,12 @@ class StopDetailsFragmentViewModelTest {
         val viewModel = createViewModel(
             SavedStateHandle(
                 mapOf(
-                    STATE_STOP_CODE to "123456")))
+                    STATE_STOP_IDENTIFIER to "123456".toParcelableNaptanStopIdentifier())))
 
         val observer = viewModel.showStopMapLiveData.test()
         viewModel.onMapClicked()
 
-        observer.assertValues("123456")
+        observer.assertValues("123456".toNaptanStopIdentifier())
     }
 
     private fun createViewModel(savedState: SavedStateHandle = SavedStateHandle()) =

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -48,7 +51,7 @@ class FavouriteStopWithServicesKtTest {
     fun toFavouriteStopsWithServicesWithNullServicesMapMapsCorrectly() {
         val expected = listOf(
             FavouriteStopWithServices(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 savedName = "Saved name",
                 services = null
             )
@@ -56,7 +59,7 @@ class FavouriteStopWithServicesKtTest {
 
         val result = listOf(
             FavouriteStop(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 stopName = "Saved name"
             )
         ).toFavouriteStopsWithServices(null)
@@ -68,7 +71,7 @@ class FavouriteStopWithServicesKtTest {
     fun toFavouriteStopsWithServicesWithEmptyServicesMapMapsCorrectly() {
         val expected = listOf(
             FavouriteStopWithServices(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 savedName = "Saved name",
                 services = null
             )
@@ -76,7 +79,7 @@ class FavouriteStopWithServicesKtTest {
 
         val result = listOf(
             FavouriteStop(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 stopName = "Saved name"
             )
         ).toFavouriteStopsWithServices(emptyMap())
@@ -88,7 +91,7 @@ class FavouriteStopWithServicesKtTest {
     fun toFavouriteStopsWithServiceWithEmptyServicesMapsCorrectly() {
         val expected = listOf(
             FavouriteStopWithServices(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 savedName = "Saved name",
                 services = null
             )
@@ -96,12 +99,12 @@ class FavouriteStopWithServicesKtTest {
 
         val result = listOf(
             FavouriteStop(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 stopName = "Saved name"
             )
         ).toFavouriteStopsWithServices(
             stopServices = mapOf(
-                "123456" to emptyList()
+                "123456".toNaptanStopIdentifier() to emptyList()
             )
         )
 
@@ -112,23 +115,30 @@ class FavouriteStopWithServicesKtTest {
     fun toFavouriteStopsWithServiceWithServicesMapMapsCorrectly() {
         val expected = listOf(
             FavouriteStopWithServices(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 savedName = "Saved name",
-                services = listOf("1", "2", "3")
+                services = listOf(service(1), service(2), service(3))
             )
         )
 
         val result = listOf(
             FavouriteStop(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 stopName = "Saved name"
             )
         ).toFavouriteStopsWithServices(
             stopServices = mapOf(
-                "123456" to listOf("1", "2", "3")
+                "123456".toNaptanStopIdentifier() to listOf(service(1), service(2), service(3))
             )
         )
 
         assertEquals(expected, result)
+    }
+
+    private fun service(id: Int): ServiceDescriptor {
+        return FakeServiceDescriptor(
+            serviceName = id.toString(),
+            operatorCode = "TEST$id"
+        )
     }
 }

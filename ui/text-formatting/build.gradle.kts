@@ -25,11 +25,9 @@
  */
 
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose.compiler)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
+    id("mybus.android-library")
+    id("mybus.android-compose")
+    id("mybus.hilt-convention")
 }
 
 android {
@@ -50,10 +48,6 @@ android {
         }
     }
 
-    buildFeatures {
-        compose = true
-    }
-
     @Suppress("UnstableApiUsage")
     testFixtures {
         enable = true
@@ -66,11 +60,8 @@ kotlin {
 
 dependencies {
 
-    implementation(project(":database:busstop-db-core"))
-
-    // Hilt (dependency injection)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
+    implementation(project(":core:busstops"))
+    implementation(project(":core:core-domain"))
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))
@@ -82,6 +73,7 @@ dependencies {
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.kotlin.test.junit)
 
+    testFixturesImplementation(project(":core:core-domain"))
     testFixturesImplementation(platform(libs.androidx.compose.bom))
     testFixturesImplementation(libs.androidx.compose.runtime)
 }

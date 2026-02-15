@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,9 +32,11 @@ import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.alerts.FakeAlertNotificationDispatcher
 import uk.org.rivernile.android.bustracker.core.alerts.FakeAlertsRepository
 import uk.org.rivernile.android.bustracker.core.alerts.ProximityAlert
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Instant
 
 /**
  * Tests for [RealAreaEnteredHandler].
@@ -111,7 +113,12 @@ class RealAreaEnteredHandlerTest {
 
     @Test
     fun handleAreaEnteredDispatchesNotificationWhenAlertDoesExist() = runTest {
-        val proximityAlert = ProximityAlert(1, 123L, "123456", 250)
+        val proximityAlert = ProximityAlert(
+            id = 1,
+            timeAdded = Instant.fromEpochMilliseconds(123L),
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            distanceFromMeters = 250
+        )
         val dispatchedNotifications = ProximityAlertTracker()
         val handler = createAreaEnteredHandler(
             alertsRepository = FakeAlertsRepository(

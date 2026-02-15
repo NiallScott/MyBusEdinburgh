@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,20 +26,39 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 
+import androidx.room.ColumnInfo
 import androidx.room.Embedded
+import androidx.room.Junction
+import androidx.room.Relation
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.RoomServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.RoomServiceView
+import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.RoomServiceStopEntity
+import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
 
 /**
  * The Room specific implementation of [StopSearchResult].
  *
- * @property stopCode See [StopSearchResult.stopCode].
+ * @property id The ID of the stop.
+ * @property naptanStopIdentifier See [StopSearchResult.naptanStopIdentifier].
  * @property stopName See [StopSearchResult.stopName].
  * @property orientation See [StopSearchResult.orientation].
  * @property serviceListing See [StopSearchResult.serviceListing].
  * @author Niall Scott
  */
 internal data class RoomStopSearchResult(
-    override val stopCode: String,
+    val id: Int,
+    @ColumnInfo("naptan_code") override val naptanStopIdentifier: NaptanStopIdentifier,
     @Embedded override val stopName: RoomStopName,
-    override val orientation: StopOrientation,
-    override val serviceListing: String?
+    @ColumnInfo("bearing") override val orientation: StopOrientation,
+    @Relation(
+        entity = RoomServiceView::class,
+        parentColumn = "id",
+        entityColumn = "id",
+        associateBy = Junction(
+            value = RoomServiceStopEntity::class,
+            parentColumn = "stop_id",
+            entityColumn = "service_id"
+        )
+    )
+    override val serviceListing: List<RoomServiceDescriptor>?
 ) : StopSearchResult

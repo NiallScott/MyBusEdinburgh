@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,8 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.times
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import kotlinx.coroutines.test.runTest
+import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableServiceDescriptor
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -58,7 +60,7 @@ class ExpandedServicesTrackerTest {
     @Test
     fun initialStateWithEmptyPreviousStateIsEmpty() = runTest {
         val handle = SavedStateHandle(
-            mapOf(STATE_KEY_EXPANDED_SERVICES to arrayListOf<String>())
+            mapOf(STATE_KEY_EXPANDED_SERVICES to arrayListOf<ParcelableServiceDescriptor>())
         )
         val tracker = ExpandedServicesTracker(handle)
 
@@ -71,12 +73,18 @@ class ExpandedServicesTrackerTest {
     @Test
     fun initialStateWithPopulatedServicesIsNonEmpty() = runTest {
         val handle = SavedStateHandle(
-            mapOf(STATE_KEY_EXPANDED_SERVICES to arrayListOf("1", "2", "3"))
+            mapOf(
+                STATE_KEY_EXPANDED_SERVICES to arrayListOf(
+                    parcelableService1,
+                    parcelableService2,
+                    parcelableService3
+                )
+            )
         )
         val tracker = ExpandedServicesTracker(handle)
 
         tracker.expandedServicesFlow.test {
-            assertEquals(setOf("1", "2", "3"), awaitItem())
+            assertEquals(setOf(service1, service2, service3), awaitItem())
             ensureAllEventsConsumed()
         }
     }
@@ -87,58 +95,104 @@ class ExpandedServicesTrackerTest {
         val tracker = ExpandedServicesTracker(handle)
 
         tracker.expandedServicesFlow.test {
-            tracker.onServiceClicked("1")
+            tracker.onServiceClicked(service1)
 
             assertEquals(emptySet(), awaitItem())
-            assertEquals(setOf("1"), awaitItem())
+            assertEquals(setOf(service1), awaitItem())
             ensureAllEventsConsumed()
         }
-        assertEquals(listOf("1"), handle[STATE_KEY_EXPANDED_SERVICES])
+        assertEquals(listOf(parcelableService1), handle[STATE_KEY_EXPANDED_SERVICES])
     }
 
     @Test
     fun onServiceClickedAfterPopulatedInitialStateRemovesService() = runTest {
         val handle = SavedStateHandle(
-                mapOf(STATE_KEY_EXPANDED_SERVICES to arrayListOf("1"))
+                mapOf(STATE_KEY_EXPANDED_SERVICES to arrayListOf(parcelableService1))
         )
         val tracker = ExpandedServicesTracker(handle)
 
         tracker.expandedServicesFlow.test {
-            tracker.onServiceClicked("1")
+            tracker.onServiceClicked(service1)
 
-            assertEquals(setOf("1"), awaitItem())
+            assertEquals(setOf(service1), awaitItem())
             assertEquals(emptySet(), awaitItem())
             ensureAllEventsConsumed()
         }
-        assertEquals(arrayListOf<String>(), handle[STATE_KEY_EXPANDED_SERVICES])
+        assertEquals(
+            arrayListOf<ParcelableServiceDescriptor>(),
+            handle[STATE_KEY_EXPANDED_SERVICES]
+        )
     }
 
     @Test
     fun onServiceClickedWithMultipleRandomInteractionsYieldsCorrectState() = runTest {
         val handle = SavedStateHandle(
-            mapOf(STATE_KEY_EXPANDED_SERVICES to arrayListOf("1"))
+            mapOf(STATE_KEY_EXPANDED_SERVICES to arrayListOf(parcelableService1))
         )
         val tracker = ExpandedServicesTracker(handle)
 
         tracker.expandedServicesFlow.test {
-            tracker.onServiceClicked("2")
-            tracker.onServiceClicked("3")
-            tracker.onServiceClicked("1")
-            tracker.onServiceClicked("4")
-            tracker.onServiceClicked("4")
-            tracker.onServiceClicked("4")
-            tracker.onServiceClicked("2")
+            tracker.onServiceClicked(service2)
+            tracker.onServiceClicked(service3)
+            tracker.onServiceClicked(service1)
+            tracker.onServiceClicked(service4)
+            tracker.onServiceClicked(service4)
+            tracker.onServiceClicked(service4)
+            tracker.onServiceClicked(service2)
 
-            assertEquals(setOf("1"), awaitItem())
-            assertEquals(setOf("1", "2"), awaitItem())
-            assertEquals(setOf("1", "2", "3"), awaitItem())
-            assertEquals(setOf("2", "3"), awaitItem())
-            assertEquals(setOf("2", "3", "4"), awaitItem())
-            assertEquals(setOf("2", "3"), awaitItem())
-            assertEquals(setOf("2", "3", "4"), awaitItem())
-            assertEquals(setOf("3", "4"), awaitItem())
+            assertEquals(setOf(service1), awaitItem())
+            assertEquals(setOf(service1, service2), awaitItem())
+            assertEquals(setOf(service1, service2, service3), awaitItem())
+            assertEquals(setOf(service2, service3), awaitItem())
+            assertEquals(setOf(service2, service3, service4), awaitItem())
+            assertEquals(setOf(service2, service3), awaitItem())
+            assertEquals(setOf(service2, service3, service4), awaitItem())
+            assertEquals(setOf(service3, service4), awaitItem())
             ensureAllEventsConsumed()
         }
-        assertEquals(listOf("3", "4"), handle[STATE_KEY_EXPANDED_SERVICES])
+        assertEquals(
+            listOf(parcelableService3, parcelableService4),
+            handle[STATE_KEY_EXPANDED_SERVICES]
+        )
     }
+
+    private val service1 get() = FakeServiceDescriptor(
+        serviceName = "1",
+        operatorCode = "TEST1"
+    )
+
+    private val service2 get() = FakeServiceDescriptor(
+        serviceName = "2",
+        operatorCode = "TEST2"
+    )
+
+    private val service3 get() = FakeServiceDescriptor(
+        serviceName = "3",
+        operatorCode = "TEST3"
+    )
+
+    private val service4 get() = FakeServiceDescriptor(
+        serviceName = "4",
+        operatorCode = "TEST4"
+    )
+
+    private val parcelableService1 get() = ParcelableServiceDescriptor(
+        serviceName = "1",
+        operatorCode = "TEST1"
+    )
+
+    private val parcelableService2 get() = ParcelableServiceDescriptor(
+        serviceName = "2",
+        operatorCode = "TEST2"
+    )
+
+    private val parcelableService3 get() = ParcelableServiceDescriptor(
+        serviceName = "3",
+        operatorCode = "TEST3"
+    )
+
+    private val parcelableService4 get() = ParcelableServiceDescriptor(
+        serviceName = "4",
+        operatorCode = "TEST4"
+    )
 }

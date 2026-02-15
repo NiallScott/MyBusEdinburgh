@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,20 +26,20 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.database
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlin.time.Instant
 
 /**
  * This Room [Entity] contains some database metadata.
  *
  * @property id The row's ID.
- * @property topologyId The database topology ID.
  * @property updateTimestamp The timestamp of the data this database represents.
  * @author Niall Scott
  */
 @Entity(tableName = "database_info")
 internal data class RoomDatabaseInfoEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int,
-    val topologyId: String?,
-    val updateTimestamp: Long
+    @PrimaryKey val id: Int,
+    @ColumnInfo("update_timestamp") val updateTimestamp: Instant
 )

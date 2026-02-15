@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,8 @@ package uk.org.rivernile.android.bustracker.ui.favouritestops
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import kotlinx.coroutines.test.runTest
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableNaptanStopIdentifier
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -57,9 +59,21 @@ class RealStateTest {
 
         state.actionFlow.test {
             assertNull(awaitItem())
-            state.action = UiAction.ShowStopData(stopCode = "123456")
-            assertEquals(UiAction.ShowStopData(stopCode = "123456"), awaitItem())
-            assertEquals(UiAction.ShowStopData(stopCode = "123456"), state.action)
+            state.action = UiAction.ShowStopData(
+                stopIdentifier = "123456".toNaptanStopIdentifier()
+            )
+            assertEquals(
+                UiAction.ShowStopData(
+                    stopIdentifier = "123456".toNaptanStopIdentifier()
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                UiAction.ShowStopData(
+                    stopIdentifier = "123456".toNaptanStopIdentifier()
+                ),
+                state.action
+            )
             state.action = null
             assertNull(awaitItem())
             assertNull(state.action)
@@ -68,47 +82,47 @@ class RealStateTest {
     }
 
     @Test
-    fun selectedStopCodeIsNullByDefault() = runTest {
+    fun selectedStopIdentifierIsNullByDefault() = runTest {
         val state = createState()
 
-        state.selectedStopCodeFlow.test {
+        state.selectedStopIdentifierFlow.test {
             assertNull(awaitItem())
             ensureAllEventsConsumed()
         }
-        assertNull(state.selectedStopCode)
+        assertNull(state.selectedStopIdentifier)
     }
 
     @Test
-    fun selectedStopCodeIsMutatedToTheCorrectValue() = runTest {
+    fun selectedStopIdentifierIsMutatedToTheCorrectValue() = runTest {
         val state = createState()
 
-        state.selectedStopCodeFlow.test {
+        state.selectedStopIdentifierFlow.test {
             assertNull(awaitItem())
-            state.selectedStopCode = "123456"
-            assertEquals("123456", awaitItem())
-            assertEquals("123456", state.selectedStopCode)
-            state.selectedStopCode = null
+            state.selectedStopIdentifier = "123456".toNaptanStopIdentifier()
+            assertEquals("123456".toNaptanStopIdentifier(), awaitItem())
+            assertEquals("123456".toNaptanStopIdentifier(), state.selectedStopIdentifier)
+            state.selectedStopIdentifier = null
             assertNull(awaitItem())
-            assertNull(state.selectedStopCode)
+            assertNull(state.selectedStopIdentifier)
             ensureAllEventsConsumed()
         }
     }
 
     @Test
-    fun selectedStopCodeIsInstantiatedToValueOfSavedState() = runTest {
+    fun selectedStopIdentifierIsInstantiatedToValueOfSavedState() = runTest {
         val state = createState(
             savedState = SavedStateHandle(
                 initialState = mapOf(
-                    STATE_SELECTED_STOP_CODE to "123456"
+                    STATE_SELECTED_STOP_IDENTIFIER to "123456".toParcelableNaptanStopIdentifier()
                 )
             )
         )
 
-        state.selectedStopCodeFlow.test {
-            assertEquals("123456", awaitItem())
+        state.selectedStopIdentifierFlow.test {
+            assertEquals("123456".toNaptanStopIdentifier(), awaitItem())
             ensureAllEventsConsumed()
         }
-        assertEquals("123456", state.selectedStopCode)
+        assertEquals("123456".toNaptanStopIdentifier(), state.selectedStopIdentifier)
     }
 
     private fun createState(

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,11 @@ import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toStopIdentifier
 import javax.inject.Inject
 
 /**
@@ -52,17 +57,17 @@ internal interface State {
     var action: UiAction?
 
     /**
-     * A [Flow] which emits the currently selected stop code.
+     * A [Flow] which emits the currently selected stop identifier.
      */
-    val selectedStopCodeFlow: Flow<String?>
+    val selectedStopIdentifierFlow: Flow<StopIdentifier?>
 
     /**
-     * A property which gets and sets the currently selected stop code.
+     * A property which gets and sets the currently selected stop identifier.
      */
-    var selectedStopCode: String?
+    var selectedStopIdentifier: StopIdentifier?
 }
 
-internal const val STATE_SELECTED_STOP_CODE = "selectedStopCode"
+internal const val STATE_SELECTED_STOP_IDENTIFIER = "selectedStopIdentifier"
 
 @ViewModelScoped
 internal class RealState @Inject constructor(
@@ -79,15 +84,20 @@ internal class RealState @Inject constructor(
             _actionFlow.value = value
         }
 
-    override val selectedStopCodeFlow = savedState
-        .getStateFlow<String?>(
-            key = STATE_SELECTED_STOP_CODE,
+    override val selectedStopIdentifierFlow get() = _selectedStopIdentifierFlow
+        .map { it?.toStopIdentifier() }
+
+    override var selectedStopIdentifier: StopIdentifier?
+        get() = savedState
+            .get<ParcelableStopIdentifier>(STATE_SELECTED_STOP_IDENTIFIER)
+            ?.toStopIdentifier()
+        set(value) {
+            savedState[STATE_SELECTED_STOP_IDENTIFIER] = value?.toParcelableStopIdentifier()
+        }
+
+    private val _selectedStopIdentifierFlow = savedState
+        .getStateFlow<ParcelableStopIdentifier?>(
+            key = STATE_SELECTED_STOP_IDENTIFIER,
             initialValue = null
         )
-
-    override var selectedStopCode: String?
-        get() = savedState[STATE_SELECTED_STOP_CODE]
-        set(value) {
-            savedState[STATE_SELECTED_STOP_CODE] = value
-        }
 }

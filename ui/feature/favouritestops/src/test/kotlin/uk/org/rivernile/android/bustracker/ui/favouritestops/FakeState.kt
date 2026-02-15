@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
 import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
  * A fake [State] for testing.
@@ -37,9 +38,12 @@ internal class FakeState(
     private val onActionFlow: () -> Flow<UiAction?> = { throw NotImplementedError() },
     private val onGetAction: () -> UiAction? = { throw NotImplementedError() },
     private val onSetAction: (UiAction?) -> Unit = { throw NotImplementedError() },
-    private val onSelectedStopCodeFlow: () -> Flow<String?> = { throw NotImplementedError() },
-    private val onGetSelectedStopCode: () -> String? = { throw NotImplementedError() },
-    private val onSetSelectedStopCode: (String?) -> Unit = { throw NotImplementedError() }
+    private val onSelectedStopIdentifierFlow: () -> Flow<StopIdentifier?> =
+        { throw NotImplementedError() },
+    private val onGetSelectedStopIdentifier: () -> StopIdentifier? =
+        { throw NotImplementedError() },
+    private val onSetSelectedStopIdentifier: (StopIdentifier?) -> Unit =
+        { throw NotImplementedError() }
 ) : State {
 
     override val actionFlow get() = onActionFlow()
@@ -50,11 +54,11 @@ internal class FakeState(
             onSetAction(value)
         }
 
-    override val selectedStopCodeFlow get() = onSelectedStopCodeFlow()
+    override val selectedStopIdentifierFlow get() = onSelectedStopIdentifierFlow()
 
-    override var selectedStopCode: String?
-        get() = onGetSelectedStopCode()
+    override var selectedStopIdentifier: StopIdentifier?
+        get() = onGetSelectedStopIdentifier()
         set(value) {
-            onSetSelectedStopCode(value)
+            onSetSelectedStopIdentifier(value)
         }
 }

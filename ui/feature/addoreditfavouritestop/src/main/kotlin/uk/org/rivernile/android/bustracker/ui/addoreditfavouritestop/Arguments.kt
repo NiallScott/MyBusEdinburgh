@@ -29,6 +29,10 @@ package uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop
 import androidx.lifecycle.SavedStateHandle
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toStopIdentifier
 import javax.inject.Inject
 
 /**
@@ -39,28 +43,33 @@ import javax.inject.Inject
 internal interface Arguments {
 
     /**
-     * The supplied stop code.
+     * The supplied stop identifier.
      */
-    val stopCode: String?
+    val stopIdentifier: StopIdentifier?
 
     /**
-     * The supplied stop code as a [Flow].
+     * The supplied stop identifier as a [Flow].
      */
-    val stopCodeFlow: Flow<String?>
+    val stopIdentifierFlow: Flow<StopIdentifier?>
 }
 
-internal const val ARG_STOP_CODE = "stopCode"
+internal const val ARG_STOP_IDENTIFIER = "stopIdentifier"
 
 @ViewModelScoped
 internal class RealArguments @Inject constructor(
     private val savedState: SavedStateHandle
 ) : Arguments {
 
-    override val stopCode: String? get() = savedState[ARG_STOP_CODE]
+    override val stopIdentifier: StopIdentifier? get() = savedState
+        .get<ParcelableStopIdentifier>(ARG_STOP_IDENTIFIER)
+        ?.toStopIdentifier()
 
-    override val stopCodeFlow = savedState
-        .getStateFlow<String?>(
-            key = ARG_STOP_CODE,
+    override val stopIdentifierFlow get() = _stopIdentifierFlow
+        .map { it?.toStopIdentifier() }
+
+    private val _stopIdentifierFlow = savedState
+        .getStateFlow<ParcelableStopIdentifier?>(
+            key = ARG_STOP_IDENTIFIER,
             initialValue = null
         )
 }

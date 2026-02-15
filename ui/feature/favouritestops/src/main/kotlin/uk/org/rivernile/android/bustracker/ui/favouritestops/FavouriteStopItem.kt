@@ -60,6 +60,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.text.SmallDecoratedServiceNamesListingText
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
@@ -337,7 +338,7 @@ private class UiFavouriteStopProvider : PreviewParameterProvider<UiFavouriteStop
 
     override val values = sequenceOf(
         UiFavouriteStop(
-            stopCode = "12345678",
+            stopIdentifier = "12345678".toNaptanStopIdentifier(),
             savedName = "My favourite stop",
             services = persistentListOf(
                 UiServiceName(
@@ -365,7 +366,7 @@ private class UiFavouriteStopProvider : PreviewParameterProvider<UiFavouriteStop
             dropdownMenu = null
         ),
         UiFavouriteStop(
-            stopCode = "12345678",
+            stopIdentifier = "12345678".toNaptanStopIdentifier(),
             savedName = "My favourite stop",
             services = persistentListOf(
                 UiServiceName(
@@ -393,7 +394,7 @@ private class UiFavouriteStopProvider : PreviewParameterProvider<UiFavouriteStop
             dropdownMenu = UiFavouriteDropdownMenu()
         ),
         UiFavouriteStop(
-            stopCode = "12345678",
+            stopIdentifier = "12345678".toNaptanStopIdentifier(),
             savedName = "My favourite stop",
             services = null,
             dropdownMenu = UiFavouriteDropdownMenu()

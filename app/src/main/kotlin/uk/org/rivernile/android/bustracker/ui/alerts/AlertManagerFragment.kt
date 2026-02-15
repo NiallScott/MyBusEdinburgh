@@ -41,6 +41,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
@@ -188,20 +189,20 @@ class AlertManagerFragment : Fragment(), HasScrollableContent {
     /**
      * Show the UI where the user can confirm their remove of the arrival alert for the given stop.
      *
-     * @param stopCode The stop code to remove the proximity alert for.
+     * @param stopIdentifier The stop to remove the proximity alert for.
      */
-    private fun showRemoveArrivalAlertDialog(stopCode: String) {
-        callbacks.onShowConfirmRemoveArrivalAlert(stopCode)
+    private fun showRemoveArrivalAlertDialog(stopIdentifier: StopIdentifier) {
+        callbacks.onShowConfirmRemoveArrivalAlert(stopIdentifier)
     }
 
     /**
      * Show the UI where the user can confirm their removal of the proximity alert for the given
      * stop.
      *
-     * @param stopCode The stop code to remove the proximity alert for.
+     * @param stopIdentifier The stop to remove the proximity alert for.
      */
-    private fun showRemoveProximityAlertDialog(stopCode: String) {
-        callbacks.onShowConfirmRemoveProximityAlert(stopCode)
+    private fun showRemoveProximityAlertDialog(stopIdentifier: StopIdentifier) {
+        callbacks.onShowConfirmRemoveProximityAlert(stopIdentifier)
     }
 
     private val alertItemClickListener = object : OnAlertItemClickListener {
@@ -209,12 +210,12 @@ class AlertManagerFragment : Fragment(), HasScrollableContent {
             viewModel.onShowLocationSettingsClicked()
         }
 
-        override fun onRemoveArrivalAlertClicked(stopCode: String) {
-            viewModel.onRemoveArrivalAlertClicked(stopCode)
+        override fun onRemoveArrivalAlertClicked(stopIdentifier: StopIdentifier) {
+            viewModel.onRemoveArrivalAlertClicked(stopIdentifier)
         }
 
-        override fun onRemoveProximityAlertClicked(stopCode: String) {
-            viewModel.onRemoveProximityAlertClicked(stopCode)
+        override fun onRemoveProximityAlertClicked(stopIdentifier: StopIdentifier) {
+            viewModel.onRemoveProximityAlertClicked(stopIdentifier)
         }
     }
 

@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.favourites.FakeFavouritesRepository
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
@@ -88,7 +89,7 @@ class AddOrEditFavouriteStopViewModelTest {
                         delay(1L)
                         emit(
                             UiContent.Mode.Add(
-                                stopCode = "123456",
+                                stopIdentifier = "123456".toNaptanStopIdentifier(),
                                 stopName = null,
                                 isPositiveButtonEnabled = false
                             )
@@ -96,7 +97,7 @@ class AddOrEditFavouriteStopViewModelTest {
                         delay(1L)
                         emit(
                             UiContent.Mode.Edit(
-                                stopCode = "123456",
+                                stopIdentifier = "123456".toNaptanStopIdentifier(),
                                 stopName = null,
                                 isPositiveButtonEnabled = true,
                                 savedName = "Saved Name"
@@ -118,7 +119,7 @@ class AddOrEditFavouriteStopViewModelTest {
             assertEquals(
                 UiState(
                     content = UiContent.Mode.Add(
-                        stopCode = "123456",
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         stopName = null,
                         isPositiveButtonEnabled = false
                     ),
@@ -129,7 +130,7 @@ class AddOrEditFavouriteStopViewModelTest {
             assertEquals(
                 UiState(
                     content = UiContent.Mode.Edit(
-                        stopCode = "123456",
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         stopName = null,
                         isPositiveButtonEnabled = true,
                         savedName = "Saved Name"
@@ -141,7 +142,7 @@ class AddOrEditFavouriteStopViewModelTest {
             assertEquals(
                 UiState(
                     content = UiContent.Mode.Edit(
-                        stopCode = "123456",
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         stopName = null,
                         isPositiveButtonEnabled = true,
                         savedName = "Saved Name"
@@ -196,7 +197,7 @@ class AddOrEditFavouriteStopViewModelTest {
     fun onAddButtonClickedShouldNotAddOrUpdateFavouriteStopWhenNameIsNull() = runTest {
         val viewModel = createViewModel(
             arguments = FakeArguments(
-                onGetStopCode = { "123456" }
+                onGetStopIdentifier = { "123456".toNaptanStopIdentifier() }
             ),
             state = FakeState(
                 onGetStopNameText = { null },
@@ -219,7 +220,7 @@ class AddOrEditFavouriteStopViewModelTest {
     fun onAddButtonClickedShouldNotAddOrUpdateFavouriteStopWhenNameIsEmpty() = runTest {
         val viewModel = createViewModel(
             arguments = FakeArguments(
-                onGetStopCode = { "123456" }
+                onGetStopIdentifier = { "123456".toNaptanStopIdentifier() }
             ),
             state = FakeState(
                 onGetStopNameText = { "" },
@@ -239,33 +240,10 @@ class AddOrEditFavouriteStopViewModelTest {
     }
 
     @Test
-    fun onAddButtonClickedShouldNotAddOrUpdateFavouriteStopWhenStopCodeIsNull() = runTest {
+    fun onAddButtonClickedShouldNotAddOrUpdateFavouriteStopWhenStopIdentifierIsNull() = runTest {
         val viewModel = createViewModel(
             arguments = FakeArguments(
-                onGetStopCode = { null }
-            ),
-            state = FakeState(
-                onGetStopNameText = { "Stop Name" },
-                onActionFlow = { emptyFlow() }
-            ),
-            uiContentFetcher = FakeUiContentFetcher(
-                onUiContentFlow = { emptyFlow() }
-            ),
-            favouritesRepository = FakeFavouritesRepository(
-                onAddOrUpdateFavouriteStop = {
-                    fail("Not expecting addOrUpdateFavouriteStop() to be called.")
-                }
-            )
-        )
-
-        viewModel.onAddButtonClicked()
-    }
-
-    @Test
-    fun onAddButtonClickedShouldNotAddOrUpdateFavouriteStopWhenStopCodeIsEmpty() = runTest {
-        val viewModel = createViewModel(
-            arguments = FakeArguments(
-                onGetStopCode = { "" }
+                onGetStopIdentifier = { null }
             ),
             state = FakeState(
                 onGetStopNameText = { "Stop Name" },
@@ -290,7 +268,7 @@ class AddOrEditFavouriteStopViewModelTest {
         val updatedShortcuts = mutableListOf<FavouriteStopShortcut>()
         val viewModel = createViewModel(
             arguments = FakeArguments(
-                onGetStopCode = { "123456" }
+                onGetStopIdentifier = { "123456".toNaptanStopIdentifier() }
             ),
             state = FakeState(
                 onGetStopNameText = { "Stop Name" },
@@ -316,7 +294,7 @@ class AddOrEditFavouriteStopViewModelTest {
         assertEquals(
             listOf(
                 FavouriteStop(
-                    stopCode = "123456",
+                    stopIdentifier = "123456".toNaptanStopIdentifier(),
                     stopName = "Stop Name"
                 )
             ),
@@ -325,7 +303,7 @@ class AddOrEditFavouriteStopViewModelTest {
         assertEquals(
             listOf(
                 FavouriteStopShortcut(
-                    stopCode = "123456",
+                    stopIdentifier = "123456".toNaptanStopIdentifier(),
                     displayName = "Stop Name"
                 )
             ),
@@ -337,7 +315,7 @@ class AddOrEditFavouriteStopViewModelTest {
     fun onKeyboardActionButtonPressedShouldNotAddOrUpdateFavouriteStopWhenNameIsNull() = runTest {
         val viewModel = createViewModel(
             arguments = FakeArguments(
-                onGetStopCode = { "123456" }
+                onGetStopIdentifier = { "123456".toNaptanStopIdentifier() }
             ),
             state = FakeState(
                 onGetStopNameText = { null },
@@ -363,7 +341,7 @@ class AddOrEditFavouriteStopViewModelTest {
     fun onKeyboardActionButtonPressedShouldNotAddOrUpdateFavouriteStopWhenNameIsEmpty() = runTest {
         val viewModel = createViewModel(
             arguments = FakeArguments(
-                onGetStopCode = { "123456" }
+                onGetStopIdentifier = { "123456".toNaptanStopIdentifier() }
             ),
             state = FakeState(
                 onGetStopNameText = { "" },
@@ -386,47 +364,12 @@ class AddOrEditFavouriteStopViewModelTest {
     }
 
     @Test
-    fun onKeyboardActionButtonPressedShouldNotAddOrUpdateFavouriteStopWhenStopCodeIsNull() =
+    fun onKeyboardActionButtonPressedShouldNotAddOrUpdateFavouriteStopWhenStopIdentifierIsNull() =
         runTest {
             val actions = mutableListOf<UiAction?>()
             val viewModel = createViewModel(
                 arguments = FakeArguments(
-                    onGetStopCode = { null }
-                ),
-                state = FakeState(
-                    onGetStopNameText = { "Stop Name" },
-                    onSetAction = {
-                        actions += it
-                    },
-                    onActionFlow = { emptyFlow() }
-                ),
-                uiContentFetcher = FakeUiContentFetcher(
-                    onUiContentFlow = { emptyFlow() }
-                ),
-                favouritesRepository = FakeFavouritesRepository(
-                    onAddOrUpdateFavouriteStop = {
-                        fail("Not expecting addOrUpdateFavouriteStop() to be called.")
-                    }
-                )
-            )
-
-            viewModel.onKeyboardActionButtonPressed()
-
-            assertEquals(
-                listOf<UiAction?>(
-                    UiAction.DismissDialog
-                ),
-                actions
-            )
-        }
-
-    @Test
-    fun onKeyboardActionButtonPressedShouldNotAddOrUpdateFavouriteStopWhenStopCodeIsEmpty() =
-        runTest {
-            val actions = mutableListOf<UiAction?>()
-            val viewModel = createViewModel(
-                arguments = FakeArguments(
-                    onGetStopCode = { "" }
+                    onGetStopIdentifier = { null }
                 ),
                 state = FakeState(
                     onGetStopNameText = { "Stop Name" },
@@ -462,7 +405,7 @@ class AddOrEditFavouriteStopViewModelTest {
         val actions = mutableListOf<UiAction?>()
         val viewModel = createViewModel(
             arguments = FakeArguments(
-                onGetStopCode = { "123456" }
+                onGetStopIdentifier = { "123456".toNaptanStopIdentifier() }
             ),
             state = FakeState(
                 onGetStopNameText = { "Stop Name" },
@@ -491,7 +434,7 @@ class AddOrEditFavouriteStopViewModelTest {
         assertEquals(
             listOf(
                 FavouriteStop(
-                    stopCode = "123456",
+                    stopIdentifier = "123456".toNaptanStopIdentifier(),
                     stopName = "Stop Name"
                 )
             ),
@@ -500,7 +443,7 @@ class AddOrEditFavouriteStopViewModelTest {
         assertEquals(
             listOf(
                 FavouriteStopShortcut(
-                    stopCode = "123456",
+                    stopIdentifier = "123456".toNaptanStopIdentifier(),
                     displayName = "Stop Name"
                 )
             ),

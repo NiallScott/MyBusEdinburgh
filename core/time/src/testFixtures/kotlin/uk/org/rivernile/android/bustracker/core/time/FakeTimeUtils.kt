@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,14 +26,19 @@
 
 package uk.org.rivernile.android.bustracker.core.time
 
+import kotlin.time.Instant
+
 /**
  * A fake [TimeUtils] used in testing.
  *
  * @author Niall Scott
  */
 class FakeTimeUtils(
-    private val onGetCurrentTimeMillis: () -> Long = { throw NotImplementedError() }
+    private val onGetCurrentTimeMillis: () -> Long = { throw NotImplementedError() },
+    private val onNow: () -> Instant = { throw NotImplementedError() }
 ) : TimeUtils {
 
     override val currentTimeMills get() = onGetCurrentTimeMillis()
+
+    override val now get() = onNow()
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint
 
 import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 
 /**
  * A fake [ServicePointDao] for testing.
@@ -34,10 +35,10 @@ import kotlinx.coroutines.flow.Flow
  * @author Niall Scott
  */
 class FakeServicePointDao(
-    private val onGetServicePointsFlow: (Set<String>?) -> Flow<List<ServicePoint>?> =
+    private val onGetServicePointsFlow: (Set<ServiceDescriptor>?) -> Flow<List<ServicePoint>?> =
         { throw NotImplementedError() }
 ) : ServicePointDao {
 
-    override fun getServicePointsFlow(serviceNames: Set<String>?) =
-        onGetServicePointsFlow(serviceNames)
+    override fun getServicePointsFlow(services: Set<ServiceDescriptor>?) =
+        onGetServicePointsFlow(services)
 }

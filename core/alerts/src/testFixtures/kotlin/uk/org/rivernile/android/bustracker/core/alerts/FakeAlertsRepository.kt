@@ -29,6 +29,7 @@ package uk.org.rivernile.android.bustracker.core.alerts
 import kotlinx.coroutines.flow.Flow
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRequest
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertRequest
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
  * A fake [AlertsRepository] for testing.
@@ -42,19 +43,20 @@ class FakeAlertsRepository(
     private val onRemoveProximityAlertWithId: (Int) -> Unit = { throw NotImplementedError() },
     private val onRemoveAllProximityAlerts: () -> Unit = { throw NotImplementedError() },
     private val onGetAllArrivalAlerts: () -> List<ArrivalAlert>? = { throw NotImplementedError() },
-    private val onGetAllArrivalAlertStopCodes: () -> Set<String>? = { throw NotImplementedError() },
+    private val onGetAllArrivalAlertStops: () -> Set<StopIdentifier>? =
+        { throw NotImplementedError() },
     private val onGetProximityAlert: (Int) -> ProximityAlert? = { throw NotImplementedError() },
-    private val onHasArrivalAlertFlow: (String) -> Flow<Boolean> = { throw NotImplementedError() },
-    private val onHasProximityAlertFlow: (String) -> Flow<Boolean> =
+    private val onHasArrivalAlertFlow: (StopIdentifier) -> Flow<Boolean> = { throw NotImplementedError() },
+    private val onHasProximityAlertFlow: (StopIdentifier) -> Flow<Boolean> =
         { throw NotImplementedError() },
     private val onGetArrivalAlertCount: () -> Int = { throw NotImplementedError() },
     private val onGetProximityAlertCount: () -> Int = { throw NotImplementedError() },
     private val onArrivalAlertCountFlow: () -> Flow<Int> = { throw NotImplementedError() },
-    private val onArrivalAlertStopCodesFlow: () -> Flow<Set<String>?> =
+    private val onArrivalAlertStopIdentifiersFlow: () -> Flow<Set<StopIdentifier>?> =
         { throw NotImplementedError() },
     private val onAllProximityAlertsFlow: () -> Flow<List<ProximityAlert>?> =
         { throw NotImplementedError() },
-    private val onProximityAlertStopCodesFlow: () -> Flow<Set<String>?> =
+    private val onProximityAlertStopIdentifiersFlow: () -> Flow<Set<StopIdentifier>?> =
         { throw NotImplementedError() },
     private val onEnsureTasksRunning: () -> Unit = { throw NotImplementedError() }
 ) : AlertsRepository {
@@ -67,7 +69,7 @@ class FakeAlertsRepository(
         throw NotImplementedError()
     }
 
-    override suspend fun removeArrivalAlert(stopCode: String) {
+    override suspend fun removeArrivalAlert(stopIdentifier: StopIdentifier) {
         throw NotImplementedError()
     }
 
@@ -79,7 +81,7 @@ class FakeAlertsRepository(
         onRemoveAllArrivalAlerts()
     }
 
-    override suspend fun removeProximityAlert(stopCode: String) {
+    override suspend fun removeProximityAlert(stopIdentifier: StopIdentifier) {
         throw NotImplementedError()
     }
 
@@ -93,13 +95,15 @@ class FakeAlertsRepository(
 
     override suspend fun getAllArrivalAlerts() = onGetAllArrivalAlerts()
 
-    override suspend fun getAllArrivalAlertStopCodes() = onGetAllArrivalAlertStopCodes()
+    override suspend fun getAllArrivalAlertStops() = onGetAllArrivalAlertStops()
 
     override suspend fun getProximityAlert(id: Int) = onGetProximityAlert(id)
 
-    override fun hasArrivalAlertFlow(stopCode: String) = onHasArrivalAlertFlow(stopCode)
+    override fun hasArrivalAlertFlow(stopIdentifier: StopIdentifier) =
+        onHasArrivalAlertFlow(stopIdentifier)
 
-    override fun hasProximityAlertFlow(stopCode: String) = onHasProximityAlertFlow(stopCode)
+    override fun hasProximityAlertFlow(stopIdentifier: StopIdentifier) =
+        onHasProximityAlertFlow(stopIdentifier)
 
     override suspend fun getArrivalAlertCount() = onGetArrivalAlertCount()
 
@@ -107,11 +111,11 @@ class FakeAlertsRepository(
 
     override val arrivalAlertCountFlow get() = onArrivalAlertCountFlow()
 
-    override val arrivalAlertStopCodesFlow get() = onArrivalAlertStopCodesFlow()
+    override val arrivalAlertStopIdentifiersFlow get() = onArrivalAlertStopIdentifiersFlow()
 
     override val allProximityAlertsFlow get() = onAllProximityAlertsFlow()
 
-    override val proximityAlertStopCodesFlow get() = onProximityAlertStopCodesFlow()
+    override val proximityAlertStopIdentifiersFlow get() = onProximityAlertStopIdentifiersFlow()
 
     override val allAlertsFlow: Flow<List<Alert>?>
         get() = throw NotImplementedError()

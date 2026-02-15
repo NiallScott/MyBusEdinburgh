@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,6 +30,7 @@ import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import javax.inject.Inject
 
@@ -90,14 +91,14 @@ class LiveTimesTransform @Inject constructor(
      * @param result The [UiResult] from upstream.
      * @param sortByTime Whether the services should be sorted by time (or by service name).
      * @param showNightServices Whether night services should be shown.
-     * @param expandedServices A [Set] containing the names of expanded services.
+     * @param expandedServices A [Set] containing the descriptors of expanded services.
      * @return The produced [UiTransformedResult].
      */
     private fun transformResult(
         result: UiResult,
         sortByTime: Boolean,
         showNightServices: Boolean,
-        expandedServices: Set<String>
+        expandedServices: Set<ServiceDescriptor>
     ): UiTransformedResult {
         return when (result) {
             is UiResult.InProgress -> UiTransformedResult.InProgress
@@ -105,7 +106,8 @@ class LiveTimesTransform @Inject constructor(
                 result,
                 sortByTime,
                 showNightServices,
-                expandedServices)
+                expandedServices
+            )
             is UiResult.Error -> mapError(result)
         }
     }
@@ -120,14 +122,14 @@ class LiveTimesTransform @Inject constructor(
      * @param success The upstream [UiResult.Success].
      * @param sortByTime Whether the services should be sorted by time (or by service name).
      * @param showNightServices Whether night services should be shown.
-     * @param expandedServices A [Set] containing the names of expanded services.
+     * @param expandedServices A [Set] containing the descriptors of expanded services.
      * @return The calculated [UiTransformedResult].
      */
     private fun mapSuccess(
         success: UiResult.Success,
         sortByTime: Boolean,
         showNightServices: Boolean,
-        expandedServices: Set<String>
+        expandedServices: Set<ServiceDescriptor>
     ): UiTransformedResult {
         return success
             .stop

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,7 @@ package uk.org.rivernile.android.bustracker.core.database.busstop
 import kotlinx.coroutines.flow.Flow
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseMetadata
 import java.io.File
+import kotlin.time.Instant
 
 /**
  * A fake [BusStopDatabaseRepository] to be used in testing.
@@ -39,12 +40,12 @@ class FakeBusStopDatabaseRepository(
     private val onReplaceDatabase: (File) -> Boolean = { throw NotImplementedError() },
     private val onDatabaseMetadataFlow:
         () -> Flow<DatabaseMetadata?> = { throw NotImplementedError() },
-    private val onGetTopologyVersionId: () -> String? = { throw NotImplementedError() }
+    private val onGetDatabaseUpdateTimestamp: () -> Instant? = { throw NotImplementedError() }
 ) : BusStopDatabaseRepository {
 
     override suspend fun replaceDatabase(newDatabase: File) = onReplaceDatabase(newDatabase)
 
     override val databaseMetadataFlow get() = onDatabaseMetadataFlow()
 
-    override suspend fun getTopologyVersionId() = onGetTopologyVersionId()
+    override suspend fun getDatabaseUpdateTimestamp() = onGetDatabaseUpdateTimestamp()
 }

@@ -25,11 +25,9 @@
  */
 
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose.compiler)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
+    id("mybus.android-library")
+    id("mybus.android-compose")
+    id("mybus.hilt-convention")
 }
 
 android {
@@ -57,10 +55,6 @@ android {
             enableAndroidTestCoverage = true
         }
     }
-
-    buildFeatures {
-        compose = true
-    }
 }
 
 kotlin {
@@ -70,6 +64,7 @@ kotlin {
 dependencies {
 
     implementation(project(":core:alerts-android"))
+    implementation(project(":core:core-domain-android"))
     implementation(project(":core:coroutines-android"))
     implementation(project(":core:favourites-android"))
     implementation(project(":core:feature"))
@@ -85,12 +80,7 @@ dependencies {
     implementation(libs.androidx.fragment.compose)
     implementation(libs.androidx.viewmodel.compose)
 
-    // Hilt (dependency injection)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
-
     // Compose
-    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
@@ -117,6 +107,7 @@ dependencies {
     }
 
     testImplementation(testFixtures(project(":core:alerts")))
+    testImplementation(testFixtures(project(":core:core-domain")))
     testImplementation(testFixtures(project(":core:favourites")))
     testImplementation(testFixtures(project(":core:feature")))
     testImplementation(testFixtures(project(":core:services")))

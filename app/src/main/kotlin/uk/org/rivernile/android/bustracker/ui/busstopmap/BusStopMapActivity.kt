@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,6 +40,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.android.bustracker.ui.HasScrollableContent
 import uk.org.rivernile.edinburghbustracker.android.R
@@ -96,7 +100,9 @@ class BusStopMapActivity : AppCompatActivity(), BusStopMapFragment.Callbacks {
         if (savedInstanceState == null) {
             when {
                 intent.hasExtra(EXTRA_STOP_CODE) ->
-                    BusStopMapFragment.newInstance(intent.getStringExtra(EXTRA_STOP_CODE))
+                    BusStopMapFragment.newInstance(
+                        intent.getStringExtra(EXTRA_STOP_CODE)?.toParcelableNaptanStopIdentifier()
+                    )
                 intent.hasExtra(EXTRA_LATITUDE) && intent.hasExtra(EXTRA_LONGITUDE) -> {
                     val location = UiLatLon(
                         intent.getDoubleExtra(EXTRA_LATITUDE, 0.0),
@@ -120,7 +126,7 @@ class BusStopMapActivity : AppCompatActivity(), BusStopMapFragment.Callbacks {
             when {
                 intent.hasExtra(EXTRA_STOP_CODE) -> {
                     intent.getStringExtra(EXTRA_STOP_CODE)?.ifBlank { null }?.let {
-                        onNewStopCode(it)
+                        onNewStopIdentifier(it.toNaptanStopIdentifier())
                         setIntent(intent)
                     }
                 }
@@ -136,9 +142,12 @@ class BusStopMapActivity : AppCompatActivity(), BusStopMapFragment.Callbacks {
         }
     }
 
-    override fun onShowBusTimes(stopCode: String) {
+    override fun onShowBusTimes(stopIdentifier: StopIdentifier) {
         Intent(this, DisplayStopDataActivity::class.java)
-            .putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
+            .putExtra(
+                DisplayStopDataActivity.EXTRA_STOP_CODE,
+                stopIdentifier.toNaptanStopCodeOrThrow()
+            )
             .let(this::startActivity)
     }
 
@@ -152,6 +161,14 @@ class BusStopMapActivity : AppCompatActivity(), BusStopMapFragment.Callbacks {
         override fun onFragmentResumed(fm: FragmentManager, f: Fragment) {
             viewBinding.appBarLayout.liftOnScrollTargetViewId =
                 (f as? HasScrollableContent)?.scrollableContentIdRes ?: View.NO_ID
+        }
+    }
+
+    private fun StopIdentifier.toNaptanStopCodeOrThrow(): String {
+        return if (this is NaptanStopIdentifier) {
+            naptanStopCode
+        } else {
+            throw UnsupportedOperationException("Only Naptan codes are supported for now.")
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,37 +26,46 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import uk.org.rivernile.android.bustracker.core.domain.AtcoStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
 
 /**
  * This Room [Entity] represents a stop.
  *
  * @property id The ID of the stop.
- * @property stopCode The stop code.
- * @property stopName The name of the stop.
+ * @property naptanCode The stop Naptan code.
+ * @property atcoCode The stop ATCO code.
+ * @property name The name of the stop.
+ * @property locality The locality of the stop.
  * @property latitude The latitude of the stop.
  * @property longitude The longitude of the stop.
- * @property orientation The orientation of the stop.
- * @property locality The locality of the stop.
+ * @property bearing The bearing of the stop.
  * @author Niall Scott
  */
 @Entity(
-    tableName = "bus_stop",
+    tableName = "stop",
     indices = [
         Index(
-            name = "bus_stop_index",
-            value = [ "stopCode" ]
+            name = "stop_naptan_code_index",
+            value = [ "naptan_code" ]
+        ),
+        Index(
+            name = "stop_atco_code_index",
+            value = [ "atco_code" ]
         )
     ]
 )
 internal data class RoomStopEntity(
     @PrimaryKey val id: Int,
-    val stopCode: String,
-    val stopName: String,
-    val latitude: Double?,
-    val longitude: Double?,
-    val orientation: Int?,
-    val locality: String?
+    @ColumnInfo("naptan_code") val naptanCode: NaptanStopIdentifier,
+    @ColumnInfo("atco_code") val atcoCode: AtcoStopIdentifier,
+    val name: String,
+    val locality: String?,
+    val latitude: Double,
+    val longitude: Double,
+    val bearing: String?
 )

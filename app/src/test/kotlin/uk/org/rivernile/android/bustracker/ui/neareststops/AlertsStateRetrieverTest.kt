@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,6 +34,7 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -110,20 +111,10 @@ class AlertsStateRetrieverTest {
     }
 
     @Test
-    fun getHasArrivalAlertFlowEmitsNullWhenStopCodeIsNull() = runTest {
-        val stopCodeFlow = flowOf(null)
+    fun getHasArrivalAlertFlowEmitsNullWhenStopIdentifierIsNull() = runTest {
+        val stopIdentifierFlow = flowOf(null)
 
-        retriever.getHasArrivalAlertFlow(stopCodeFlow).test {
-            assertNull(awaitItem())
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun getHasArrivalAlertFlowEmitsNullWhenStopCodeIsEmpty() = runTest {
-        val stopCodeFlow = flowOf("")
-
-        retriever.getHasArrivalAlertFlow(stopCodeFlow).test {
+        retriever.getHasArrivalAlertFlow(stopIdentifierFlow).test {
             assertNull(awaitItem())
             awaitComplete()
         }
@@ -131,11 +122,11 @@ class AlertsStateRetrieverTest {
 
     @Test
     fun getHasArrivalAlertFlowEmitsValuesFromAlertsRepository() = runTest {
-        val stopCodeFlow = flowOf("123456")
-        whenever(alertsRepository.hasArrivalAlertFlow("123456"))
+        val stopIdentifierFlow = flowOf("123456".toNaptanStopIdentifier())
+        whenever(alertsRepository.hasArrivalAlertFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(false, true, false))
 
-        retriever.getHasArrivalAlertFlow(stopCodeFlow).test {
+        retriever.getHasArrivalAlertFlow(stopIdentifierFlow).test {
             assertNull(awaitItem())
             assertEquals(false, awaitItem())
             assertEquals(true, awaitItem())
@@ -145,20 +136,10 @@ class AlertsStateRetrieverTest {
     }
 
     @Test
-    fun getHasProximityAlertFlowEmitsNullWhenStopCodeIsNull() = runTest {
-        val stopCodeFlow = flowOf(null)
+    fun getHasProximityAlertFlowEmitsNullWhenStopIdentifierIsNull() = runTest {
+        val stopIdentifierFlow = flowOf(null)
 
-        retriever.getHasProximityAlertFlow(stopCodeFlow).test {
-            assertNull(awaitItem())
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun getHasProximityAlertFlowEmitsNullWhenStopCodeIsEmpty() = runTest {
-        val stopCodeFlow = flowOf("")
-
-        retriever.getHasProximityAlertFlow(stopCodeFlow).test {
+        retriever.getHasProximityAlertFlow(stopIdentifierFlow).test {
             assertNull(awaitItem())
             awaitComplete()
         }
@@ -166,11 +147,11 @@ class AlertsStateRetrieverTest {
 
     @Test
     fun getHasProximityAlertFlowEmitsValuesFromAlertsRepository() = runTest {
-        val stopCodeFlow = flowOf("123456")
-        whenever(alertsRepository.hasProximityAlertFlow("123456"))
+        val stopIdentifierFlow = flowOf("123456".toNaptanStopIdentifier())
+        whenever(alertsRepository.hasProximityAlertFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(false, true, false))
 
-        retriever.getHasProximityAlertFlow(stopCodeFlow).test {
+        retriever.getHasProximityAlertFlow(stopIdentifierFlow).test {
             assertNull(awaitItem())
             assertEquals(false, awaitItem())
             assertEquals(true, awaitItem())

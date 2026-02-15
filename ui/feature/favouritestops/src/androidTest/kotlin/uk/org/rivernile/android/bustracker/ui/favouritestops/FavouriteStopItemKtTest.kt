@@ -40,6 +40,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import kotlinx.collections.immutable.persistentListOf
 import org.junit.Rule
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
@@ -62,7 +63,7 @@ class FavouriteStopItemKtTest {
             MyBusTheme {
                 FavouriteStopItemWithDefaults(
                     favouriteStop = UiFavouriteStop(
-                        stopCode = "123456",
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         savedName = "Saved Name",
                         services = null,
                         dropdownMenu = null
@@ -88,7 +89,7 @@ class FavouriteStopItemKtTest {
             MyBusTheme {
                 FavouriteStopItemWithDefaults(
                     favouriteStop = UiFavouriteStop(
-                        stopCode = "123456",
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         savedName = "Saved Name",
                         services = null,
                         dropdownMenu = null
@@ -111,7 +112,7 @@ class FavouriteStopItemKtTest {
             MyBusTheme {
                 FavouriteStopItemWithDefaults(
                     favouriteStop = UiFavouriteStop(
-                        stopCode = "123456",
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         savedName = "Saved Name",
                         services = null,
                         dropdownMenu = null
@@ -134,7 +135,7 @@ class FavouriteStopItemKtTest {
             MyBusTheme {
                 FavouriteStopItemWithDefaults(
                     favouriteStop = UiFavouriteStop(
-                        stopCode = "123456",
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         savedName = "Saved Name",
                         services = persistentListOf(
                             UiServiceName(
@@ -183,7 +184,7 @@ class FavouriteStopItemKtTest {
             MyBusTheme {
                 FavouriteStopItemWithDefaults(
                     favouriteStop = UiFavouriteStop(
-                        stopCode = "123456",
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         savedName = "Saved Name",
                         services = null,
                         dropdownMenu = null
@@ -206,7 +207,7 @@ class FavouriteStopItemKtTest {
             MyBusTheme {
                 FavouriteStopItemWithDefaults(
                     favouriteStop = UiFavouriteStop(
-                        stopCode = "123456",
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         savedName = "Saved Name",
                         services = null,
                         dropdownMenu = UiFavouriteDropdownMenu()
@@ -238,7 +239,7 @@ class FavouriteStopItemKtTest {
             MyBusTheme {
                 FavouriteStopItemWithDefaults(
                     favouriteStop = UiFavouriteStop(
-                        stopCode = "123456",
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         savedName = "Saved Name",
                         services = null,
                         dropdownMenu = UiFavouriteDropdownMenu()
@@ -264,7 +265,7 @@ class FavouriteStopItemKtTest {
             MyBusTheme {
                 FavouriteStopItemWithDefaults(
                     favouriteStop = UiFavouriteStop(
-                        stopCode = "123456",
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         savedName = "Saved Name",
                         services = null,
                         dropdownMenu = null
@@ -287,7 +288,7 @@ class FavouriteStopItemKtTest {
             MyBusTheme {
                 FavouriteStopItemWithDefaults(
                     favouriteStop = UiFavouriteStop(
-                        stopCode = "123456",
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         savedName = "Saved Name",
                         services = null,
                         dropdownMenu = UiFavouriteDropdownMenu(isShown = true)
@@ -311,7 +312,7 @@ class FavouriteStopItemKtTest {
             MyBusTheme {
                 FavouriteStopItemWithDefaults(
                     favouriteStop = UiFavouriteStop(
-                        stopCode = "123456",
+                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         savedName = "Saved Name",
                         services = null,
                         dropdownMenu = null

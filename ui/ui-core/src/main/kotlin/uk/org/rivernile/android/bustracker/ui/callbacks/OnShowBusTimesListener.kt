@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.callbacks
 
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+
 /**
  * This listener is used to send callbacks from `Fragment`s to [android.app.Activity]s when the user
  * wishes to view bus times.
@@ -37,7 +39,7 @@ public interface OnShowBusTimesListener {
     /**
      * This is called when the user wishes to view bus stop times.
      *
-     * @param stopCode The bus stop to view times for.
+     * @param stopIdentifier The bus stop to view times for.
      */
-    public fun onShowBusTimes(stopCode: String)
+    public fun onShowBusTimes(stopIdentifier: StopIdentifier)
 }

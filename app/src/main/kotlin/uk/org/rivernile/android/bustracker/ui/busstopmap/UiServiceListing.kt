@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.ui.busstopmap
 
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+
 /**
  * This sealed interface describes the state of loading the service listing for a stop.
  *
@@ -34,36 +37,36 @@ package uk.org.rivernile.android.bustracker.ui.busstopmap
 sealed interface UiServiceListing {
 
     /**
-     * The stop code for this service listing.
+     * The stop identifier for this service listing.
      */
-    val stopCode: String
+    val stopIdentifier: StopIdentifier
 
     /**
      * The service listing is in progress.
      *
-     * @property stopCode The stop code the service listing is for.
+     * @property stopIdentifier The stop the service listing is for.
      */
     data class InProgress(
-        override val stopCode: String
+        override val stopIdentifier: StopIdentifier
     ) : UiServiceListing
 
     /**
      * The service listing is empty.
      *
-     * @property stopCode The stop code the service listing is for.
+     * @property stopIdentifier The stop the service listing is for.
      */
     data class Empty(
-        override val stopCode: String
+        override val stopIdentifier: StopIdentifier
     ) : UiServiceListing
 
     /**
      * The service listing was successful.
      *
-     * @property stopCode The stop code the service listing is for.
+     * @property stopIdentifier The stop the service listing is for.
      * @property services The service listing.
      */
     data class Success(
-        override val stopCode: String,
-        val services: List<String>
+        override val stopIdentifier: StopIdentifier,
+        val services: List<ServiceDescriptor>
     ) : UiServiceListing
 }

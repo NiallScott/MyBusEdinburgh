@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,6 +32,7 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
 import uk.org.rivernile.android.bustracker.core.permission.AndroidPermissionChecker
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
@@ -45,6 +46,7 @@ import javax.inject.Inject
  * @param busStopsRepository The repository to access bus stop data.
  * @param deeplinkIntentFactory An implementation which creates [Intent]s for deeplinking.
  * @param textFormattingUtils Utility class for formatting text of stop name.
+ * @param serviceNameComparator Used to sort services by name.
  * @author Niall Scott
  */
 internal class AndroidAlertNotificationDispatcher @Inject constructor(
@@ -53,7 +55,8 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
     private val busStopsRepository: BusStopsRepository,
     private val permissionChecker: AndroidPermissionChecker,
     private val deeplinkIntentFactory: DeeplinkIntentFactory,
-    private val textFormattingUtils: TextFormattingUtils
+    private val textFormattingUtils: TextFormattingUtils,
+    private val serviceNameComparator: Comparator<String>
 ) : AlertNotificationDispatcher, ErrorNotificationDispatcher {
 
     companion object {
@@ -71,7 +74,7 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
         if (permissionChecker.checkPostNotificationPermission()) {
             val title = context.getString(R.string.arrival_alert_notification_title)
             val summary = createAlertSummaryString(arrivalAlert, qualifyingServices)
-            val pendingIntent = createArrivalAlertPendingIntent(arrivalAlert.stopCode)
+            val pendingIntent = createArrivalAlertPendingIntent(arrivalAlert.stopIdentifier)
 
             NotificationCompat.Builder(
                 context,
@@ -95,15 +98,15 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
 
     override suspend fun dispatchProximityAlertNotification(proximityAlert: ProximityAlert) {
         if (permissionChecker.checkPostNotificationPermission()) {
-            val stopName = getDisplayableStopName(proximityAlert.stopCode)
+            val stopName = getDisplayableStopName(proximityAlert.stopIdentifier)
             val title = context.getString(R.string.proximity_alert_notification_title, stopName)
             val ticker = context.getString(R.string.proximity_alert_notification_ticker, stopName)
             val summary = context.getString(
                 R.string.proximity_alert_notification_summary,
-                proximityAlert.distanceFrom,
+                proximityAlert.distanceFromMeters,
                 stopName
             )
-            val pendingIntent = createProximityAlertPendingIntent(proximityAlert.stopCode)
+            val pendingIntent = createProximityAlertPendingIntent(proximityAlert.stopIdentifier)
 
             NotificationCompat.Builder(
                 context,
@@ -188,9 +191,15 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
         arrivalAlert: ArrivalAlert,
         qualifyingServices: List<Service>
     ): String {
-        val serviceListing = qualifyingServices.joinToString { it.serviceName }
-        val numberOfMinutes = getAlertNumberOfMinutesString(arrivalAlert.timeTrigger)
-        val displayableStopName = getDisplayableStopName(arrivalAlert.stopCode)
+        val serviceComparator = compareBy<Service, String>(serviceNameComparator) {
+            it.serviceDescriptor.serviceName
+        }
+
+        val serviceListing = qualifyingServices
+            .sortedWith(serviceComparator)
+            .joinToString { it.serviceDescriptor.serviceName }
+        val numberOfMinutes = getAlertNumberOfMinutesString(arrivalAlert.timeTriggerMinutes)
+        val displayableStopName = getDisplayableStopName(arrivalAlert.stopIdentifier)
 
         return context.resources.getQuantityString(
             R.plurals.arrival_alert_notification_services,
@@ -222,13 +231,13 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
     /**
      * Get the stop name to display.
      *
-     * @param stopCode The stop code.
+     * @param stopIdentifier The stop identifier.
      * @return The stop name to display.
      */
-    private suspend fun getDisplayableStopName(stopCode: String): String {
+    private suspend fun getDisplayableStopName(stopIdentifier: StopIdentifier): String {
         return textFormattingUtils.formatBusStopNameWithStopCode(
-            stopCode,
-            busStopsRepository.getNameForStop(stopCode)
+            stopIdentifier,
+            busStopsRepository.getNameForStop(stopIdentifier)
         )
     }
 
@@ -236,11 +245,11 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
      * Create a [PendingIntent] for a fired arrival alert - the action which is performed when the
      * user clicks on the notification.
      *
-     * @param stopCode The stop code.
+     * @param stopIdentifier The stop identifier.
      * @return A [PendingIntent] which is executed when the user clicks on the notification.
      */
-    private fun createArrivalAlertPendingIntent(stopCode: String) =
-        deeplinkIntentFactory.createShowBusTimesIntent(stopCode)
+    private fun createArrivalAlertPendingIntent(stopIdentifier: StopIdentifier) =
+        deeplinkIntentFactory.createShowBusTimesIntent(stopIdentifier)
             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             .let {
                 PendingIntent.getActivity(
@@ -255,12 +264,12 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
      * Create a [PendingIntent] for a fired proximity alert - the action which is performed when the
      * user clicks on the notification.
      *
-     * @param stopCode The stop code.
+     * @param stopIdentifier The stop identifier.
      * @return A [PendingIntent] which is executed when the user clicks on the notification.
      */
-    private fun createProximityAlertPendingIntent(stopCode: String) =
-        (deeplinkIntentFactory.createShowStopOnMapIntent(stopCode)
-            ?: deeplinkIntentFactory.createShowBusTimesIntent(stopCode))
+    private fun createProximityAlertPendingIntent(stopIdentifier: StopIdentifier) =
+        (deeplinkIntentFactory.createShowStopOnMapIntent(stopIdentifier)
+            ?: deeplinkIntentFactory.createShowBusTimesIntent(stopIdentifier))
             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             .let {
                 PendingIntent.getActivity(

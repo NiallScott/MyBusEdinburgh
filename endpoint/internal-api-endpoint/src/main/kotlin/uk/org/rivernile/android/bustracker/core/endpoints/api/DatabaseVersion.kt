@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,15 +29,14 @@ package uk.org.rivernile.android.bustracker.core.endpoints.api
 /**
  * This data class describes the latest database available for this app.
  *
- * @property schemaVersion The version of the database schema.
- * @property topologyId The topology ID to represent the version of the data.
+ * @property timestampInSeconds The timestamp of the database, in seconds since UNIX epoch.
  * @property databaseUrl The URL of the database.
- * @property checksum A checksum to use to verify the consistency of the database file.
+ * @property sha256Checksum A SHA-256 checksum to use to verify the consistency of the database
+ * file.
  * @author Niall Scott
  */
-data class DatabaseVersion(
-    val schemaVersion: String,
-    val topologyId: String,
+public data class DatabaseVersion(
+    val timestampInSeconds: Long,
     val databaseUrl: String,
-    val checksum: String
+    val sha256Checksum: String
 )

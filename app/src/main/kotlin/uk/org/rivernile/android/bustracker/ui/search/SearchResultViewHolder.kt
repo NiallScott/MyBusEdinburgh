@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,12 +45,12 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemSearchRe
  * @author Niall Scott
  */
 class SearchResultViewHolder(
-        private val viewBinding: ListItemSearchResultBinding,
-        private val clickListener: OnItemClickedListener,
-        private val stopMapMarkerDecorator: StopMapMarkerDecorator,
-        private val textFormattingUtils: TextFormattingUtils,
-        private val directionStrings: Array<String>)
-    : RecyclerView.ViewHolder(viewBinding.root) {
+    private val viewBinding: ListItemSearchResultBinding,
+    private val clickListener: OnItemClickedListener,
+    private val stopMapMarkerDecorator: StopMapMarkerDecorator,
+    private val textFormattingUtils: TextFormattingUtils,
+    private val directionStrings: Array<String>
+) : RecyclerView.ViewHolder(viewBinding.root) {
 
     private var item: UiSearchResult? = null
 
@@ -77,11 +77,15 @@ class SearchResultViewHolder(
                 imgDirection.contentDescription = getDirectionString(orientation)
 
                 text1.text = textFormattingUtils.formatBusStopNameWithStopCode(
-                        it.stopCode,
-                        it.stopName)
+                    it.stopIdentifier,
+                    it.stopName
+                )
 
-                text2.text = it.services?.ifBlank { null }
-                        ?: viewBinding.root.context.getString(R.string.search_item_no_services)
+                text2.text = it
+                    .services
+                    ?.ifEmpty { null }
+                    ?.joinToString { service -> service.serviceName }
+                    ?: viewBinding.root.context.getString(R.string.search_item_no_services)
             } ?: run {
                 imgDirection.setImageResource(0)
                 imgDirection.contentDescription = null

@@ -39,11 +39,9 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.launch
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
@@ -81,7 +79,6 @@ import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment
 import uk.org.rivernile.android.bustracker.ui.HasScrollableContent
 import uk.org.rivernile.android.bustracker.ui.HasTabBar
 import uk.org.rivernile.android.bustracker.ui.news.NewsFragment
-import uk.org.rivernile.android.bustracker.ui.removefavouritestop.RemoveFavouriteStopDialogFragment
 import uk.org.rivernile.android.bustracker.ui.search.SearchFragment
 import uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity
 import uk.org.rivernile.android.bustracker.ui.turnongps.TurnOnGpsDialogFragment
@@ -89,10 +86,13 @@ import uk.org.rivernile.edinburghbustracker.android.BuildConfig
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.ActivityMainBinding
 import javax.inject.Inject
-import androidx.core.net.toUri
 import androidx.core.view.ViewGroupCompat
 import uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop.AddOrEditFavouriteStopDialogFragment
 import uk.org.rivernile.android.bustracker.ui.favouritestops.FavouriteStopsFragment
+import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.ui.removefavouritestop.RemoveFavouriteStopDialogFragment
 
 /**
  * This [android.app.Activity] is the root Activity of the app.
@@ -105,7 +105,6 @@ class MainActivity : AppCompatActivity(),
         BusStopMapFragment.Callbacks,
         ExploreFragment.Callbacks,
         FavouriteStopsFragment.Callbacks,
-        InstallBarcodeScannerDialogFragment.Callbacks,
         NearestStopsFragment.Callbacks,
         SearchFragment.Callbacks,
         TurnOnGpsDialogFragment.Callbacks {
@@ -128,10 +127,6 @@ class MainActivity : AppCompatActivity(),
         private const val DIALOG_DELETE_TIME_ALERT = "dialogDeleteTimeAlert"
         private const val DIALOG_DELETE_FAVOURITE = "dialogDeleteFavourite"
         private const val DIALOG_TURN_ON_GPS = "dialogTurnOnGps"
-        private const val DIALOG_INSTALL_QR_SCANNER = "installQrScannerDialog"
-
-        private const val BARCODE_APP_PACKAGE =
-                "market://details?id=com.google.zxing.client.android"
     }
 
     @Inject
@@ -140,12 +135,6 @@ class MainActivity : AppCompatActivity(),
     private val viewModel by viewModels<MainActivityViewModel>()
 
     private lateinit var viewBinding: ActivityMainBinding
-
-    private var menuItemScan: MenuItem? = null
-
-    private val scanQrCodeLauncher = registerForActivityResult(ScanQrCode()) {
-        viewModel.onQrScanned(it)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -180,17 +169,6 @@ class MainActivity : AppCompatActivity(),
         addMenuProvider(menuProvider)
         onBackPressedDispatcher.addCallback(this, backPressedCallback)
 
-        viewModel.showStopLiveData.observe(this, this::onShowBusTimes)
-        viewModel.isScanMenuItemVisibleLiveData.observe(this, this::handleIsScanMenuItemVisible)
-        viewModel.showQrCodeScannerLiveData.observe(this) {
-            handleShowQrCodeScanner()
-        }
-        viewModel.showInstallQrScannerDialogLiveData.observe(this) {
-            handleShowInstallQrScannerDialog()
-        }
-        viewModel.showInvalidQrCodeErrorLiveData.observe(this) {
-            showInvalidQrCodeError()
-        }
         viewModel.showSettingsLiveData.observe(this) {
             showSettings()
         }
@@ -252,51 +230,57 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    override fun onShowAddOrEditFavouriteStop(stopCode: String) {
+    override fun onShowAddOrEditFavouriteStop(stopIdentifier: StopIdentifier) {
         AddOrEditFavouriteStopDialogFragment
-            .newInstance(stopCode)
+            .newInstance(stopIdentifier)
             .show(supportFragmentManager, DIALOG_ADD_FAVOURITE)
     }
 
-    override fun onShowAddProximityAlert(stopCode: String) {
+    override fun onShowAddProximityAlert(stopIdentifier: StopIdentifier) {
         AddProximityAlertDialogFragment
-            .newInstance(stopCode)
+            .newInstance(stopIdentifier)
             .show(supportFragmentManager, DIALOG_ADD_PROX_ALERT)
     }
 
-    override fun onShowAddArrivalAlert(stopCode: String, defaultServices: Array<String>?) {
+    override fun onShowAddArrivalAlert(
+        stopIdentifier: StopIdentifier,
+        defaultServices: List<ServiceDescriptor>?
+    ) {
         AddTimeAlertDialogFragment
-            .newInstance(stopCode, defaultServices)
+            .newInstance(stopIdentifier, defaultServices)
             .show(supportFragmentManager, DIALOG_ADD_TIME_ALERT)
     }
 
-    override fun onShowBusStopMapWithStopCode(stopCode: String) {
+    override fun onShowBusStopMapWithStopIdentifier(stopIdentifier: StopIdentifier) {
         Intent(this, BusStopMapActivity::class.java)
-            .putExtra(BusStopMapActivity.EXTRA_STOP_CODE, stopCode)
+            .putExtra(BusStopMapActivity.EXTRA_STOP_CODE, stopIdentifier.toNaptanStopCodeOrThrow())
             .let(this::startActivity)
     }
 
-    override fun onShowBusTimes(stopCode: String) {
+    override fun onShowBusTimes(stopIdentifier: StopIdentifier) {
         Intent(this, DisplayStopDataActivity::class.java)
-            .putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
+            .putExtra(
+                DisplayStopDataActivity.EXTRA_STOP_CODE,
+                stopIdentifier.toNaptanStopCodeOrThrow()
+            )
             .let(this::startActivity)
     }
 
-    override fun onShowConfirmRemoveProximityAlert(stopCode: String) {
+    override fun onShowConfirmRemoveProximityAlert(stopIdentifier: StopIdentifier) {
         DeleteProximityAlertDialogFragment
-            .newInstance(stopCode)
+            .newInstance(stopIdentifier)
             .show(supportFragmentManager, DIALOG_DELETE_PROX_ALERT)
     }
 
-    override fun onShowConfirmRemoveArrivalAlert(stopCode: String) {
+    override fun onShowConfirmRemoveArrivalAlert(stopIdentifier: StopIdentifier) {
         DeleteTimeAlertDialogFragment
-            .newInstance(stopCode)
+            .newInstance(stopIdentifier)
             .show(supportFragmentManager, DIALOG_DELETE_TIME_ALERT)
     }
 
-    override fun onShowConfirmFavouriteRemoval(stopCode: String) {
+    override fun onShowConfirmFavouriteRemoval(stopIdentifier: StopIdentifier) {
         RemoveFavouriteStopDialogFragment
-            .newInstance(stopCode = stopCode)
+            .newInstance(stopIdentifier)
             .show(supportFragmentManager, DIALOG_DELETE_FAVOURITE)
     }
 
@@ -315,24 +299,6 @@ class MainActivity : AppCompatActivity(),
     override fun onAskTurnOnGps() {
         TurnOnGpsDialogFragment()
             .show(supportFragmentManager, DIALOG_TURN_ON_GPS)
-    }
-
-    override fun onShowInstallBarcodeScanner() {
-        try {
-            Intent(Intent.ACTION_VIEW)
-                .setData(BARCODE_APP_PACKAGE.toUri())
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                .let(this::startActivity)
-        } catch (e: ActivityNotFoundException) {
-            exceptionLogger.log(e)
-            Toast
-                .makeText(
-                    this,
-                    R.string.barcodescannerdialog_noplaystore,
-                    Toast.LENGTH_LONG
-                )
-                .show()
-        }
     }
 
     override fun onExploreTabSwitched() {
@@ -403,11 +369,6 @@ class MainActivity : AppCompatActivity(),
                     marginParams.bottomMargin
             applyBottomContentPadding(supportFragmentManager, contentBottomPadding)
         }
-
-        searchView.inflateMenu(R.menu.search_option_menu)
-        menuItemScan = searchView.toolbar.menu.findItem(R.id.search_option_menu_scan)
-        handleIsScanMenuItemVisible(viewModel.isScanMenuItemVisibleLiveData.value ?: false)
-        searchView.setOnMenuItemClickListener(this@MainActivity::handleSearchViewMenuItemClicked)
 
         searchView.editText.doAfterTextChanged {
             performSearch(it?.toString())
@@ -520,60 +481,6 @@ class MainActivity : AppCompatActivity(),
     }
 
     /**
-     * Handle a [MenuItem] inside [SearchView] being clicked.
-     *
-     * @param menuItem The clicked [MenuItem].
-     * @return `true` if the click was handled here, otherwise `false`.
-     */
-    private fun handleSearchViewMenuItemClicked(menuItem: MenuItem) = when (menuItem.itemId) {
-        R.id.search_option_menu_scan -> {
-            viewModel.onScanMenuItemClicked()
-            true
-        }
-        else -> false
-    }
-
-    /**
-     * Handle the visibility of the scan QR code menu item changing.
-     *
-     * @param isVisible Is the scan QR code menu item visible?
-     */
-    private fun handleIsScanMenuItemVisible(isVisible: Boolean) {
-        menuItemScan?.isVisible = isVisible
-    }
-
-    /**
-     * Attempt to launch the QR code scanner application.
-     */
-    private fun handleShowQrCodeScanner() {
-        try {
-            scanQrCodeLauncher.launch()
-        } catch (_: ActivityNotFoundException) {
-            viewModel.onQrScannerNotFound()
-        } catch (_: SecurityException) {
-            // SecurityException has been seen out in the wild, albeit from an unsupported app which
-            // is hijacking the Intent. When this happens, the user will be directed to install the
-            // supported app.
-            viewModel.onQrScannerNotFound()
-        }
-    }
-
-    /**
-     * Show a dialog to the user asking them if they wish to install the QR scanner application.
-     */
-    private fun handleShowInstallQrScannerDialog() {
-        InstallBarcodeScannerDialogFragment()
-            .show(supportFragmentManager, DIALOG_INSTALL_QR_SCANNER)
-    }
-
-    /**
-     * Show a [Toast] notification which informs the user they scanned an invalid QR code.
-     */
-    private fun showInvalidQrCodeError() {
-        Toast.makeText(this, R.string.main_invalid_qrcode, Toast.LENGTH_SHORT).show()
-    }
-
-    /**
      * Show the settings UI.
      */
     private fun showSettings() {
@@ -657,6 +564,14 @@ class MainActivity : AppCompatActivity(),
     private val backPressedCallback = object : OnBackPressedCallback(false) {
         override fun handleOnBackPressed() {
             viewBinding.searchView.hide()
+        }
+    }
+
+    private fun StopIdentifier.toNaptanStopCodeOrThrow(): String {
+        return if (this is NaptanStopIdentifier) {
+            naptanStopCode
+        } else {
+            throw UnsupportedOperationException("Only Naptan stop codes are supported for now.")
         }
     }
 }

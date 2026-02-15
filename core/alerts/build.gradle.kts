@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,7 @@
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.ksp)
+    id("mybus.dagger-convention")
     `java-test-fixtures`
 }
 
@@ -37,20 +37,17 @@ kotlin {
 dependencies {
 
     implementation(project(":core:busstops"))
+    implementation(project(":core:core-domain"))
     implementation(project(":core:coroutines"))
     implementation(project(":core:time"))
     implementation(project(":database:busstop-db-core"))
     implementation(project(":database:settings-db-core"))
     implementation(project(":endpoint:tracker-endpoint"))
 
-    // Dagger 2
-    implementation(libs.dagger.core)
-    ksp(libs.dagger.compiler)
-
     // Testing dependencies
     testImplementation(testFixtures(project(":core:busstops")))
+    testImplementation(testFixtures(project(":core:core-domain")))
     testImplementation(testFixtures(project(":core:time")))
-    testImplementation(testFixtures(project(":database:busstop-db-core")))
     testImplementation(testFixtures(project(":database:settings-db-core")))
     testImplementation(testFixtures(project(":endpoint:tracker-endpoint")))
     testImplementation(project(":testutils"))
@@ -59,5 +56,6 @@ dependencies {
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.turbine)
 
+    testFixturesImplementation(project(":core:core-domain"))
     testFixturesImplementation(project(":core:coroutines"))
 }

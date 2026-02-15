@@ -25,10 +25,8 @@
  */
 
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
+    id("mybus.android-library")
+    id("mybus.hilt-convention")
 }
 
 android {
@@ -64,15 +62,12 @@ kotlin {
 
 dependencies {
 
+    implementation(project(":core:core-domain-android"))
     api(project(":core:shortcuts"))
     implementation(project(":ui:ui-core"))
 
     // AndroidX
     implementation(libs.androidx.core)
-
-    // Hilt (dependency injection)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
 
     // Testing dependencies
     androidTestImplementation(libs.androidx.test.runner)

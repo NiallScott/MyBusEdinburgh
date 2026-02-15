@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -56,8 +56,10 @@ class FileConsistencyCheckerTest {
         val fileConsistencyChecker = createFileConsistencyChecker()
         val file = getFileForPath("/empty_file.txt")
 
-        val result = fileConsistencyChecker.checkFileMatchesHash(file,
-                "d41d8cd98f00b204e9800998ecf8427e")
+        val result = fileConsistencyChecker.checkFileMatchesHash(
+            file,
+            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        )
 
         assertTrue(result)
     }
@@ -67,8 +69,10 @@ class FileConsistencyCheckerTest {
         val fileConsistencyChecker = createFileConsistencyChecker()
         val file = getFileForPath("/non_empty_file.txt")
 
-        val result = fileConsistencyChecker.checkFileMatchesHash(file,
-                "f336a8073df3d4f06afbf281671715bf")
+        val result = fileConsistencyChecker.checkFileMatchesHash(
+            file,
+            "2fbaf28f6427b1832f2924e4c22c66e85fe96afbdc3541c659b673b8ff7d5b9c"
+        )
 
         assertTrue(result)
     }

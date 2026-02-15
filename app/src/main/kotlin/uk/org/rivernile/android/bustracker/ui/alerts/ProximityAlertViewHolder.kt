@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -101,7 +101,7 @@ class ProximityAlertViewHolder(
         this.alert = alert
 
         viewBinding.txtDescription.text = alert?.let {
-            val stopName = textFormattingUtils.formatBusStopNameWithStopCode(it.stopCode,
+            val stopName = textFormattingUtils.formatBusStopNameWithStopCode(it.stopIdentifier,
                     it.stopDetails?.stopName)
             viewBinding.root.context.getString(R.string.alertmanager_prox_subtitle,
                     it.distanceFrom, stopName)
@@ -166,7 +166,7 @@ class ProximityAlertViewHolder(
      */
     private fun handleRemoveClicked() {
         alert?.let {
-            clickListener.onRemoveProximityAlertClicked(it.stopCode)
+            clickListener.onRemoveProximityAlertClicked(it.stopIdentifier)
         }
     }
 }

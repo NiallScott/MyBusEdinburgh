@@ -26,14 +26,16 @@
 
 package uk.org.rivernile.android.bustracker.core.shortcuts
 
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+
 /**
  * This represents the data required for a favourite stop shortcut.
  *
- * @property stopCode The code of the stop the shortcut should represent.
+ * @property stopIdentifier The identifier of the stop the shortcut should represent.
  * @property displayName The name of the shortcut to display to users.
  * @author Niall Scott
  */
 public data class FavouriteStopShortcut(
-    val stopCode: String,
+    val stopIdentifier: StopIdentifier,
     val displayName: String
 )

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,8 @@ package uk.org.rivernile.android.bustracker.ui.serviceschooser
 import android.os.Parcelable
 import androidx.annotation.StringRes
 import kotlinx.parcelize.Parcelize
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableStopIdentifier
 
 /**
  * This sealed interface defines the parameter types for [ServicesChooserDialogFragment].
@@ -46,7 +48,7 @@ sealed interface ServicesChooserParams : Parcelable {
     /**
      * The existing selected services.
      */
-    val selectedServices: List<String>?
+    val selectedServices: List<ParcelableServiceDescriptor>?
 
     /**
      * All services should be shown for selection.
@@ -56,21 +58,21 @@ sealed interface ServicesChooserParams : Parcelable {
      */
     @Parcelize
     data class AllServices(
-        @StringRes override val titleResId: Int,
-        override val selectedServices: List<String>?
+        @param:StringRes @field:StringRes override val titleResId: Int,
+        override val selectedServices: List<ParcelableServiceDescriptor>?
     ) : ServicesChooserParams
 
     /**
-     * Only services for the given [stopCode] should be shown for selection.
+     * Only services for the given [stopIdentifier] should be shown for selection.
      *
      * @property titleResId The resource ID to use for the title.
      * @property selectedServices The existing selected services.
-     * @property stopCode The stop code to show services for.
+     * @property stopIdentifier The stop identifier to show services for.
      */
     @Parcelize
     data class Stop(
-        @StringRes override val titleResId: Int,
-        override val selectedServices: List<String>?,
-        val stopCode: String
+        @param:StringRes @field:StringRes override val titleResId: Int,
+        override val selectedServices: List<ParcelableServiceDescriptor>?,
+        val stopIdentifier: ParcelableStopIdentifier
     ) : ServicesChooserParams
 }

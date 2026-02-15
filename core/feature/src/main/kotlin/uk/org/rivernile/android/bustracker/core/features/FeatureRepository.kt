@@ -49,11 +49,6 @@ public interface FeatureRepository {
     public val hasProximityAlertFeature: Boolean
 
     /**
-     * Is the camera feature available?
-     */
-    public val hasCameraFeature: Boolean
-
-    /**
      * Is the pin shortcut feature available?
      */
     public val hasPinShortcutFeature: Boolean

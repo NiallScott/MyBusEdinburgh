@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,6 +32,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
  * This is the Room-specific implementation of [FavouriteStopsDao].
@@ -41,50 +42,50 @@ import kotlinx.coroutines.flow.map
 @Dao
 internal abstract class RoomFavouriteStopsDao : FavouriteStopsDao {
 
-    override suspend fun addOrUpdateFavouriteStop(favouriteStop: FavouriteStopEntity) {
-        if (favouriteStop is RoomFavouriteStopEntity) {
-            addOrUpdateFavouriteStopInternal(favouriteStop)
-        }
+    override suspend fun addOrUpdateFavouriteStop(favouriteStop: FavouriteStop) {
+        addOrUpdateFavouriteStopInternal(favouriteStop.toFavouriteStopEntity())
     }
 
     @Query("""
-        DELETE FROM favourite_stops 
-        WHERE stopCode = :stopCode
+        DELETE FROM favourite_stop
+        WHERE stop_code = :stopIdentifier
     """)
-    abstract override suspend fun removeFavouriteStop(stopCode: String)
+    abstract override suspend fun removeFavouriteStop(stopIdentifier: StopIdentifier)
 
-    override fun isStopAddedAsFavouriteFlow(stopCode: String) =
-        isStopAddedAsFavouriteFlowInternal(stopCode)
+    override fun isStopAddedAsFavouriteFlow(stopIdentifier: StopIdentifier) =
+        isStopAddedAsFavouriteFlowInternal(stopIdentifier)
             .map { it > 0 }
 
-    override fun getFavouriteStopFlow(stopCode: String): Flow<FavouriteStopEntity?> =
-        getFavouriteStopFlowInternal(stopCode)
+    override fun getFavouriteStopFlow(stopIdentifier: StopIdentifier): Flow<FavouriteStop?> =
+        getFavouriteStopFlowInternal(stopIdentifier)
 
-    override val allFavouriteStopsFlow: Flow<List<FavouriteStopEntity>?> get() =
+    override val allFavouriteStopsFlow: Flow<List<FavouriteStop>?> get() =
         allFavouriteStopsFlowInternal
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun addOrUpdateFavouriteStopInternal(favouriteStop: RoomFavouriteStopEntity)
 
     @Query("""
-        SELECT COUNT(*) 
-        FROM favourite_stops 
-        WHERE stopCode = :stopCode
+        SELECT COUNT(*)
+        FROM favourite_stop
+        WHERE stop_code = :stopIdentifier
     """)
-    abstract fun isStopAddedAsFavouriteFlowInternal(stopCode: String): Flow<Int>
+    abstract fun isStopAddedAsFavouriteFlowInternal(stopIdentifier: StopIdentifier): Flow<Int>
 
     @Query("""
-        SELECT stopCode, stopName 
-        FROM favourite_stops 
-        WHERE stopCode = :stopCode 
+        SELECT stop_code, stop_name
+        FROM favourite_stop
+        WHERE stop_code = :stopIdentifier
         LIMIT 1
     """)
-    abstract fun getFavouriteStopFlowInternal(stopCode: String): Flow<RoomFavouriteStopEntity?>
+    abstract fun getFavouriteStopFlowInternal(
+        stopIdentifier: StopIdentifier
+    ): Flow<RoomFavouriteStopEntity?>
 
     @get:Query("""
-        SELECT stopCode, stopName 
-        FROM favourite_stops 
-        ORDER BY stopName ASC
+        SELECT stop_code, stop_name
+        FROM favourite_stop
+        ORDER BY stop_name ASC
     """)
     abstract val allFavouriteStopsFlowInternal: Flow<List<RoomFavouriteStopEntity>?>
 }

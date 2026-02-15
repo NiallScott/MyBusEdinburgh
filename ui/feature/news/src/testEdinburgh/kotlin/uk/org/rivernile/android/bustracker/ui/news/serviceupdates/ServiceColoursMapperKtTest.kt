@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -112,7 +112,7 @@ class ServiceColoursMapperKtTest {
             serviceNames = setOf("1"),
             serviceColours = mapOf(
                 "2" to ServiceColours(
-                    primaryColour = 0x00111111,
+                    colourPrimary = 0x00111111,
                     colourOnPrimary = 0x00222222
                 )
             ),
@@ -138,7 +138,7 @@ class ServiceColoursMapperKtTest {
             serviceNames = setOf("1"),
             serviceColours = mapOf(
                 "1" to ServiceColours(
-                    primaryColour = 0x00111111,
+                    colourPrimary = 0x00111111,
                     colourOnPrimary = 0x00222222
                 )
             ),
@@ -175,11 +175,11 @@ class ServiceColoursMapperKtTest {
             serviceNames = setOf("2", "1", "3"),
             serviceColours = mapOf(
                 "1" to ServiceColours(
-                    primaryColour = 0x00111111,
+                    colourPrimary = 0x00111111,
                     colourOnPrimary = 0x00222222
                 ),
                 "3" to ServiceColours(
-                    primaryColour = 0x00333333,
+                    colourPrimary = 0x00333333,
                     colourOnPrimary = 0x00444444
                 )
             ),

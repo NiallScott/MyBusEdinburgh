@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,8 +34,10 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
+import uk.org.rivernile.android.bustracker.core.busstops.StopDetailsWithServices
 import uk.org.rivernile.android.bustracker.core.config.ConfigRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetailsWithServices
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.sortByServiceName
 import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
@@ -50,12 +52,14 @@ import kotlin.math.absoluteValue
  * @param busStopsRepository Used to obtain the stop data.
  * @param configRepository Used to obtain app-specific configuration - namely, the lat/lon bounds
  * for nearest stops.
+ * @param serviceNameComparator Used to sort services by name.
  * @author Niall Scott
  */
 class UiStateRetriever @Inject constructor(
     private val locationRepository: LocationRepository,
     private val busStopsRepository: BusStopsRepository,
-    private val configRepository: ConfigRepository
+    private val configRepository: ConfigRepository,
+    private val serviceNameComparator: Comparator<String>
 ) {
 
     /**
@@ -69,7 +73,7 @@ class UiStateRetriever @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getUiStateFlow(
         permissionStateFlow: Flow<PermissionsState>,
-        serviceFilterFlow: Flow<Set<String>?>
+        serviceFilterFlow: Flow<Set<ServiceDescriptor>?>
     ): Flow<UiState> {
         return if (locationRepository.hasLocationFeature) {
             permissionStateFlow
@@ -94,7 +98,7 @@ class UiStateRetriever @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun handlePermissionsStateChanged(
         isPermissionsSufficient: Boolean,
-        serviceFilterFlow: Flow<Set<String>?>
+        serviceFilterFlow: Flow<Set<ServiceDescriptor>?>
     ): Flow<UiState> {
         return if (isPermissionsSufficient) {
             locationRepository.isLocationEnabledFlow
@@ -118,7 +122,7 @@ class UiStateRetriever @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun handleLocationEnabled(
         isEnabled: Boolean,
-        serviceFilterFlow: Flow<Set<String>?>
+        serviceFilterFlow: Flow<Set<ServiceDescriptor>?>
     ): Flow<UiState> {
         return if (isEnabled) {
             locationRepository.userVisibleLocationFlow
@@ -142,7 +146,7 @@ class UiStateRetriever @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun loadNearestStops(
         location: DeviceLocation,
-        serviceFilterFlow: Flow<Set<String>?>
+        serviceFilterFlow: Flow<Set<ServiceDescriptor>?>
     ): Flow<UiState> {
         return serviceFilterFlow
             .flatMapLatest { loadNearestStops(location, it) }
@@ -160,7 +164,7 @@ class UiStateRetriever @Inject constructor(
      */
     private fun loadNearestStops(
         location: DeviceLocation,
-        serviceFilter: Set<String>?
+        serviceFilter: Set<ServiceDescriptor>?
     ): Flow<UiState> {
         val latitudeSpan = configRepository.nearestStopsLatitudeSpan
         val longitudeSpan = configRepository.nearestStopsLongitudeSpan
@@ -219,9 +223,9 @@ class UiStateRetriever @Inject constructor(
         val distanceBetween = locationRepository.distanceBetween(stopLocation, location)
 
         return UiNearestStop(
-            stop.stopCode,
+            stop.stopIdentifier,
             stop.stopName,
-            stop.serviceListing,
+            stop.serviceListing?.sortByServiceName(serviceNameComparator),
             distanceBetween.absoluteValue.toInt(),
             stop.orientation,
             false

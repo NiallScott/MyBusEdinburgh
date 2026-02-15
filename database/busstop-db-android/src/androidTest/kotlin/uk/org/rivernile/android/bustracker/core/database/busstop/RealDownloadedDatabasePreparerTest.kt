@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -271,54 +271,8 @@ class RealDownloadedDatabasePreparerTest {
     }
 
     private fun SQLiteDatabase.createOldSchema() {
-        execSQL("""
-            CREATE TABLE bus_stops (
-                _id INTEGER PRIMARY KEY,
-                stopCode TEXT,
-                stopName TEXT,
-                x REAL,
-                y REAL,
-                orientation INTEGER,
-                locality TEXT)
-        """.trimIndent())
-
-        execSQL("""
-            CREATE TABLE database_info (
-                _id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                current_topo_id TEXT,
-                updateTS LONG)
-        """.trimIndent())
-
-        execSQL("""
-            CREATE TABLE service (
-                _id INTEGER,
-                name TEXT,
-                `desc` TEXT)
-        """.trimIndent())
-
-        execSQL("""
-            CREATE TABLE service_colour (
-                _id INTEGER,
-                hex_colour TEXT)
-        """.trimIndent())
-
-        execSQL("""
-            CREATE TABLE service_point (
-                _id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                service_id INTEGER,
-                stop_id INTEGER,
-                order_value INTEGER,
-                chainage INTEGER,
-                latitude REAL,
-                longitude REAL)
-        """.trimIndent())
-
-        execSQL("""
-            CREATE TABLE service_stops (
-                _id INTEGER PRIMARY KEY AUTOINCREMENT,
-                stopCode TEXT,
-                serviceName TEXT)
-        """.trimIndent())
+        preProcessedSchemaCreateStatements()
+            .forEach(::execSQL)
     }
 
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext

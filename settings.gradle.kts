@@ -66,6 +66,8 @@ include(
     ":core:config",
     ":core:connectivity",
     ":core:connectivity-android",
+    ":core:core-domain",
+    ":core:core-domain-android",
     ":core:coroutines",
     ":core:coroutines-android",
     ":core:favourites",
@@ -86,6 +88,7 @@ include(
     ":core:services",
     ":core:services-android",
     ":core:servicepoints",
+    ":core:servicepoints-android",
     ":core:servicestops",
     ":core:servicestops-android",
     ":core:shortcuts",
@@ -112,4 +115,7 @@ include(
     ":ui:text-formatting",
     ":ui:ui-core",
     ":ui:widget:contentview",
-    ":ui:widget:expandcollapseindicator")
+    ":ui:widget:expandcollapseindicator"
+)
+
+includeBuild("build-logic")

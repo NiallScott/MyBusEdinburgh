@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,7 +35,8 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopName
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopName
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
@@ -67,7 +68,7 @@ class UiStateCalculatorTest {
             .thenReturn(false)
         val permissionStateFlow = flowOf(PermissionState.GRANTED)
         val backgroundLocationPermissionStateFlow = flowOf(PermissionState.GRANTED)
-        val stopDetailsFlow = flowOf(StopDetails("123456", null))
+        val stopDetailsFlow = flowOf(StopDetails("123456".toNaptanStopIdentifier(), null))
 
         calculator
             .createUiStateFlow(
@@ -88,7 +89,7 @@ class UiStateCalculatorTest {
             .thenReturn(flowOf(true))
         val permissionStateFlow = flowOf(PermissionState.UNGRANTED)
         val backgroundLocationPermissionStateFlow = flowOf(PermissionState.UNGRANTED)
-        val stopDetailsFlow = flowOf(StopDetails("123456", null))
+        val stopDetailsFlow = flowOf(StopDetails("123456".toNaptanStopIdentifier(), null))
 
         calculator
             .createUiStateFlow(
@@ -109,7 +110,7 @@ class UiStateCalculatorTest {
             .thenReturn(flowOf(true))
         val permissionStateFlow = flowOf(PermissionState.DENIED)
         val backgroundLocationPermissionStateFlow = flowOf(PermissionState.UNGRANTED)
-        val stopDetailsFlow = flowOf(StopDetails("123456", null))
+        val stopDetailsFlow = flowOf(StopDetails("123456".toNaptanStopIdentifier(), null))
 
         calculator
             .createUiStateFlow(
@@ -130,7 +131,7 @@ class UiStateCalculatorTest {
             .thenReturn(flowOf(true))
         val permissionStateFlow = flowOf(PermissionState.GRANTED)
         val backgroundLocationPermissionStateFlow = flowOf(PermissionState.DENIED)
-        val stopDetailsFlow = flowOf(StopDetails("123456", null))
+        val stopDetailsFlow = flowOf(StopDetails("123456".toNaptanStopIdentifier(), null))
 
         calculator
             .createUiStateFlow(
@@ -151,7 +152,7 @@ class UiStateCalculatorTest {
             .thenReturn(flowOf(true))
         val permissionStateFlow = flowOf(PermissionState.GRANTED)
         val backgroundLocationPermissionStateFlow = flowOf(PermissionState.UNGRANTED)
-        val stopDetailsFlow = flowOf(StopDetails("123456", null))
+        val stopDetailsFlow = flowOf(StopDetails("123456".toNaptanStopIdentifier(), null))
 
         calculator
             .createUiStateFlow(
@@ -193,7 +194,7 @@ class UiStateCalculatorTest {
             .thenReturn(flowOf(true))
         val permissionStateFlow = flowOf(PermissionState.GRANTED)
         val backgroundLocationPermissionStateFlow = flowOf(PermissionState.GRANTED)
-        val stopDetailsFlow = flowOf(StopDetails("123456", null))
+        val stopDetailsFlow = flowOf(StopDetails("123456".toNaptanStopIdentifier(), null))
 
         calculator
             .createUiStateFlow(
@@ -229,9 +230,9 @@ class UiStateCalculatorTest {
         val stopDetailsFlow = flow {
             emit(null)
             delay(700L)
-            emit(StopDetails("123456", null))
+            emit(StopDetails("123456".toNaptanStopIdentifier(), null))
             delay(100L)
-            emit(StopDetails("123456", FakeStopName("Name", "Locality")))
+            emit(StopDetails("123456".toNaptanStopIdentifier(), FakeStopName("Name", "Locality")))
         }
 
         calculator

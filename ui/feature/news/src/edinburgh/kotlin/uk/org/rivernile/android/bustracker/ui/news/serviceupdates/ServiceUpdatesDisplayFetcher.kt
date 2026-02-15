@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.shareIn
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForViewModelCoroutineScope
@@ -94,6 +95,14 @@ internal class RealServiceUpdatesDisplayFetcher @Inject constructor(
 
     private val serviceColoursFlow = servicesRepository
         .getColoursForServicesFlow()
+        .map { servicesWithColours ->
+            // The Lothian updates API does not supply operator codes with the service names. And
+            // Lothian is multiple operators, so we can't make assumptions about the operator. So we
+            // need to map the ServiceDescriptor to just a service name as that's all we can
+            // cross-reference after here.
+            servicesWithColours
+                ?.mapKeys { it.key.serviceName }
+        }
         .shareIn(
             scope = viewModelCoroutineScope,
             started = SharingStarted.WhileSubscribed(replayExpirationMillis = 0L),

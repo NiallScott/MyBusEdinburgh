@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.shareIn
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForViewModelCoroutineScope
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import javax.inject.Inject
 
@@ -52,16 +53,16 @@ import javax.inject.Inject
 internal interface UiFavouriteDropdownMenuGenerator {
 
     /**
-     * For the given [Set] of [stopCodes], return a [Flow] which emits a mapping of the supplied
-     * stop codes to its associated [UiFavouriteDropdownMenu], if available.
+     * For the given [Set] of [stopIdentifiers], return a [Flow] which emits a mapping of the
+     * supplied stop identifiers to its associated [UiFavouriteDropdownMenu], if available.
      *
-     * @param stopCodes The stop codes to get [UiFavouriteDropdownMenu]s for.
-     * @return A [Flow] which emits a mapping of the supplied stop codes to its associated
+     * @param stopIdentifiers The stop identifiers to get [UiFavouriteDropdownMenu]s for.
+     * @return A [Flow] which emits a mapping of the supplied stop identifiers to its associated
      * [UiFavouriteDropdownMenu], if available.
      */
     fun getDropdownMenuItemsForStopsFlow(
-        stopCodes: Set<String>
-    ): Flow<Map<String, UiFavouriteDropdownMenu>?>
+        stopIdentifiers: Set<StopIdentifier>
+    ): Flow<Map<StopIdentifier, UiFavouriteDropdownMenu>?>
 }
 
 @ViewModelScoped
@@ -81,14 +82,14 @@ internal class RealUiFavouriteDropdownMenuGenerator @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getDropdownMenuItemsForStopsFlow(
-        stopCodes: Set<String>
-    ): Flow<Map<String, UiFavouriteDropdownMenu>?> {
-        return if (stopCodes.isNotEmpty()) {
+        stopIdentifiers: Set<StopIdentifier>
+    ): Flow<Map<StopIdentifier, UiFavouriteDropdownMenu>?> {
+        return if (stopIdentifiers.isNotEmpty()) {
             arguments
                 .isShortcutModeFlow
                 .flatMapLatest {
                     getDropdownMenuItemsForStopsFlow(
-                        stopCodes = stopCodes,
+                        stopIdentifiers = stopIdentifiers,
                         isShortcutMode = it
                     )
                 }
@@ -98,20 +99,21 @@ internal class RealUiFavouriteDropdownMenuGenerator @Inject constructor(
     }
 
     private fun getDropdownMenuItemsForStopsFlow(
-        stopCodes: Set<String>,
+        stopIdentifiers: Set<StopIdentifier>,
         isShortcutMode: Boolean
-    ): Flow<Map<String, UiFavouriteDropdownMenu>?> {
+    ): Flow<Map<StopIdentifier, UiFavouriteDropdownMenu>?> {
         return if (!isShortcutMode) {
             combine(
-                state.selectedStopCodeFlow,
-                arrivalAlertStopCodes,
-                proximityAlertStopCodes
-            ) { selectedStopCode, arrivalAlertStopCodes, proximityAlertStopCodes ->
+                state.selectedStopIdentifierFlow,
+                arrivalAlertStopIdentifiers,
+                proximityAlertStopIdentifiers
+            ) { selectedStopIdentifier, arrivalAlertStopIdentifiers,
+                proximityAlertStopIdentifiers ->
                 createDropdownMenusForStops(
-                    stopCodes = stopCodes,
-                    arrivalAlertStopCodes = arrivalAlertStopCodes,
-                    proximityAlertStopCodes = proximityAlertStopCodes,
-                    selectedStopCode = selectedStopCode
+                    stopIdentifiers = stopIdentifiers,
+                    arrivalAlertStopIdentifiers = arrivalAlertStopIdentifiers,
+                    proximityAlertStopIdentifiers = proximityAlertStopIdentifiers,
+                    selectedStopIdentifier = selectedStopIdentifier
                 )
             }
         } else {
@@ -119,7 +121,7 @@ internal class RealUiFavouriteDropdownMenuGenerator @Inject constructor(
         }
     }
 
-    private val arrivalAlertStopCodes = _arrivalAlertStopCodes
+    private val arrivalAlertStopIdentifiers = _arrivalAlertStopIdentifiers
         .shareIn(
             scope = viewModelCoroutineScope,
             started = SharingStarted.WhileSubscribed(
@@ -129,7 +131,7 @@ internal class RealUiFavouriteDropdownMenuGenerator @Inject constructor(
             replay = 1
         )
 
-    private val proximityAlertStopCodes = _proximityAlertStopCodes
+    private val proximityAlertStopIdentifiers = _proximityAlertStopIdentifiers
         .shareIn(
             scope = viewModelCoroutineScope,
             started = SharingStarted.WhileSubscribed(
@@ -139,10 +141,10 @@ internal class RealUiFavouriteDropdownMenuGenerator @Inject constructor(
             replay = 1
         )
 
-    private val _arrivalAlertStopCodes: Flow<Set<String>?> get() {
+    private val _arrivalAlertStopIdentifiers: Flow<Set<StopIdentifier>?> get() {
         return if (hasArrivalAlertFeature) {
             alertsRepository
-                .arrivalAlertStopCodesFlow
+                .arrivalAlertStopIdentifiersFlow
                 .distinctUntilChanged()
                 .flowOn(defaultCoroutineDispatcher)
         } else {
@@ -150,10 +152,10 @@ internal class RealUiFavouriteDropdownMenuGenerator @Inject constructor(
         }
     }
 
-    private val _proximityAlertStopCodes: Flow<Set<String>?> get() {
+    private val _proximityAlertStopIdentifiers: Flow<Set<StopIdentifier>?> get() {
         return if (hasProximityAlertFeature) {
             alertsRepository
-                .proximityAlertStopCodesFlow
+                .proximityAlertStopIdentifiersFlow
                 .distinctUntilChanged()
                 .flowOn(defaultCoroutineDispatcher)
         } else {
@@ -162,23 +164,23 @@ internal class RealUiFavouriteDropdownMenuGenerator @Inject constructor(
     }
 
     private fun createDropdownMenusForStops(
-        stopCodes: Set<String>,
-        arrivalAlertStopCodes: Set<String>?,
-        proximityAlertStopCodes: Set<String>?,
-        selectedStopCode: String?
-    ): Map<String, UiFavouriteDropdownMenu> {
-        return stopCodes
-            .associateWith { stopCode ->
+        stopIdentifiers: Set<StopIdentifier>,
+        arrivalAlertStopIdentifiers: Set<StopIdentifier>?,
+        proximityAlertStopIdentifiers: Set<StopIdentifier>?,
+        selectedStopIdentifier: StopIdentifier?
+    ): Map<StopIdentifier, UiFavouriteDropdownMenu> {
+        return stopIdentifiers
+            .associateWith { stopIdentifier ->
                 UiFavouriteDropdownMenu(
-                    isShown = stopCode == selectedStopCode,
+                    isShown = stopIdentifier == selectedStopIdentifier,
                     isShortcutItemShown = hasShortcutFeature,
                     arrivalAlertDropdownItem = createUiArrivalAlertDropdownItem(
-                        stopCode = stopCode,
-                        arrivalAlertStopCodes = arrivalAlertStopCodes
+                        stopIdentifier = stopIdentifier,
+                        arrivalAlertStopIdentifiers = arrivalAlertStopIdentifiers
                     ),
                     proximityAlertDropdownItem = createUiProximityAlertDropdownItem(
-                        stopCode = stopCode,
-                        proximityAlertStopCodes = proximityAlertStopCodes
+                        stopIdentifier = stopIdentifier,
+                        proximityAlertStopIdentifiers = proximityAlertStopIdentifiers
                     ),
                     isStopMapItemShown = hasStopMapFeature
                 )
@@ -186,12 +188,12 @@ internal class RealUiFavouriteDropdownMenuGenerator @Inject constructor(
     }
 
     private fun createUiArrivalAlertDropdownItem(
-        stopCode: String,
-        arrivalAlertStopCodes: Set<String>?
+        stopIdentifier: StopIdentifier,
+        arrivalAlertStopIdentifiers: Set<StopIdentifier>?
     ): UiArrivalAlertDropdownItem? {
         return if (hasArrivalAlertFeature) {
             UiArrivalAlertDropdownItem(
-                hasArrivalAlert = arrivalAlertStopCodes?.contains(stopCode) ?: false
+                hasArrivalAlert = arrivalAlertStopIdentifiers?.contains(stopIdentifier) ?: false
             )
         } else {
             null
@@ -199,12 +201,12 @@ internal class RealUiFavouriteDropdownMenuGenerator @Inject constructor(
     }
 
     private fun createUiProximityAlertDropdownItem(
-        stopCode: String,
-        proximityAlertStopCodes: Set<String>?
+        stopIdentifier: StopIdentifier,
+        proximityAlertStopIdentifiers: Set<StopIdentifier>?
     ): UiProximityAlertDropdownItem? {
         return if (hasProximityAlertFeature) {
             UiProximityAlertDropdownItem(
-                hasProximityAlert = proximityAlertStopCodes?.contains(stopCode) ?: false
+                hasProximityAlert = proximityAlertStopIdentifiers?.contains(stopIdentifier) ?: false
             )
         } else {
             null

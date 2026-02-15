@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,11 +46,11 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemNearestS
  * @author Niall Scott
  */
 class NearestStopsAdapter(
-        context: Context,
-        private val clickListener: OnNearStopItemClickListener,
-        private val stopMapMarkerDecorator: StopMapMarkerDecorator,
-        private val textFormattingUtils: TextFormattingUtils)
-    : ListAdapter<UiNearestStop, NearestStopViewHolder>(ItemEquator()) {
+    context: Context,
+    private val clickListener: OnNearStopItemClickListener,
+    private val stopMapMarkerDecorator: StopMapMarkerDecorator,
+    private val textFormattingUtils: TextFormattingUtils
+) : ListAdapter<UiNearestStop, NearestStopViewHolder>(ItemEquator()) {
 
     private val inflater = LayoutInflater.from(context)
     private val directionStrings = context.resources.getStringArray(R.array.orientations)
@@ -60,19 +60,20 @@ class NearestStopsAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-            NearestStopViewHolder(
-                    ListItemNearestStopBinding.inflate(inflater, parent, false),
-                    clickListener,
-                    stopMapMarkerDecorator,
-                    textFormattingUtils,
-                    directionStrings)
+        NearestStopViewHolder(
+            ListItemNearestStopBinding.inflate(inflater, parent, false),
+            clickListener,
+            stopMapMarkerDecorator,
+            textFormattingUtils,
+            directionStrings
+        )
 
     override fun onBindViewHolder(holder: NearestStopViewHolder, position: Int) {
         holder.populate(getItem(position))
     }
 
     override fun getItemId(position: Int) =
-            getItem(position)?.stopCode?.hashCode()?.toLong() ?: 0L
+        getItem(position)?.stopIdentifier?.hashCode()?.toLong() ?: 0L
 
     /**
      * This class is used to compare [UiNearestStop] items to determine position updates.
@@ -80,9 +81,9 @@ class NearestStopsAdapter(
     private class ItemEquator : DiffUtil.ItemCallback<UiNearestStop>() {
 
         override fun areItemsTheSame(oldItem: UiNearestStop, newItem: UiNearestStop) =
-                oldItem.stopCode == newItem.stopCode
+            oldItem.stopIdentifier == newItem.stopIdentifier
 
         override fun areContentsTheSame(oldItem: UiNearestStop, newItem: UiNearestStop) =
-                oldItem == newItem
+            oldItem == newItem
     }
 }

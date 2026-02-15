@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,7 +28,14 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.RawQuery
+import androidx.room.RoomRawQuery
 import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.database.busstop.operator.RoomOperatorEntity
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.RoomServiceEntity
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.bindStatement
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.createPlaceholders
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 
 /**
  * This is the Room implementation of [ServicePointDao].
@@ -38,32 +45,61 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 internal abstract class RoomServicePointDao : ServicePointDao {
 
-    override fun getServicePointsFlow(serviceNames: Set<String>?): Flow<List<ServicePoint>?> {
-        return serviceNames
+    override fun getServicePointsFlow(
+        services: Set<ServiceDescriptor>?
+    ): Flow<List<ServicePoint>> {
+        return services
             ?.ifEmpty { null }
             ?.let {
-                getServicePointsForServicesFlow(it)
+                getServicePointsForServicesFlow(createGetServicePointsForServicesRawQuery(it))
             }
             ?: servicePointsForAllServicesFlow
     }
 
     @get:Query("""
-        SELECT service.name AS serviceName, chainage, latitude, longitude 
-        FROM service_point 
-        LEFT JOIN service ON service_point.serviceId = service.id 
-        WHERE serviceName NOT NULL 
-        ORDER BY serviceName ASC, chainage ASC, orderValue ASC
+        SELECT service.name AS name, service.operator_code AS operator_code, route_section,
+            latitude, longitude
+        FROM service_point
+        LEFT JOIN service_view AS service ON service_point.service_id = service.id
+        ORDER BY service.name ASC, service.operator_code ASC, route_section ASC, order_value ASC
     """)
-    abstract val servicePointsForAllServicesFlow: Flow<List<RoomServicePoint>?>
+    abstract val servicePointsForAllServicesFlow: Flow<List<RoomServicePoint>>
 
-    @Query("""
-        SELECT service.name AS serviceName, chainage, latitude, longitude 
-        FROM service_point 
-        LEFT JOIN service ON service_point.serviceId = service.id 
-        WHERE serviceName IN (:services)
-        ORDER BY serviceName ASC, chainage ASC, orderValue ASC
-    """)
-    abstract fun getServicePointsForServicesFlow(
-        services: Set<String>
-    ): Flow<List<RoomServicePoint>?>
+    @RawQuery(
+        observedEntities = [
+            RoomOperatorEntity::class,
+            RoomServiceEntity::class,
+            RoomServicePointEntity::class
+        ]
+    )
+    abstract fun getServicePointsForServicesFlow(query: RoomRawQuery): Flow<List<RoomServicePoint>>
+
+    private fun createGetServicePointsForServicesRawQuery(
+        services: Set<ServiceDescriptor>
+    ): RoomRawQuery {
+        val sqlQuery = buildString {
+            append("""
+                SELECT service.name AS name, service.operator_code AS operator_code, route_section,
+                    latitude, longitude
+                FROM service_point
+                LEFT JOIN service_view AS service ON service_point.service_id = service.id
+                WHERE (service.name, service.operator_code) IN (VALUES
+            """.trimIndent())
+
+            append(services.createPlaceholders())
+
+            append("""
+                )
+                ORDER BY service.name ASC, service.operator_code ASC, route_section ASC,
+                    order_value ASC
+            """.trimIndent())
+        }
+
+        return RoomRawQuery(
+            sql = sqlQuery,
+            onBindStatement = {
+                services.bindStatement(it)
+            }
+        )
+    }
 }

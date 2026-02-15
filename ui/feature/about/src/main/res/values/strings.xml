@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
+  ~ Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
   ~
   ~ This software is provided 'as-is', without any express or implied
   ~ warranty.  In no event will the authors or contributors be held liable for
@@ -32,7 +32,6 @@
     <string name="about_version">Application version</string>
     <string name="about_author">Author</string>
     <string name="about_database_version">Database version</string>
-    <string name="about_topology_version">Topology version</string>
     <string name="about_website">Website</string>
     <string name="about_bluesky">Bluesky</string>
     <string name="about_credits">Credits</string>
@@ -40,7 +39,6 @@
     <string name="about_open_source">Open source licences</string>
 
     <string name="about_database_version_loading">Loading&#8230;</string>
-    <string name="about_topology_version_loading">Loading&#8230;</string>
 
     <string name="creditsdialog_title">Credits</string>
     <string name="creditsdialog_body">
@@ -51,7 +49,6 @@
                 &#8226; Gordon Christie (EdinBus for iOS developer)<br/>
                 &#8226; The City of Edinburgh Council<br/>
                 &#8226; Anthony Totton (App icon, website and graphics)<br/>
-                &#8226; INEO Systrans<br/>
                 &#8226; Lothian Buses
             </p>
             <br/>

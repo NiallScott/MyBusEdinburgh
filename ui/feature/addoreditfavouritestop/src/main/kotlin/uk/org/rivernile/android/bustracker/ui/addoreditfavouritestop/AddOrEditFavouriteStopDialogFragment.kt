@@ -76,15 +76,18 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
 import uk.org.rivernile.android.bustracker.core.text.UiStopName
 import uk.org.rivernile.android.bustracker.core.text.formatBusStopName
-import uk.org.rivernile.android.bustracker.core.text.formatBusStopNameWithStopCode
+import uk.org.rivernile.android.bustracker.core.text.formatBusStopNameWithStopIdentifier
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 
 /**
  * Show a [DialogFragment] which allows the user to add a new favourite stop, or edit the name
- * of an existing one. This [DialogFragment] will determine if the given stop code is already
+ * of an existing one. This [DialogFragment] will determine if the given stop identifier is already
  * a favourite stop and present the correct UI.
  *
  * @author Niall Scott
@@ -95,15 +98,17 @@ public class AddOrEditFavouriteStopDialogFragment : DialogFragment() {
     public companion object {
 
         /**
-         * Create a new instance of this [DialogFragment] with the given stop code.
+         * Create a new instance of this [DialogFragment] with the given stop identifier.
          *
-         * @param stopCode The stop code to add or edit the favourite details for.
+         * @param stopIdentifier The stop to add or edit the favourite details for.
          * @return A new instance of this [DialogFragment].
          */
-        public fun newInstance(stopCode: String): AddOrEditFavouriteStopDialogFragment {
+        public fun newInstance(
+            stopIdentifier: StopIdentifier
+        ): AddOrEditFavouriteStopDialogFragment {
             return AddOrEditFavouriteStopDialogFragment().apply {
                 arguments = bundleOf(
-                    ARG_STOP_CODE to stopCode
+                    ARG_STOP_IDENTIFIER to stopIdentifier.toParcelableStopIdentifier()
                 )
             }
         }
@@ -380,7 +385,7 @@ private fun LaunchAction(
 
 @Composable
 private fun blurbString(mode: UiContent.Mode): String {
-    val stopName = formatBusStopNameWithStopCode(mode.stopCode, mode.stopName)
+    val stopName = formatBusStopNameWithStopIdentifier(mode.stopIdentifier, mode.stopName)
 
     return when (mode) {
         is UiContent.Mode.Add ->
@@ -398,7 +403,7 @@ private fun stopNameDefaultTextString(mode: UiContent.Mode): String {
             ?.let { stopName ->
                 formatBusStopName(stopName)
             }
-            ?: mode.stopCode
+            ?: mode.stopIdentifier.toHumanReadableString()
         is UiContent.Mode.Edit -> mode.savedName
     }
 }
@@ -452,7 +457,7 @@ private class UiStateProvider : PreviewParameterProvider<UiState> {
         ),
         UiState(
             content = UiContent.Mode.Add(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 stopName = UiStopName(
                     name = "A Stop",
                     locality = "Some Locality"
@@ -462,7 +467,7 @@ private class UiStateProvider : PreviewParameterProvider<UiState> {
         ),
         UiState(
             content = UiContent.Mode.Edit(
-                stopCode = "123456",
+                stopIdentifier = "123456".toNaptanStopIdentifier(),
                 stopName = UiStopName(
                     name = "A Stop",
                     locality = "Some Locality"

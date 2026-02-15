@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,17 +26,33 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts.arrivals
 
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.arrival.ArrivalAlert
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.arrival.InsertableArrivalAlert
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import kotlin.time.Instant
+
 /**
  * This class holds data for an arrival alert that the user has requested.
  *
- * @property stopCode The stop code this arrival alert is for.
- * @property serviceNames A non-empty [List] of service names to trigger the alert for.
+ * @property stopIdentifier The stop this arrival alert is for.
+ * @property services A non-empty [Set] of services to trigger the alert for.
  * @property timeTrigger The alert should be fired when any of the named services is due at the
  * named stop at this value or less.
  * @author Niall Scott
  */
 public data class ArrivalAlertRequest(
-    val stopCode: String,
-    val serviceNames: List<String>,
+    val stopIdentifier: StopIdentifier,
+    val services: Set<ServiceDescriptor>,
     val timeTrigger: Int
 )
+
+internal fun ArrivalAlertRequest.toArrivalAlert(timeAdded: Instant): ArrivalAlert {
+    return InsertableArrivalAlert(
+        id = 0,
+        timeAdded = timeAdded,
+        stopIdentifier = stopIdentifier,
+        timeTriggerMinutes = timeTrigger,
+        services = services
+    )
+}

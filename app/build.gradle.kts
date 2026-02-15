@@ -27,15 +27,14 @@
 import com.android.build.api.variant.ResValue
 
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
+    id("mybus.android-application")
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
     alias(libs.plugins.firebase.appdistribution)
     alias(libs.plugins.androidx.baselineprofile)
+    id("mybus.hilt-convention")
 }
 
 android {
@@ -70,9 +69,10 @@ android {
             dimension = "city"
 
             applicationId = "uk.org.rivernile.edinburghbustracker.android"
-            versionCode = 21
-            versionName = "3.2.2"
-            setProperty("archivesBaseName", "MyBusEdinburgh-$versionName")
+            versionCode = 22
+            versionName = "3.3"
+            // TODO: find a proper way to change the APK name - maybe androidComponents API?
+            base.archivesName.set("MyBusEdinburgh-$versionName")
         }
     }
 
@@ -107,8 +107,9 @@ android {
     }
 
     buildFeatures {
-        viewBinding = true
         buildConfig = true
+        viewBinding = true
+        resValues = true
     }
 }
 
@@ -138,6 +139,7 @@ dependencies {
     implementation(project(":core:busstops-android"))
     implementation(project(":core:config"))
     implementation(project(":core:connectivity-android"))
+    implementation(project(":core:core-domain-android"))
     implementation(project(":core:coroutines-android"))
     implementation(project(":core:busstop-db-updater-android"))
     implementation(project(":core:favourites-android"))
@@ -149,7 +151,7 @@ dependencies {
     implementation(project(":core:preferences-android"))
     implementation(project(":core:services"))
     implementation(project(":core:services-android"))
-    implementation(project(":core:servicepoints"))
+    implementation(project(":core:servicepoints-android"))
     implementation(project(":core:servicestops-android"))
     implementation(project(":core:time-android"))
     implementation(project(":database:busstop-db-android"))
@@ -166,8 +168,6 @@ dependencies {
     implementation(project(":ui:widget:expandcollapseindicator"))
 
     // Hilt (dependency injection)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
     ksp(libs.kotlin.metadata)
 
     // AndroidX
@@ -209,6 +209,9 @@ dependencies {
     androidTestImplementation(libs.androidx.test.espresso.intents)
     androidTestImplementation(libs.kotlin.test.junit)
 
+    testImplementation(testFixtures(project(":core:busstops")))
+    testImplementation(testFixtures(project(":core:core-domain")))
+    testImplementation(testFixtures(project(":core:servicepoints")))
     testImplementation(testFixtures(project(":core:time")))
     testImplementation(testFixtures(project(":database:busstop-db-core")))
     testImplementation(project(":testutils"))

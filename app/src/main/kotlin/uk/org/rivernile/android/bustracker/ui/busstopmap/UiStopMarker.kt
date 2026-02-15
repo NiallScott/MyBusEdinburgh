@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,8 +28,9 @@ package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.clustering.ClusterItem
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
+import uk.org.rivernile.android.bustracker.core.busstops.StopName
+import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
  * This class describes a stop marker on the Google Map.
@@ -38,7 +39,7 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrient
  * This class is used by the Google Maps Utils clustering functionality, which has a somewhat
  * painful interface to work with. Internally, it uses the [ClusterItem] as a key (this class
  * implements [ClusterItem]). This means the [equals] and [hashCode] methods need to return a
- * stable value, and the [stopCode] is our key for this marker.
+ * stable value, and the [stopIdentifier] is our key for this marker.
  *
  * If this class were a `data class`, it would generate [equals], [hashCode] and [toString]
  * implementations for all fields, meaning that if any field changed then so would the results
@@ -47,10 +48,10 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrient
  *
  * To do real equality checks, the [deepEquals] method is available.
  *
- * TL;DR; for reasons, [equals] and [hashCode] are only calculated from the [stopCode] and no other
- * field.
+ * TL;DR; for reasons, [equals] and [hashCode] are only calculated from the [stopIdentifier] and no
+ * other field.
  *
- * @property stopCode The stop code of the marker.
+ * @property stopIdentifier The stop identifier of the marker.
  * @property stopName The name properties of the marker.
  * @property latLng The location of the marker as a Google Map [LatLng] object.
  * @property orientation The orientation of the stop icon marker.
@@ -58,7 +59,7 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrient
  * @author Niall Scott
  */
 class UiStopMarker(
-    val stopCode: String,
+    val stopIdentifier: StopIdentifier,
     val stopName: StopName,
     val latLng: LatLng,
     val orientation: StopOrientation,
@@ -88,18 +89,14 @@ class UiStopMarker(
 
         other as UiStopMarker
 
-        if (stopCode != other.stopCode) {
-            return false
-        }
-
-        return true
+        return stopIdentifier == other.stopIdentifier
     }
 
-    override fun hashCode() = stopCode.hashCode()
+    override fun hashCode() = stopIdentifier.hashCode()
 
     override fun toString(): String {
         return "UiStopMarker(" +
-            "stopCode='$stopCode', " +
+            "stopIdentifier='$stopIdentifier', " +
             "stopName=$stopName, " +
             "latLng=$latLng, " +
             "orientation=$orientation, " +
@@ -128,7 +125,7 @@ class UiStopMarker(
 
         other as UiStopMarker
 
-        return stopCode == other.stopCode &&
+        return stopIdentifier == other.stopIdentifier &&
             stopName == other.stopName &&
             latLng == other.latLng &&
             orientation == other.orientation &&

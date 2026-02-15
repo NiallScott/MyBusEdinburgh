@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.core.text
 
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+
 /**
  * A fake [StopNameFormatter] for testing.
  *
@@ -33,15 +35,15 @@ package uk.org.rivernile.android.bustracker.core.text
  */
 public class FakeStopNameFormatter(
     private val onFormatBusStopName: (UiStopName) -> String = { throw NotImplementedError() },
-    private val onFormatBusStopNameWithStopCode: (String, UiStopName?) -> String =
+    private val onFormatBusStopNameWithStopIdentifier: (StopIdentifier, UiStopName?) -> String =
         { _, _ -> throw NotImplementedError() }
 ) : StopNameFormatter {
 
     override fun formatBusStopName(stopName: UiStopName): String =
         onFormatBusStopName(stopName)
 
-    override fun formatBusStopNameWithStopCode(
-        stopCode: String,
+    override fun formatBusStopNameWithStopIdentifier(
+        stopIdentifier: StopIdentifier,
         stopName: UiStopName?
-    ): String = onFormatBusStopNameWithStopCode(stopCode, stopName)
+    ): String = onFormatBusStopNameWithStopIdentifier(stopIdentifier, stopName)
 }

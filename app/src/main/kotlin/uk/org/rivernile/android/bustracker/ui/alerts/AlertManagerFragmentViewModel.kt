@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import javax.inject.Inject
 
@@ -54,8 +55,8 @@ class AlertManagerFragmentViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val alertsFlow = alertsRetriever.allAlertsFlow
-            .flowOn(defaultDispatcher)
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+        .flowOn(defaultDispatcher)
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
     /**
      * This [LiveData] emits the current [UiAlert] items to present as a list on the UI.
@@ -66,8 +67,8 @@ class AlertManagerFragmentViewModel @Inject constructor(
      * This [LiveData] emits the current [UiState].
      */
     val uiStateLiveData = alertsFlow
-            .map(this::calculateUiState)
-            .asLiveData(viewModelScope.coroutineContext + defaultDispatcher)
+        .map(this::calculateUiState)
+        .asLiveData(viewModelScope.coroutineContext + defaultDispatcher)
 
     /**
      * When this [LiveData] emits a new item, the system location settings screen should be shown.
@@ -77,17 +78,17 @@ class AlertManagerFragmentViewModel @Inject constructor(
 
     /**
      * When this [LiveData] emits a new item, the user should be prompted to remove the arrival
-     * alert for the given stop code.
+     * alert for the given stop identifier.
      */
-    val showRemoveArrivalAlertLiveData: LiveData<String> get() = showRemoveArrivalAlert
-    private val showRemoveArrivalAlert = SingleLiveEvent<String>()
+    val showRemoveArrivalAlertLiveData: LiveData<StopIdentifier> get() = showRemoveArrivalAlert
+    private val showRemoveArrivalAlert = SingleLiveEvent<StopIdentifier>()
 
     /**
      * When this [LiveData] emits a new item, the user should be prompted to remove the proximity
-     * alert for the given stop code.
+     * alert for the given stop identifier.
      */
-    val showRemoveProximityAlertLiveData: LiveData<String> get() = showRemoveProximityAlert
-    private val showRemoveProximityAlert = SingleLiveEvent<String>()
+    val showRemoveProximityAlertLiveData: LiveData<StopIdentifier> get() = showRemoveProximityAlert
+    private val showRemoveProximityAlert = SingleLiveEvent<StopIdentifier>()
 
     /**
      * Handle the user clicking on the button to invoke the system location settings.
@@ -99,19 +100,19 @@ class AlertManagerFragmentViewModel @Inject constructor(
     /**
      * Handle the user clicking on the 'Remove' button on an arrival alert item.
      *
-     * @param stopCode The stop code for the arrival alert.
+     * @param stopIdentifier The stop for the arrival alert.
      */
-    fun onRemoveArrivalAlertClicked(stopCode: String) {
-        showRemoveArrivalAlert.value = stopCode
+    fun onRemoveArrivalAlertClicked(stopIdentifier: StopIdentifier) {
+        showRemoveArrivalAlert.value = stopIdentifier
     }
 
     /**
      * Handle the user clicking on the 'Remove' button on a proximity alert item.
      *
-     * @param stopCode The stop code for the proximity alert.
+     * @param stopIdentifier The stop for the proximity alert.
      */
-    fun onRemoveProximityAlertClicked(stopCode: String) {
-        showRemoveProximityAlert.value = stopCode
+    fun onRemoveProximityAlertClicked(stopIdentifier: StopIdentifier) {
+        showRemoveProximityAlert.value = stopIdentifier
     }
 
     /**

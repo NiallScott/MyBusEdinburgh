@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,6 +46,8 @@ import androidx.lifecycle.Lifecycle
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
 import uk.org.rivernile.android.bustracker.core.time.ElapsedTimeMinutes
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.utils.Event
@@ -66,12 +68,15 @@ class BusTimesFragment : Fragment() {
         /**
          * Creates a new instance of this [BusTimesFragment].
          *
-         * @param stopCode The stop code to show bus times for.
+         * @param stopIdentifier The stop to show bus times for.
          * @return A new instance of this [Fragment].
          */
-        fun newInstance(stopCode: String?) = BusTimesFragment().apply {
+        fun newInstance(stopIdentifier: StopIdentifier?) = BusTimesFragment().apply {
             arguments = Bundle().apply {
-                putString(BusTimesFragmentViewModel.STATE_STOP_CODE, stopCode)
+                putParcelable(
+                    BusTimesFragmentViewModel.STATE_STOP_IDENTIFIER,
+                    stopIdentifier?.toParcelableStopIdentifier()
+                )
             }
         }
     }

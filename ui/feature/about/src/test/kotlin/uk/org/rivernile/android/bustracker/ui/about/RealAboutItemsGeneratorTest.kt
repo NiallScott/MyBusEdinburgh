@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,6 +39,7 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.database.FakeDa
 import java.util.Date
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Instant
 
 private const val EXPECTED_VERSION_NAME = "1.2.3"
 private const val EXPECTED_VERSION_CODE = 4L
@@ -64,14 +65,12 @@ class RealAboutItemsGeneratorTest {
     fun createAboutItemsReturnsItemsWithDatabaseInfoWhenDatabaseInfoIsPresent() {
         val generator = createAboutItemsGenerator()
         val expected = createdExpectedItems(
-            databaseUpdateTime = Date(123L),
-            topologyId = "abc123"
+            databaseUpdateTime = Date(123L)
         )
 
         val result = generator.createAboutItems(
             FakeDatabaseMetadata(
-                updateTimestamp = 123L,
-                topologyVersionId = "abc123"
+                updateTimestamp = Instant.fromEpochMilliseconds(123L)
             )
         )
 
@@ -84,16 +83,14 @@ class RealAboutItemsGeneratorTest {
             onDatabaseMetadataFlow = {
                 flowOf(
                     FakeDatabaseMetadata(
-                        updateTimestamp = 123L,
-                        topologyVersionId = "abc123"
+                        updateTimestamp = Instant.fromEpochMilliseconds(123L)
                     )
                 )
             }
         )
         val expected1 = createdExpectedItems()
         val expected2 = createdExpectedItems(
-            databaseUpdateTime = Date(123L),
-            topologyId = "abc123"
+            databaseUpdateTime = Date(123L)
         )
 
         generator.aboutItemsFlow.test {
@@ -104,8 +101,7 @@ class RealAboutItemsGeneratorTest {
     }
 
     private fun createdExpectedItems(
-        databaseUpdateTime: Date? = null,
-        topologyId: String? = null
+        databaseUpdateTime: Date? = null
     ) = listOf(
         UiAboutItem.TwoLinesItem.AppVersion(
             versionName = EXPECTED_VERSION_NAME,
@@ -115,7 +111,6 @@ class RealAboutItemsGeneratorTest {
         UiAboutItem.TwoLinesItem.Website,
         UiAboutItem.TwoLinesItem.Bluesky,
         UiAboutItem.TwoLinesItem.DatabaseVersion(databaseUpdateTime),
-        UiAboutItem.TwoLinesItem.TopologyVersion(topologyId),
         UiAboutItem.OneLineItem.Credits,
         UiAboutItem.OneLineItem.PrivacyPolicy,
         UiAboutItem.OneLineItem.OpenSourceLicences

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,7 +28,7 @@ package uk.org.rivernile.android.bustracker.core.endpoints.api.json
 
 import retrofit2.Response
 import retrofit2.http.GET
-import retrofit2.http.Query
+import retrofit2.http.Path
 
 /**
  * This interface defines a Retrofit interface for accessing the API.
@@ -40,13 +40,13 @@ internal interface ApiService {
     /**
      * Get the database version.
      *
-     * @param apiKey The API key.
-     * @param schemaType The schema type.
+     * @param appName The name of the app to get the database version for.
+     * @param schemaVersion The version of the schema to get for the app.
      * @return A Retrofit [Response] object.
      */
-    @GET("DatabaseVersion")
+    @GET("v1/database-version/{appName}/{schemaVersion}")
     suspend fun getDatabaseVersion(
-        @Query("key") apiKey: String,
-        @Query("schemaType") schemaType: String
+        @Path("appName") appName: String,
+        @Path("schemaVersion") schemaVersion: Int
     ): Response<JsonDatabaseVersion>
 }

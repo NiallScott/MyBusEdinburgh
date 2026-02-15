@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,14 +26,16 @@
 
 package uk.org.rivernile.android.bustracker.ui.removefavouritestop
 
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+
 /**
  * A fake [Arguments] for testing.
  *
  * @author Niall Scott
  */
 class FakeArguments(
-    private val onGetStopCode: () -> String? = { throw NotImplementedError() }
+    private val onGetStopIdentifier: () -> StopIdentifier? = { throw NotImplementedError() }
 ) : Arguments {
 
-    override val stopCode get() = onGetStopCode()
+    override val stopIdentifier get() = onGetStopIdentifier()
 }

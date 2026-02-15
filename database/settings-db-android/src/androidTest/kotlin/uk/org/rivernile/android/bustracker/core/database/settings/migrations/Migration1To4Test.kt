@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,7 +37,7 @@ import org.junit.Rule
 import org.junit.Test
 import uk.org.rivernile.android.bustracker.core.database.OldDatabaseCreator
 import uk.org.rivernile.android.bustracker.core.database.settings.RoomSettingsDatabase
-import uk.org.rivernile.android.bustracker.core.database.settings.assertAlertTriggersExist
+import uk.org.rivernile.android.bustracker.core.database.settings.assertAlertTriggersExistUpToVersion4
 
 /**
  * Tests for [Migration1To4].
@@ -70,97 +70,87 @@ class Migration1To4Test {
     fun migrate1To4Empty() {
         oldDatabaseCreator.openDatabase(TEST_DB, openHelperCallback).close()
 
-        helper.runMigrationsAndValidate(TEST_DB, 4, true, Migration1To4()).apply {
-            assertAlertTriggersExist(this)
+        helper.runMigrationsAndValidate(TEST_DB, 4, true, Migration1To4()).use { database ->
+            database.assertAlertTriggersExistUpToVersion4()
 
-            query("SELECT * FROM active_alerts").apply {
-                assertEquals(0, count)
-                close()
+            database.query("SELECT * FROM active_alerts").use {
+                assertEquals(0, it.count)
             }
 
-            query("SELECT * FROM favourite_stops").apply {
-                assertEquals(0, count)
-                close()
+            database.query("SELECT * FROM favourite_stops").use {
+                assertEquals(0, it.count)
             }
         }
     }
 
     @Test
     fun migrate1To4WithData() {
-        oldDatabaseCreator.openDatabase(TEST_DB, openHelperCallback).apply {
-            execSQL("""
+        oldDatabaseCreator.openDatabase(TEST_DB, openHelperCallback).use { database ->
+            database.execSQL("""
                 INSERT INTO favourite_stops (_id, stopName)
                 VALUES ('111111', 'Stop 1')
             """.trimIndent())
 
-            execSQL("""
+            database.execSQL("""
                 INSERT INTO favourite_stops (_id, stopName)
                 VALUES ('222222', 'Stop 2')
             """.trimIndent())
 
-            execSQL("""
+            database.execSQL("""
                 INSERT INTO favourite_stops (_id, stopName)
                 VALUES ('333333', 'Stop 3')
             """.trimIndent())
 
             // Stop name is the same as '333333' to test there is no uniqueness on stop name.
-            execSQL("""
-                INSERT INTO favourite_stops (_id, stopName) 
+            database.execSQL("""
+                INSERT INTO favourite_stops (_id, stopName)
                 VALUES ('444444', 'Stop 3')
             """.trimIndent())
-
-            close()
         }
 
-        helper.runMigrationsAndValidate(TEST_DB, 4, true, Migration1To4()).apply {
-            assertAlertTriggersExist(this)
+        helper.runMigrationsAndValidate(TEST_DB, 4, true, Migration1To4()).use { database ->
+            database.assertAlertTriggersExistUpToVersion4()
 
-            query("SELECT * FROM favourite_stops ORDER BY stopCode ASC").apply {
-                assertEquals(4, count)
-                val stopCodeColumn = getColumnIndexOrThrow("stopCode")
-                val stopNameColumn = getColumnIndexOrThrow("stopName")
+            database.query("SELECT * FROM favourite_stops ORDER BY stopCode ASC").use {
+                assertEquals(4, it.count)
+                val stopCodeColumn = it.getColumnIndexOrThrow("stopCode")
+                val stopNameColumn = it.getColumnIndexOrThrow("stopName")
 
-                moveToFirst()
-                assertEquals("111111", getString(stopCodeColumn))
-                assertEquals("Stop 1", getString(stopNameColumn))
+                it.moveToFirst()
+                assertEquals("111111", it.getString(stopCodeColumn))
+                assertEquals("Stop 1", it.getString(stopNameColumn))
 
-                moveToNext()
-                assertEquals("222222", getString(stopCodeColumn))
-                assertEquals("Stop 2", getString(stopNameColumn))
+                it.moveToNext()
+                assertEquals("222222", it.getString(stopCodeColumn))
+                assertEquals("Stop 2", it.getString(stopNameColumn))
 
-                moveToNext()
-                assertEquals("333333", getString(stopCodeColumn))
-                assertEquals("Stop 3", getString(stopNameColumn))
+                it.moveToNext()
+                assertEquals("333333", it.getString(stopCodeColumn))
+                assertEquals("Stop 3", it.getString(stopNameColumn))
 
-                moveToNext()
-                assertEquals("444444", getString(stopCodeColumn))
-                assertEquals("Stop 3", getString(stopNameColumn))
-
-                close()
+                it.moveToNext()
+                assertEquals("444444", it.getString(stopCodeColumn))
+                assertEquals("Stop 3", it.getString(stopNameColumn))
             }
 
-            query("SELECT * FROM active_alerts").apply {
-                assertEquals(0, count)
-                close()
+            database.query("SELECT * FROM active_alerts").use {
+                assertEquals(0, it.count)
             }
         }
     }
 
     @Test
     fun migrate1To4WithNullStopCodeDoesNotGetMigrated() {
-        oldDatabaseCreator.openDatabase(TEST_DB, openHelperCallback).apply {
-            execSQL("""
-                INSERT INTO favourite_stops (_id, stopName) 
+        oldDatabaseCreator.openDatabase(TEST_DB, openHelperCallback).use { database ->
+            database.execSQL("""
+                INSERT INTO favourite_stops (_id, stopName)
                 VALUES (NULL, 'Stop name 1')
             """.trimIndent())
-
-            close()
         }
 
-        helper.runMigrationsAndValidate(TEST_DB, 4, true, Migration1To4()).apply {
-            query("SELECT * FROM favourite_stops").apply {
-                assertEquals(0, count)
-                close()
+        helper.runMigrationsAndValidate(TEST_DB, 4, true, Migration1To4()).use { database ->
+            database.query("SELECT * FROM favourite_stops").use {
+                assertEquals(0, it.count)
             }
         }
     }
