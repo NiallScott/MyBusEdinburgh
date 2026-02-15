@@ -57,7 +57,9 @@ internal class RealAndroidShortcutsRepository @Inject constructor(
     private val busTimesIntentFactory: BusTimesIntentFactory
 ) : AndroidShortcutsRepository {
 
-    override fun createPinFavouriteStopShortcutResultIntent(shortcut: FavouriteStopShortcut): Intent {
+    override fun createPinFavouriteStopShortcutResultIntent(
+        shortcut: FavouriteStopShortcut
+    ): Intent {
         return ShortcutManagerCompat
             .createShortcutResultIntent(
                 context,
