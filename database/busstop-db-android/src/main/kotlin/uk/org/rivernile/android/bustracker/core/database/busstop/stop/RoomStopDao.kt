@@ -31,6 +31,7 @@ import androidx.room.MapColumn
 import androidx.room.Query
 import androidx.room.RawQuery
 import androidx.room.RoomRawQuery
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import uk.org.rivernile.android.bustracker.core.database.busstop.operator.RoomOperatorEntity
 import uk.org.rivernile.android.bustracker.core.database.busstop.service.RoomServiceEntity
@@ -93,6 +94,7 @@ internal abstract class RoomStopDao : StopDao {
             ?: allStopDetailsFlow
     }
 
+    @Transaction
     @Query("""
         SELECT id, naptan_code, name, locality, latitude, longitude, bearing
         FROM stop
@@ -124,6 +126,7 @@ internal abstract class RoomStopDao : StopDao {
         )
     }
 
+    @Transaction
     @Query("""
         SELECT id, naptan_code, name, locality, bearing
         FROM stop
@@ -156,6 +159,7 @@ internal abstract class RoomStopDao : StopDao {
         query: RoomRawQuery
     ): Flow<List<RoomStopDetails>>
 
+    @Transaction
     @RawQuery(
         observedEntities = [
             RoomOperatorEntity::class,

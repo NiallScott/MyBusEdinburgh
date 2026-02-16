@@ -80,11 +80,8 @@ internal abstract class RoomArrivalAlertDao : ArrivalAlertDao {
     """)
     abstract override suspend fun getAllArrivalAlerts(): List<RoomArrivalAlert>
 
-    @get:Query("""
-        SELECT id, time_added_millis, stop_code, time_trigger_minutes
-        FROM arrival_alert
-    """)
-    abstract override val allArrivalAlertsFlow: Flow<List<RoomArrivalAlert>>
+    override val allArrivalAlertsFlow get() = getAllArrivalAlertsFlowInternal()
+        .onStart { deleteOldAlerts() }
 
     @Transaction
     override suspend fun getAllArrivalAlertStops(): Set<StopIdentifier> {
@@ -114,6 +111,13 @@ internal abstract class RoomArrivalAlertDao : ArrivalAlertDao {
         WHERE stop_code = :stopIdentifier
     """)
     abstract fun getHasArrivalAlertFlowInternal(stopIdentifier: StopIdentifier): Flow<Int>
+
+    @Transaction
+    @Query("""
+        SELECT id, time_added_millis, stop_code, time_trigger_minutes
+        FROM arrival_alert
+    """)
+    abstract fun getAllArrivalAlertsFlowInternal(): Flow<List<RoomArrivalAlert>>
 
     @Query("""
         SELECT DISTINCT stop_code

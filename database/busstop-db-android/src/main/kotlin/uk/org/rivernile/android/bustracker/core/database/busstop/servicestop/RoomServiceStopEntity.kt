@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.servicestop
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
@@ -38,7 +39,19 @@ import androidx.room.PrimaryKey
  * @property stopId The stop ID.
  * @author Niall Scott
  */
-@Entity(tableName = "service_stop")
+@Entity(
+    tableName = "service_stop",
+    indices = [
+        Index(
+            name = "service_stop_service_id_index",
+            value = [ "service_id" ]
+        ),
+        Index(
+            name = "service_stop_stop_id_index",
+            value = [ "stop_id" ]
+        )
+    ]
+)
 internal data class RoomServiceStopEntity(
     @PrimaryKey val id: Int,
     @ColumnInfo("service_id") val serviceId: Int,

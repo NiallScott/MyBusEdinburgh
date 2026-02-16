@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "f61c3ea3d75b631c63757a6466fd6089",
+    "identityHash": "1c2f734af4c32fd0b6f44594bd36f717",
     "entities": [
       {
         "tableName": "database_info",
@@ -215,7 +215,27 @@
           "columnNames": [
             "id"
           ]
-        }
+        },
+        "indices": [
+          {
+            "name": "service_stop_service_id_index",
+            "unique": false,
+            "columnNames": [
+              "service_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `service_stop_service_id_index` ON `${TABLE_NAME}` (`service_id`)"
+          },
+          {
+            "name": "service_stop_stop_id_index",
+            "unique": false,
+            "columnNames": [
+              "stop_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `service_stop_stop_id_index` ON `${TABLE_NAME}` (`stop_id`)"
+          }
+        ]
       },
       {
         "tableName": "stop",
@@ -304,7 +324,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f61c3ea3d75b631c63757a6466fd6089')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1c2f734af4c32fd0b6f44594bd36f717')"
     ]
   }
 }

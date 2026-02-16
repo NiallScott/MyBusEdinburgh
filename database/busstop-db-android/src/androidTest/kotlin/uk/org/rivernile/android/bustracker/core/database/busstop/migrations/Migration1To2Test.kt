@@ -104,6 +104,14 @@ class Migration1To2Test {
             assertTrue(it.count > 0)
         }
 
+        query("PRAGMA index_info(service_stop_service_id_index)").use {
+            assertTrue(it.count > 0)
+        }
+
+        query("PRAGMA index_info(service_stop_stop_id_index)").use {
+            assertTrue(it.count > 0)
+        }
+
         query("PRAGMA index_info(stop_naptan_code_index)").use {
             assertTrue(it.count > 0)
         }
