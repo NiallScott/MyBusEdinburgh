@@ -107,6 +107,7 @@ include(
     ":testutils",
     ":ui:feature:about",
     ":ui:feature:news",
+    ":ui:feature:removearrivalalert",
     ":ui:text-formatting",
     ":ui:ui-core",
     ":ui:widget:contentview",

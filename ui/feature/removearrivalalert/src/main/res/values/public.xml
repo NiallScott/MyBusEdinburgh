@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
+  ~ Copyright (C) 2026 Niall 'Rivernile' Scott
   ~
   ~ This software is provided 'as-is', without any express or implied
   ~ warranty.  In no event will the authors or contributors be held liable for
@@ -25,14 +25,5 @@
   ~
   -->
 <resources>
-    <public name="padding_half" type="dimen" />
-    <public name="padding_default" type="dimen" />
-    <public name="padding_double" type="dimen" />
-    <public name="action_button_min_size" type="dimen" />
-    <public name="indeterminate_progress_size" type="dimen" />
-
-    <public name="cancel" type="string" />
-    <public name="close" type="string" />
-    <public name="okay" type="string" />
-    <public name="navigate_up" type="string" />
+    <public />
 </resources>

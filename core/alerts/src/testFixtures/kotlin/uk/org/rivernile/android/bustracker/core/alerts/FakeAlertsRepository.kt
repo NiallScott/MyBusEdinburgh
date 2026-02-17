@@ -37,6 +37,8 @@ import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
  * @author Niall Scott
  */
 class FakeAlertsRepository(
+    private val onRemoveArrivalAlertWithStopIdentifier: (StopIdentifier) -> Unit =
+        { throw NotImplementedError() },
     private val onRemoveArrivalAlertWithId: (Int) -> Unit =
         { throw NotImplementedError() },
     private val onRemoveAllArrivalAlerts: () -> Unit = { throw NotImplementedError() },
@@ -63,7 +65,7 @@ class FakeAlertsRepository(
     }
 
     override suspend fun removeArrivalAlert(stopIdentifier: StopIdentifier) {
-        throw NotImplementedError()
+        onRemoveArrivalAlertWithStopIdentifier(stopIdentifier)
     }
 
     override suspend fun removeArrivalAlert(id: Int) {

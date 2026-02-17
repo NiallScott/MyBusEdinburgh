@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,46 +24,45 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.alerts.time
+package uk.org.rivernile.android.bustracker.ui.alerts.removearrivalalert
 
+import android.app.Dialog
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
+import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
-import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 
 /**
- * This [DialogFragment] will show an [AlertDialog] which asks the user to confirm if they wish
- * to delete the arrival alert or not.
+ * This [DialogFragment] will show an [androidx.appcompat.app.AlertDialog] which asks the user to
+ * confirm if they wish to remove the arrival alert or not.
  *
  * @author Niall Scott
  */
 @AndroidEntryPoint
-class DeleteTimeAlertDialogFragment : DialogFragment() {
+public class RemoveArrivalAlertDialogFragment : DialogFragment() {
 
-    companion object {
+    public companion object {
 
         /**
-         * Create a new instance of [DeleteTimeAlertDialogFragment].
+         * Create a new instance of [RemoveArrivalAlertDialogFragment].
          *
          * @param stopIdentifier The stop to remove the arrival alert for.
          */
-        fun newInstance(stopIdentifier: StopIdentifier) =
-            DeleteTimeAlertDialogFragment().apply {
-                arguments = Bundle().apply {
-                    putParcelable(
-                        DeleteTimeAlertDialogFragmentViewModel.STATE_STOP_IDENTIFIER,
-                        stopIdentifier.toParcelableStopIdentifier()
-                    )
-                }
+        public fun newInstance(stopIdentifier: StopIdentifier): RemoveArrivalAlertDialogFragment {
+            return RemoveArrivalAlertDialogFragment().apply {
+                arguments = bundleOf(
+                    ARG_STOP_IDENTIFIER to stopIdentifier.toParcelableStopIdentifier()
+                )
             }
+        }
     }
 
-    private val viewModel by viewModels<DeleteTimeAlertDialogFragmentViewModel>()
+    private val viewModel by viewModels<RemoveArrivalAlertViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,12 +70,13 @@ class DeleteTimeAlertDialogFragment : DialogFragment() {
         isCancelable = true
     }
 
-    override fun onCreateDialog(savedInstanceState: Bundle?) =
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.deletetimedialog_title)
-            .setPositiveButton(R.string.okay) { _, _ ->
-                viewModel.onUserConfirmDeletion()
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.removearrivalalertdialog_title)
+            .setPositiveButton(Rcore.string.okay) { _, _ ->
+                viewModel.onUserConfirmRemoval()
             }
-            .setNegativeButton(R.string.cancel, null)
+            .setNegativeButton(Rcore.string.cancel, null)
             .create()
+    }
 }
