@@ -47,7 +47,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragment
-import uk.org.rivernile.android.bustracker.ui.alerts.proximity.DeleteProximityAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.alerts.time.AddTimeAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity
 import uk.org.rivernile.android.bustracker.ui.bustimes.details.StopDetailsFragment
@@ -66,6 +65,7 @@ import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.ui.alerts.removearrivalalert.RemoveArrivalAlertDialogFragment
+import uk.org.rivernile.android.bustracker.ui.alerts.removeproximityalert.RemoveProximityAlertDialogFragment
 
 /**
  * The purpose of this [AppCompatActivity] is to display to the user live departure times and
@@ -403,7 +403,7 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
      * @param stopIdentifier The stop to remove the proximity alert for.
      */
     private fun showRemoveProximityAlert(stopIdentifier: StopIdentifier) {
-        DeleteProximityAlertDialogFragment
+        RemoveProximityAlertDialogFragment
             .newInstance(stopIdentifier)
             .show(supportFragmentManager, DIALOG_REMOVE_PROX_ALERT)
     }

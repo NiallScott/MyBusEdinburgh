@@ -42,6 +42,8 @@ class FakeAlertsRepository(
     private val onRemoveArrivalAlertWithId: (Int) -> Unit =
         { throw NotImplementedError() },
     private val onRemoveAllArrivalAlerts: () -> Unit = { throw NotImplementedError() },
+    private val onRemoveProximityAlertWithStopIdentifier: (StopIdentifier) -> Unit =
+        { throw NotImplementedError() },
     private val onRemoveProximityAlertWithId: (Int) -> Unit = { throw NotImplementedError() },
     private val onRemoveAllProximityAlerts: () -> Unit = { throw NotImplementedError() },
     private val onGetAllArrivalAlerts: () -> List<ArrivalAlert>? = { throw NotImplementedError() },
@@ -77,7 +79,7 @@ class FakeAlertsRepository(
     }
 
     override suspend fun removeProximityAlert(stopIdentifier: StopIdentifier) {
-        throw NotImplementedError()
+        onRemoveProximityAlertWithStopIdentifier(stopIdentifier)
     }
 
     override suspend fun removeProximityAlert(id: Int) {

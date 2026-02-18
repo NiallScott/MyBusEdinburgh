@@ -382,13 +382,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="deletefavouritedialog_title">Remove stop as a favourite?</string>
 
     <!--
-    **************************************************
-    * Strings for DeleteProximityAlertDialogFragment *
-    **************************************************
-    -->
-    <string name="deleteproxdialog_title">Remove proximity alert?</string>
-
-    <!--
     ************************************************
     * Strings for MapTypeBottomSheetDialogFragment *
     ************************************************

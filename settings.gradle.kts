@@ -108,6 +108,7 @@ include(
     ":ui:feature:about",
     ":ui:feature:news",
     ":ui:feature:removearrivalalert",
+    ":ui:feature:removeproximityalert",
     ":ui:text-formatting",
     ":ui:ui-core",
     ":ui:widget:contentview",

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,46 +24,45 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.alerts.proximity
+package uk.org.rivernile.android.bustracker.ui.alerts.removeproximityalert
 
+import android.app.Dialog
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
+import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
-import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 
 /**
- * This [DialogFragment] will show an [AlertDialog] which asks the user to confirm if they wish
- * to delete the proximity alert or not.
+ * This [DialogFragment] will show an [androidx.appcompat.app.AlertDialog] which asks the user to
+ * confirm if they wish to remove the proximity alert or not.
  *
  * @author Niall Scott
  */
 @AndroidEntryPoint
-class DeleteProximityAlertDialogFragment : DialogFragment() {
+public class RemoveProximityAlertDialogFragment : DialogFragment() {
 
-    companion object {
+    public companion object {
 
         /**
-         * Create a new instance of [DeleteProximityAlertDialogFragment].
+         * Create a new instance of [RemoveProximityAlertDialogFragment].
          *
-         * @param stopIdentifier The stop to delete the proximity alert for.
+         * @param stopIdentifier The stop to remove the proximity alert for.
          */
-        fun newInstance(stopIdentifier: StopIdentifier) =
-            DeleteProximityAlertDialogFragment().apply {
-                arguments = Bundle().apply {
-                    putParcelable(
-                        DeleteProximityAlertDialogFragmentViewModel.STATE_STOP_IDENTIFIER,
-                        stopIdentifier.toParcelableStopIdentifier()
-                    )
-                }
+        public fun newInstance(stopIdentifier: StopIdentifier): RemoveProximityAlertDialogFragment {
+            return RemoveProximityAlertDialogFragment().apply {
+                arguments = bundleOf(
+                    ARG_STOP_IDENTIFIER to stopIdentifier.toParcelableStopIdentifier()
+                )
             }
+        }
     }
 
-    private val viewModel by viewModels<DeleteProximityAlertDialogFragmentViewModel>()
+    private val viewModel by viewModels<RemoveProximityAlertViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,12 +70,13 @@ class DeleteProximityAlertDialogFragment : DialogFragment() {
         isCancelable = true
     }
 
-    override fun onCreateDialog(savedInstanceState: Bundle?) =
-            MaterialAlertDialogBuilder(requireContext())
-                    .setTitle(R.string.deleteproxdialog_title)
-                    .setPositiveButton(R.string.okay) { _, _ ->
-                        viewModel.onUserConfirmDeletion()
-                    }
-                    .setNegativeButton(R.string.cancel, null)
-                    .create()
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.removeproxdialog_title)
+            .setPositiveButton(Rcore.string.okay) { _, _ ->
+                viewModel.onUserConfirmRemoval()
+            }
+            .setNegativeButton(Rcore.string.cancel, null)
+            .create()
+    }
 }

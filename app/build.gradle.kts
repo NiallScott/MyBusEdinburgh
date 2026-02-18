@@ -160,6 +160,7 @@ dependencies {
     implementation(project(":ui:feature:about"))
     implementation(project(":ui:feature:news"))
     implementation(project(":ui:feature:removearrivalalert"))
+    implementation(project(":ui:feature:removeproximityalert"))
     implementation(project(":ui:text-formatting"))
     implementation(project(":ui:ui-core"))
     implementation(project(":ui:widget:contentview"))
