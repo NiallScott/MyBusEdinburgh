@@ -31,7 +31,7 @@ plugins {
 }
 
 android {
-    namespace = "uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop"
+    namespace = "uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit"
 
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

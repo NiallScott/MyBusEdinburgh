@@ -24,18 +24,16 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop
-
-import kotlinx.coroutines.flow.Flow
+package uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit
 
 /**
- * A fake [UiContentFetcher] for testing.
+ * This represents the current state of the add or edit favourite stops UI.
  *
+ * @property content The current [UiContent] to show.
+ * @property action The current [UiAction] to perform, or `null` if no action should be performed.
  * @author Niall Scott
  */
-internal class FakeUiContentFetcher(
-    private val onUiContentFlow: () -> Flow<UiContent> = { throw NotImplementedError() }
-) : UiContentFetcher {
-
-    override val uiContentFlow get() = onUiContentFlow()
-}
+internal data class UiState(
+    val content: UiContent = UiContent.InProgress,
+    val action: UiAction? = null
+)

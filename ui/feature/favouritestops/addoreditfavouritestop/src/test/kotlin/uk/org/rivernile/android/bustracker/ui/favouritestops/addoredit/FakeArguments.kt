@@ -24,23 +24,22 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop
+package uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit
 
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.contract
+import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
- * Is the stop name valid?
+ * A fake [Arguments] for testing.
  *
- * @param stopName The stop name to validate.
- * @return `true` if the stop name is valid, otherwise `false`.
  * @author Niall Scott
  */
-@OptIn(ExperimentalContracts::class)
-internal fun isStopNameValid(stopName: String?): Boolean {
-    contract {
-        returns(true) implies (stopName != null)
-    }
+class FakeArguments(
+    private val onGetStopIdentifier: () -> StopIdentifier? = { throw NotImplementedError() },
+    private val onStopIdentifierFlow: () -> Flow<StopIdentifier?> = { throw NotImplementedError() }
+) : Arguments {
 
-    return !stopName.isNullOrBlank()
+    override val stopIdentifier get() = onGetStopIdentifier()
+
+    override val stopIdentifierFlow get() = onStopIdentifierFlow()
 }

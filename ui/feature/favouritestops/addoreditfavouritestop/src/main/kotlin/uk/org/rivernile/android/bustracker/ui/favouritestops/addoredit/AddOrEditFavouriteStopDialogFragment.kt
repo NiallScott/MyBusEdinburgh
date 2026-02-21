@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop
+package uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit
 
 import android.app.Dialog
 import android.content.DialogInterface

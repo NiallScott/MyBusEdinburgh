@@ -24,22 +24,22 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop.di
+package uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit.di
 
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
-import uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop.Arguments
-import uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop.RealArguments
-import uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop.RealState
-import uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop.RealUiContentFetcher
-import uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop.State
-import uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop.UiContentFetcher
+import uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit.Arguments
+import uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit.RealArguments
+import uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit.RealState
+import uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit.RealUiContentFetcher
+import uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit.State
+import uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit.UiContentFetcher
 
 /**
  * A module for supplying dependencies for
- * [uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop.AddOrEditFavouriteStopViewModel].
+ * [uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit.AddOrEditFavouriteStopViewModel].
  *
  * @author Niall Scott
  */

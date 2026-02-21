@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop
+package uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit
 
 import app.cash.turbine.test
 import kotlinx.coroutines.ExperimentalCoroutinesApi

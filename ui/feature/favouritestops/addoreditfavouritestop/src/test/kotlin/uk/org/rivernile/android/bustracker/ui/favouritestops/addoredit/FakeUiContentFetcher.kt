@@ -24,38 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop
+package uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit
 
-import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlinx.coroutines.flow.Flow
 
 /**
- * Tests for `InputValidator.kt`.
+ * A fake [UiContentFetcher] for testing.
  *
  * @author Niall Scott
  */
-class InputValidatorKtTest {
+internal class FakeUiContentFetcher(
+    private val onUiContentFlow: () -> Flow<UiContent> = { throw NotImplementedError() }
+) : UiContentFetcher {
 
-    @Suppress("KotlinConstantConditions")
-    @Test
-    fun isStopNameValidReturnsFalseWhenStopNameIsNull() {
-        val result = isStopNameValid(null)
-
-        assertFalse(result)
-    }
-
-    @Test
-    fun isStopNameValidReturnsFalseWhenStopNameIsEmpty() {
-        val result = isStopNameValid("")
-
-        assertFalse(result)
-    }
-
-    @Test
-    fun isStopNameValidReturnsTrueWhenStopNameIsPopulated() {
-        val result = isStopNameValid("A")
-
-        assertTrue(result)
-    }
+    override val uiContentFlow get() = onUiContentFlow()
 }

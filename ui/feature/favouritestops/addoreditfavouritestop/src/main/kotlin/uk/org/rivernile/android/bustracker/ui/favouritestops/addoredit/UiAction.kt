@@ -24,22 +24,20 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop
+package uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit
 
-import kotlinx.coroutines.flow.Flow
-import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import androidx.compose.runtime.Immutable
 
 /**
- * A fake [Arguments] for testing.
+ * This represents an action which should be performed.
  *
  * @author Niall Scott
  */
-class FakeArguments(
-    private val onGetStopIdentifier: () -> StopIdentifier? = { throw NotImplementedError() },
-    private val onStopIdentifierFlow: () -> Flow<StopIdentifier?> = { throw NotImplementedError() }
-) : Arguments {
+@Immutable
+internal sealed interface UiAction {
 
-    override val stopIdentifier get() = onGetStopIdentifier()
-
-    override val stopIdentifierFlow get() = onStopIdentifierFlow()
+    /**
+     * The action to be performed is to dismiss the dialog.
+     */
+    data object DismissDialog : UiAction
 }

@@ -24,16 +24,38 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop
+package uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit
+
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 /**
- * This represents the current state of the add or edit favourite stops UI.
+ * Tests for `InputValidator.kt`.
  *
- * @property content The current [UiContent] to show.
- * @property action The current [UiAction] to perform, or `null` if no action should be performed.
  * @author Niall Scott
  */
-internal data class UiState(
-    val content: UiContent = UiContent.InProgress,
-    val action: UiAction? = null
-)
+class InputValidatorKtTest {
+
+    @Suppress("KotlinConstantConditions")
+    @Test
+    fun isStopNameValidReturnsFalseWhenStopNameIsNull() {
+        val result = isStopNameValid(null)
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun isStopNameValidReturnsFalseWhenStopNameIsEmpty() {
+        val result = isStopNameValid("")
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun isStopNameValidReturnsTrueWhenStopNameIsPopulated() {
+        val result = isStopNameValid("A")
+
+        assertTrue(result)
+    }
+}

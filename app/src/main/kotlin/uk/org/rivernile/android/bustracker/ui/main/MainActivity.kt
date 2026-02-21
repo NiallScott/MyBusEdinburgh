@@ -85,7 +85,7 @@ import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.ActivityMainBinding
 import javax.inject.Inject
 import androidx.core.view.ViewGroupCompat
-import uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop.AddOrEditFavouriteStopDialogFragment
+import uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit.AddOrEditFavouriteStopDialogFragment
 import uk.org.rivernile.android.bustracker.ui.alerts.removearrivalalert.RemoveArrivalAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.alerts.removeproximityalert.RemoveProximityAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.favouritestops.FavouriteStopsFragment

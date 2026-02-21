@@ -24,52 +24,61 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop
+package uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit
 
-import androidx.lifecycle.SavedStateHandle
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-import uk.org.rivernile.android.bustracker.core.domain.ParcelableStopIdentifier
-import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
-import uk.org.rivernile.android.bustracker.core.domain.toStopIdentifier
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 /**
- * This exposes the arguments which the add or edit favourite stops feature was initialised with.
+ * This exposes any held state.
  *
  * @author Niall Scott
  */
-internal interface Arguments {
+internal interface State {
 
     /**
-     * The supplied stop identifier.
+     * The current value of the user-supplied name for the stop.
      */
-    val stopIdentifier: StopIdentifier?
+    var stopNameText: String?
 
     /**
-     * The supplied stop identifier as a [Flow].
+     * A [Flow] which emits the current value of the user-supplied name for the stop.
      */
-    val stopIdentifierFlow: Flow<StopIdentifier?>
+    val stopNameTextFlow: Flow<String?>
+
+    /**
+     * The current [UiAction] to be performed.
+     */
+    var action: UiAction?
+
+    /**
+     * A [Flow] which emits the current [UiAction] to be performed.
+     */
+    val actionFlow: Flow<UiAction?>
 }
 
-internal const val ARG_STOP_IDENTIFIER = "stopIdentifier"
-
 @ViewModelScoped
-internal class RealArguments @Inject constructor(
-    private val savedState: SavedStateHandle
-) : Arguments {
+internal class RealState @Inject constructor() : State {
 
-    override val stopIdentifier: StopIdentifier? get() = savedState
-        .get<ParcelableStopIdentifier>(ARG_STOP_IDENTIFIER)
-        ?.toStopIdentifier()
+    private val _stopNameTextFlow = MutableStateFlow<String?>(null)
+    private val _actionFlow = MutableStateFlow<UiAction?>(null)
 
-    override val stopIdentifierFlow get() = _stopIdentifierFlow
-        .map { it?.toStopIdentifier() }
+    override var stopNameText: String?
+        get() = _stopNameTextFlow.value
+        set(value) {
+            _stopNameTextFlow.value = value
+        }
 
-    private val _stopIdentifierFlow = savedState
-        .getStateFlow<ParcelableStopIdentifier?>(
-            key = ARG_STOP_IDENTIFIER,
-            initialValue = null
-        )
+    override val stopNameTextFlow get() = _stopNameTextFlow.asStateFlow()
+
+    override var action: UiAction?
+        get() = _actionFlow.value
+        set(value) {
+            _actionFlow.value = value
+        }
+
+    override val actionFlow get() = _actionFlow.asStateFlow()
 }

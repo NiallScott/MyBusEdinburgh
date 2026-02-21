@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop
+package uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit
 
 import androidx.compose.runtime.Immutable
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier

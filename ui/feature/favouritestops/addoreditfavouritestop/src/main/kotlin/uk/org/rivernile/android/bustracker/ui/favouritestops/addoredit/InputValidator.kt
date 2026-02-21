@@ -24,20 +24,23 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop
+package uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit
 
-import androidx.compose.runtime.Immutable
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 /**
- * This represents an action which should be performed.
+ * Is the stop name valid?
  *
+ * @param stopName The stop name to validate.
+ * @return `true` if the stop name is valid, otherwise `false`.
  * @author Niall Scott
  */
-@Immutable
-internal sealed interface UiAction {
+@OptIn(ExperimentalContracts::class)
+internal fun isStopNameValid(stopName: String?): Boolean {
+    contract {
+        returns(true) implies (stopName != null)
+    }
 
-    /**
-     * The action to be performed is to dismiss the dialog.
-     */
-    data object DismissDialog : UiAction
+    return !stopName.isNullOrBlank()
 }
