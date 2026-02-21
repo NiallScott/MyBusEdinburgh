@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -60,7 +60,6 @@ class AndroidPreferenceDataStorageTest {
 
         private const val DEFAULT_WIFI_ONLY = false
         private const val DEFAULT_AUTO_REFRESH = false
-        private const val DEFAULT_SHOW_NIGHT_BUSES = true
         private const val DEFAULT_SERVICE_SORTING = false
         private const val DEFAULT_NUMBER_OF_DEPARTURES_PER_SERVICE = 4
         private const val DEFAULT_MAP_ZOOM_BUTTONS = true
@@ -151,31 +150,6 @@ class AndroidPreferenceDataStorageTest {
             assertEquals(DEFAULT_AUTO_REFRESH, awaitItem())
             assertTrue(awaitItem())
             assertFalse(awaitItem())
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun isLiveTimesShowNightServicesEnabledFlowEmitsValues() = runTest {
-        val key = booleanPreferencesKey(PREF_SHOW_NIGHT_BUSES)
-        val flow = intervalFlowOf(
-            0L,
-            10L,
-            preferencesOf(),
-            preferencesOf(key to DEFAULT_SHOW_NIGHT_BUSES),
-            preferencesOf(key to false),
-            preferencesOf(key to false),
-            preferencesOf(key to true))
-        val dataStorage = createAndroidPreferenceDataStorage(
-            dataStoreSource = FakePreferenceDataStoreSource(
-                onPreferencesFlow = { flow }
-            )
-        )
-
-        dataStorage.isLiveTimesShowNightServicesEnabledFlow.test {
-            assertEquals(DEFAULT_SHOW_NIGHT_BUSES, awaitItem())
-            assertFalse(awaitItem())
-            assertTrue(awaitItem())
             awaitComplete()
         }
     }

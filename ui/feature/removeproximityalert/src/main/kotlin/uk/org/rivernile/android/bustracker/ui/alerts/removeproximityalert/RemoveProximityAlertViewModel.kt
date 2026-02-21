@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,61 +24,47 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.alerts.proximity
+package uk.org.rivernile.android.bustracker.ui.alerts.removeproximityalert
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
-import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
-import uk.org.rivernile.android.bustracker.core.domain.ParcelableStopIdentifier
-import uk.org.rivernile.android.bustracker.core.domain.toStopIdentifier
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForViewModelCoroutineScope
 import javax.inject.Inject
 
 /**
- * This is the [ViewModel] for [DeleteProximityAlertDialogFragment].
+ * This is the [ViewModel] for [RemoveProximityAlertDialogFragment].
  *
- * @param savedState The saved state.
- * @param alertsRepository The [AlertsRepository], used to interface with the lower-level
- * architecture layers to handle alerts.
- * @param applicationCoroutineScope The application [CoroutineScope].
+ * @param arguments The arguments the UI was invoked with.
+ * @param alertsRepository Used to remove the alert.
  * @param defaultDispatcher The default [CoroutineDispatcher].
+ * @param applicationCoroutineScope The application [CoroutineScope].
+ * @param viewModelCoroutineScope The [ViewModel] [CoroutineScope].
  * @author Niall Scott
  */
 @HiltViewModel
-class DeleteProximityAlertDialogFragmentViewModel @Inject constructor(
-    private val savedState: SavedStateHandle,
+internal class RemoveProximityAlertViewModel @Inject constructor(
+    private val arguments: Arguments,
     private val alertsRepository: AlertsRepository,
+    @param:ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
     @param:ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
-    @param:ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
-) : ViewModel() {
-
-    companion object {
-
-        /**
-         * State key for stop identifier.
-         */
-        const val STATE_STOP_IDENTIFIER = "stopIdentifier"
-    }
+    @ForViewModelCoroutineScope viewModelCoroutineScope: CoroutineScope
+) : ViewModel(viewModelCoroutineScope) {
 
     /**
-     * This property contains the stop identifier for which the proximity alert should be deleted.
+     * This is called when the user has confirmed they wish to remove the proximity alert.
      */
-    private val stopIdentifier: ParcelableStopIdentifier? get() = savedState[STATE_STOP_IDENTIFIER]
-
-    /**
-     * This is called when the user has confirmed they wish to delete the proximity alert.
-     */
-    fun onUserConfirmDeletion() {
-        stopIdentifier?.let {
+    fun onUserConfirmRemoval() {
+        arguments.stopIdentifier?.let {
             // Uses the application CoroutineScope as the Dialog dismisses immediately, and we need
             // this task to finish. Fire and forget is fine here.
             applicationCoroutineScope.launch(defaultDispatcher) {
-                alertsRepository.removeProximityAlert(it.toStopIdentifier())
+                alertsRepository.removeProximityAlert(it)
             }
         }
     }

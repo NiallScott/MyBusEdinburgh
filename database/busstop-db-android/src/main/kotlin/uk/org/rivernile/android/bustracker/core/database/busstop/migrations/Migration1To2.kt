@@ -99,6 +99,15 @@ internal class Migration1To2 @Inject constructor() : Migration(1, 2) {
             ON `service_point` (`service_id`, `route_section`, `order_value`)
         """.trimIndent())
 
+        execSQL("""
+            CREATE INDEX IF NOT EXISTS `service_stop_service_id_index`
+            ON `service_stop` (`service_id`)
+        """.trimIndent())
+        execSQL("""
+            CREATE INDEX IF NOT EXISTS `service_stop_stop_id_index` ON
+            `service_stop` (`stop_id`)
+        """.trimIndent())
+
         execSQL("CREATE INDEX IF NOT EXISTS `stop_naptan_code_index` ON `stop` (`naptan_code`)")
         execSQL("CREATE INDEX IF NOT EXISTS `stop_atco_code_index` ON `stop` (`atco_code`)")
     }

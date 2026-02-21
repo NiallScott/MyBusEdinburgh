@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -53,7 +53,6 @@ internal class AndroidPreferenceDataStorage @Inject constructor(
 
         private const val DEFAULT_WIFI_ONLY = false
         private const val DEFAULT_AUTO_REFRESH = false
-        private const val DEFAULT_SHOW_NIGHT_BUSES = true
         private const val DEFAULT_SERVICE_SORTING = false
         private const val DEFAULT_NUMBER_OF_DEPARTURES_PER_SERVICE = 4
         private const val DEFAULT_MAP_ZOOM_BUTTONS = true
@@ -70,7 +69,6 @@ internal class AndroidPreferenceDataStorage @Inject constructor(
     private val keyBusStopDatabaseWifiOnly = booleanPreferencesKey(PREF_BUS_STOP_DATABASE_WIFI_ONLY)
     private val keyAppTheme = stringPreferencesKey(PREF_APP_THEME)
     private val keyAutoRefresh = booleanPreferencesKey(PREF_AUTO_REFRESH)
-    private val keyShowNightBuses = booleanPreferencesKey(PREF_SHOW_NIGHT_BUSES)
     private val keyServiceSorting = booleanPreferencesKey(PREF_SERVICE_SORTING)
     private val keyNumberOfShownDeparturesPerService =
         stringPreferencesKey(PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE)
@@ -103,13 +101,6 @@ internal class AndroidPreferenceDataStorage @Inject constructor(
         .preferencesFlow
         .map {
             it[keyAutoRefresh] ?: DEFAULT_AUTO_REFRESH
-        }
-        .distinctUntilChanged()
-
-    override val isLiveTimesShowNightServicesEnabledFlow get() = dataStoreSource
-        .preferencesFlow
-        .map {
-            it[keyShowNightBuses] ?: DEFAULT_SHOW_NIGHT_BUSES
         }
         .distinctUntilChanged()
 

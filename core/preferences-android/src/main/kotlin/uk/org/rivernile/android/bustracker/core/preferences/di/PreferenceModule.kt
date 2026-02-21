@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -51,7 +51,6 @@ import uk.org.rivernile.android.bustracker.core.preferences.PREF_MAP_LAST_MAP_TY
 import uk.org.rivernile.android.bustracker.core.preferences.PREF_MAP_LAST_ZOOM
 import uk.org.rivernile.android.bustracker.core.preferences.PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE
 import uk.org.rivernile.android.bustracker.core.preferences.PREF_SERVICE_SORTING
-import uk.org.rivernile.android.bustracker.core.preferences.PREF_SHOW_NIGHT_BUSES
 import uk.org.rivernile.android.bustracker.core.preferences.PREF_ZOOM_BUTTONS
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceDataStorage
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceDataStoreSource
@@ -99,7 +98,6 @@ internal class PreferenceModule {
         PREF_BUS_STOP_DATABASE_WIFI_ONLY,
         PREF_APP_THEME,
         PREF_AUTO_REFRESH,
-        PREF_SHOW_NIGHT_BUSES,
         PREF_SERVICE_SORTING,
         PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE,
         PREF_ZOOM_BUTTONS,

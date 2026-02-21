@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,16 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.livetimes
+package uk.org.rivernile.android.bustracker.ui.alerts.removearrivalalert
 
-import javax.inject.Inject
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
- * This is an Edinburgh-specific implementation of [IsNightServiceDetector].
+ * A fake [Arguments] for testing.
  *
  * @author Niall Scott
  */
-internal class EdinburghIsNightServiceDetector @Inject constructor() : IsNightServiceDetector {
+class FakeArguments(
+    private val onGetStopIdentifier: () -> StopIdentifier? = { throw NotImplementedError() }
+) : Arguments {
 
-    override fun isNightService(serviceName: String) = serviceName.startsWith('N', true)
+    override val stopIdentifier get() = onGetStopIdentifier()
 }

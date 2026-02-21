@@ -67,9 +67,7 @@ import uk.org.rivernile.android.bustracker.ui.RequiresContentPadding
 import uk.org.rivernile.android.bustracker.ui.about.AboutActivity
 import uk.org.rivernile.android.bustracker.ui.alerts.AlertManagerFragment
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragment
-import uk.org.rivernile.android.bustracker.ui.alerts.proximity.DeleteProximityAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.alerts.time.AddTimeAlertDialogFragment
-import uk.org.rivernile.android.bustracker.ui.alerts.time.DeleteTimeAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapFragment
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
@@ -88,11 +86,13 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.ActivityMainBind
 import javax.inject.Inject
 import androidx.core.view.ViewGroupCompat
 import uk.org.rivernile.android.bustracker.ui.addoreditfavouritestop.AddOrEditFavouriteStopDialogFragment
+import uk.org.rivernile.android.bustracker.ui.alerts.removearrivalalert.RemoveArrivalAlertDialogFragment
+import uk.org.rivernile.android.bustracker.ui.alerts.removeproximityalert.RemoveProximityAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.favouritestops.FavouriteStopsFragment
+import uk.org.rivernile.android.bustracker.ui.removefavouritestop.RemoveFavouriteStopDialogFragment
 import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
-import uk.org.rivernile.android.bustracker.ui.removefavouritestop.RemoveFavouriteStopDialogFragment
 
 /**
  * This [android.app.Activity] is the root Activity of the app.
@@ -123,8 +123,8 @@ class MainActivity : AppCompatActivity(),
         private const val DIALOG_ADD_FAVOURITE = "dialogAddFavourite"
         private const val DIALOG_ADD_PROX_ALERT = "dialogAddProxAlert"
         private const val DIALOG_ADD_TIME_ALERT = "dialogAddTimeAlert"
-        private const val DIALOG_DELETE_PROX_ALERT = "dialogDeleteProxAlert"
-        private const val DIALOG_DELETE_TIME_ALERT = "dialogDeleteTimeAlert"
+        private const val DIALOG_REMOVE_PROX_ALERT = "dialogRemoveProxAlert"
+        private const val DIALOG_REMOVE_ARRIVAL_ALERT = "dialogRemoveArrivalAlert"
         private const val DIALOG_DELETE_FAVOURITE = "dialogDeleteFavourite"
         private const val DIALOG_TURN_ON_GPS = "dialogTurnOnGps"
     }
@@ -267,15 +267,15 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun onShowConfirmRemoveProximityAlert(stopIdentifier: StopIdentifier) {
-        DeleteProximityAlertDialogFragment
+        RemoveProximityAlertDialogFragment
             .newInstance(stopIdentifier)
-            .show(supportFragmentManager, DIALOG_DELETE_PROX_ALERT)
+            .show(supportFragmentManager, DIALOG_REMOVE_PROX_ALERT)
     }
 
     override fun onShowConfirmRemoveArrivalAlert(stopIdentifier: StopIdentifier) {
-        DeleteTimeAlertDialogFragment
+        RemoveArrivalAlertDialogFragment
             .newInstance(stopIdentifier)
-            .show(supportFragmentManager, DIALOG_DELETE_TIME_ALERT)
+            .show(supportFragmentManager, DIALOG_REMOVE_ARRIVAL_ALERT)
     }
 
     override fun onShowConfirmFavouriteRemoval(stopIdentifier: StopIdentifier) {

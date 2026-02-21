@@ -59,7 +59,7 @@ internal abstract class RoomFavouriteStopsDao : FavouriteStopsDao {
     override fun getFavouriteStopFlow(stopIdentifier: StopIdentifier): Flow<FavouriteStop?> =
         getFavouriteStopFlowInternal(stopIdentifier)
 
-    override val allFavouriteStopsFlow: Flow<List<FavouriteStop>?> get() =
+    override val allFavouriteStopsFlow: Flow<List<FavouriteStop>> get() =
         allFavouriteStopsFlowInternal
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -87,5 +87,5 @@ internal abstract class RoomFavouriteStopsDao : FavouriteStopsDao {
         FROM favourite_stop
         ORDER BY stop_name ASC
     """)
-    abstract val allFavouriteStopsFlowInternal: Flow<List<RoomFavouriteStopEntity>?>
+    abstract val allFavouriteStopsFlowInternal: Flow<List<RoomFavouriteStopEntity>>
 }

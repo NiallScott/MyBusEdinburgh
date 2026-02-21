@@ -65,10 +65,9 @@ class LiveTimesTransform @Inject constructor(
     fun getLiveTimesTransformFlow(result: UiResult): Flow<UiTransformedResult> =
         combine(
             sortByTimeFlow,
-            showNightServicesFlow,
             expandedServicesTracker.expandedServicesFlow
-        ) { sortByTime, showNightServices, expandedServices ->
-            transformResult(result, sortByTime, showNightServices, expandedServices)
+        ) { sortByTime, expandedServices ->
+            transformResult(result, sortByTime, expandedServices)
         }
 
     /**
@@ -79,25 +78,16 @@ class LiveTimesTransform @Inject constructor(
         .distinctUntilChanged()
 
     /**
-     * A [Flow] which emits the user's night services preference.
-     */
-    private val showNightServicesFlow get() = preferenceRepository
-        .isLiveTimesShowNightServicesEnabledFlow
-        .distinctUntilChanged()
-
-    /**
      * Given a [UiResult], transform this in to a [UiTransformedResult].
      *
      * @param result The [UiResult] from upstream.
      * @param sortByTime Whether the services should be sorted by time (or by service name).
-     * @param showNightServices Whether night services should be shown.
      * @param expandedServices A [Set] containing the descriptors of expanded services.
      * @return The produced [UiTransformedResult].
      */
     private fun transformResult(
         result: UiResult,
         sortByTime: Boolean,
-        showNightServices: Boolean,
         expandedServices: Set<ServiceDescriptor>
     ): UiTransformedResult {
         return when (result) {
@@ -105,7 +95,6 @@ class LiveTimesTransform @Inject constructor(
             is UiResult.Success -> mapSuccess(
                 result,
                 sortByTime,
-                showNightServices,
                 expandedServices
             )
             is UiResult.Error -> mapError(result)
@@ -121,22 +110,17 @@ class LiveTimesTransform @Inject constructor(
      *
      * @param success The upstream [UiResult.Success].
      * @param sortByTime Whether the services should be sorted by time (or by service name).
-     * @param showNightServices Whether night services should be shown.
      * @param expandedServices A [Set] containing the descriptors of expanded services.
      * @return The calculated [UiTransformedResult].
      */
     private fun mapSuccess(
         success: UiResult.Success,
         sortByTime: Boolean,
-        showNightServices: Boolean,
         expandedServices: Set<ServiceDescriptor>
     ): UiTransformedResult {
         return success
             .stop
             .services
-            .let {
-                transformations.filterNightServices(it, showNightServices)
-            }
             .let {
                 transformations.sortServices(it, sortByTime)
             }

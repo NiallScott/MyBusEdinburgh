@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,80 +35,77 @@ import javax.inject.Inject
  * @param preferenceDataStorage Preference data storage.
  * @author Niall Scott
  */
-class PreferenceRepository @Inject internal constructor(
+public class PreferenceRepository @Inject internal constructor(
     private val preferenceDataStorage: PreferenceDataStorage
 ) {
 
     /**
      * A [Flow] which emits whether database updates should be over Wi-Fi only.
      */
-    val isDatabaseUpdateWifiOnlyFlow get() = preferenceDataStorage.isDatabaseUpdateWifiOnlyFlow
+    public val isDatabaseUpdateWifiOnlyFlow: Flow<Boolean> get() =
+        preferenceDataStorage.isDatabaseUpdateWifiOnlyFlow
 
     /**
      * A [Flow] which emits the [AppTheme] and will emit further values when this preference
      * changes.
      */
-    val appThemeFlow get() = preferenceDataStorage.appThemeFlow
+    public val appThemeFlow: Flow<AppTheme> get() = preferenceDataStorage.appThemeFlow
 
     /**
      * A [Flow] which emits whether auto refresh is enabled by default, and will emit further values
      * when this preference changes.
      */
-    val isLiveTimesAutoRefreshEnabledFlow get() =
+    public val isLiveTimesAutoRefreshEnabledFlow: Flow<Boolean> get() =
         preferenceDataStorage.isLiveTimesAutoRefreshEnabledFlow
-
-    /**
-     * A [Flow] which emits whether night services should be shown or not, and will emit further
-     * values when this preference changes.
-     */
-    val isLiveTimesShowNightServicesEnabledFlow get() =
-        preferenceDataStorage.isLiveTimesShowNightServicesEnabledFlow
 
     /**
      * A [Flow] which emits whether live times are sorted by time, and will emit further values when
      * this preference changes.
      */
-    val isLiveTimesSortByTimeFlow get() = preferenceDataStorage.isLiveTimesSortByTimeFlow
+    public val isLiveTimesSortByTimeFlow: Flow<Boolean> get() =
+        preferenceDataStorage.isLiveTimesSortByTimeFlow
 
     /**
      * A [Flow] which emits the number of departures preference value and will emit further values
      * when this preference changes.
      */
-    val liveTimesNumberOfDeparturesFlow get() =
+    public val liveTimesNumberOfDeparturesFlow: Flow<Int>get() =
         preferenceDataStorage.liveTimesNumberOfDeparturesFlow
 
     /**
      * A [Flow] which emits whether the GPS prompt is disabled.
      */
-    val isGpsPromptDisabledFlow get() = preferenceDataStorage.isGpsPromptDisabledFlow
+    public val isGpsPromptDisabledFlow: Flow<Boolean> get() =
+        preferenceDataStorage.isGpsPromptDisabledFlow
 
     /**
      * A [Flow] which emits whether the zoom controls should be visible on the map or not.
      */
-    val isMapZoomControlsVisibleFlow get() =
+    public val isMapZoomControlsVisibleFlow: Flow<Boolean> get() =
         preferenceDataStorage.isMapZoomControlsVisibleFlow
 
     /**
      * A [Flow] which emits the last (most recently recorded) map camera location.
      */
-    val lastMapCameraLocationFlow get() = preferenceDataStorage.lastMapCameraLocationFlow
+    public val lastMapCameraLocationFlow: Flow<LastMapCameraLocation> get() =
+        preferenceDataStorage.lastMapCameraLocationFlow
 
     /**
      * A [Flow] which emits the last set map type.
      */
-    val mapTypeFlow get() = preferenceDataStorage.mapTypeFlow
+    public val mapTypeFlow: Flow<Int> get() = preferenceDataStorage.mapTypeFlow
 
     /**
      * Toggle the sort by time preference.
      */
-    suspend fun toggleSortByTime() {
+    public suspend fun toggleSortByTime() {
         preferenceDataStorage.toggleSortByTime()
     }
 
     /**
      * Toggle the auto-refresh preference.
      */
-    suspend fun toggleAutoRefresh() {
+    public suspend fun toggleAutoRefresh() {
         preferenceDataStorage.toggleAutoRefresh()
     }
 
@@ -117,7 +114,7 @@ class PreferenceRepository @Inject internal constructor(
      *
      * @param isDisabled Is the GPS prompt disabled?
      */
-    suspend fun setIsGpsPromptDisabled(isDisabled: Boolean) {
+    public suspend fun setIsGpsPromptDisabled(isDisabled: Boolean) {
         preferenceDataStorage.setIsGpsPromptDisabled(isDisabled)
     }
 
@@ -126,7 +123,7 @@ class PreferenceRepository @Inject internal constructor(
      *
      * @param cameraLocation The last map camera location.
      */
-    suspend fun setLastMapCameraLocation(cameraLocation: LastMapCameraLocation) {
+    public suspend fun setLastMapCameraLocation(cameraLocation: LastMapCameraLocation) {
         preferenceDataStorage.setLastMapCameraLocation(cameraLocation)
     }
 
@@ -135,7 +132,7 @@ class PreferenceRepository @Inject internal constructor(
      *
      * @param mapType The new value of the map type preference.
      */
-    suspend fun setMapType(mapType: Int) {
+    public suspend fun setMapType(mapType: Int) {
         preferenceDataStorage.setMapType(mapType)
     }
 }

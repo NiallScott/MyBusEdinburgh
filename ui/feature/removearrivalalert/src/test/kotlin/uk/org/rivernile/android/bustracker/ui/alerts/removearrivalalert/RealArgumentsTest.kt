@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,38 +24,45 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.livetimes
+package uk.org.rivernile.android.bustracker.ui.alerts.removearrivalalert
 
-import kotlin.test.BeforeTest
+import androidx.lifecycle.SavedStateHandle
+import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableNaptanStopIdentifier
 import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 /**
- * Tests for [EdinburghIsNightServiceDetector].
+ * Tests for [RealArguments].
  *
  * @author Niall Scott
  */
-class EdinburghIsNightServiceDetectorTest {
+class RealArgumentsTest {
 
-    private lateinit var detector: EdinburghIsNightServiceDetector
+    @Test
+    fun stopIdentifierIsNullByDefault() {
+        val arguments = createArguments()
 
-    @BeforeTest
-    fun setUp() {
-        detector = EdinburghIsNightServiceDetector()
+        assertNull(arguments.stopIdentifier)
     }
 
     @Test
-    fun isNightServiceReturnsFalseWhenServiceNameDoesNotBeginWithN() {
-        val result = detector.isNightService("123")
+    fun stopIdentifierIsPopulatedWhenSavedStateValueIsPopulated() {
+        val arguments = createArguments(
+            SavedStateHandle(
+                mapOf(
+                    ARG_STOP_IDENTIFIER to "123456".toParcelableNaptanStopIdentifier()
+                )
+            )
+        )
 
-        assertFalse(result)
+        assertEquals("123456".toNaptanStopIdentifier(), arguments.stopIdentifier)
     }
 
-    @Test
-    fun isNightServiceReturnsTrueWhenServiceNameBeginsWithN() {
-        val result = detector.isNightService("N123")
-
-        assertTrue(result)
+    private fun createArguments(
+        savedState: SavedStateHandle = SavedStateHandle()
+    ): RealArguments {
+        return RealArguments(savedState = savedState)
     }
 }

@@ -27,48 +27,21 @@
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
-import uk.org.rivernile.android.bustracker.core.livetimes.IsNightServiceDetector
 import javax.inject.Inject
 
 /**
  * This class contains individual transformations which can be applied to live times, as used by
  * [LiveTimesTransform]. This class exists to make [LiveTimesTransform] more easily testable.
  *
- * @param isNightServiceDetector Detect whether the service is a night service or not. This is only
- * used when the user has set a preference to say they wish for night services to be filtered out
- * of the results.
  * @param serviceNameComparator Used to sort services.
  * @author Niall Scott
  */
 class LiveTimesTransformations @Inject constructor(
-    private val isNightServiceDetector: IsNightServiceDetector,
     serviceNameComparator: Comparator<String>
 ) {
 
     private val uiServiceComparator = compareBy<UiService, String>(serviceNameComparator) {
         it.serviceDescriptor.serviceName
-    }
-
-    /**
-     * Given a [List] of [UiService]s, remove night services if the user has set this preference,
-     * otherwise just return the input [List].
-     *
-     * @param services The [List] of [UiService]s to remove night services from.
-     * @param showNightServices `true` if night services should be included, otherwise `false`.
-     * @return The original input [List] if night services should be shown, or a new instance of the
-     * [List] with night services filtered out if they should not be shown.
-     */
-    fun filterNightServices(
-        services: List<UiService>,
-        showNightServices: Boolean
-    ): List<UiService> {
-        return if (!showNightServices) {
-            services.filterNot {
-                isNightServiceDetector.isNightService(it.serviceDescriptor.serviceName)
-            }
-        } else {
-            services
-        }
     }
 
     /**

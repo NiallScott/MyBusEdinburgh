@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,7 +29,6 @@ package uk.org.rivernile.android.bustracker.core.preferences
 internal const val PREF_BUS_STOP_DATABASE_WIFI_ONLY = "pref_bus_stop_database_wifi_only"
 public const val PREF_APP_THEME: String = "pref_theme"
 internal const val PREF_AUTO_REFRESH = "pref_autorefresh_state"
-internal const val PREF_SHOW_NIGHT_BUSES = "pref_nightservices_state"
 internal const val PREF_SERVICE_SORTING = "pref_servicessorting_state"
 public const val PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE: String =
     "pref_numberOfShownDeparturesPerService"
