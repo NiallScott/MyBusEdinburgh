@@ -89,7 +89,7 @@ import uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit.AddOrEdit
 import uk.org.rivernile.android.bustracker.ui.alerts.removearrivalalert.RemoveArrivalAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.alerts.removeproximityalert.RemoveProximityAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.favouritestops.FavouriteStopsFragment
-import uk.org.rivernile.android.bustracker.ui.removefavouritestop.RemoveFavouriteStopDialogFragment
+import uk.org.rivernile.android.bustracker.ui.favouritestops.remove.RemoveFavouriteStopDialogFragment
 import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier

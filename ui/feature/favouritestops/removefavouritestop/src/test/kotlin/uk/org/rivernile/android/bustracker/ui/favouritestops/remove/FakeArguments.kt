@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,26 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.removefavouritestop.di
+package uk.org.rivernile.android.bustracker.ui.favouritestops.remove
 
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
-import uk.org.rivernile.android.bustracker.ui.removefavouritestop.Arguments
-import uk.org.rivernile.android.bustracker.ui.removefavouritestop.RealArguments
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
- * A module for supplying dependencies for
- * [uk.org.rivernile.android.bustracker.ui.removefavouritestop.RemoveFavouriteStopViewModel].
+ * A fake [Arguments] for testing.
  *
  * @author Niall Scott
  */
-@InstallIn(ViewModelComponent::class)
-@Module
-internal interface RemoveFavouriteStopViewModelModule {
+class FakeArguments(
+    private val onGetStopIdentifier: () -> StopIdentifier? = { throw NotImplementedError() }
+) : Arguments {
 
-    @Suppress("unused")
-    @Binds
-    fun bindArguments(realArguments: RealArguments): Arguments
+    override val stopIdentifier get() = onGetStopIdentifier()
 }

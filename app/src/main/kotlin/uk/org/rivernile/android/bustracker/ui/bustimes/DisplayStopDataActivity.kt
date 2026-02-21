@@ -65,7 +65,7 @@ import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit.AddOrEditFavouriteStopDialogFragment
 import uk.org.rivernile.android.bustracker.ui.alerts.removearrivalalert.RemoveArrivalAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.alerts.removeproximityalert.RemoveProximityAlertDialogFragment
-import uk.org.rivernile.android.bustracker.ui.removefavouritestop.RemoveFavouriteStopDialogFragment
+import uk.org.rivernile.android.bustracker.ui.favouritestops.remove.RemoveFavouriteStopDialogFragment
 
 /**
  * The purpose of this [AppCompatActivity] is to display to the user live departure times and

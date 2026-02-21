@@ -30,7 +30,7 @@ plugins {
 }
 
 android {
-    namespace = "uk.org.rivernile.android.bustracker.ui.removefavouritestop"
+    namespace = "uk.org.rivernile.android.bustracker.ui.favouritestops.remove"
 
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
