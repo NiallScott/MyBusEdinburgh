@@ -7,7 +7,7 @@ android-build-tools = "36.1.0"
 
 android-gradle-plugin = "9.0.1"
 coroutines = "1.10.2"
-dagger = "2.59.1"
+dagger = "2.59.2"
 kotlin = "2.3.10"
 okhttp = "5.3.2"
 retrofit = "3.0.0"
