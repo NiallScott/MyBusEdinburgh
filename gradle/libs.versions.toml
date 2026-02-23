@@ -58,7 +58,7 @@ kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializat
 kotlin-immutable-collections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.4.0" }
 
 # Kotlin date-time
-kotlin-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime-jvm", version = "0.7.1" }
+kotlin-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime-jvm", version = "0.7.1-0.6.x-compat" }
 
 # AndroidX
 androidx-activity = { module = "androidx.activity:activity-ktx", version.ref = "androidx-activity" }
