@@ -208,5 +208,10 @@
                 android:name="uk.org.rivernile.android.bustracker.startup.AppThemeInitialiser"
                 android:value="androidx.startup" />
         </provider>
+
+        <!-- https://issuetracker.google.com/issues/476788722 -->
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
     </application>
 </manifest>
