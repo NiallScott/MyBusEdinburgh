@@ -7,7 +7,7 @@ jobs:
     environment: development
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup Java
         uses: ./.github/actions/setup-java
       - name: Write Google Services file
