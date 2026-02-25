@@ -4,9 +4,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    target-branch: "development"
   - package-ecosystem: "gradle"
     directory: "/"
     schedule:
       interval: "weekly"
-    target-branch: "development"

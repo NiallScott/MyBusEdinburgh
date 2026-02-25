@@ -1,8 +1,6 @@
 name: Deploy release
 on:
-  push:
-    branches:
-      - master
+  workflow_dispatch:
 jobs:
   build-and-test:
     name: Build, test and deploy
