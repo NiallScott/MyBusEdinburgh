@@ -7,7 +7,7 @@ android-build-tools = "36.1.0"
 
 android-gradle-plugin = "9.0.1"
 coroutines = "1.10.2"
-dagger = "2.59.1"
+dagger = "2.59.2"
 kotlin = "2.3.10"
 okhttp = "5.3.2"
 retrofit = "3.0.0"
@@ -106,7 +106,7 @@ firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version = "21.3.0" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.0.0" }
 play-services-maps-ktx = { module = "com.google.maps.android:maps-ktx", version = "6.0.0" }
-play-services-maps-utils = { module = "com.google.maps.android:android-maps-utils", version = "4.0.0" }
+play-services-maps-utils = { module = "com.google.maps.android:android-maps-utils", version = "4.1.0" }
 play-services-maps-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version = "6.0.0" }
 
 # Testing dependencies.
@@ -145,4 +145,4 @@ kotlin-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-ksp = { id = "com.google.devtools.ksp", version = "2.3.5" }
+ksp = { id = "com.google.devtools.ksp", version = "2.3.6" }

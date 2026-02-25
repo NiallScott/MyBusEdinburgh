@@ -1,8 +1,6 @@
 name: Deploy staging
 on:
-  push:
-    branches:
-      - staging
+  workflow_dispatch:
 jobs:
   build-and-test:
     name: Build, test and deploy
@@ -10,7 +8,7 @@ jobs:
     environment: staging
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup Java
         uses: ./.github/actions/setup-java
       - name: Write Google Services file
