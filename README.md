@@ -1,4 +1,4 @@
-[![Development branch](https://github.com/NiallScott/MyBusEdinburgh/actions/workflows/push-and-pull-request.yml/badge.svg?branch=main)](https://github.com/NiallScott/MyBusEdinburgh/actions/workflows/push-and-pull-request.yml)
+[![main branch](https://github.com/NiallScott/MyBusEdinburgh/actions/workflows/push-and-pull-request.yml/badge.svg?branch=main)](https://github.com/NiallScott/MyBusEdinburgh/actions/workflows/push-and-pull-request.yml)
 
 # My Bus Edinburgh
 
