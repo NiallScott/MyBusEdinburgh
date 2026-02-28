@@ -63,7 +63,6 @@ kotlin {
 
 dependencies {
 
-    implementation(project(":core:alerts-android"))
     implementation(project(":core:core-domain-android"))
     implementation(project(":core:coroutines-android"))
     implementation(project(":core:favourites-android"))
@@ -71,6 +70,7 @@ dependencies {
     implementation(project(":core:services-android"))
     implementation(project(":core:servicestops-android"))
     implementation(project(":core:shortcuts-android"))
+    implementation(project(":ui:feature:alerts:alertscommon"))
     implementation(project(":ui:ui-core"))
 
     // AndroidX
@@ -106,13 +106,13 @@ dependencies {
         }
     }
 
-    testImplementation(testFixtures(project(":core:alerts")))
     testImplementation(testFixtures(project(":core:core-domain")))
     testImplementation(testFixtures(project(":core:favourites")))
     testImplementation(testFixtures(project(":core:feature")))
     testImplementation(testFixtures(project(":core:services")))
     testImplementation(testFixtures(project(":core:servicestops")))
     testImplementation(testFixtures(project(":core:shortcuts")))
+    testImplementation(testFixtures(project(":ui:feature:alerts:alertscommon")))
     testImplementation(libs.coroutines.test)
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)

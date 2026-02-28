@@ -109,6 +109,7 @@ include(
     ":testutils",
     ":ui:feature:about",
     ":ui:feature:news",
+    ":ui:feature:alerts:alertscommon",
     ":ui:feature:alerts:removearrivalalert",
     ":ui:feature:alerts:removeproximityalert",
     ":ui:feature:favouritestops:addoreditfavouritestop",

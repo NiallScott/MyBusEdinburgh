@@ -40,6 +40,12 @@ import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import org.junit.Rule
+import uk.org.rivernile.android.bustracker.ui.alerts.TEST_TAG_MENU_ITEM_ADD_ARRIVAL_ALERT
+import uk.org.rivernile.android.bustracker.ui.alerts.TEST_TAG_MENU_ITEM_ADD_PROXIMITY_ALERT
+import uk.org.rivernile.android.bustracker.ui.alerts.TEST_TAG_MENU_ITEM_REMOVE_ARRIVAL_ALERT
+import uk.org.rivernile.android.bustracker.ui.alerts.TEST_TAG_MENU_ITEM_REMOVE_PROXIMITY_ALERT
+import uk.org.rivernile.android.bustracker.ui.alerts.UiArrivalAlertDropdownMenuItem
+import uk.org.rivernile.android.bustracker.ui.alerts.UiProximityAlertDropdownMenuItem
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -172,14 +178,14 @@ class FavouriteStopItemDropdownMenuKtTest {
     }
 
     @Test
-    fun addArrivalAlertMenuItemShowsCorrectTextAndFiresClickHandler() {
+    fun addArrivalAlertMenuItemFiresClickHandler() {
         val itemClickedCounter = ItemClickedCounter()
         composeTestRule.setContent {
             MyBusTheme {
                 FavouriteStopItemDropdownMenuWithDefaults(
                     menu = UiFavouriteDropdownMenu(
                         isShown = true,
-                        arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
+                        arrivalAlertDropdownItem = UiArrivalAlertDropdownMenuItem(
                             hasArrivalAlert = false
                         )
                     ),
@@ -187,14 +193,11 @@ class FavouriteStopItemDropdownMenuKtTest {
                 )
             }
         }
-        val expectedText = composeTestRule.activity.getString(R.string.favouritestops_menu_time_add)
 
         composeTestRule
             .onNodeWithTag(TEST_TAG_MENU_ITEM_ADD_ARRIVAL_ALERT)
             .apply {
                 assertExists()
-                assertTextEquals(expectedText)
-                assertIsEnabled()
                 performClick()
             }
         composeTestRule
@@ -222,14 +225,14 @@ class FavouriteStopItemDropdownMenuKtTest {
     }
 
     @Test
-    fun removeArrivalAlertMenuItemShowsCorrectTextAndFiresClickHandler() {
+    fun removeArrivalAlertMenuItemFiresClickHandler() {
         val itemClickedCounter = ItemClickedCounter()
         composeTestRule.setContent {
             MyBusTheme {
                 FavouriteStopItemDropdownMenuWithDefaults(
                     menu = UiFavouriteDropdownMenu(
                         isShown = true,
-                        arrivalAlertDropdownItem = UiArrivalAlertDropdownItem(
+                        arrivalAlertDropdownItem = UiArrivalAlertDropdownMenuItem(
                             hasArrivalAlert = true
                         )
                     ),
@@ -237,14 +240,11 @@ class FavouriteStopItemDropdownMenuKtTest {
                 )
             }
         }
-        val expectedText = composeTestRule.activity.getString(R.string.favouritestops_menu_time_rem)
 
         composeTestRule
             .onNodeWithTag(TEST_TAG_MENU_ITEM_REMOVE_ARRIVAL_ALERT)
             .apply {
                 assertExists()
-                assertTextEquals(expectedText)
-                assertIsEnabled()
                 performClick()
             }
         composeTestRule
@@ -272,14 +272,14 @@ class FavouriteStopItemDropdownMenuKtTest {
     }
 
     @Test
-    fun addProximityAlertMenuItemShowsCorrectTextAndFiresClickHandler() {
+    fun addProximityAlertMenuItemFiresClickHandler() {
         val itemClickedCounter = ItemClickedCounter()
         composeTestRule.setContent {
             MyBusTheme {
                 FavouriteStopItemDropdownMenuWithDefaults(
                     menu = UiFavouriteDropdownMenu(
                         isShown = true,
-                        proximityAlertDropdownItem = UiProximityAlertDropdownItem(
+                        proximityAlertDropdownItem = UiProximityAlertDropdownMenuItem(
                             hasProximityAlert = false
                         )
                     ),
@@ -287,14 +287,11 @@ class FavouriteStopItemDropdownMenuKtTest {
                 )
             }
         }
-        val expectedText = composeTestRule.activity.getString(R.string.favouritestops_menu_prox_add)
 
         composeTestRule
             .onNodeWithTag(TEST_TAG_MENU_ITEM_ADD_PROXIMITY_ALERT)
             .apply {
                 assertExists()
-                assertTextEquals(expectedText)
-                assertIsEnabled()
                 performClick()
             }
         composeTestRule
@@ -322,14 +319,14 @@ class FavouriteStopItemDropdownMenuKtTest {
     }
 
     @Test
-    fun removeProximityAlertMenuItemShowsCorrectTextAndFiresClickHandler() {
+    fun removeProximityAlertMenuItemFiresClickHandler() {
         val itemClickedCounter = ItemClickedCounter()
         composeTestRule.setContent {
             MyBusTheme {
                 FavouriteStopItemDropdownMenuWithDefaults(
                     menu = UiFavouriteDropdownMenu(
                         isShown = true,
-                        proximityAlertDropdownItem = UiProximityAlertDropdownItem(
+                        proximityAlertDropdownItem = UiProximityAlertDropdownMenuItem(
                             hasProximityAlert = true
                         )
                     ),
@@ -337,14 +334,11 @@ class FavouriteStopItemDropdownMenuKtTest {
                 )
             }
         }
-        val expectedText = composeTestRule.activity.getString(R.string.favouritestops_menu_prox_rem)
 
         composeTestRule
             .onNodeWithTag(TEST_TAG_MENU_ITEM_REMOVE_PROXIMITY_ALERT)
             .apply {
                 assertExists()
-                assertTextEquals(expectedText)
-                assertIsEnabled()
                 performClick()
             }
         composeTestRule

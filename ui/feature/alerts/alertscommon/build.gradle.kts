@@ -26,11 +26,12 @@
 
 plugins {
     id("mybus.android-library")
+    id("mybus.android-compose")
     id("mybus.hilt-convention")
 }
 
 android {
-    namespace = "uk.org.rivernile.android.bustracker.ui.alerts.removearrivalalert"
+    namespace = "uk.org.rivernile.android.bustracker.ui.alerts.common"
 
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -46,6 +47,11 @@ android {
             enableAndroidTestCoverage = true
         }
     }
+
+    @Suppress("UnstableApiUsage")
+    testFixtures {
+        enable = true
+    }
 }
 
 kotlin {
@@ -56,22 +62,42 @@ dependencies {
 
     implementation(project(":core:alerts-android"))
     implementation(project(":core:core-domain-android"))
-    implementation(project(":core:coroutines-android"))
+    implementation(project(":core:feature"))
     implementation(project(":ui:ui-core"))
 
-    // AndroidX
-    implementation(libs.androidx.core)
-    implementation(libs.androidx.fragment)
-    implementation(libs.androidx.viewmodel)
-
-    // Material Design
-    implementation(libs.material)
+    // Compose
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.material.compose)
 
     // Test dependencies
+    androidTestImplementation(testFixtures(project(":core:alerts-android")))
+    androidTestImplementation(libs.androidx.compose.ui.test)
     androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.kotlin.test.junit)
+
+    // TODO: remove this when Compose UI Test targets a newer version of Espresso compatible with
+    //  Android 16.
+    constraints {
+        androidTestImplementation(libs.androidx.test.espresso) {
+            because("Compose UI Test brings in an old version of Espresso incompatible with " +
+                "Android 16.")
+        }
+    }
 
     testImplementation(testFixtures(project(":core:alerts")))
+    testImplementation(testFixtures(project(":core:feature")))
     testImplementation(libs.coroutines.test)
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.turbine)
+
+    testFixturesImplementation(testFixtures(project(":core:core-domain")))
+    testFixturesImplementation(libs.coroutines.core)
+    // Even though the test fixtures don't use Compose, the Compose plugin is used on this module
+    // and it expects the Compose runtime to be on the classpath.
+    testFixturesImplementation(platform(libs.androidx.compose.bom))
+    testFixturesImplementation(libs.material.compose)
 }

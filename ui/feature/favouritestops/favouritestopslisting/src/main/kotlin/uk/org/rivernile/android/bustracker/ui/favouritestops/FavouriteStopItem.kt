@@ -97,7 +97,7 @@ internal const val TEST_TAG_DROPDOWN_MENU = "dropdown-menu"
  * a proximity alert.
  * @param onShowOnMapClick This is called when the user clicks on the menu item to show the
  * favourite stop on a map.
- * @param modifier Any [Modifier]s which should be applied this this composable.
+ * @param modifier Any [Modifier]s which should be applied to this composable.
  * @author Niall Scott
  */
 @Composable

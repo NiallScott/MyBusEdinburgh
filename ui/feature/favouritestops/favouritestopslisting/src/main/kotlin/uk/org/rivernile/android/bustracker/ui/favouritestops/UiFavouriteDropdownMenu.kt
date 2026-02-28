@@ -26,6 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
+import uk.org.rivernile.android.bustracker.ui.alerts.UiArrivalAlertDropdownMenuItem
+import uk.org.rivernile.android.bustracker.ui.alerts.UiProximityAlertDropdownMenuItem
+
 /**
  * A dropdown menu for a favourite stop item.
  *
@@ -41,27 +44,7 @@ package uk.org.rivernile.android.bustracker.ui.favouritestops
 internal data class UiFavouriteDropdownMenu(
     val isShown: Boolean = false,
     val isShortcutItemShown: Boolean = false,
-    val arrivalAlertDropdownItem: UiArrivalAlertDropdownItem? = null,
-    val proximityAlertDropdownItem: UiProximityAlertDropdownItem? = null,
+    val arrivalAlertDropdownItem: UiArrivalAlertDropdownMenuItem? = null,
+    val proximityAlertDropdownItem: UiProximityAlertDropdownMenuItem? = null,
     val isStopMapItemShown: Boolean = false
-)
-
-/**
- * Attributed data for the arrival alert dropdown item.
- *
- * @property hasArrivalAlert Is an arrival alert set for the stop this item represents?
- * @author Niall Scott
- */
-internal data class UiArrivalAlertDropdownItem(
-    val hasArrivalAlert: Boolean = false
-)
-
-/**
- * Attributed data for the proximity alert dropdown item.
- *
- * @property hasProximityAlert Is a proximity alert set for the stop this item represents?
- * @author Niall Scott
- */
-internal data class UiProximityAlertDropdownItem(
-    val hasProximityAlert: Boolean = false
 )
