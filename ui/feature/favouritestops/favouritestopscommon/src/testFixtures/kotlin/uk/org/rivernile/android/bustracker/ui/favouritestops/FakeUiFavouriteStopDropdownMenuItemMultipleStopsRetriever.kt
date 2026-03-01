@@ -24,26 +24,25 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.alerts.di
+package uk.org.rivernile.android.bustracker.ui.favouritestops
 
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
-import uk.org.rivernile.android.bustracker.ui.alerts.RealUiAlertDropdownMenuItemMultipleStopsRetriever
-import uk.org.rivernile.android.bustracker.ui.alerts.UiAlertDropdownMenuItemMultipleStopsRetriever
+import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
- * This [Module] provides common alerts dependencies within the [ViewModelComponent].
+ * A fake [UiFavouriteStopDropdownMenuItemMultipleStopsRetriever] for testing.
  *
  * @author Niall Scott
  */
-@InstallIn(ViewModelComponent::class)
-@Module
-internal interface AlertsCommonViewModelModule {
+public class FakeUiFavouriteStopDropdownMenuItemMultipleStopsRetriever(
+    private val onGetUiFavouriteStopDropdownMenuItemsFlow:
+        (Set<StopIdentifier>) -> Flow<Map<StopIdentifier, UiFavouriteStopDropdownMenuItem>?> =
+        { throw NotImplementedError() }
+) : UiFavouriteStopDropdownMenuItemMultipleStopsRetriever {
 
-    @Binds
-    fun bindUiAlertDropdownMenuItemMultipleStopsRetriever(
-        retriever: RealUiAlertDropdownMenuItemMultipleStopsRetriever
-    ): UiAlertDropdownMenuItemMultipleStopsRetriever
+    override fun getUiFavouriteStopDropdownMenuItemsFlow(
+        stopIdentifiers: Set<StopIdentifier>
+    ): Flow<Map<StopIdentifier, UiFavouriteStopDropdownMenuItem>?> {
+        return onGetUiFavouriteStopDropdownMenuItemsFlow(stopIdentifiers)
+    }
 }

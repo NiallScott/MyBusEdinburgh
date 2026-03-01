@@ -99,7 +99,7 @@ class FavouriteStopItemDropdownMenuKtTest {
                 )
             }
         }
-        val expectedText = composeTestRule.activity.getString(R.string.favouritestops_menu_delete)
+        val expectedText = composeTestRule.activity.getString(R.string.favouritestops_menu_remove)
 
         composeTestRule
             .onNodeWithTag(TEST_TAG_MENU_ITEM_REMOVE_FAVOURITE)

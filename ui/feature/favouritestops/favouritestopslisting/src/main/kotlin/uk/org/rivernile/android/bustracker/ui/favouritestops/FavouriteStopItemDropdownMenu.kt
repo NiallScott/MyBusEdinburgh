@@ -158,7 +158,7 @@ private fun RemoveFavouriteMenuItem(
     modifier: Modifier = Modifier
 ) {
     FavouriteDropdownMenuItem(
-        textStringResId = R.string.favouritestops_menu_delete,
+        textStringResId = R.string.favouritestops_menu_remove,
         iconResId = R.drawable.ic_delete,
         onClick = onClick,
         modifier = modifier

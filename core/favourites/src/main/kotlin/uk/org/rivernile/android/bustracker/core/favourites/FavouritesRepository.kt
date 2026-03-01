@@ -78,6 +78,12 @@ public interface FavouritesRepository {
      * if there was an error or there are no items.
      */
     public val allFavouriteStopsFlow: Flow<List<FavouriteStop>?>
+
+    /**
+     * Get a [Flow] which emits a [Set] containing the [StopIdentifier]s of all currently saved
+     * favourite stops.
+     */
+    public val allFavouriteStopsStopIdentifiersFlow: Flow<Set<StopIdentifier>?>
 }
 
 @Singleton
@@ -112,5 +118,13 @@ internal class DefaultFavouritesRepository @Inject constructor(
                 entities
                     ?.map { it.toFavouriteStop() }
                     ?.ifEmpty { null }
+            }
+
+    override val allFavouriteStopsStopIdentifiersFlow get() =
+        favouriteStopsDao
+            .allFavouriteStopsStopIdentifiersFlow
+            .distinctUntilChanged()
+            .map {
+                it?.toSet()
             }
 }

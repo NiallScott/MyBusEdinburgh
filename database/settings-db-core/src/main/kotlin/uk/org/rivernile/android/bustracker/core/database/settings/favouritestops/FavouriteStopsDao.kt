@@ -75,4 +75,10 @@ public interface FavouriteStopsDao {
      * are no items.
      */
     public val allFavouriteStopsFlow: Flow<List<FavouriteStop>?>
+
+    /**
+     * Get a [Flow] which emits a [List] containing the [StopIdentifier]s of all currently saved
+     * favourite stops.
+     */
+    public val allFavouriteStopsStopIdentifiersFlow: Flow<List<StopIdentifier>?>
 }

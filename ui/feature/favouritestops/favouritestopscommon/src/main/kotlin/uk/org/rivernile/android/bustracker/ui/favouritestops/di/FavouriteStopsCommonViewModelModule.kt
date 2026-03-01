@@ -24,26 +24,26 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.alerts.di
+package uk.org.rivernile.android.bustracker.ui.favouritestops.di
 
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
-import uk.org.rivernile.android.bustracker.ui.alerts.RealUiAlertDropdownMenuItemMultipleStopsRetriever
-import uk.org.rivernile.android.bustracker.ui.alerts.UiAlertDropdownMenuItemMultipleStopsRetriever
+import uk.org.rivernile.android.bustracker.ui.favouritestops.RealUiFavouriteStopDropdownMenuItemMultipleStopsRetriever
+import uk.org.rivernile.android.bustracker.ui.favouritestops.UiFavouriteStopDropdownMenuItemMultipleStopsRetriever
 
 /**
- * This [Module] provides common alerts dependencies within the [ViewModelComponent].
+ * This [Module] provides common favourite stops dependencies within the [ViewModelComponent].
  *
  * @author Niall Scott
  */
 @InstallIn(ViewModelComponent::class)
 @Module
-internal interface AlertsCommonViewModelModule {
+internal interface FavouriteStopsCommonViewModelModule {
 
     @Binds
-    fun bindUiAlertDropdownMenuItemMultipleStopsRetriever(
-        retriever: RealUiAlertDropdownMenuItemMultipleStopsRetriever
-    ): UiAlertDropdownMenuItemMultipleStopsRetriever
+    fun bindUiFavouriteStopDropdownMenuItemMultipleStopsRetriever(
+        retriever: RealUiFavouriteStopDropdownMenuItemMultipleStopsRetriever
+    ): UiFavouriteStopDropdownMenuItemMultipleStopsRetriever
 }

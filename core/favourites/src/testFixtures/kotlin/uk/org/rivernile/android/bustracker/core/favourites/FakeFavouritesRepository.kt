@@ -43,6 +43,8 @@ class FakeFavouritesRepository(
     private val onGetFavouriteStopFlow: (StopIdentifier) -> Flow<FavouriteStop?> =
         { throw NotImplementedError() },
     private val onAllFavouriteStopsFlow: () -> Flow<List<FavouriteStop>?> =
+        { throw NotImplementedError() },
+    private val onAllFavouriteStopsStopIdentifiersFlow: () -> Flow<Set<StopIdentifier>?> =
         { throw NotImplementedError() }
 ) : FavouritesRepository {
 
@@ -61,4 +63,7 @@ class FakeFavouritesRepository(
         onGetFavouriteStopFlow(stopIdentifier)
 
     override val allFavouriteStopsFlow get() = onAllFavouriteStopsFlow()
+
+    override val allFavouriteStopsStopIdentifiersFlow get() =
+        onAllFavouriteStopsStopIdentifiersFlow()
 }

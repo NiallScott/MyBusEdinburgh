@@ -113,6 +113,7 @@ include(
     ":ui:feature:alerts:removearrivalalert",
     ":ui:feature:alerts:removeproximityalert",
     ":ui:feature:favouritestops:addoreditfavouritestop",
+    ":ui:feature:favouritestops:favouritestopscommon",
     ":ui:feature:favouritestops:favouritestopslisting",
     ":ui:feature:favouritestops:removefavouritestop",
     ":ui:text-formatting",

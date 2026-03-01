@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
+  ~ Copyright (C) 2026 Niall 'Rivernile' Scott
   ~
   ~ This software is provided 'as-is', without any express or implied
   ~ warranty.  In no event will the authors or contributors be held liable for
@@ -25,15 +25,6 @@
   ~
   -->
 <resources>
-    <string name="favouritestops_star_content_description">Favourite stop</string>
-    <string name="favouritestops_nosavedstops_title">You have no saved favourite stops</string>
-    <string name="favouritestops_nosavedstops_summary">To begin, find a stop from the stop map or nearest stops list</string>
-    <string name="favouritestops_dropdown_content_description">More actions</string>
-
-    <string name="favouritestops_menu_edit">Edit name</string>
-    <string name="favouritestops_menu_remove">Remove</string>
-    <string name="favouritestops_menu_showonmap">Show on map</string>
-    <string name="favouritestops_menu_add_shortcut">Add shortcut</string>
-
-    <string name="favouriteshortcut_title">Select favourite stop</string>
+    <public name="favourite_stop_add" type="string" />
+    <public name="favourite_stop_remove" type="string" />
 </resources>

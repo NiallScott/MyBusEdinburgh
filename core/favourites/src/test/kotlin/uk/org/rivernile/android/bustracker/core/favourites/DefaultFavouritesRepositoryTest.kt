@@ -186,6 +186,35 @@ class DefaultFavouritesRepositoryTest {
         }
     }
 
+    @Test
+    fun allFavouriteStopsStopIdentifiersFlowEmitsDistinctValues() = runTest {
+        val stopCode1 = "1".toNaptanStopIdentifier()
+        val stopCode2 = "2".toNaptanStopIdentifier()
+        val stopCode3 = "3".toNaptanStopIdentifier()
+        val repository = createFavouritesRepository(
+            favouriteStopsDao = FakeFavouriteStopsDao(
+                onAllFavouriteStopsStopIdentifiersFlow = {
+                    intervalFlowOf(
+                        0L,
+                        10L,
+                        null,
+                        null,
+                        listOf(stopCode1),
+                        listOf(stopCode1),
+                        listOf(stopCode1, stopCode2, stopCode3)
+                    )
+                }
+            )
+        )
+
+        repository.allFavouriteStopsStopIdentifiersFlow.test {
+            assertNull(awaitItem())
+            assertEquals(setOf(stopCode1), awaitItem())
+            assertEquals(setOf(stopCode1, stopCode2, stopCode3), awaitItem())
+            awaitComplete()
+        }
+    }
+
     private fun createFavouritesRepository(
         favouriteStopsDao: FavouriteStopsDao
     ): DefaultFavouritesRepository {

@@ -43,14 +43,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="remove">Remove</string>
     <string name="loading">Loading&#8230;</string>
 
-    <string name="prox_alert_add">Add proximity alert</string>
-    <string name="prox_alert_rem">Remove proximity alert</string>
-    <string name="time_alert_add">Add arrival alert</string>
-    <string name="time_alert_rem">Remove arrival alert</string>
-
-    <string name="favourite_add">Add favourite</string>
-    <string name="favourite_rem">Remove favourite</string>
-
     <!--
     ***************************
     * String related to times *
@@ -435,8 +427,8 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * Strings for DisplayStopDataActivity menu *
     ********************************************
     -->
-    <string name="displaystopdata_menu_favourite_add">@string/favourite_add</string>
-    <string name="displaystopdata_menu_favourite_rem">@string/favourite_rem</string>
+    <string name="displaystopdata_menu_favourite_add">@string/favourite_stop_add</string>
+    <string name="displaystopdata_menu_favourite_rem">@string/favourite_stop_remove</string>
     <string name="displaystopdata_menu_prox_add">@string/prox_alert_add</string>
     <string name="displaystopdata_menu_prox_rem">@string/prox_alert_rem</string>
     <string name="displaystopdata_menu_time_add">@string/time_alert_add</string>
@@ -456,8 +448,8 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     **********************************************************
     -->
     <string name="neareststops_context_showonmap">Show on map</string>
-    <string name="neareststops_context_addasfav">@string/favourite_add</string>
-    <string name="neareststops_context_remasfav">@string/favourite_rem</string>
+    <string name="neareststops_context_addasfav">@string/favourite_stop_add</string>
+    <string name="neareststops_context_remasfav">@string/favourite_stop_remove</string>
     <string name="neareststops_menu_prox_add">@string/prox_alert_add</string>
     <string name="neareststops_menu_prox_rem">@string/prox_alert_rem</string>
     <string name="neareststops_menu_time_add">@string/time_alert_add</string>

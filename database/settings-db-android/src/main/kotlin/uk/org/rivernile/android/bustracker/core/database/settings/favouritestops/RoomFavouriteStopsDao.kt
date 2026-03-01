@@ -32,6 +32,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
@@ -61,6 +62,12 @@ internal abstract class RoomFavouriteStopsDao : FavouriteStopsDao {
 
     override val allFavouriteStopsFlow: Flow<List<FavouriteStop>> get() =
         allFavouriteStopsFlowInternal
+
+    @get:Query("""
+        SELECT DISTINCT stop_code
+        FROM favourite_stop
+    """)
+    abstract override val allFavouriteStopsStopIdentifiersFlow: Flow<List<NaptanStopIdentifier>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun addOrUpdateFavouriteStopInternal(favouriteStop: RoomFavouriteStopEntity)

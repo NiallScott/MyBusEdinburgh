@@ -24,26 +24,15 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.alerts.di
-
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
-import uk.org.rivernile.android.bustracker.ui.alerts.RealUiAlertDropdownMenuItemMultipleStopsRetriever
-import uk.org.rivernile.android.bustracker.ui.alerts.UiAlertDropdownMenuItemMultipleStopsRetriever
+package uk.org.rivernile.android.bustracker.ui.favouritestops
 
 /**
- * This [Module] provides common alerts dependencies within the [ViewModelComponent].
+ * This defines a dropdown menu item for a favourite stop.
  *
+ * @property isFavouriteStop Is the stop a favourite stop?
  * @author Niall Scott
  */
-@InstallIn(ViewModelComponent::class)
-@Module
-internal interface AlertsCommonViewModelModule {
-
-    @Binds
-    fun bindUiAlertDropdownMenuItemMultipleStopsRetriever(
-        retriever: RealUiAlertDropdownMenuItemMultipleStopsRetriever
-    ): UiAlertDropdownMenuItemMultipleStopsRetriever
-}
+@JvmInline
+public value class UiFavouriteStopDropdownMenuItem(
+    public val isFavouriteStop: Boolean
+)

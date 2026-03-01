@@ -40,6 +40,8 @@ class FakeFavouriteStopsDao(
     private val onGetFavouriteStopFlow: (StopIdentifier) -> Flow<FavouriteStop?> =
         { throw NotImplementedError() },
     private val onAllFavouriteStopsFlow: () -> Flow<List<FavouriteStop>?> =
+        { throw NotImplementedError() },
+    private val onAllFavouriteStopsStopIdentifiersFlow: () -> Flow<List<StopIdentifier>?> =
         { throw NotImplementedError() }
 ) : FavouriteStopsDao {
 
@@ -65,4 +67,7 @@ class FakeFavouriteStopsDao(
 
     override val allFavouriteStopsFlow: Flow<List<FavouriteStop>?>
         get() = onAllFavouriteStopsFlow()
+
+    override val allFavouriteStopsStopIdentifiersFlow: Flow<List<StopIdentifier>?>
+        get() = onAllFavouriteStopsStopIdentifiersFlow()
 }
