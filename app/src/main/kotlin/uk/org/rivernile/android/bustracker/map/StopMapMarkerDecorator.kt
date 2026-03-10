@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,8 +30,8 @@ import androidx.annotation.DrawableRes
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
-import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
+import uk.org.rivernile.android.bustracker.core.busstops.toIconDrawableResId
 import javax.inject.Inject
 
 /**
@@ -73,15 +73,6 @@ class StopMapMarkerDecorator @Inject constructor() {
      * @return A drawable resource ID for a given orientation.
      */
     @DrawableRes
-    fun getStopDirectionDrawableResourceId(orientation: StopOrientation) = when (orientation) {
-        StopOrientation.NORTH -> R.drawable.mapmarker_n
-        StopOrientation.NORTH_EAST -> R.drawable.mapmarker_ne
-        StopOrientation.EAST -> R.drawable.mapmarker_e
-        StopOrientation.SOUTH_EAST -> R.drawable.mapmarker_se
-        StopOrientation.SOUTH -> R.drawable.mapmarker_s
-        StopOrientation.SOUTH_WEST -> R.drawable.mapmarker_sw
-        StopOrientation.WEST -> R.drawable.mapmarker_w
-        StopOrientation.NORTH_WEST -> R.drawable.mapmarker_nw
-        else -> R.drawable.mapmarker
-    }
+    fun getStopDirectionDrawableResourceId(orientation: StopOrientation) =
+        orientation.toIconDrawableResId()
 }

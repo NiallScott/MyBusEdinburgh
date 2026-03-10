@@ -42,7 +42,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -290,8 +289,6 @@ private fun DropdownMenuIconButton(
             contentDescription = stringResource(
                 R.string.favouritestops_dropdown_content_description
             ),
-            modifier = Modifier
-                .minimumInteractiveComponentSize(),
             tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }

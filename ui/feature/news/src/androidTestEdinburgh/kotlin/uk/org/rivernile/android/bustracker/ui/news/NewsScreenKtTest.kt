@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.ui.news
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
@@ -52,8 +51,6 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.window.core.layout.WindowSizeClass
 import org.junit.Rule
-import uk.org.rivernile.android.bustracker.ui.formatters.LocalNumberFormatter
-import uk.org.rivernile.android.bustracker.ui.formatters.rememberNumberFormatter
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.TEST_TAG_DIVERSIONS_SCREEN
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.UiDiversion
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.TEST_TAG_INCIDENTS_SCREEN
@@ -269,21 +266,17 @@ class NewsScreenKtTest {
         onDiversionActionLaunched: () -> Unit = { },
         onErrorSnackbarShown: (Long) -> Unit = { }
     ) {
-        CompositionLocalProvider(
-            LocalNumberFormatter provides rememberNumberFormatter()
-        ) {
-            NewsScreenWithState(
-                state = state,
-                windowSizeClass = windowSizeClass,
-                modifier = modifier,
-                onRefresh = onRefresh,
-                onIncidentMoreDetailsClicked = onIncidentMoreDetailsClicked,
-                onIncidentActionLaunched = onIncidentActionLaunched,
-                onDiversionMoreDetailsClicked = onDiversionMoreDetailsClicked,
-                onDiversionActionLaunched = onDiversionActionLaunched,
-                onErrorSnackbarShown = onErrorSnackbarShown
-            )
-        }
+        NewsScreenWithState(
+            state = state,
+            windowSizeClass = windowSizeClass,
+            modifier = modifier,
+            onRefresh = onRefresh,
+            onIncidentMoreDetailsClicked = onIncidentMoreDetailsClicked,
+            onIncidentActionLaunched = onIncidentActionLaunched,
+            onDiversionMoreDetailsClicked = onDiversionMoreDetailsClicked,
+            onDiversionActionLaunched = onDiversionActionLaunched,
+            onErrorSnackbarShown = onErrorSnackbarShown
+        )
     }
 
     private fun createWindowSizeClass(

@@ -73,7 +73,7 @@ internal value class WrappedStopSearchResult(
 
     override val stopName get() = databaseStopSearchResult.stopName.toStopName()
 
-    override val orientation get() = databaseStopSearchResult.orientation
+    override val orientation get() = databaseStopSearchResult.orientation.toStopOrientation()
 
     override val serviceListing get() = databaseStopSearchResult.serviceListing
 }

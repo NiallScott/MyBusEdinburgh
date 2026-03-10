@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,7 +29,6 @@
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
 import androidx.activity.ComponentActivity
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -38,8 +37,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import kotlinx.collections.immutable.persistentListOf
 import org.junit.Rule
-import uk.org.rivernile.android.bustracker.ui.formatters.LocalDateTimeFormatter
-import uk.org.rivernile.android.bustracker.ui.formatters.rememberDateTimeFormatter
 import uk.org.rivernile.android.bustracker.ui.news.R
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
@@ -97,13 +94,9 @@ class ServiceUpdateItemKtTest {
 
         composeTestRule.setContent {
             MyBusTheme {
-                CompositionLocalProvider(
-                    LocalDateTimeFormatter provides rememberDateTimeFormatter()
-                ) {
-                    ItemLastUpdated(
-                        lastUpdated = instant
-                    )
-                }
+                ItemLastUpdated(
+                    lastUpdated = instant
+                )
             }
         }
 
@@ -111,7 +104,6 @@ class ServiceUpdateItemKtTest {
             .onNodeWithTag(TEST_TAG_ITEM_LAST_UPDATED)
             .assertTextEquals(expected)
     }
-
 
     @Test
     fun itemAffectedServicesHandlesEmptyAffectedServices() {

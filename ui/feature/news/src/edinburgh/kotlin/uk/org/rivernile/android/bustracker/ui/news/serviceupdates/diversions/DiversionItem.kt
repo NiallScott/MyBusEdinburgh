@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,7 +36,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -44,8 +43,6 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.persistentListOf
-import uk.org.rivernile.android.bustracker.ui.formatters.LocalDateTimeFormatter
-import uk.org.rivernile.android.bustracker.ui.formatters.rememberDateTimeFormatter
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ItemAffectedServices
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ItemLastUpdated
@@ -135,44 +132,40 @@ internal fun DiversionItem(
 @Composable
 private fun DiversionItemPreview() {
     MyBusTheme {
-        CompositionLocalProvider(
-            LocalDateTimeFormatter provides rememberDateTimeFormatter()
-        ) {
-            DiversionItem(
-                item = UiDiversion(
-                    id = "abc123",
-                    lastUpdated = Instant.fromEpochMilliseconds(1719063420000L),
-                    title = "Princes Street",
-                    summary = "Due to road works buses are being diverted from Princes Street.",
-                    affectedServices = persistentListOf(
-                        UiServiceName(
-                            serviceName = "1",
-                            colours = UiServiceColours(
-                                backgroundColour = Color.Blue.toArgb(),
-                                textColour = Color.White.toArgb()
-                            )
-                        ),
-                        UiServiceName(
-                            serviceName = "26",
-                            colours = UiServiceColours(
-                                backgroundColour = Color.Red.toArgb(),
-                                textColour = Color.White.toArgb()
-                            )
-                        ),
-                        UiServiceName(
-                            serviceName = "44",
-                            colours = UiServiceColours(
-                                backgroundColour = Color.Yellow.toArgb(),
-                                textColour = Color.Black.toArgb()
-                            )
+        DiversionItem(
+            item = UiDiversion(
+                id = "abc123",
+                lastUpdated = Instant.fromEpochMilliseconds(1719063420000L),
+                title = "Princes Street",
+                summary = "Due to road works buses are being diverted from Princes Street.",
+                affectedServices = persistentListOf(
+                    UiServiceName(
+                        serviceName = "1",
+                        colours = UiServiceColours(
+                            backgroundColour = Color.Blue.toArgb(),
+                            textColour = Color.White.toArgb()
                         )
                     ),
-                    moreDetails = UiMoreDetails(url = "https://some.url")
+                    UiServiceName(
+                        serviceName = "26",
+                        colours = UiServiceColours(
+                            backgroundColour = Color.Red.toArgb(),
+                            textColour = Color.White.toArgb()
+                        )
+                    ),
+                    UiServiceName(
+                        serviceName = "44",
+                        colours = UiServiceColours(
+                            backgroundColour = Color.Yellow.toArgb(),
+                            textColour = Color.Black.toArgb()
+                        )
+                    )
                 ),
-                modifier = Modifier.padding(16.dp),
-                onMoreDetailsClicked = { }
-            )
-        }
+                moreDetails = UiMoreDetails(url = "https://some.url")
+            ),
+            modifier = Modifier.padding(16.dp),
+            onMoreDetailsClicked = { }
+        )
     }
 }
 
@@ -193,22 +186,18 @@ private fun DiversionItemPreview() {
 @Composable
 private fun DiversionItemNoServicesPreview() {
     MyBusTheme {
-        CompositionLocalProvider(
-            LocalDateTimeFormatter provides rememberDateTimeFormatter()
-        ) {
-            DiversionItem(
-                item = UiDiversion(
-                    id = "abc123",
-                    lastUpdated = Instant.fromEpochMilliseconds(1719063420000L),
-                    title = "Princes Street",
-                    summary = "Due to road works buses are being diverted from Princes Street.",
-                    affectedServices = null,
-                    moreDetails = UiMoreDetails(url = "https://some.url")
-                ),
-                modifier = Modifier.padding(16.dp),
-                onMoreDetailsClicked = { }
-            )
-        }
+        DiversionItem(
+            item = UiDiversion(
+                id = "abc123",
+                lastUpdated = Instant.fromEpochMilliseconds(1719063420000L),
+                title = "Princes Street",
+                summary = "Due to road works buses are being diverted from Princes Street.",
+                affectedServices = null,
+                moreDetails = UiMoreDetails(url = "https://some.url")
+            ),
+            modifier = Modifier.padding(16.dp),
+            onMoreDetailsClicked = { }
+        )
     }
 }
 
@@ -229,21 +218,17 @@ private fun DiversionItemNoServicesPreview() {
 @Composable
 private fun DiversionItemNoMoreDetailsButtonPreview() {
     MyBusTheme {
-        CompositionLocalProvider(
-            LocalDateTimeFormatter provides rememberDateTimeFormatter()
-        ) {
-            DiversionItem(
-                item = UiDiversion(
-                    id = "abc123",
-                    lastUpdated = Instant.fromEpochMilliseconds(1719063420000L),
-                    title = "Princes Street",
-                    summary = "Due to road works buses are being diverted from Princes Street.",
-                    affectedServices = null,
-                    moreDetails = null
-                ),
-                modifier = Modifier.padding(16.dp),
-                onMoreDetailsClicked = { }
-            )
-        }
+        DiversionItem(
+            item = UiDiversion(
+                id = "abc123",
+                lastUpdated = Instant.fromEpochMilliseconds(1719063420000L),
+                title = "Princes Street",
+                summary = "Due to road works buses are being diverted from Princes Street.",
+                affectedServices = null,
+                moreDetails = null
+            ),
+            modifier = Modifier.padding(16.dp),
+            onMoreDetailsClicked = { }
+        )
     }
 }

@@ -137,7 +137,8 @@ class UiItemRetriever @Inject constructor(
                 items += UiItem.Map(
                     it.location.latitude,
                     it.location.longitude,
-                    it.orientation)
+                    it.orientation
+                )
             }
         }
 

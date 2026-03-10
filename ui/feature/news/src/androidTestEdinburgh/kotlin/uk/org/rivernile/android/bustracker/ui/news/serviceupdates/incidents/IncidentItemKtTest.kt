@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,8 +29,6 @@
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents
 
 import androidx.activity.ComponentActivity
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -39,8 +37,6 @@ import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.collections.immutable.persistentListOf
 import org.junit.Rule
-import uk.org.rivernile.android.bustracker.ui.formatters.LocalDateTimeFormatter
-import uk.org.rivernile.android.bustracker.ui.formatters.rememberDateTimeFormatter
 import uk.org.rivernile.android.bustracker.ui.news.R
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.TEST_TAG_ITEM_AFFECTED_SERVICES
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.TEST_TAG_ITEM_BUTTON_MORE_DETAILS
@@ -50,7 +46,6 @@ import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.TEST_TAG_ITEM_
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiMoreDetails
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
-import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import kotlin.test.Test
@@ -75,7 +70,7 @@ class IncidentItemKtTest {
         val lastUpdated = Instant.fromEpochMilliseconds(123L)
 
         composeTestRule.setContent {
-            MyBusThemeWithCompositionLocals {
+            MyBusTheme {
                 IncidentItem(
                     item = UiIncident(
                         id = "1",
@@ -103,7 +98,7 @@ class IncidentItemKtTest {
         val buttonClickedTracker = ButtonClickedTracker()
 
         composeTestRule.setContent {
-            MyBusThemeWithCompositionLocals {
+            MyBusTheme {
                 IncidentItem(
                     item = UiIncident(
                         id = "1",
@@ -131,7 +126,7 @@ class IncidentItemKtTest {
         val lastUpdated = Instant.fromEpochMilliseconds(123L)
 
         composeTestRule.setContent {
-            MyBusThemeWithCompositionLocals {
+            MyBusTheme {
                 IncidentItem(
                     item = UiIncident(
                         id = "1",
@@ -161,7 +156,7 @@ class IncidentItemKtTest {
         val buttonClickedTracker = ButtonClickedTracker()
 
         composeTestRule.setContent {
-            MyBusThemeWithCompositionLocals {
+            MyBusTheme {
                 IncidentItem(
                     item = UiIncident(
                         id = "1",
@@ -184,19 +179,6 @@ class IncidentItemKtTest {
         assertAffectedServicesExists()
         assertMoreDetailsButtonExistsAndIsClickable()
         assertEquals(1, buttonClickedTracker.numberOfInvocations)
-    }
-
-    @Composable
-    private fun MyBusThemeWithCompositionLocals(
-        dateTimeFormat: DateFormat = rememberDateTimeFormatter(),
-        content: @Composable () -> Unit
-    ) {
-        MyBusTheme {
-            CompositionLocalProvider(
-                LocalDateTimeFormatter provides dateTimeFormat,
-                content = content
-            )
-        }
     }
 
     @Suppress("SameParameterValue")

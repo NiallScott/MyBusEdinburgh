@@ -83,7 +83,7 @@ internal value class WrappedStopDetailsWithServices(
 
     override val location get() = databaseStopDetailsWithServices.location.toStopLocation()
 
-    override val orientation get() = databaseStopDetailsWithServices.orientation
+    override val orientation get() = databaseStopDetailsWithServices.orientation.toStopOrientation()
 
     override val serviceListing get() = databaseStopDetailsWithServices.serviceListing
 }

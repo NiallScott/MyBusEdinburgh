@@ -39,7 +39,7 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
+import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toParcelableNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState

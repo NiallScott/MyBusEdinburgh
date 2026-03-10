@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.details
 
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
+import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 
 /**
@@ -61,7 +61,8 @@ sealed interface UiItem {
          * stop.
          */
         data class Known(
-                val distanceKilometers: Float) : Distance
+            val distanceKilometers: Float
+        ) : Distance
 
         /**
          * This item is shown when the distance between the device and the stop is unknown, but not

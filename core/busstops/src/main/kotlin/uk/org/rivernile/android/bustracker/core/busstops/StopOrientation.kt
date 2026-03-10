@@ -34,4 +34,56 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrient
  *
  * @author Niall Scott
  */
-public typealias StopOrientation = DatabaseStopOrientation
+public enum class StopOrientation {
+
+    /**
+     * The stop is facing north.
+     */
+    NORTH,
+    /**
+     * The stop is facing north-east.
+     */
+    NORTH_EAST,
+    /**
+     * The stop is facing east.
+     */
+    EAST,
+    /**
+     * The stop is facing south-east.
+     */
+    SOUTH_EAST,
+    /**
+     * The stop is facing south.
+     */
+    SOUTH,
+    /**
+     * The stop is facing south-west.
+     */
+    SOUTH_WEST,
+    /**
+     * The stop is facing west.
+     */
+    WEST,
+    /**
+     * The stop is facing north-west.
+     */
+    NORTH_WEST,
+    /**
+     * The stop orientation is unknown.
+     */
+    UNKNOWN
+}
+
+internal fun DatabaseStopOrientation.toStopOrientation(): StopOrientation {
+    return when (this) {
+        DatabaseStopOrientation.NORTH -> StopOrientation.NORTH
+        DatabaseStopOrientation.NORTH_EAST -> StopOrientation.NORTH_EAST
+        DatabaseStopOrientation.EAST -> StopOrientation.EAST
+        DatabaseStopOrientation.SOUTH_EAST -> StopOrientation.SOUTH_EAST
+        DatabaseStopOrientation.SOUTH -> StopOrientation.SOUTH
+        DatabaseStopOrientation.SOUTH_WEST -> StopOrientation.SOUTH_WEST
+        DatabaseStopOrientation.WEST -> StopOrientation.WEST
+        DatabaseStopOrientation.NORTH_WEST -> StopOrientation.NORTH_WEST
+        DatabaseStopOrientation.UNKNOWN -> StopOrientation.UNKNOWN
+    }
+}

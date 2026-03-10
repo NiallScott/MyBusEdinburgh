@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2026 Niall 'Rivernile' Scott
+  ~
+  ~ This software is provided 'as-is', without any express or implied
+  ~ warranty.  In no event will the authors or contributors be held liable for
+  ~ any damages arising from the use of this software.
+  ~
+  ~ The aforementioned copyright holder(s) hereby grant you a
+  ~ non-transferrable right to use this software for any purpose (including
+  ~ commercial applications), and to modify it and redistribute it, subject to
+  ~ the following conditions:
+  ~
+  ~  1. This notice may not be removed or altered from any file it appears in.
+  ~
+  ~  2. Any modifications made to this software, except those defined in
+  ~     clause 3 of this agreement, must be released under this license, and
+  ~     the source code of any modifications must be made available on a
+  ~     publically accessible (and locateable) website, or sent to the
+  ~     original author of this software.
+  ~
+  ~  3. Software modifications that do not alter the functionality of the
+  ~     software but are simply adaptations to a specific environment are
+  ~     exempt from clause 2.
+  ~
+  -->
+<resources>
+    <string name="neareststops_menu_showonmap">Show on map</string>
+    <string name="neareststops_distance_format">%s m</string>
+    <string name="neareststops_dropdown_content_description">More actions</string>
+    <string name="neareststops_error_empty_title">No nearby stops</string>
+    <string name="neareststops_error_empty_blurb">You are out of range of any stops, or your service filter does not match any nearby stops</string>
+    <string name="neareststops_error_location_unknown_title">Your location is unknown</string>
+    <string name="neareststops_error_location_unknown_blurb">Nearest stops can only be shown if your location can be determined</string>
+    <string name="neareststops_error_no_location_feature_title">No location services</string>
+    <string name="neareststops_error_no_location_feature_blurb">This device does not have the necessary location services to be able to determine your nearest stops</string>
+    <string name="neareststops_error_permission_required_title">Permission required</string>
+    <string name="neareststops_error_permission_required_blurb">To show the nearest stops, you need to grant access to your location</string>
+    <string name="neareststops_error_permission_required_button">Grant permission</string>
+    <string name="neareststops_error_location_sources_title">Location services disabled</string>
+    <string name="neareststops_error_location_sources_blurb">Please enable location services from system settings</string>
+    <string name="neareststops_error_location_sources_button">Open settings</string>
+    <string name="neareststops_error_no_location_settings">System location settings does not exist on this device</string>
+</resources>

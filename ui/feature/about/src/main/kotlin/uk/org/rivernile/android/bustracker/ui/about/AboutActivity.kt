@@ -312,28 +312,24 @@ private val UiAboutItem.contentType: Int get() {
 @Composable
 private fun AboutScreenPreview() {
     MyBusTheme {
-        CompositionLocalProvider(
-            LocalDateTimeFormatter provides rememberDateTimeFormatter()
-        ) {
-            AboutScreenWithState(
-                state = UiState(
-                    items = persistentListOf(
-                        UiAboutItem.TwoLinesItem.AppVersion("1.2.3", 4),
-                        UiAboutItem.TwoLinesItem.Author,
-                        UiAboutItem.TwoLinesItem.Website,
-                        UiAboutItem.TwoLinesItem.Bluesky,
-                        UiAboutItem.TwoLinesItem.DatabaseVersion(Date(1712498400000L)),
-                        UiAboutItem.OneLineItem.Credits,
-                        UiAboutItem.OneLineItem.PrivacyPolicy,
-                        UiAboutItem.OneLineItem.OpenSourceLicences
-                    )
-                ),
-                onNavigateUp = { },
-                onItemClicked = { },
-                onCreditsDialogDismissed = { },
-                onOpenSourceLicenceDialogDismissed = { },
-                onActionLaunched = { }
-            )
-        }
+        AboutScreenWithState(
+            state = UiState(
+                items = persistentListOf(
+                    UiAboutItem.TwoLinesItem.AppVersion("1.2.3", 4),
+                    UiAboutItem.TwoLinesItem.Author,
+                    UiAboutItem.TwoLinesItem.Website,
+                    UiAboutItem.TwoLinesItem.Bluesky,
+                    UiAboutItem.TwoLinesItem.DatabaseVersion(Date(1712498400000L)),
+                    UiAboutItem.OneLineItem.Credits,
+                    UiAboutItem.OneLineItem.PrivacyPolicy,
+                    UiAboutItem.OneLineItem.OpenSourceLicences
+                )
+            ),
+            onNavigateUp = { },
+            onItemClicked = { },
+            onCreditsDialogDismissed = { },
+            onOpenSourceLicenceDialogDismissed = { },
+            onActionLaunched = { }
+        )
     }
 }

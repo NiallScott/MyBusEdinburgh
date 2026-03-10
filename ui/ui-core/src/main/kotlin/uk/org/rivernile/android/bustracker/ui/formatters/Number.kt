@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,32 +28,27 @@ package uk.org.rivernile.android.bustracker.ui.formatters
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ProvidableCompositionLocal
-import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.compositionLocalWithComputedDefaultOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
 import java.text.NumberFormat
 
 /**
  * A [androidx.compose.runtime.CompositionLocal] which provides a [NumberFormat] for formatting
- * numbers, suitable for displaying on user interfaces.
+ * numbers, suitable for displaying on user interfaces. This value will be updated when
+ * [LocalConfiguration] changes.
  *
- * This is not provided by default in the theme. Many pieces of UI will not require this, so the
- * allocation of a [NumberFormat] object will be wasteful. Therefore, any pieces of UI which want to
- * use this must use a [androidx.compose.runtime.CompositionLocalProvider] and supply an appropriate
- * instance of [NumberFormat].
+ * For better performance, you may wish to provide this [ProvidableCompositionLocal] with
+ * [rememberNumberFormatter] so that the [NumberFormat] instance is not created on every usage.
  *
- * For example, to have a [NumberFormat] which responds to device configuration changes, use
- * [rememberNumberFormatter].
- *
- * If this [androidx.compose.runtime.CompositionLocal] is used without a value being provided, an
- * [IllegalStateException] will be thrown at the usage site.
- *
- * @see [rememberNumberFormatter]
+ * @see rememberNumberFormatter
  * @author Niall Scott
  */
-public val LocalNumberFormatter: ProvidableCompositionLocal<NumberFormat> = compositionLocalOf {
-    error("LocalNumberFormatter has not been set with a value.")
-}
+public val LocalNumberFormatter: ProvidableCompositionLocal<NumberFormat> =
+    compositionLocalWithComputedDefaultOf {
+        LocalConfiguration.currentValue
+        NumberFormat.getInstance()
+    }
 
 /**
  * This [remember]s a [NumberFormat] instance which is reinitialised every time there is a change

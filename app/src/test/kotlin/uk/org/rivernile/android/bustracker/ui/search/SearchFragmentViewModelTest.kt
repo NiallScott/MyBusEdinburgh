@@ -40,7 +40,7 @@ import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.busstops.FakeStopName
 import uk.org.rivernile.android.bustracker.core.busstops.FakeStopSearchResult
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
+import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
 import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier

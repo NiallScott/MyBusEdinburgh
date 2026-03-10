@@ -27,7 +27,7 @@
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
 import androidx.recyclerview.widget.RecyclerView
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
+import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.edinburghbustracker.android.R

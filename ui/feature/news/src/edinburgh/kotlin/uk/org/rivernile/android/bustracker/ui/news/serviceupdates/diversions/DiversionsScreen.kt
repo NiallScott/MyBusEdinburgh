@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,7 +32,6 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
@@ -43,8 +42,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.collections.immutable.persistentListOf
-import uk.org.rivernile.android.bustracker.ui.formatters.LocalDateTimeFormatter
-import uk.org.rivernile.android.bustracker.ui.formatters.rememberDateTimeFormatter
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.ServiceUpdatesScreen
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiContent
@@ -239,26 +236,22 @@ private fun DiversionsScreenContentPreview() {
     )
 
     MyBusTheme {
-        CompositionLocalProvider(
-            LocalDateTimeFormatter provides rememberDateTimeFormatter()
-        ) {
-            DiversionsScreen(
-                state = UiDiversionsState(
-                    content = UiContent.Populated(
-                        isRefreshing = false,
-                        items = diversions,
-                        error = null,
-                        hasInternetConnectivity = true,
-                        lastRefreshTime = UiLastRefreshed.Minutes(minutes = 5),
-                        loadTimeMillis = 123L
-                    )
-                ),
-                onRefresh = { },
-                onMoreDetailsClicked = { },
-                onActionLaunched = { },
-                onErrorSnackbarShown = { }
-            )
-        }
+        DiversionsScreen(
+            state = UiDiversionsState(
+                content = UiContent.Populated(
+                    isRefreshing = false,
+                    items = diversions,
+                    error = null,
+                    hasInternetConnectivity = true,
+                    lastRefreshTime = UiLastRefreshed.Minutes(minutes = 5),
+                    loadTimeMillis = 123L
+                )
+            ),
+            onRefresh = { },
+            onMoreDetailsClicked = { },
+            onActionLaunched = { },
+            onErrorSnackbarShown = { }
+        )
     }
 }
 
@@ -279,19 +272,15 @@ private fun DiversionsScreenContentPreview() {
 @Composable
 private fun DiversionsScreenProgressPreview() {
     MyBusTheme {
-        CompositionLocalProvider(
-            LocalDateTimeFormatter provides rememberDateTimeFormatter()
-        ) {
-            DiversionsScreen(
-                state = UiDiversionsState(
-                    content = UiContent.InProgress
-                ),
-                onRefresh = { },
-                onMoreDetailsClicked = { },
-                onActionLaunched = { },
-                onErrorSnackbarShown = { }
-            )
-        }
+        DiversionsScreen(
+            state = UiDiversionsState(
+                content = UiContent.InProgress
+            ),
+            onRefresh = { },
+            onMoreDetailsClicked = { },
+            onActionLaunched = { },
+            onErrorSnackbarShown = { }
+        )
     }
 }
 
@@ -312,20 +301,16 @@ private fun DiversionsScreenProgressPreview() {
 @Composable
 private fun DiversionsScreenEmptyErrorPreview() {
     MyBusTheme {
-        CompositionLocalProvider(
-            LocalDateTimeFormatter provides rememberDateTimeFormatter()
-        ) {
-            DiversionsScreen(
-                state = UiDiversionsState(
-                    content = UiContent.Error(
-                        error = UiError.EMPTY
-                    )
-                ),
-                onRefresh = { },
-                onMoreDetailsClicked = { },
-                onActionLaunched = { },
-                onErrorSnackbarShown = { }
-            )
-        }
+        DiversionsScreen(
+            state = UiDiversionsState(
+                content = UiContent.Error(
+                    error = UiError.EMPTY
+                )
+            ),
+            onRefresh = { },
+            onMoreDetailsClicked = { },
+            onActionLaunched = { },
+            onErrorSnackbarShown = { }
+        )
     }
 }

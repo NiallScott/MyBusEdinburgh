@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,7 +39,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -56,7 +55,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.window.core.layout.WindowSizeClass
 import uk.org.rivernile.android.bustracker.ui.formatters.LocalNumberFormatter
-import uk.org.rivernile.android.bustracker.ui.formatters.rememberNumberFormatter
 import uk.org.rivernile.android.bustracker.ui.interop.MenuProvider
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.DiversionsScreen
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.diversions.UiDiversion
@@ -373,7 +371,7 @@ private fun NewsContent(
 )
 @Composable
 private fun NewsScreenPreview() {
-    MyBusThemeWithCompositionLocals {
+    MyBusTheme {
         NewsScreenWithState(
             state = UiState(
                 tabBadges = UiTabBadges(
@@ -484,25 +482,13 @@ private fun NewsTabPreview(
     selected: Boolean,
     countForBadge: Int?
 ) {
-    MyBusThemeWithCompositionLocals {
+    MyBusTheme {
         NewsTab(
             selected = selected,
             text = stringResource(id = R.string.news_fragment_tab_incidents),
             iconRes = R.drawable.ic_bus_alert,
             countForBadge = countForBadge,
             onClick = { }
-        )
-    }
-}
-
-@Composable
-private fun MyBusThemeWithCompositionLocals(
-    content: @Composable () -> Unit
-) {
-    MyBusTheme {
-        CompositionLocalProvider(
-            LocalNumberFormatter provides rememberNumberFormatter(),
-            content = content
         )
     }
 }

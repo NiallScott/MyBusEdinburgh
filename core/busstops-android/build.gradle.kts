@@ -59,4 +59,7 @@ dependencies {
 
     // Testing dependencies
     androidTestImplementation(libs.androidx.test.runner)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlin.test.junit)
 }
