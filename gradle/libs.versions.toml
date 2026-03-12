@@ -23,7 +23,7 @@ androidx-work = "2.11.1"
 
 # Testing versions.
 espresso = "3.7.0"
-mockito = "5.22.0"
+mockito = "5.23.0"
 
 [libraries]
 # Coroutines
