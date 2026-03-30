@@ -126,8 +126,7 @@ class JsonStopEventKtTest {
                 day = 8,
                 hour = 12,
                 minute = 34
-            ).toInstant(TimeZone.UTC),
-            timeZone = TimeZone.UTC
+            ).toInstant(TimeZone.UTC)
         )
 
         assertNull(result)
@@ -147,8 +146,7 @@ class JsonStopEventKtTest {
                 day = 8,
                 hour = 12,
                 minute = 34
-            ).toInstant(TimeZone.UTC),
-            timeZone = TimeZone.UTC
+            ).toInstant(TimeZone.UTC)
         )
 
         assertEquals(
@@ -183,8 +181,7 @@ class JsonStopEventKtTest {
                 day = 8,
                 hour = 12,
                 minute = 34
-            ).toInstant(TimeZone.UTC),
-            timeZone = TimeZone.UTC
+            ).toInstant(TimeZone.UTC)
         )
 
         assertEquals(
@@ -219,8 +216,7 @@ class JsonStopEventKtTest {
                 day = 8,
                 hour = 12,
                 minute = 34
-            ).toInstant(TimeZone.UTC),
-            timeZone = TimeZone.UTC
+            ).toInstant(TimeZone.UTC)
         )
 
         assertEquals(
@@ -258,8 +254,7 @@ class JsonStopEventKtTest {
                 day = 8,
                 hour = 12,
                 minute = 34
-            ).toInstant(TimeZone.UTC),
-            timeZone = TimeZone.UTC
+            ).toInstant(TimeZone.UTC)
         )
 
         assertEquals(
@@ -294,8 +289,7 @@ class JsonStopEventKtTest {
                 day = 8,
                 hour = 23,
                 minute = 50
-            ).toInstant(TimeZone.UTC),
-            timeZone = TimeZone.UTC
+            ).toInstant(TimeZone.UTC)
         )
 
         assertEquals(
@@ -330,8 +324,7 @@ class JsonStopEventKtTest {
                 day = 8,
                 hour = 23,
                 minute = 50
-            ).toInstant(TimeZone.UTC),
-            timeZone = TimeZone.UTC
+            ).toInstant(TimeZone.UTC)
         )
 
         assertEquals(
@@ -369,8 +362,7 @@ class JsonStopEventKtTest {
                 day = 8,
                 hour = 23,
                 minute = 50
-            ).toInstant(TimeZone.UTC),
-            timeZone = TimeZone.UTC
+            ).toInstant(TimeZone.UTC)
         )
 
         assertEquals(
