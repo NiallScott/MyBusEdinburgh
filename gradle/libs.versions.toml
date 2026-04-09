@@ -63,7 +63,7 @@ kotlin-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime-jvm", versi
 # AndroidX
 androidx-activity = { module = "androidx.activity:activity-ktx", version.ref = "androidx-activity" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
-androidx-annotation = { module = "androidx.annotation:annotation", version = "1.9.1" }
+androidx-annotation = { module = "androidx.annotation:annotation", version = "1.10.0" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.1" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2026.03.01" }
 androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
