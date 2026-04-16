@@ -135,7 +135,7 @@ android-library = { id = "com.android.library", version.ref = "android-gradle-pl
 android-test = { id = "com.android.test", version.ref = "android-gradle-plugin" }
 androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "androidx-benchmark" }
 firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.2.1" }
-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.6" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.7" }
 google-services = { id = "com.google.gms.google-services", version = "4.4.4" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
 kotlin-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
