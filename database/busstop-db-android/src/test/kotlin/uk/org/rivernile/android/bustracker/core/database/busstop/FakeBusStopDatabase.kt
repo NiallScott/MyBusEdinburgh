@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import kotlinx.coroutines.flow.Flow
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.operator.OperatorDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.service.ServiceDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.ServicePointDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.ServiceStopDao
@@ -40,6 +41,7 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDao
  */
 internal class FakeBusStopDatabase(
     private val onDatabaseDao: () -> DatabaseDao = { throw NotImplementedError() },
+    private val onOperatorDao: () -> OperatorDao = { throw NotImplementedError() },
     private val onServiceDao: () -> ServiceDao = { throw NotImplementedError() },
     private val onServicePointDao: () -> ServicePointDao = { throw NotImplementedError() },
     private val onServiceStopDao: () -> ServiceStopDao = { throw NotImplementedError() },
@@ -48,6 +50,8 @@ internal class FakeBusStopDatabase(
 ) : BusStopDatabase {
 
     override val databaseDao get() = onDatabaseDao()
+
+    override val operatorDao get() = onOperatorDao()
 
     override val serviceDao get() = onServiceDao()
 

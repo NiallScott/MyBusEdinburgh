@@ -401,15 +401,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
 
     <!--
     *********************************************
-    * Strings for ServicesChooserDialogFragment *
-    *********************************************
-    -->
-    <string name="serviceschooserdialog_btn_clear_all">Clear all</string>
-    <string name="serviceschooserdialog_error_no_services_global">There are no known services</string>
-    <string name="serviceschooserdialog_error_no_services_stop">There are no known services for this stop</string>
-
-    <!--
-    *********************************************
     * Strings for TimeLimitationsDialogFragment *
     *********************************************
     -->

@@ -35,6 +35,9 @@ kotlin {
 
 dependencies {
 
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.runtime.annotation)
+
     // Testing dependencies
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)
