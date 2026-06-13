@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,7 +29,7 @@ package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import kotlinx.collections.immutable.persistentListOf
 import org.junit.Rule
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiContent
