@@ -37,10 +37,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.visible
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridItemSpanScope
-import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -190,7 +190,7 @@ internal const val TEST_TAG_ERROR_NO_SERVICES_FOR_STOP = "error-no-services-for-
 internal const val TEST_TAG_CONTENT_GRID = "content-grid"
 internal const val TEST_TAG_TOP_SCROLL_HORIZONTAL_DIVIDER = "top-scroll-horizontal-divider"
 internal const val TEST_TAG_BOTTOM_SCROLL_HORIZONTAL_DIVIDER = "bottom-scroll-horizontal-divider"
-private const val KEY_UNKNOWN_OPERATOR = "unknown-operator"
+private const val KEY_UNKNOWN_OPERATOR = "__unknown-operator__"
 private const val CONTENT_TYPE_OPERATOR = "operator"
 private const val CONTENT_TYPE_SERVICE = "service"
 
@@ -340,41 +340,19 @@ private fun LazyContentGrid(
             }
         }
 
-        TopScrollHorizontalDivider(
-            lazyGridState = lazyGridState,
-            modifier = Modifier.align(Alignment.TopStart)
-        )
-
-        BottomScrollHorizontalDivider(
-            lazyGridState = lazyGridState,
-            modifier = Modifier.align(Alignment.BottomStart)
-        )
-    }
-}
-
-@Composable
-private fun TopScrollHorizontalDivider(
-    lazyGridState: LazyGridState,
-    modifier: Modifier = Modifier
-) {
-    if (lazyGridState.canScrollBackward) {
         HorizontalDivider(
-            modifier = modifier
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .visible(lazyGridState.canScrollBackward)
                 .semantics {
                     testTag = TEST_TAG_TOP_SCROLL_HORIZONTAL_DIVIDER
                 }
         )
-    }
-}
 
-@Composable
-private fun BottomScrollHorizontalDivider(
-    lazyGridState: LazyGridState,
-    modifier: Modifier = Modifier
-) {
-    if (lazyGridState.canScrollForward) {
         HorizontalDivider(
-            modifier = modifier
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .visible(lazyGridState.canScrollForward)
                 .semantics {
                     testTag = TEST_TAG_BOTTOM_SCROLL_HORIZONTAL_DIVIDER
                 }
@@ -432,12 +410,12 @@ private fun ClearAllButtonEffect(
     }
 }
 
-private fun calculateKeyForItem(item: UiServiceChooserItem): Any {
+private fun calculateKeyForItem(item: UiServiceChooserItem): String {
     return when (item) {
         is UiServiceChooserItem.Operator.Unknown -> KEY_UNKNOWN_OPERATOR
-        is UiServiceChooserItem.Operator.Named -> item.operatorId
+        is UiServiceChooserItem.Operator.Named -> "op_${item.operatorId}"
         is UiServiceChooserItem.Service ->
-            item.serviceDescriptor.toParcelableServiceDescriptor()
+            "srv_${item.serviceDescriptor.operatorCode}_${item.serviceDescriptor.serviceName}"
     }
 }
 

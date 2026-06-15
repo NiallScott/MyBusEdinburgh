@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.persistentListOf
 import org.junit.Rule
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
-import uk.org.rivernile.android.bustracker.core.domain.toParcelableServiceDescriptor
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
@@ -304,7 +303,7 @@ class ServicesChooserDialogFragmentKtTest {
 
         composeTestRule
             .onNodeWithTag(TEST_TAG_CONTENT_GRID)
-            .performScrollToKey("TEST2")
+            .performScrollToKey("op_TEST2")
         composeTestRule
             .onNodeWithTag(TEST_TAG_TOP_SCROLL_HORIZONTAL_DIVIDER)
             .assertIsDisplayed()
@@ -359,7 +358,7 @@ class ServicesChooserDialogFragmentKtTest {
 
         composeTestRule
             .onNodeWithTag(TEST_TAG_CONTENT_GRID)
-            .performScrollToKey(ServiceDescriptor("2", "TEST2").toParcelableServiceDescriptor())
+            .performScrollToKey("srv_TEST2_2")
         composeTestRule
             .onNodeWithTag(TEST_TAG_BOTTOM_SCROLL_HORIZONTAL_DIVIDER)
             .assertIsNotDisplayed()
