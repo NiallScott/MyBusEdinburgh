@@ -74,7 +74,7 @@ androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.2.1" }
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version = "1.1.1" }
-androidx-core = { module = "androidx.core:core-ktx", version = "1.18.0" } # FIXME: 1.19.0 is blocked until we comile against API 37.
+androidx-core = { module = "androidx.core:core-ktx", version = "1.19.0" } # FIXME: 1.19.0 is blocked until we comile against API 37.
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version = "1.2.1" }
 androidx-fragment = { module = "androidx.fragment:fragment-ktx", version.ref = "androidx-fragment" }
 androidx-fragment-compose = { module = "androidx.fragment:fragment-compose", version.ref = "androidx-fragment" }
