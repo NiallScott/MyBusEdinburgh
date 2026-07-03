@@ -16,7 +16,7 @@ retrofit = "3.0.0"
 androidx-activity = "1.13.0"
 androidx-benchmark = "1.4.1"
 androidx-fragment = "1.8.9"
-androidx-hilt = "1.3.0"
+androidx-hilt = "1.4.0"
 androidx-lifecycle = "2.11.0"
 androidx-room = "2.8.4"
 androidx-work = "2.11.2"
@@ -59,7 +59,7 @@ retrofit-converter-kotlin-serialization = { module = "com.squareup.retrofit2:con
 kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.11.0" }
 
 # Kotlin immutable collections
-kotlin-immutable-collections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.5.0" }
+kotlin-immutable-collections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.5.1" }
 
 # Kotlin date-time
 kotlin-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime-jvm", version = "0.8.0" }
@@ -69,7 +69,7 @@ androidx-activity = { module = "androidx.activity:activity-ktx", version.ref = "
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
 androidx-annotation = { module = "androidx.annotation:annotation", version = "1.10.0" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.1" }
-androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2026.06.00" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2026.06.01" }
 androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.2.1" }
@@ -86,7 +86,7 @@ androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstall
 androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version = "1.4.0" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "androidx-room" }
 androidx-room-core = { module = "androidx.room:room-ktx", version.ref = "androidx-room" }
-androidx-sqlite-framework = { module = "androidx.sqlite:sqlite-framework", version = "2.6.2" }
+androidx-sqlite-framework = { module = "androidx.sqlite:sqlite-framework", version = "2.7.0" }
 androidx-startup = { module = "androidx.startup:startup-runtime", version = "1.2.0" }
 androidx-swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version = "1.2.0" }
 androidx-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "androidx-lifecycle" }
@@ -105,10 +105,10 @@ firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.15.0
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 
 # Play Services
-play-services-location = { module = "com.google.android.gms:play-services-location", version = "21.3.0" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version = "21.4.0" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.0.0" }
 play-services-maps-ktx = { module = "com.google.maps.android:maps-ktx", version = "6.0.1" }
-play-services-maps-utils = { module = "com.google.maps.android:android-maps-utils", version = "4.5.0" }
+play-services-maps-utils = { module = "com.google.maps.android:android-maps-utils", version = "4.5.1" }
 play-services-maps-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version = "6.0.1" }
 
 # Testing dependencies.
