@@ -8,7 +8,7 @@ android-build-tools = "37.0.0"
 android-gradle-plugin = "9.2.1"
 coroutines = "1.11.0"
 dagger = "2.60"
-kotlin = "2.3.20" # FIXME: 2.4.0 blocked, awaiting https://github.com/google/ksp/pull/2981 to be merged and released
+kotlin = "2.4.0" # FIXME: 2.4.0 blocked, awaiting https://github.com/google/ksp/pull/2981 to be merged and released
 okhttp = "5.4.0"
 retrofit = "3.0.0"
 
