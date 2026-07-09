@@ -26,17 +26,22 @@
 
 package uk.org.rivernile.android.bustracker.ui.serviceschooser
 
-import android.app.Dialog
 import android.content.DialogInterface
 import android.content.res.Configuration
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.visible
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -45,32 +50,40 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.core.os.BundleCompat
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.fragment.compose.content
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -83,14 +96,14 @@ import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 
 /**
- * This [DialogFragment] allows the user to select services from a list and then return the user's
- * selection back to the caller. This may be used to ask the user to filter services or to declare
- * which services they are interested in.
+ * This [BottomSheetDialogFragment] allows the user to select services from a list and then return
+ * the user's selection back to the caller. This may be used to ask the user to filter services or
+ * to declare which services they are interested in.
  *
  * @author Niall Scott
  */
 @AndroidEntryPoint
-public class ServicesChooserDialogFragment : DialogFragment() {
+public class ServicesChooserDialogFragment : BottomSheetDialogFragment() {
 
     public companion object {
 
@@ -104,10 +117,11 @@ public class ServicesChooserDialogFragment : DialogFragment() {
         public const val RESULT_CHOSEN_SERVICES: String = "chosenServices"
 
         /**
-         * Create a new instance of this [DialogFragment], providing the [ServicesChooserParams].
+         * Create a new instance of this [BottomSheetDialogFragment], providing the
+         * [ServicesChooserParams].
          *
          * @param parameters The parameters to use to start this chooser.
-         * @return A new instance of this [DialogFragment].
+         * @return A new instance of this [BottomSheetDialogFragment].
          */
         public fun newInstance(parameters: ServicesChooserParams): ServicesChooserDialogFragment {
             return ServicesChooserDialogFragment()
@@ -127,46 +141,31 @@ public class ServicesChooserDialogFragment : DialogFragment() {
         isCancelable = true
     }
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         val titleResId = arguments
             ?.let { BundleCompat.getParcelable(it, ARG_PARAMS, ServicesChooserParams::class.java) }
             ?.titleResId
             ?: 0
 
-        return MaterialAlertDialogBuilder(requireContext())
-            .setTitle(titleResId)
-            .setView(
-                content {
-                    MyBusTheme {
-                        ServicesChooserDialogContent(
-                            onClearAllButtonEnabledStateChanged =
-                                ::updateClearAllButtonEnabledState,
-                            modifier = Modifier
-                                .padding(
-                                    top = dimensionResource(Rcore.dimen.padding_double)
-                                ),
-                            viewModel = viewModel
-                        )
-                    }
-                }
-            )
-            .setPositiveButton(Rcore.string.close, null)
-            .setNeutralButton(R.string.serviceschooserdialog_btn_clear_all) { _, _ ->
-                viewModel.onClearAllClicked()
+        return content {
+            MyBusTheme {
+                ServicesChooserDialogContent(
+                    appBarTitle = stringResource(titleResId),
+                    onCloseClick = ::dismiss,
+                    viewModel = viewModel
+                )
             }
-            .create()
+        }
     }
 
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
 
         dispatchSelectedServices()
-    }
-
-    override fun getDialog(): AlertDialog? = super.dialog as? AlertDialog
-
-    private fun updateClearAllButtonEnabledState(enabled: Boolean) {
-        dialog?.getButton(DialogInterface.BUTTON_NEUTRAL)?.isEnabled = enabled
     }
 
     private fun dispatchSelectedServices() {
@@ -183,56 +182,74 @@ public class ServicesChooserDialogFragment : DialogFragment() {
     }
 }
 
+internal const val TEST_TAG_CLOSE_BUTTON = "button-close"
+internal const val TEST_TAG_TITLE = "title"
+internal const val TEST_TAG_CLEAR_ALL_BUTTON = "button-clear-all"
 internal const val TEST_TAG_CONTENT_PROGRESS = "content-progress"
 internal const val TEST_TAG_CONTENT_CONTENT = "content-content"
 internal const val TEST_TAG_ERROR_NO_SERVICES_GLOBAL = "error-no-services-global"
 internal const val TEST_TAG_ERROR_NO_SERVICES_FOR_STOP = "error-no-services-for-stop"
 internal const val TEST_TAG_CONTENT_GRID = "content-grid"
 internal const val TEST_TAG_TOP_SCROLL_HORIZONTAL_DIVIDER = "top-scroll-horizontal-divider"
-internal const val TEST_TAG_BOTTOM_SCROLL_HORIZONTAL_DIVIDER = "bottom-scroll-horizontal-divider"
 private const val KEY_UNKNOWN_OPERATOR = "__unknown-operator__"
 private const val CONTENT_TYPE_OPERATOR = "operator"
 private const val CONTENT_TYPE_SERVICE = "service"
 
 @Composable
 private fun ServicesChooserDialogContent(
-    onClearAllButtonEnabledStateChanged: (Boolean) -> Unit,
+    appBarTitle: String,
+    onCloseClick: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ServicesChooserViewModel = viewModel()
+    viewModel: ServicesChooserViewModel = viewModel(),
 ) {
     val uiState by viewModel.uiStateFlow.collectAsStateWithLifecycle()
 
     ServicesChooserDialogContentWithState(
+        appBarTitle = appBarTitle,
         state = uiState,
+        onCloseClick = onCloseClick,
+        onClearAllClick = viewModel::onClearAllClicked,
         onServiceClick = viewModel::onServiceClicked,
-        onClearAllButtonEnabledStateChanged = onClearAllButtonEnabledStateChanged,
         modifier = modifier
+            .fillMaxWidth()
     )
 }
 
 /**
  * This composes the services chooser dialog content.
  *
+ * @param appBarTitle The title to be displayed in the app bar.
  * @param state The state to be rendered.
+ * @param onCloseClick This is called when the close button has been clicked.
+ * @param onClearAllClick This is called when the 'Clear all' button has been clicked.
  * @param onServiceClick This is called when a service has been clicked.
- * @param onClearAllButtonEnabledStateChanged This is called when the clear all button state has
- * changed.
  * @param modifier Any [Modifier]s which should be applied.
  */
 @Composable
 internal fun ServicesChooserDialogContentWithState(
+    appBarTitle: String,
     state: UiState,
+    onCloseClick: () -> Unit,
+    onClearAllClick: () -> Unit,
     onServiceClick: (ServiceDescriptor) -> Unit,
-    onClearAllButtonEnabledStateChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
+    Column(
+        modifier = modifier
     ) {
+        ServicesChooserTopAppBar(
+            appBarTitle = appBarTitle,
+            isClearAllButtonEnabled = state.isClearAllButtonEnabled,
+            onCloseClick = onCloseClick,
+            onClearAllClick = onClearAllClick,
+            modifier = Modifier
+                .consumeWindowInsets(WindowInsets.safeContent)
+        )
+
         when (val content = state.content) {
             is UiContent.InProgress -> IndeterminateProgress(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(dimensionResource(Rcore.dimen.padding_double))
             )
             is UiContent.Content -> LazyContentGrid(
@@ -243,19 +260,107 @@ internal fun ServicesChooserDialogContentWithState(
             )
             is UiContent.Error.NoGlobalServices -> NoGlobalServicesErrorText(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(dimensionResource(Rcore.dimen.padding_double))
             )
             is UiContent.Error.NoServicesForStop -> NoServicesForStopErrorText(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(dimensionResource(Rcore.dimen.padding_double))
             )
         }
     }
+}
 
-    ClearAllButtonEffect(
-        isClearAllButtonEnabled = state.isClearAllButtonEnabled,
-        onClearAllButtonEnabledStateChanged = onClearAllButtonEnabledStateChanged
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ServicesChooserTopAppBar(
+    appBarTitle: String,
+    isClearAllButtonEnabled: Boolean,
+    onCloseClick: () -> Unit,
+    onClearAllClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    TopAppBar(
+        title = {
+            AppBarTitleText(
+                text = appBarTitle
+            )
+        },
+        modifier = modifier,
+        navigationIcon = {
+            CloseButton(
+                onClick = onCloseClick
+            )
+        },
+        actions = {
+            ClearAllButton(
+                onClick = onClearAllClick,
+                enabled = isClearAllButtonEnabled
+            )
+        },
+        colors = TopAppBarDefaults
+            .topAppBarColors(
+                containerColor = Color.Transparent,
+                navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                titleContentColor = MaterialTheme.colorScheme.onSurface
+            )
     )
+}
+
+@Composable
+private fun CloseButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    IconButton(
+        onClick = onClick,
+        modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_CLOSE_BUTTON
+            }
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_action_close),
+            contentDescription = stringResource(Rcore.string.close)
+        )
+    }
+}
+
+@Composable
+private fun AppBarTitleText(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = text,
+        modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_TITLE
+            },
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
+    )
+}
+
+@Composable
+private fun ClearAllButton(
+    onClick: () -> Unit,
+    enabled: Boolean,
+    modifier: Modifier = Modifier
+) {
+    TextButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_CLEAR_ALL_BUTTON
+            }
+    ) {
+        Text(
+            text = stringResource(R.string.serviceschooserdialog_btn_clear_all)
+        )
+    }
 }
 
 @Composable
@@ -289,16 +394,17 @@ private fun LazyContentGrid(
         val lazyGridState = rememberLazyGridState()
 
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 76.dp),
+            columns = GridCells.Adaptive(minSize = 72.dp),
             modifier = Modifier
+                .nestedScroll(rememberNestedScrollInteropConnection())
                 .semantics {
                     testTag = TEST_TAG_CONTENT_GRID
                 },
             state = lazyGridState,
             contentPadding = PaddingValues(
                 bottom = paddingDefault,
-                start = 24.dp,
-                end = 24.dp
+                start = 16.dp,
+                end = 16.dp
             ),
             verticalArrangement = Arrangement.spacedBy(paddingDefault),
             horizontalArrangement = Arrangement.spacedBy(paddingDefault)
@@ -343,18 +449,10 @@ private fun LazyContentGrid(
         HorizontalDivider(
             modifier = Modifier
                 .align(Alignment.TopStart)
+                .fillMaxWidth()
                 .visible(lazyGridState.canScrollBackward)
                 .semantics {
                     testTag = TEST_TAG_TOP_SCROLL_HORIZONTAL_DIVIDER
-                }
-        )
-
-        HorizontalDivider(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .visible(lazyGridState.canScrollForward)
-                .semantics {
-                    testTag = TEST_TAG_BOTTOM_SCROLL_HORIZONTAL_DIVIDER
                 }
         )
     }
@@ -400,16 +498,6 @@ private fun ErrorText(
     )
 }
 
-@Composable
-private fun ClearAllButtonEffect(
-    isClearAllButtonEnabled: Boolean,
-    onClearAllButtonEnabledStateChanged: (Boolean) -> Unit
-) {
-    LaunchedEffect(isClearAllButtonEnabled) {
-        onClearAllButtonEnabledStateChanged(isClearAllButtonEnabled)
-    }
-}
-
 private fun calculateKeyForItem(item: UiServiceChooserItem): String {
     return when (item) {
         is UiServiceChooserItem.Operator.Unknown -> KEY_UNKNOWN_OPERATOR
@@ -453,13 +541,14 @@ private fun ServicesChooserDialogContentPreview(
 ) {
     MyBusTheme {
         ServicesChooserDialogContentWithState(
+            appBarTitle = "Choose services",
             state = state,
+            onCloseClick = { },
+            onClearAllClick = { },
             onServiceClick = { },
-            onClearAllButtonEnabledStateChanged = { },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    top = 16.dp,
                     bottom = 16.dp
                 )
         )
