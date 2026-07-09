@@ -38,11 +38,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.visible
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridItemSpanScope
@@ -168,6 +172,8 @@ public class ServicesChooserDialogFragment : BottomSheetDialogFragment() {
         dispatchSelectedServices()
     }
 
+    override fun getTheme(): Int = R.style.ThemeOverlay_MyBus_BottomSheetDialog_Scrollable
+
     private fun dispatchSelectedServices() {
         val selectedServices = viewModel.selectedServices
         val chosenServices = ArrayList<ParcelableServiceDescriptor>(selectedServices.size)
@@ -203,6 +209,7 @@ private fun ServicesChooserDialogContent(
     viewModel: ServicesChooserViewModel = viewModel(),
 ) {
     val uiState by viewModel.uiStateFlow.collectAsStateWithLifecycle()
+    val windowInsets = WindowInsets.safeContent
 
     ServicesChooserDialogContentWithState(
         appBarTitle = appBarTitle,
@@ -212,6 +219,8 @@ private fun ServicesChooserDialogContent(
         onServiceClick = viewModel::onServiceClicked,
         modifier = modifier
             .fillMaxWidth()
+            .consumeWindowInsets(windowInsets.only(WindowInsetsSides.Top))
+            .consumeWindowInsets(windowInsets.only(WindowInsetsSides.Horizontal))
     )
 }
 
@@ -241,15 +250,16 @@ internal fun ServicesChooserDialogContentWithState(
             appBarTitle = appBarTitle,
             isClearAllButtonEnabled = state.isClearAllButtonEnabled,
             onCloseClick = onCloseClick,
-            onClearAllClick = onClearAllClick,
-            modifier = Modifier
-                .consumeWindowInsets(WindowInsets.safeContent)
+            onClearAllClick = onClearAllClick
         )
+
+        val windowInsets = WindowInsets.safeContent
 
         when (val content = state.content) {
             is UiContent.InProgress -> IndeterminateProgress(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .windowInsetsPadding(windowInsets)
                     .padding(dimensionResource(Rcore.dimen.padding_double))
             )
             is UiContent.Content -> LazyContentGrid(
@@ -261,11 +271,13 @@ internal fun ServicesChooserDialogContentWithState(
             is UiContent.Error.NoGlobalServices -> NoGlobalServicesErrorText(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .windowInsetsPadding(windowInsets)
                     .padding(dimensionResource(Rcore.dimen.padding_double))
             )
             is UiContent.Error.NoServicesForStop -> NoServicesForStopErrorText(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .windowInsetsPadding(windowInsets)
                     .padding(dimensionResource(Rcore.dimen.padding_double))
             )
         }
@@ -392,6 +404,7 @@ private fun LazyContentGrid(
     ) {
         val paddingDefault = dimensionResource(Rcore.dimen.padding_default)
         val lazyGridState = rememberLazyGridState()
+        val bottomWindowInset = WindowInsets.safeContent.only(WindowInsetsSides.Bottom)
 
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 72.dp),
@@ -402,7 +415,8 @@ private fun LazyContentGrid(
                 },
             state = lazyGridState,
             contentPadding = PaddingValues(
-                bottom = paddingDefault,
+                bottom = bottomWindowInset.asPaddingValues().calculateBottomPadding() +
+                    paddingDefault,
                 start = 16.dp,
                 end = 16.dp
             ),
