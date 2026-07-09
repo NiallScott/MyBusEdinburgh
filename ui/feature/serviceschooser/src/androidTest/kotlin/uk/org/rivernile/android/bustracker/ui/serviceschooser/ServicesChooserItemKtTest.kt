@@ -170,7 +170,7 @@ class ServicesChooserItemKtTest {
     }
 
     @Test
-    fun serviceItemIsNotCheckedWhenServiceIsSelected() {
+    fun serviceItemIsCheckedWhenServiceIsSelected() {
         composeTestRule.setContent {
             MyBusTheme {
                 ServiceItem(

@@ -153,7 +153,7 @@ public class ServicesChooserDialogFragment : BottomSheetDialogFragment() {
         val titleResId = arguments
             ?.let { BundleCompat.getParcelable(it, ARG_PARAMS, ServicesChooserParams::class.java) }
             ?.titleResId
-            ?: 0
+            ?: error("Parameters have not been set.")
 
         return content {
             MyBusTheme {
@@ -403,6 +403,7 @@ private fun LazyContentGrid(
             }
     ) {
         val paddingDefault = dimensionResource(Rcore.dimen.padding_default)
+        val paddingDouble = dimensionResource(Rcore.dimen.padding_double)
         val lazyGridState = rememberLazyGridState()
         val bottomWindowInset = WindowInsets.safeContent.only(WindowInsetsSides.Bottom)
 
@@ -417,8 +418,8 @@ private fun LazyContentGrid(
             contentPadding = PaddingValues(
                 bottom = bottomWindowInset.asPaddingValues().calculateBottomPadding() +
                     paddingDefault,
-                start = 16.dp,
-                end = 16.dp
+                start = paddingDouble,
+                end = paddingDouble
             ),
             verticalArrangement = Arrangement.spacedBy(paddingDefault),
             horizontalArrangement = Arrangement.spacedBy(paddingDefault)
