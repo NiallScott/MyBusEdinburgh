@@ -96,6 +96,7 @@ dependencies {
 
     compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin-api:${libs.versions.kotlin.get()}")
     compileOnly("com.android.tools.build:gradle-api:${libs.versions.android.gradle.plugin.get()}")
+    compileOnly(plugin(libs.plugins.kotlin.compose.compiler))
     compileOnly(plugin(libs.plugins.ksp))
 }
 

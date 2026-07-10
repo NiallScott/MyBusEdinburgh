@@ -74,7 +74,7 @@ internal data class JsonStopEvent(
 internal sealed interface ArrivalDepartureTime {
 
     /**
-     * The field is an integer, indicating a number of minutes until the event.
+     * The field is an integer, indicating a number of seconds until the event.
      */
     @JvmInline
     value class Seconds(
@@ -127,12 +127,8 @@ internal object EventTimeSerialiser : KSerializer<ArrivalDepartureTime> {
  * Maps a [JsonStopEvent] to a [Vehicle], or `null` if this fails.
  *
  * @param serverTime The server time to compare any timestamps against to perform time calculations.
- * @param timeZone The time zone for which the live times are based in.
  */
-internal fun JsonStopEvent.toVehicleOrNull(
-    serverTime: Instant,
-    timeZone: TimeZone
-): Vehicle? {
+internal fun JsonStopEvent.toVehicleOrNull(serverTime: Instant): Vehicle? {
     val isEstimatedTime: Boolean
 
     val departureTime = when (departureTime) {
@@ -147,8 +143,7 @@ internal fun JsonStopEvent.toVehicleOrNull(
             // time next occurs after the server time. This could wrap to the next day.
             isEstimatedTime = false
             departureTime.clockTime.nextOccurrenceAfterInstant(
-                instant = serverTime,
-                timeZone = timeZone
+                instant = serverTime
             )
         }
         null -> {
@@ -158,8 +153,7 @@ internal fun JsonStopEvent.toVehicleOrNull(
             // given server time. This could wrap to the next day.
             isEstimatedTime = true
             scheduledDepartureTime?.nextOccurrenceAfterInstant(
-                instant = serverTime,
-                timeZone = timeZone
+                instant = serverTime
             )
         }
     }
@@ -177,11 +171,10 @@ internal fun JsonStopEvent.toVehicleOrNull(
     }
 }
 
-private fun LocalTime.nextOccurrenceAfterInstant(
-    instant: Instant,
-    timeZone: TimeZone
-): Instant {
-    val instantAsDateTime = instant.toLocalDateTime(timeZone)
+private fun LocalTime.nextOccurrenceAfterInstant(instant: Instant): Instant {
+    // As we request the live times specifically asking for the timestamps to be in UTC, then we
+    // hard-assume that we're dealing with UTC here.
+    val instantAsDateTime = instant.toLocalDateTime(TimeZone.UTC)
 
     val todayAtTarget = LocalDateTime(
         year = instantAsDateTime.year,
@@ -192,7 +185,7 @@ private fun LocalTime.nextOccurrenceAfterInstant(
         second = second
     )
 
-    val todayAtTargetInstant = todayAtTarget.toInstant(timeZone)
+    val todayAtTargetInstant = todayAtTarget.toInstant(TimeZone.UTC)
 
     return if (todayAtTarget < instantAsDateTime) {
         todayAtTargetInstant + 1.days

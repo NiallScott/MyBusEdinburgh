@@ -31,6 +31,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.RoomDatabaseDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.RoomDatabaseInfoEntity
+import uk.org.rivernile.android.bustracker.core.database.busstop.operator.RoomOperatorDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.operator.RoomOperatorEntity
 import uk.org.rivernile.android.bustracker.core.database.busstop.service.RoomServiceDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.service.RoomServiceEntity
@@ -76,6 +77,11 @@ internal abstract class RoomBusStopDatabase : RoomDatabase() {
      * The [RoomDatabaseDao].
      */
     abstract val databaseDao: RoomDatabaseDao
+
+    /**
+     * The [RoomOperatorDao].
+     */
+    abstract val operatorDao: RoomOperatorDao
 
     /**
      * The [RoomServiceDao].

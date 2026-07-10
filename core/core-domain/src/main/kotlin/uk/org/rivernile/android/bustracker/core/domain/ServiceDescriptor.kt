@@ -26,9 +26,12 @@
 
 package uk.org.rivernile.android.bustracker.core.domain
 
+import androidx.compose.runtime.Immutable
+
 /**
  * This defines a service descriptor, to uniquely identify a service.
  */
+@Immutable
 public interface ServiceDescriptor {
 
     /**

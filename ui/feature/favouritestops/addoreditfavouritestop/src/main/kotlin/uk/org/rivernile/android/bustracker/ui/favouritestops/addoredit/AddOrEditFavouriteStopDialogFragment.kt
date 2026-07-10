@@ -67,7 +67,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
-import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.fragment.compose.content
@@ -107,9 +106,9 @@ public class AddOrEditFavouriteStopDialogFragment : DialogFragment() {
             stopIdentifier: StopIdentifier
         ): AddOrEditFavouriteStopDialogFragment {
             return AddOrEditFavouriteStopDialogFragment().apply {
-                arguments = bundleOf(
-                    ARG_STOP_IDENTIFIER to stopIdentifier.toParcelableStopIdentifier()
-                )
+                arguments = Bundle().apply {
+                    putParcelable(ARG_STOP_IDENTIFIER, stopIdentifier.toParcelableStopIdentifier())
+                }
             }
         }
     }

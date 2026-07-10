@@ -29,9 +29,12 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.times
 import android.view.View
 import android.widget.TextView
 import uk.org.rivernile.edinburghbustracker.android.R
-import java.text.DateFormat
-import java.util.Date
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import javax.inject.Inject
+import kotlin.time.toJavaInstant
 
 /**
  * This class is used to populate the common [TextView]s in [LiveTimesAdapter]. This implementation
@@ -47,7 +50,7 @@ class ViewHolderFieldPopulator @Inject constructor() {
         private const val MINUTES_CUTOFF = 59
     }
 
-    private val busTimeFormat = DateFormat.getTimeInstance(DateFormat.SHORT)
+    private val busTimeFormat = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
 
     /**
      * Populate the destination [TextView]. This caters for cases such as diversions, and when the
@@ -90,8 +93,9 @@ class ViewHolderFieldPopulator @Inject constructor() {
             if (!vehicle.isDiverted) {
                 val minutes = vehicle.departureMinutes
                 val timeToDisplay = when {
-                    minutes > MINUTES_CUTOFF -> busTimeFormat
-                        .format(Date(vehicle.departureTime.toEpochMilliseconds()))
+                    minutes > MINUTES_CUTOFF -> ZonedDateTime
+                        .ofInstant(vehicle.departureTime.toJavaInstant(), ZoneId.systemDefault())
+                        .format(busTimeFormat)
                     minutes < DUE_CUTOFF -> textView.context.getString(R.string.bustimes_due)
                     else -> minutes.toString()
                 }

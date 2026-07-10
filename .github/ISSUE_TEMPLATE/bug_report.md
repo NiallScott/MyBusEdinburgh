@@ -20,8 +20,6 @@ Describe what you expected to happen here.
 
 **Database version:** Available from the 'About' menu. Only the date-time component is required.
 
-**Topology version:** Available from the 'About' menu. Only the first 6 characters are required.
-
 Please check you are running the [latest version](https://play.google.com/store/apps/details?id=uk.org.rivernile.edinburghbustracker.android)
 as your issue may have already been solved.
 

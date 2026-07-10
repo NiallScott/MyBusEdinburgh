@@ -38,6 +38,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForIoDispatcher
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.operator.OperatorDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.service.ServiceDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.ServicePointDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.ServiceStopDao
@@ -59,6 +60,14 @@ internal interface BusStopDatabase {
      * obtain an instance when [isDatabaseOpenFlow] is emitting `true`.
      */
     val databaseDao: DatabaseDao
+
+    /**
+     * The current [OperatorDao] instance.
+     *
+     * Do not hold on to this instance as it will become invalid when the database is closed. Only
+     * obtain an instance when [isDatabaseOpenFlow] is emitting `true`.
+     */
+    val operatorDao: OperatorDao
 
     /**
      * The current [ServiceDao] instance.
@@ -141,6 +150,8 @@ internal class AndroidBusStopDatabase @Inject constructor(
     private val _isDatabaseOpenFlow = MutableStateFlow(true)
 
     override val databaseDao get() = database.databaseDao
+
+    override val operatorDao get() = database.operatorDao
 
     override val serviceDao get() = database.serviceDao
 

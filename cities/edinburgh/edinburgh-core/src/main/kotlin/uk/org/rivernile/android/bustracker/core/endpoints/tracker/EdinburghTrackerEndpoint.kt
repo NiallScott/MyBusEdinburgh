@@ -29,7 +29,6 @@ package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.datetime.TimeZone
 import kotlinx.serialization.SerializationException
 import okio.IOException
 import uk.org.rivernile.android.bustracker.core.domain.AtcoStopIdentifier
@@ -65,8 +64,6 @@ internal class EdinburghTrackerEndpoint @Inject constructor(
     private val timeUtils: TimeUtils
 ): TrackerEndpoint {
 
-    private val timeZone = TimeZone.of("Europe/London")
-
     override suspend fun getLiveTimes(
         stopIdentifier: StopIdentifier,
         numberOfDepartures: Int
@@ -95,8 +92,7 @@ internal class EdinburghTrackerEndpoint @Inject constructor(
                         ?.toLiveTimes(
                             stopIdentifier = stopIdentifier,
                             numberOfDepartures = numberOfDepartures,
-                            receiveTime = receiveTime,
-                            timeZone = timeZone
+                            receiveTime = receiveTime
                         )
                         ?: emptyLiveTimes(receiveTime = receiveTime)
 
