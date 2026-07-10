@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 
-import kotlinx.datetime.TimeZone
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
@@ -53,21 +52,18 @@ internal data class JsonStopEvents(
  * @param numberOfDepartures The number of departures per service requested. This is used to
  * only display at most this number of services per service.
  * @param receiveTime The time the data was received from the server.
- * @param timeZone The time zone the live times pertain to.
  * @return This [JsonStopEvents] mapped to a [LiveTimes].
  */
 internal fun JsonStopEvents.toLiveTimes(
     stopIdentifier: StopIdentifier,
     numberOfDepartures: Int,
-    receiveTime: Instant,
-    timeZone: TimeZone
+    receiveTime: Instant
 ): LiveTimes {
     return if (time != null) {
         toStopOrNull(
             stopIdentifier = stopIdentifier,
             numberOfDepartures = numberOfDepartures,
-            serverTime = time,
-            timeZone = timeZone
+            serverTime = time
         )?.let {
             LiveTimes(
                 stops = mapOf(stopIdentifier to it),
@@ -82,14 +78,12 @@ internal fun JsonStopEvents.toLiveTimes(
 private fun JsonStopEvents.toStopOrNull(
     stopIdentifier: StopIdentifier,
     numberOfDepartures: Int,
-    serverTime: Instant,
-    timeZone: TimeZone
+    serverTime: Instant
 ): Stop? {
     return events
         ?.toServicesOrNull(
             numberOfDepartures = numberOfDepartures,
-            serverTime = serverTime,
-            timeZone = timeZone
+            serverTime = serverTime
         )?.let {
             Stop(
                 stopIdentifier = stopIdentifier,
@@ -100,8 +94,7 @@ private fun JsonStopEvents.toStopOrNull(
 
 private fun List<JsonStopEvent>.toServicesOrNull(
     numberOfDepartures: Int,
-    serverTime: Instant,
-    timeZone: TimeZone
+    serverTime: Instant
 ): List<Service>? {
     return if (isNotEmpty()) {
         val serviceVehicles = mutableMapOf<ServiceDescriptor, MutableList<Vehicle>>()
@@ -112,8 +105,7 @@ private fun List<JsonStopEvent>.toServicesOrNull(
 
             if (!serviceName.isNullOrBlank() && !operatorCode.isNullOrBlank()) {
                 val vehicle = event.toVehicleOrNull(
-                    serverTime = serverTime,
-                    timeZone = timeZone
+                    serverTime = serverTime
                 )
 
                 if (vehicle != null) {

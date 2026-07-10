@@ -44,3 +44,13 @@ plugins {
     id("mybus.kotlin-convention")
     id("mybus.test-convention")
 }
+
+buildscript {
+    dependencies {
+        // In AGP 9.x the Kotlin Android Gradle Plugin is automatically added to the project. But
+        // this may not use the most up-to-date version of Kotlin. So below the version is forced to
+        // be the version specified in the version catalogue.
+        // See https://developer.android.com/build/releases/agp-9-0-0-release-notes#runtime-dependency-on-kotlin-gradle-plugin-upgrade
+        classpath(libs.kotlin.gradle.plugin)
+    }
+}

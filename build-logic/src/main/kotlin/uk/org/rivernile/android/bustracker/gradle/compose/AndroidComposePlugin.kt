@@ -31,7 +31,10 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
+import org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradlePluginExtension
 import uk.org.rivernile.android.bustracker.gradle.versioncatalog.versionCatalog
+
+private const val COMPOSE_COMPILER_OUTPUT_DIR = "compose_compiler"
 
 /**
  * This is a [Plugin] which sets up Compose for an Android project.
@@ -53,6 +56,13 @@ public class AndroidComposePlugin : Plugin<Project> {
             buildFeatures.apply {
                 compose = true
             }
+        }
+
+        extensions.configure<ComposeCompilerGradlePluginExtension> {
+            val directory = layout.buildDirectory.dir(COMPOSE_COMPILER_OUTPUT_DIR)
+
+            reportsDestination.set(directory)
+            metricsDestination.set(directory)
         }
 
         dependencies {

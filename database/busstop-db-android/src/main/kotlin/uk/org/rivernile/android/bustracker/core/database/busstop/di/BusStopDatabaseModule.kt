@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,6 +43,8 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.RealRoomBusStop
 import uk.org.rivernile.android.bustracker.core.database.busstop.RoomBusStopDatabaseFactory
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.ProxyDatabaseDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.operator.OperatorDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.operator.ProxyOperatorDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.service.ProxyServiceDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.service.ServiceDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.ProxyServicePointDao
@@ -70,49 +72,42 @@ internal class BusStopDatabaseModule {
     @Module
     interface Bindings {
 
-        @Suppress("unused")
         @Binds
         fun bindBusStopDatabase(androidBusStopDatabase: AndroidBusStopDatabase): BusStopDatabase
 
-        @Suppress("unused")
         @Binds
         fun bindBusStopDatabaseRepository(
             androidBusStopDatabaseRepository: AndroidBusStopDatabaseRepository
         ): BusStopDatabaseRepository
 
-        @Suppress("unused")
         @Binds
         fun bindDatabaseDao(proxyDatabaseDao: ProxyDatabaseDao): DatabaseDao
 
-        @Suppress("unused")
         @Binds
         fun bindDatabaseReplacer(androidBusStopDatabase: AndroidBusStopDatabase): DatabaseReplacer
 
-        @Suppress("unused")
         @Binds
         fun bindDownloadedDatabasePreparer(
             realDownloadedDatabasePreparer: RealDownloadedDatabasePreparer
         ): DownloadedDatabasePreparer
 
-        @Suppress("unused")
+        @Binds
+        fun bindOperatorDao(proxyOperatorDao: ProxyOperatorDao): OperatorDao
+
         @Binds
         fun bindRoomBusStopDatabaseFactory(
             realRoomBusStopDatabaseFactory: RealRoomBusStopDatabaseFactory
         ): RoomBusStopDatabaseFactory
 
-        @Suppress("unused")
         @Binds
         fun bindServiceDao(proxyServiceDao: ProxyServiceDao): ServiceDao
 
-        @Suppress("unused")
         @Binds
         fun bindServicePointDao(proxyServicePointDao: ProxyServicePointDao): ServicePointDao
 
-        @Suppress("unused")
         @Binds
         fun bindServiceStopDao(proxyServiceStopDao: ProxyServiceStopDao): ServiceStopDao
 
-        @Suppress("unused")
         @Binds
         fun bindStopDao(proxyStopDao: ProxyStopDao): StopDao
     }

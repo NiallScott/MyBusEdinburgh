@@ -59,8 +59,7 @@ class JsonStopEventsKtTest {
         ).toLiveTimes(
             stopIdentifier = "123456".toNaptanStopIdentifier(),
             numberOfDepartures = 4,
-            receiveTime = Instant.fromEpochMilliseconds(123L),
-            timeZone = TimeZone.UTC
+            receiveTime = Instant.fromEpochMilliseconds(123L)
         )
 
         assertEquals(
@@ -77,8 +76,7 @@ class JsonStopEventsKtTest {
         ).toLiveTimes(
             stopIdentifier = "123456".toNaptanStopIdentifier(),
             numberOfDepartures = 4,
-            receiveTime = Instant.fromEpochMilliseconds(123L),
-            timeZone = TimeZone.UTC
+            receiveTime = Instant.fromEpochMilliseconds(123L)
         )
 
         assertEquals(
@@ -95,8 +93,7 @@ class JsonStopEventsKtTest {
         ).toLiveTimes(
             stopIdentifier = "123456".toNaptanStopIdentifier(),
             numberOfDepartures = 4,
-            receiveTime = Instant.fromEpochMilliseconds(123L),
-            timeZone = TimeZone.UTC
+            receiveTime = Instant.fromEpochMilliseconds(123L)
         )
 
         assertEquals(
@@ -113,8 +110,7 @@ class JsonStopEventsKtTest {
         ).toLiveTimes(
             stopIdentifier = "123456".toNaptanStopIdentifier(),
             numberOfDepartures = 4,
-            receiveTime = Instant.fromEpochMilliseconds(123L),
-            timeZone = TimeZone.UTC
+            receiveTime = Instant.fromEpochMilliseconds(123L)
         )
 
         assertEquals(
@@ -145,8 +141,7 @@ class JsonStopEventsKtTest {
         ).toLiveTimes(
             stopIdentifier = "123456".toNaptanStopIdentifier(),
             numberOfDepartures = 4,
-            receiveTime = Instant.fromEpochMilliseconds(123L),
-            timeZone = TimeZone.UTC
+            receiveTime = Instant.fromEpochMilliseconds(123L)
         )
 
         assertEquals(
@@ -228,8 +223,7 @@ class JsonStopEventsKtTest {
         ).toLiveTimes(
             stopIdentifier = "123456".toNaptanStopIdentifier(),
             numberOfDepartures = 2,
-            receiveTime = Instant.fromEpochMilliseconds(123L),
-            timeZone = TimeZone.UTC
+            receiveTime = Instant.fromEpochMilliseconds(123L)
         )
 
         assertEquals(
@@ -352,8 +346,7 @@ class JsonStopEventsKtTest {
         ).toLiveTimes(
             stopIdentifier = "123456".toNaptanStopIdentifier(),
             numberOfDepartures = 4,
-            receiveTime = Instant.fromEpochMilliseconds(123L),
-            timeZone = TimeZone.UTC
+            receiveTime = Instant.fromEpochMilliseconds(123L)
         )
 
         assertEquals(
@@ -462,8 +455,7 @@ class JsonStopEventsKtTest {
         ).toLiveTimes(
             stopIdentifier = "123456".toNaptanStopIdentifier(),
             numberOfDepartures = 4,
-            receiveTime = Instant.fromEpochMilliseconds(123L),
-            timeZone = TimeZone.UTC
+            receiveTime = Instant.fromEpochMilliseconds(123L)
         )
 
         assertEquals(
@@ -605,8 +597,7 @@ class JsonStopEventsKtTest {
         ).toLiveTimes(
             stopIdentifier = "123456".toNaptanStopIdentifier(),
             numberOfDepartures = 4,
-            receiveTime = Instant.fromEpochMilliseconds(123L),
-            timeZone = TimeZone.UTC
+            receiveTime = Instant.fromEpochMilliseconds(123L)
         )
 
         assertEquals(
@@ -667,8 +658,7 @@ class JsonStopEventsKtTest {
         ).toLiveTimes(
             stopIdentifier = "123456".toNaptanStopIdentifier(),
             numberOfDepartures = 4,
-            receiveTime = Instant.fromEpochMilliseconds(123L),
-            timeZone = TimeZone.UTC
+            receiveTime = Instant.fromEpochMilliseconds(123L)
         )
 
         assertEquals(
