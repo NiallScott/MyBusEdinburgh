@@ -67,7 +67,10 @@ class NearestStopItemKtTest {
                 NearestStopItemWithDefaults(
                     nearestStop = UiNearestStop(
                         stopIdentifier = "123456".toNaptanStopIdentifier(),
-                        stopName = null,
+                        stopName = UiStopName(
+                            name = "Stop Name",
+                            locality = "Locality"
+                        ),
                         services = null,
                         orientation = StopOrientation.NORTH_EAST,
                         distanceMeters = 123,

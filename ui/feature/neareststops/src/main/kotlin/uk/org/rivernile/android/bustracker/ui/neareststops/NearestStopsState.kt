@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,17 +26,45 @@
 
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
-import uk.org.rivernile.android.bustracker.core.busstops.StopName
-import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
-
 /**
- * This class contains the required data for constructing the nearest stop's name on the UI.
+ * This encapsulates the possible states as a result of attempting to load nearest stops.
  *
- * @property stopIdentifier The stop identifier.
- * @property stopName The stop name.
  * @author Niall Scott
  */
-data class UiNearestStopName(
-    val stopIdentifier: StopIdentifier,
-    val stopName: StopName?
-)
+internal sealed interface NearestStopsState {
+
+    /**
+     * These are the stops available for the current location of the device.
+     *
+     * @property stops The stops available for the current location of the device.
+     */
+    data class Stops(
+        val stops: List<NearestStop>?
+    ) : NearestStopsState
+
+    /**
+     * There was an error.
+     */
+    sealed interface Error : NearestStopsState {
+
+        /**
+         * No location feature is available on the device.
+         */
+        data object NoLocationFeature : Error
+
+        /**
+         * The app has insufficient location permissions to obtain the device location.
+         */
+        data object InsufficientLocationPermissions : Error
+
+        /**
+         * Location services have been disabled on the device.
+         */
+        data object LocationOff : Error
+
+        /**
+         * It is not currently possible to obtain a location for this device.
+         */
+        data object LocationUnknown : Error
+    }
+}

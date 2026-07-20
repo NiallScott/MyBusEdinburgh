@@ -27,9 +27,14 @@
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
+import uk.org.rivernile.android.bustracker.core.busstops.StopName
 import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.text.UiStopName
+import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 
 /**
@@ -45,9 +50,81 @@ import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
  */
 internal data class UiNearestStop(
     val stopIdentifier: StopIdentifier,
-    val stopName: UiStopName?,
+    val stopName: UiStopName,
     val services: ImmutableList<UiServiceName>?,
     val orientation: StopOrientation,
     val distanceMeters: Int,
     val dropdownMenu: UiNearestStopDropdownMenu
 )
+
+/**
+ * Map this [List] of [NearestStop]s to a [List] of [UiNearestStop].
+ *
+ * @param serviceColours A [Map] of services to [ServiceColours].
+ * @param dropdownMenus A mapping of stop identifiers to [UiNearestStopDropdownMenu]s, used to
+ * populate the dropdown menu for each [UiNearestStop].
+ * @param serviceNameComparator A [Comparator] used to sort service names.
+ * @return This [List] of [NearestStop]s mapped to a [List] of [UiNearestStop]s.
+ */
+internal fun List<NearestStop>.toUiNearestStops(
+    serviceColours: Map<ServiceDescriptor, ServiceColours>?,
+    dropdownMenus: Map<StopIdentifier, UiNearestStopDropdownMenu>?,
+    serviceNameComparator: Comparator<String>
+) = map { nearestStop ->
+    nearestStop
+        .toUiNearestStop(
+            serviceColours = serviceColours,
+            dropdownMenu = dropdownMenus?.get(nearestStop.stopIdentifier)
+                ?: UiNearestStopDropdownMenu(),
+            serviceNameComparator = serviceNameComparator
+        )
+}
+
+private fun NearestStop.toUiNearestStop(
+    serviceColours: Map<ServiceDescriptor, ServiceColours>?,
+    dropdownMenu: UiNearestStopDropdownMenu,
+    serviceNameComparator: Comparator<String>
+): UiNearestStop {
+    return UiNearestStop(
+        stopIdentifier = stopIdentifier,
+        stopName = stopName.toUiStopName(),
+        services = serviceListing
+            ?.ifEmpty { null }
+            ?.map {
+                toUiServiceName(it, serviceColours?.get(it))
+            }
+            ?.sortedWith(
+                compareBy(serviceNameComparator) {
+                    it.serviceName
+                }
+            )
+            ?.toImmutableList(),
+        orientation = orientation,
+        distanceMeters = distanceMeters,
+        dropdownMenu = dropdownMenu
+    )
+}
+
+private fun StopName.toUiStopName(): UiStopName {
+    return UiStopName(
+        name = name,
+        locality = locality
+    )
+}
+
+private fun toUiServiceName(
+    serviceDescriptor: ServiceDescriptor,
+    serviceColours: ServiceColours?
+): UiServiceName {
+    return UiServiceName(
+        serviceName = serviceDescriptor.serviceName,
+        colours = serviceColours?.toUiServiceColours()
+    )
+}
+
+private fun ServiceColours.toUiServiceColours(): UiServiceColours {
+    return UiServiceColours(
+        backgroundColour = colourPrimary,
+        textColour = colourOnPrimary
+    )
+}

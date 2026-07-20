@@ -26,16 +26,40 @@
 
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import uk.org.rivernile.android.bustracker.core.location.LocationRepository
+import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
+import javax.inject.Inject
+
 /**
- * The state to render on the UI.
+ * This is used to generate [UiActionButtons].
  *
- * @property content The content to display.
- * @property actionButtons The state of the action buttons.
- * @property action An action, if any, to be performed.
  * @author Niall Scott
  */
-internal data class UiState(
-    val content: UiContent = UiContent.InProgress,
-    val actionButtons: UiActionButtons = UiActionButtons(),
-    val action: UiAction? = null
-)
+internal interface UiActionButtonsGenerator {
+
+    /**
+     * A [Flow] which emits generated [UiActionButtons] based upon the current state.
+     */
+    val uiActionButtonsFlow: Flow<UiActionButtons>
+}
+
+internal class RealUiActionButtonsGenerator @Inject constructor(
+    private val locationRepository: LocationRepository,
+    private val servicesRepository: ServicesRepository
+) : UiActionButtonsGenerator {
+
+    private val hasLocationFeature by lazy { locationRepository.hasLocationFeature }
+
+    override val uiActionButtonsFlow get() = servicesRepository
+        .hasServicesFlow
+        .map(::createServiceFilterActionButton)
+        .map(::UiActionButtons)
+
+    private fun createServiceFilterActionButton(hasServices: Boolean): UiServiceFilterActionButton {
+        return UiServiceFilterActionButton(
+            isEnabled = hasServices && hasLocationFeature
+        )
+    }
+}

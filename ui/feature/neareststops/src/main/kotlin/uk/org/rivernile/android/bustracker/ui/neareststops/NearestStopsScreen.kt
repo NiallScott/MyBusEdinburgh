@@ -70,6 +70,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.dimensionResource
@@ -92,6 +93,7 @@ import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
 import uk.org.rivernile.android.bustracker.core.text.UiStopName
+import uk.org.rivernile.android.bustracker.ui.interop.MenuProvider
 import uk.org.rivernile.android.bustracker.ui.text.PrimaryErrorText
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
@@ -140,7 +142,7 @@ internal fun NearestStopsScreen(
     onShowRemoveProximityAlert: ((StopIdentifier) -> Unit)? = null,
     onShowOnMap: ((StopIdentifier) -> Unit)? = null,
     onRequestLocationPermissions: (() -> Unit)? = null,
-    onShowServicesChooser: ((ImmutableList<ServiceDescriptor>?) -> Unit)? = null,
+    onShowServicesChooser: ((Set<ServiceDescriptor>?) -> Unit)? = null,
     onShowLocationSettings: (() -> Unit)? = null,
     onShowTurnOnGps: (() -> Unit)? = null
 ) {
@@ -148,7 +150,6 @@ internal fun NearestStopsScreen(
 
     NearestStopsScreenWithState(
         state = uiState,
-        onActionLaunched = viewModel::onActionLaunched,
         onItemClick = viewModel::onItemClicked,
         onOpenDropdownMenuClick = viewModel::onOpenDropdownMenuClicked,
         onDropdownMenuDismissed = viewModel::onDropdownMenuDismissed,
@@ -161,6 +162,9 @@ internal fun NearestStopsScreen(
         onShowOnMapClick = viewModel::onShowOnMapClicked,
         onGrantPermissionClick = viewModel::onGrantPermissionClicked,
         onOpenSettingsClick = viewModel::onOpenSettingsClicked,
+        onShowServicesChooserClick = viewModel::onShowServicesChooserClicked,
+        onActionLaunched = viewModel::onActionLaunched,
+        modifier = modifier,
         onShowStopData = onShowStopData,
         onShowAddFavouriteStop = onShowAddFavouriteStop,
         onShowRemoveFavouriteStop = onShowRemoveFavouriteStop,
@@ -203,6 +207,8 @@ internal fun NearestStopsScreen(
  * resolution button.
  * @param onOpenSettingsClick This is called when the user clicks on the open settings error
  * resolution button.
+ * @param onShowServicesChooserClick This is called when the user clicks on the menu item to show
+ * the services chooser.
  * @param onActionLaunched This is called when an action has been launched.
  * @param modifier Any [Modifier]s which should be applied.
  * @param onShowStopData This is called when stop data should be shown.
@@ -238,6 +244,7 @@ internal fun NearestStopsScreenWithState(
     onShowOnMapClick: (StopIdentifier) -> Unit,
     onGrantPermissionClick: () -> Unit,
     onOpenSettingsClick: () -> Unit,
+    onShowServicesChooserClick: () -> Unit,
     onActionLaunched: () -> Unit,
     modifier: Modifier = Modifier,
     onShowStopData: ((StopIdentifier) -> Unit)? = null,
@@ -249,7 +256,7 @@ internal fun NearestStopsScreenWithState(
     onShowRemoveProximityAlert: ((StopIdentifier) -> Unit)? = null,
     onShowOnMap: ((StopIdentifier) -> Unit)? = null,
     onRequestLocationPermissions: (() -> Unit)? = null,
-    onShowServicesChooser: ((ImmutableList<ServiceDescriptor>?) -> Unit)? = null,
+    onShowServicesChooser: ((Set<ServiceDescriptor>?) -> Unit)? = null,
     onShowLocationSettings: (() -> Unit)? = null,
     onShowTurnOnGps: (() -> Unit)? = null
 ) {
@@ -316,6 +323,13 @@ internal fun NearestStopsScreenWithState(
             onShowServicesChooser = onShowServicesChooser,
             onShowLocationSettings = onShowLocationSettings,
             onShowTurnOnGps = onShowTurnOnGps
+        )
+    }
+
+    if (!LocalInspectionMode.current) {
+        NearestStopsOptionMenu(
+            actionButtons = state.actionButtons,
+            onFilterMenuItemClick = onShowServicesChooserClick
         )
     }
 }
@@ -571,7 +585,7 @@ private fun LaunchAction(
     onShowRemoveProximityAlert: ((StopIdentifier) -> Unit)? = null,
     onShowOnMap: ((StopIdentifier) -> Unit)? = null,
     onRequestLocationPermissions: (() -> Unit)? = null,
-    onShowServicesChooser: ((ImmutableList<ServiceDescriptor>?) -> Unit)? = null,
+    onShowServicesChooser: ((Set<ServiceDescriptor>?) -> Unit)? = null,
     onShowLocationSettings: (() -> Unit)? = null,
     onShowTurnOnGps: (() -> Unit)? = null
 ) {
@@ -601,6 +615,31 @@ private fun LaunchAction(
 
         onActionLaunched()
     }
+}
+
+@Composable
+private fun NearestStopsOptionMenu(
+    actionButtons: UiActionButtons,
+    onFilterMenuItemClick: () -> Unit
+) {
+    MenuProvider(
+        onCreateMenu = { menu, menuInflater ->
+            menuInflater.inflate(R.menu.neareststops_option_menu, menu)
+        },
+        onPrepareMenu = { menu ->
+            checkNotNull(menu.findItem(R.id.neareststops_option_menu_filter))
+                .isEnabled = actionButtons.serviceFilterActionButton.isEnabled
+        },
+        onMenuItemSelected = { item ->
+            when (item.itemId) {
+                R.id.neareststops_option_menu_filter -> {
+                    onFilterMenuItemClick()
+                    true
+                }
+                else -> false
+            }
+        }
+    )
 }
 
 @Composable
@@ -650,6 +689,7 @@ private fun NearestStopsScreenPreview(
             onRemoveProximityAlertClick = { },
             onShowOnMapClick = { },
             onGrantPermissionClick = { },
+            onShowServicesChooserClick = { },
             onOpenSettingsClick = { }
         )
     }

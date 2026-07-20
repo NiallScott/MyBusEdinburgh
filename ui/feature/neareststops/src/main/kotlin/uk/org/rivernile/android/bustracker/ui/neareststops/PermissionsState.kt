@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,28 +26,27 @@
 
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
-import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 
 /**
- * Classes which wish to be informed when favourite click events happen should implement this
- * interface.
+ * This class encapsulates the permissions that the details screen would like, and their current
+ * state.
  *
- * @author Niall Scott
+ * @property fineLocationPermission The state of the fine location permission.
+ * @property coarseLocationPermission The state of the coarse location permission.
  */
-interface OnNearStopItemClickListener {
+internal data class PermissionsState(
+    val fineLocationPermission: PermissionState = PermissionState.UNGRANTED,
+    val coarseLocationPermission: PermissionState = PermissionState.UNGRANTED
+)
 
-    /**
-     * A nearest stop item has been clicked.
-     *
-     * @param item The item which has been clicked.
-     */
-    fun onNearestStopClicked(item: UiNearestStop)
-
-    /**
-     * A nearest stop item has been long clicked.
-     *
-     * @param stopIdentifier The stop of the long clicked nearest stop.
-     * @return `true` if the long click was handled, otherwise `false`.
-     */
-    fun onNearestStopLongClicked(stopIdentifier: StopIdentifier): Boolean
+/**
+ * Is the current state sufficient for allowing nearest stops to obtain a device location?
+ *
+ * @return `true` if the permissions are sufficient to obtain the device location, otherwise
+ * `false`.
+ */
+internal fun PermissionsState.isPermissionsSufficient(): Boolean {
+    return coarseLocationPermission == PermissionState.GRANTED ||
+        fineLocationPermission == PermissionState.GRANTED
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,27 +26,52 @@
 
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
+import uk.org.rivernile.android.bustracker.core.busstops.StopDetailsWithServices
+import uk.org.rivernile.android.bustracker.core.busstops.StopLocation
 import uk.org.rivernile.android.bustracker.core.busstops.StopName
 import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
- * This class describes a nearest stop item.
+ * This describes a nearest stop.
  *
- * @property stopIdentifier The stop identifier.
- * @property stopName The stop name.
- * @property services The service listing for this stop.
- * @property distance The computed distance between the device and the stop.
+ * @property stopIdentifier The identifier for the stop.
+ * @property stopName The name details of the stop.
+ * @property distanceMeters The distance in meters between the device and the stop.
  * @property orientation The orientation of the stop.
- * @property isSelected Is the stop currently selected on the UI?
+ * @property serviceListing The [List]ing of the services for this stop.
  * @author Niall Scott
  */
-data class UiNearestStop(
+internal data class NearestStop(
     val stopIdentifier: StopIdentifier,
-    val stopName: StopName?,
-    val services: List<ServiceDescriptor>?,
-    val distance: Int,
+    val stopName: StopName,
+    val distanceMeters: Int,
     val orientation: StopOrientation,
-    val isSelected: Boolean
+    val serviceListing: List<ServiceDescriptor>?
 )
+
+/**
+ * Map a [List] of [StopDetailsWithServices] to a [List] of [NearestStop]s.
+ *
+ * @param distanceCalculator A lambda which provides an implementation for calculating the distance
+ * between the device location and the stop's location.
+ */
+internal fun List<StopDetailsWithServices>.toNearestStops(
+    distanceCalculator: (StopLocation) -> Int
+): List<NearestStop> {
+    return map { stopDetails ->
+        stopDetails
+            .toNearestStop(distanceMeters = distanceCalculator(stopDetails.location))
+    }
+}
+
+private fun StopDetailsWithServices.toNearestStop(distanceMeters: Int): NearestStop {
+    return NearestStop(
+        stopIdentifier = stopIdentifier,
+        stopName = stopName,
+        distanceMeters = distanceMeters,
+        orientation = orientation,
+        serviceListing = serviceListing
+    )
+}

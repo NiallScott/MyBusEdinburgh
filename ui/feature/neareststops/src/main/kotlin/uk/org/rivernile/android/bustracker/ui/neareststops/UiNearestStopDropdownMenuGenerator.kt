@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,83 +24,65 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.favouritestops
+package uk.org.rivernile.android.bustracker.ui.neareststops
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.ui.alerts.UiAlertDropdownMenuItemMultipleStopsRetriever
 import uk.org.rivernile.android.bustracker.ui.alerts.UiArrivalAlertDropdownMenuItem
 import uk.org.rivernile.android.bustracker.ui.alerts.UiProximityAlertDropdownMenuItem
+import uk.org.rivernile.android.bustracker.ui.favouritestops.UiFavouriteStopDropdownMenuItem
+import uk.org.rivernile.android.bustracker.ui.favouritestops.UiFavouriteStopDropdownMenuItemMultipleStopsRetriever
 import javax.inject.Inject
 
 /**
- * This generates a [UiFavouriteDropdownMenu] for a selected stop.
+ * This generates a [UiNearestStopDropdownMenu] for a selected stop.
  *
  * @author Niall Scott
  */
-internal interface UiFavouriteDropdownMenuGenerator {
+internal interface UiNearestStopDropdownMenuGenerator {
 
     /**
      * For the given [Set] of [stopIdentifiers], return a [Flow] which emits a mapping of the
-     * supplied stop identifiers to its associated [UiFavouriteDropdownMenu], if available.
+     * supplied stop identifiers to its associated [UiNearestStopDropdownMenu], if available.
      *
-     * @param stopIdentifiers The stop identifiers to get [UiFavouriteDropdownMenu]s for.
+     * @param stopIdentifiers The stop identifiers to get [UiNearestStopDropdownMenu]s for.
      * @return A [Flow] which emits a mapping of the supplied stop identifiers to its associated
-     * [UiFavouriteDropdownMenu], if available.
+     * [UiNearestStopDropdownMenu], if available.
      */
     fun getDropdownMenuItemsForStopsFlow(
         stopIdentifiers: Set<StopIdentifier>
-    ): Flow<Map<StopIdentifier, UiFavouriteDropdownMenu>?>
+    ): Flow<Map<StopIdentifier, UiNearestStopDropdownMenu>?>
 }
 
-internal class RealUiFavouriteDropdownMenuGenerator @Inject constructor(
-    private val arguments: Arguments,
+internal class RealUiNearestStopDropdownMenuGenerator @Inject constructor(
     private val state: State,
     private val featureRepository: FeatureRepository,
+    private val favouriteMenuItemRetriever: UiFavouriteStopDropdownMenuItemMultipleStopsRetriever,
     private val alertMenuItemsRetriever: UiAlertDropdownMenuItemMultipleStopsRetriever
-) : UiFavouriteDropdownMenuGenerator {
+) : UiNearestStopDropdownMenuGenerator {
 
     private val hasStopMapFeature by lazy { featureRepository.hasStopMapUiFeature }
-    private val hasShortcutFeature by lazy { featureRepository.hasPinShortcutFeature }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getDropdownMenuItemsForStopsFlow(
         stopIdentifiers: Set<StopIdentifier>
-    ): Flow<Map<StopIdentifier, UiFavouriteDropdownMenu>?> {
+    ): Flow<Map<StopIdentifier, UiNearestStopDropdownMenu>?> {
         return if (stopIdentifiers.isNotEmpty()) {
-            arguments
-                .isShortcutModeFlow
-                .flatMapLatest {
-                    getDropdownMenuItemsForStopsFlow(
-                        stopIdentifiers = stopIdentifiers,
-                        isShortcutMode = it
-                    )
-                }
-        } else {
-            flowOf(null)
-        }
-    }
-
-    private fun getDropdownMenuItemsForStopsFlow(
-        stopIdentifiers: Set<StopIdentifier>,
-        isShortcutMode: Boolean
-    ): Flow<Map<StopIdentifier, UiFavouriteDropdownMenu>?> {
-        return if (!isShortcutMode) {
             combine(
                 state.selectedStopIdentifierFlow,
+                favouriteMenuItemRetriever.getUiFavouriteStopDropdownMenuItemsFlow(stopIdentifiers),
                 alertMenuItemsRetriever.getUiArrivalAlertDropdownMenuItemsFlow(stopIdentifiers),
                 alertMenuItemsRetriever.getUiProximityAlertDropdownMenuItemsFlow(stopIdentifiers)
-            ) { selectedStopIdentifier, arrivalAlertMenuItems, proximityAlertMenuItems ->
+            ) { selectedStop, favouriteMenus, arrivalAlertMenus, proxAlertMenus ->
                 createDropdownMenusForStops(
                     stopIdentifiers = stopIdentifiers,
-                    arrivalAlertMenuItems = arrivalAlertMenuItems,
-                    proximityAlertMenuItems = proximityAlertMenuItems,
-                    selectedStopIdentifier = selectedStopIdentifier
+                    selectedStopIdentifier = selectedStop,
+                    favouriteStopMenuItems = favouriteMenus,
+                    arrivalAlertMenuItems = arrivalAlertMenus,
+                    proximityAlertMenuItems = proxAlertMenus
                 )
             }
         } else {
@@ -110,15 +92,16 @@ internal class RealUiFavouriteDropdownMenuGenerator @Inject constructor(
 
     private fun createDropdownMenusForStops(
         stopIdentifiers: Set<StopIdentifier>,
+        selectedStopIdentifier: StopIdentifier?,
+        favouriteStopMenuItems: Map<StopIdentifier, UiFavouriteStopDropdownMenuItem>?,
         arrivalAlertMenuItems: Map<StopIdentifier, UiArrivalAlertDropdownMenuItem>?,
         proximityAlertMenuItems: Map<StopIdentifier, UiProximityAlertDropdownMenuItem>?,
-        selectedStopIdentifier: StopIdentifier?
-    ): Map<StopIdentifier, UiFavouriteDropdownMenu> {
+    ): Map<StopIdentifier, UiNearestStopDropdownMenu> {
         return stopIdentifiers
             .associateWith { stopIdentifier ->
-                UiFavouriteDropdownMenu(
+                UiNearestStopDropdownMenu(
                     isShown = stopIdentifier == selectedStopIdentifier,
-                    isShortcutItemShown = hasShortcutFeature,
+                    favouriteStopDropdownItem = favouriteStopMenuItems?.get(stopIdentifier),
                     arrivalAlertDropdownItem = arrivalAlertMenuItems?.get(stopIdentifier),
                     proximityAlertDropdownItem = proximityAlertMenuItems?.get(stopIdentifier),
                     isStopMapItemShown = hasStopMapFeature

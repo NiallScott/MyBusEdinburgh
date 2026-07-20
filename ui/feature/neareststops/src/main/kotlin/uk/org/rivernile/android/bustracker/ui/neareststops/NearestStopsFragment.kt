@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.ui.neareststops
 
 import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -41,12 +42,17 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.core.content.ContextCompat
+import androidx.core.os.BundleCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.fragment.compose.content
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.collections.immutable.ImmutableList
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableServiceDescriptorList
+import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddArrivalAlertListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddOrEditFavouriteStopListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddProximityAlertListener
@@ -58,7 +64,11 @@ import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmRemoveProxi
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowSystemLocationPreferencesListener
 import uk.org.rivernile.android.bustracker.ui.formatters.LocalNumberFormatter
 import uk.org.rivernile.android.bustracker.ui.formatters.rememberNumberFormatter
+import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment
+import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserParams
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
+
+private const val DIALOG_SELECT_SERVICES = "selectServicesDialog"
 
 /**
  * Show a list of the nearest bus stops to the device. If a location could not be found or the
@@ -72,10 +82,11 @@ import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 public class NearestStopsFragment : Fragment() {
 
     private var callbacks: Callbacks? = null
+    private val viewModel by viewModels<NearestStopsViewModel>()
 
     private val requestLocationPermissionsLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
-        this::handleLocationPermissionsResult
+        ::handleLocationPermissionsResult
     )
 
     override fun onAttach(context: Context) {
@@ -98,6 +109,7 @@ public class NearestStopsFragment : Fragment() {
                         .consumeWindowInsets(
                             WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical)
                         ),
+                    viewModel = viewModel,
                     onShowStopData = ::handleOnShowStopData,
                     onShowAddFavouriteStop = ::handleOnShowAddFavouriteStop,
                     onShowRemoveFavouriteStop = ::handleOnShowConfirmRemoveFavouriteStop,
@@ -113,6 +125,31 @@ public class NearestStopsFragment : Fragment() {
                 )
             }
         }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        childFragmentManager.setFragmentResultListener(
+            ServicesChooserDialogFragment.REQUEST_KEY,
+            viewLifecycleOwner
+        ) { _, result ->
+            viewModel.onServicesSelected(
+                selectedServices = BundleCompat
+                    .getParcelableArrayList(
+                        result,
+                        ServicesChooserDialogFragment.RESULT_CHOSEN_SERVICES,
+                        ParcelableServiceDescriptor::class.java
+                    )
+                    ?.toSet()
+            )
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        updatePermissions()
     }
 
     override fun onDetach() {
@@ -163,8 +200,17 @@ public class NearestStopsFragment : Fragment() {
             )
     }
 
-    private fun handleShowServicesChooser(selectedServices: ImmutableList<ServiceDescriptor>?) {
-
+    private fun handleShowServicesChooser(selectedServices: Set<ServiceDescriptor>?) {
+        ServicesChooserDialogFragment
+            .newInstance(
+                parameters = ServicesChooserParams.AllServices(
+                    titleResId = R.string.neareststops_service_chooser_title,
+                    selectedServices = selectedServices
+                        ?.toList()
+                        ?.toParcelableServiceDescriptorList()
+                )
+            )
+            .show(childFragmentManager, DIALOG_SELECT_SERVICES)
     }
 
     private fun handleShowLocationSettings() {
@@ -185,8 +231,40 @@ public class NearestStopsFragment : Fragment() {
         callbacks?.onAskTurnOnGps()
     }
 
-    private fun handleLocationPermissionsResult(states: Map<String, Boolean>) {
+    private fun updatePermissions() {
+        viewModel.onUpdatePermissionsState(
+            permissionsState = PermissionsState(
+                fineLocationPermission =
+                    getPermissionState(Manifest.permission.ACCESS_FINE_LOCATION),
+                coarseLocationPermission =
+                    getPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION)
+            )
+        )
+    }
 
+    private fun getPermissionState(permission: String) =
+        getPermissionState(
+            ContextCompat.checkSelfPermission(requireContext(), permission) ==
+                PackageManager.PERMISSION_GRANTED
+        )
+
+    private fun getPermissionState(isGranted: Boolean) =
+        if (isGranted) PermissionState.GRANTED else PermissionState.UNGRANTED
+
+    private fun handleLocationPermissionsResult(states: Map<String, Boolean>) {
+        val fineLocationState = states[Manifest.permission.ACCESS_FINE_LOCATION]
+            ?.let(::getPermissionState)
+            ?: getPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+        val coarseLocationState = states[Manifest.permission.ACCESS_COARSE_LOCATION]
+            ?.let(::getPermissionState)
+            ?: getPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION)
+
+        viewModel.onUpdatePermissionsState(
+            permissionsState = PermissionsState(
+                fineLocationPermission = fineLocationState,
+                coarseLocationPermission = coarseLocationState
+            )
+        )
     }
 
     /**

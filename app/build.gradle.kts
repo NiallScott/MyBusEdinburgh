@@ -163,6 +163,7 @@ dependencies {
     implementation(project(":ui:feature:favouritestops:addoreditfavouritestop"))
     implementation(project(":ui:feature:favouritestops:favouritestopslisting"))
     implementation(project(":ui:feature:favouritestops:removefavouritestop"))
+    implementation(project(":ui:feature:neareststops"))
     implementation(project(":ui:feature:news"))
     implementation(project(":ui:feature:serviceschooser"))
     implementation(project(":ui:text-formatting"))

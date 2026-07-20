@@ -37,14 +37,15 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
 import org.junit.Rule
 import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
 import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.text.UiStopName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -92,7 +93,10 @@ class NearestStopsScreenKtTest {
                             nearestStops = persistentListOf(
                                 UiNearestStop(
                                     stopIdentifier = "123456".toNaptanStopIdentifier(),
-                                    stopName = null,
+                                    stopName = UiStopName(
+                                        name = "Stop name",
+                                        locality = "Locality"
+                                    ),
                                     services = null,
                                     orientation = StopOrientation.NORTH_EAST,
                                     distanceMeters = 123,
@@ -760,7 +764,7 @@ class NearestStopsScreenKtTest {
                     state = UiState(
                         content = UiContent.InProgress,
                         action = UiAction.ShowServicesChooser(
-                            selectedServices = persistentListOf(
+                            selectedServices = persistentSetOf(
                                 FakeServiceDescriptor(
                                     serviceName = "1",
                                     operatorCode = "TEST1"
@@ -779,7 +783,7 @@ class NearestStopsScreenKtTest {
 
     @Test
     fun showServicesChooserActionCallsLambdaThenMarksActionAsLaunched() {
-        val actionTracker = Tracker<List<ServiceDescriptor>?>()
+        val actionTracker = Tracker<Set<ServiceDescriptor>?>()
         val actionLaunchedCounter = InvocationCounter()
         composeTestRule.setContent {
             MyBusTheme {
@@ -787,7 +791,7 @@ class NearestStopsScreenKtTest {
                     state = UiState(
                         content = UiContent.InProgress,
                         action = UiAction.ShowServicesChooser(
-                            selectedServices = persistentListOf(
+                            selectedServices = persistentSetOf(
                                 FakeServiceDescriptor(
                                     serviceName = "1",
                                     operatorCode = "TEST1"
@@ -803,7 +807,7 @@ class NearestStopsScreenKtTest {
 
         assertEquals(
             listOf(
-                persistentListOf(
+                persistentSetOf(
                     FakeServiceDescriptor(
                         serviceName = "1",
                         operatorCode = "TEST1"
@@ -911,6 +915,7 @@ class NearestStopsScreenKtTest {
         onShowOnMapClick: (StopIdentifier) -> Unit = { throw NotImplementedError() },
         onGrantPermissionClick: () -> Unit = { throw NotImplementedError() },
         onOpenSettingsClick: () -> Unit = { throw NotImplementedError() },
+        onShowServicesChooserClick: () -> Unit = { throw NotImplementedError() },
         onActionLaunched: () -> Unit = { throw NotImplementedError() },
         onShowStopData: ((StopIdentifier) -> Unit)? = { throw NotImplementedError() },
         onShowAddFavouriteStop: ((StopIdentifier) -> Unit)? = { throw NotImplementedError() },
@@ -921,7 +926,7 @@ class NearestStopsScreenKtTest {
         onShowRemoveProximityAlert: ((StopIdentifier) -> Unit)? = { throw NotImplementedError() },
         onShowOnMap: ((StopIdentifier) -> Unit)? = { throw NotImplementedError() },
         onRequestLocationPermissions: (() -> Unit)? = { throw NotImplementedError() },
-        onShowServicesChooser: ((ImmutableList<ServiceDescriptor>?) -> Unit)? =
+        onShowServicesChooser: ((Set<ServiceDescriptor>?) -> Unit)? =
             { throw NotImplementedError() },
         onShowLocationSettings: (() -> Unit)? = { throw NotImplementedError() },
         onShowTurnOnGps: (() -> Unit)? = { throw NotImplementedError() }
@@ -940,6 +945,7 @@ class NearestStopsScreenKtTest {
             onShowOnMapClick = onShowOnMapClick,
             onGrantPermissionClick = onGrantPermissionClick,
             onOpenSettingsClick = onOpenSettingsClick,
+            onShowServicesChooserClick = onShowServicesChooserClick,
             onActionLaunched = onActionLaunched,
             modifier = modifier,
             onShowStopData = onShowStopData,

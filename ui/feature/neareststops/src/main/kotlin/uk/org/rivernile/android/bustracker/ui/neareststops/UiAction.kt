@@ -26,7 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
-import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableSet
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
@@ -120,7 +120,7 @@ internal sealed interface UiAction {
      * @property selectedServices The currently selected services, if any.
      */
     data class ShowServicesChooser(
-        val selectedServices: ImmutableList<ServiceDescriptor>?
+        val selectedServices: ImmutableSet<ServiceDescriptor>?
     ) : UiAction
 
     /**

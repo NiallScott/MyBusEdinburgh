@@ -1,0 +1,152 @@
+/*
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty.  In no event will the authors or contributors be held liable for
+ * any damages arising from the use of this software.
+ *
+ * The aforementioned copyright holder(s) hereby grant you a
+ * non-transferrable right to use this software for any purpose (including
+ * commercial applications), and to modify it and redistribute it, subject to
+ * the following conditions:
+ *
+ *  1. This notice may not be removed or altered from any file it appears in.
+ *
+ *  2. Any modifications made to this software, except those defined in
+ *     clause 3 of this agreement, must be released under this license, and
+ *     the source code of any modifications must be made available on a
+ *     publically accessible (and locateable) website, or sent to the
+ *     original author of this software.
+ *
+ *  3. Software modifications that do not alter the functionality of the
+ *     software but are simply adaptations to a specific environment are
+ *     exempt from clause 2.
+ *
+ */
+
+package uk.org.rivernile.android.bustracker.ui.neareststops
+
+import androidx.lifecycle.SavedStateHandle
+import dagger.hilt.android.scopes.ViewModelScoped
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.ParcelableStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toStopIdentifier
+import javax.inject.Inject
+
+/**
+ * This provides the way to read and write any transient state for the nearest stops feature.
+ *
+ * @author Niall Scott
+ */
+internal interface State {
+
+    /**
+     * This emits the current [UiAction] to be performed. `null` will be emitted when no action is
+     * to be performed.
+     */
+    val actionFlow: Flow<UiAction?>
+
+    /**
+     * The current [UiAction] in progress, if any.
+     */
+    var action: UiAction?
+
+    /**
+     * This emits the current [PermissionsState].
+     */
+    val permissionsStateFlow: Flow<PermissionsState?>
+
+    /**
+     * The current [PermissionsState].
+     */
+    var permissionsState: PermissionsState?
+
+    /**
+     * A [Flow] which emits the currently selected stop identifier.
+     */
+    val selectedStopIdentifierFlow: Flow<StopIdentifier?>
+
+    /**
+     * A property which gets and sets the currently selected stop identifier.
+     */
+    var selectedStopIdentifier: StopIdentifier?
+
+    /**
+     * A [Flow] which emits the [Set] of currently filtered services.
+     */
+    val selectedServicesFlow: Flow<Set<ServiceDescriptor>?>
+
+    /**
+     * A property which gets and sets the currently filtered services.
+     */
+    var selectedServices: Set<ServiceDescriptor>?
+}
+
+internal const val STATE_SELECTED_STOP_IDENTIFIER = "selectedStopIdentifier"
+internal const val STATE_SELECTED_SERVICES = "selectedServices"
+
+@ViewModelScoped
+internal class RealState @Inject constructor(
+    savedState: SavedStateHandle
+) : State {
+
+    override val actionFlow get() = _actionFlow.asStateFlow()
+
+    override var action: UiAction?
+        get() = _actionFlow.value
+        set(value) {
+            _actionFlow.value = value
+        }
+
+    override val permissionsStateFlow get() = _permissionsFlow.asStateFlow()
+
+    override var permissionsState: PermissionsState?
+        get() = _permissionsFlow.value
+        set(value) {
+            _permissionsFlow.value = value
+        }
+
+    override val selectedStopIdentifierFlow get() = _selectedStopIdentifierFlow
+        .map { it?.toStopIdentifier() }
+
+    override var selectedStopIdentifier: StopIdentifier?
+        get() = _selectedStopIdentifierFlow.value?.toStopIdentifier()
+        set(value) {
+            _selectedStopIdentifierFlow.value = value?.toParcelableStopIdentifier()
+        }
+
+    override val selectedServicesFlow get() = _selectedServicesFlow
+        .map { it?.toSet() }
+
+    override var selectedServices: Set<ServiceDescriptor>?
+        get() = _selectedServicesFlow.value?.toSet()
+        set(value) {
+            _selectedServicesFlow.value = value
+                ?.map { it.toParcelableServiceDescriptor() }
+                ?.let { ArrayList(it) }
+        }
+
+    private val _actionFlow = MutableStateFlow<UiAction?>(null)
+
+    private val _permissionsFlow = MutableStateFlow<PermissionsState?>(null)
+
+    private val _selectedStopIdentifierFlow = savedState
+        .getMutableStateFlow<ParcelableStopIdentifier?>(
+            key = STATE_SELECTED_STOP_IDENTIFIER,
+            initialValue = null
+        )
+
+    private val _selectedServicesFlow = savedState
+        .getMutableStateFlow<ArrayList<ParcelableServiceDescriptor>?>(
+            key = STATE_SELECTED_SERVICES,
+            initialValue = null
+        )
+}

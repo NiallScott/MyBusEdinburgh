@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
@@ -176,6 +177,10 @@ private fun NearestStopMarkerIcon(
         painter = painterResource(orientation.toIconDrawableResId()),
         contentDescription = stringResource(orientation.toContentDescriptionStringResId()),
         modifier = modifier
+            .defaultMinSize(
+                minWidth = 32.dp,
+                minHeight = 32.dp
+            )
             .semantics {
                 testTag = TEST_TAG_STOP_MARKER_ICON
             },
@@ -186,7 +191,7 @@ private fun NearestStopMarkerIcon(
 @Composable
 private fun DetailsColumn(
     stopIdentifier: StopIdentifier,
-    stopName: UiStopName?,
+    stopName: UiStopName,
     services: ImmutableList<UiServiceName>?,
     modifier: Modifier = Modifier
 ) {
@@ -210,7 +215,7 @@ private fun DetailsColumn(
 @Composable
 private fun NearestStopName(
     stopIdentifier: StopIdentifier,
-    stopName: UiStopName?,
+    stopName: UiStopName,
     modifier: Modifier = Modifier
 ) {
     Text(

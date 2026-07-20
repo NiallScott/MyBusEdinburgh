@@ -27,70 +27,136 @@
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.toImmutableSet
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.stateIn
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForViewModelCoroutineScope
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import javax.inject.Inject
 
 @HiltViewModel
 internal class NearestStopsViewModel @Inject constructor(
+    private val state: State,
+    private val uiContentRetriever: UiContentRetriever,
+    private val uiActionButtonsGenerator: UiActionButtonsGenerator,
+    @ForDefaultDispatcher defaultCoroutineDispatcher: CoroutineDispatcher,
     @ForViewModelCoroutineScope viewModelCoroutineScope: CoroutineScope
 ) : ViewModel(viewModelCoroutineScope) {
 
-    val uiStateFlow: StateFlow<UiState> = MutableStateFlow(UiState())
+    val uiStateFlow: StateFlow<UiState> = _uiStateFlow
+        .flowOn(defaultCoroutineDispatcher)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = UiState()
+        )
 
     fun onItemClicked(stopIdentifier: StopIdentifier) {
-
+        state.action = UiAction.ShowStopData(
+            stopIdentifier = stopIdentifier
+        )
     }
 
     fun onOpenDropdownMenuClicked(stopIdentifier: StopIdentifier) {
-
+        state.selectedStopIdentifier = stopIdentifier
     }
 
     fun onDropdownMenuDismissed() {
-
+        dismissDropdownMenu()
     }
 
     fun onAddFavouriteStopClicked(stopIdentifier: StopIdentifier) {
-
+        state.action = UiAction.ShowAddFavouriteStop(
+            stopIdentifier = stopIdentifier
+        )
+        dismissDropdownMenu()
     }
 
     fun onRemoveFavouriteStopClicked(stopIdentifier: StopIdentifier) {
-
+        state.action = UiAction.ShowRemoveFavouriteStop(
+            stopIdentifier = stopIdentifier
+        )
+        dismissDropdownMenu()
     }
 
     fun onAddArrivalAlertClicked(stopIdentifier: StopIdentifier) {
-
+        state.action = UiAction.ShowAddArrivalAlert(
+            stopIdentifier = stopIdentifier
+        )
+        dismissDropdownMenu()
     }
 
     fun onRemoveArrivalAlertClicked(stopIdentifier: StopIdentifier) {
-
+        state.action = UiAction.ShowRemoveArrivalAlert(
+            stopIdentifier = stopIdentifier
+        )
+        dismissDropdownMenu()
     }
 
     fun onAddProximityAlertClicked(stopIdentifier: StopIdentifier) {
-
+        state.action = UiAction.ShowAddProximityAlert(
+            stopIdentifier = stopIdentifier
+        )
+        dismissDropdownMenu()
     }
 
     fun onRemoveProximityAlertCLicked(stopIdentifier: StopIdentifier) {
-
+        state.action = UiAction.ShowRemoveProximityAlert(
+            stopIdentifier = stopIdentifier
+        )
+        dismissDropdownMenu()
     }
 
     fun onShowOnMapClicked(stopIdentifier: StopIdentifier) {
-
+        state.action = UiAction.ShowOnMap(
+            stopIdentifier = stopIdentifier
+        )
+        dismissDropdownMenu()
     }
 
     fun onGrantPermissionClicked() {
-
+        state.action = UiAction.RequestLocationPermissions
     }
 
     fun onOpenSettingsClicked() {
+        state.action = UiAction.ShowLocationSettings
+    }
 
+    fun onShowServicesChooserClicked() {
+        state.action = UiAction.ShowServicesChooser(
+            selectedServices = state.selectedServices?.toImmutableSet()
+        )
     }
 
     fun onActionLaunched() {
+        state.action = null
+    }
 
+    fun onUpdatePermissionsState(permissionsState: PermissionsState) {
+        state.permissionsState = permissionsState
+    }
+
+    fun onServicesSelected(selectedServices: Set<ServiceDescriptor>?) {
+        state.selectedServices = selectedServices
+    }
+
+    private val _uiStateFlow get() = combine(
+        uiContentRetriever.uiContentFlow,
+        uiActionButtonsGenerator.uiActionButtonsFlow,
+        state.actionFlow,
+        ::UiState
+    )
+
+    private fun dismissDropdownMenu() {
+        state.selectedStopIdentifier = null
     }
 }

@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
- * Copyright (C) 2009 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,14 +21,27 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<menu
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:compat="http://schemas.android.com/apk/res-auto">
+ *
+ */
 
-    <item
-        android:id="@+id/neareststops_option_menu_filter"
-        android:title="@string/neareststops_menu_filter"
-        android:icon="@drawable/ic_action_filter"
-        compat:showAsAction="ifRoom" />
-</menu>
+package uk.org.rivernile.android.bustracker.ui.neareststops
+
+/**
+ * This contains the state of the action buttons.
+ *
+ * @property serviceFilterActionButton The state for the [UiServiceFilterActionButton].
+ * @author Niall Scott
+ */
+internal data class UiActionButtons(
+    val serviceFilterActionButton: UiServiceFilterActionButton = UiServiceFilterActionButton()
+)
+
+/**
+ * This contains the state of the service filter action button.
+ *
+ * @property isEnabled Is the service filter action button enabled?
+ * @author Niall Scott
+ */
+internal data class UiServiceFilterActionButton(
+    val isEnabled: Boolean = false
+)

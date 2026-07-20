@@ -26,6 +26,8 @@
   -->
 <resources>
     <string name="neareststops_menu_showonmap">Show on map</string>
+    <string name="neareststops_menu_filter">Filter services</string>
+
     <string name="neareststops_distance_format">%s m</string>
     <string name="neareststops_dropdown_content_description">More actions</string>
     <string name="neareststops_error_empty_title">No nearby stops</string>
@@ -41,4 +43,6 @@
     <string name="neareststops_error_location_sources_blurb">Please enable location services from system settings</string>
     <string name="neareststops_error_location_sources_button">Open settings</string>
     <string name="neareststops_error_no_location_settings">System location settings does not exist on this device</string>
+
+    <string name="neareststops_service_chooser_title">Select service(s) to filter</string>
 </resources>

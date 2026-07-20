@@ -242,23 +242,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="explore_tab_nearest_stops">Nearest</string>
 
     <!--
-    ************************************
-    * Strings for NearestStopsFragment *
-    ************************************
-    -->
-    <string name="neareststops_error_empty">There are no nearby stops which match your selected filter</string>
-    <string name="neareststops_error_location_unknown">Your location is unknown</string>
-    <string name="neareststops_error_no_location_feature">This device does not have the necessary location services to be able to determine your nearest stops</string>
-    <string name="neareststops_error_permission_required"><b>Permission required</b>\nTo show the nearest stops, you need to grant access to your location</string>
-    <string name="neareststops_error_permission_required_button">Grant permission</string>
-    <string name="neareststops_error_location_sources"><b>Location services disabled</b>\nPlease enable location services from the system settings</string>
-    <string name="neareststops_error_location_sources_button">Open settings</string>
-    <string name="neareststops_error_no_location_settings">System location settings does not exist on this device</string>
-    <string name="neareststops_service_chooser_title">Select service(s) to filter</string>
-    <string name="neareststops_distance_format">%d m</string>
-    <string name="neareststops_no_services">No known services</string>
-
-    <!--
     ******************************
     * Strings for SearchFragment *
     ******************************
@@ -425,24 +408,4 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="displaystopdata_menu_time_add">@string/time_alert_add</string>
     <string name="displaystopdata_menu_time_rem">@string/time_alert_rem</string>
     <string name="displaystopdata_menu_show_street_view">Show on Street View</string>
-
-    <!--
-    *****************************************
-    * Strings for NearestStopsFragment menu *
-    *****************************************
-    -->
-    <string name="neareststops_menu_filter">Filter services</string>
-
-    <!--
-    **********************************************************
-    * Strings for NearestStopsFragment ListView context menu *
-    **********************************************************
-    -->
-    <string name="neareststops_context_showonmap">Show on map</string>
-    <string name="neareststops_context_addasfav">@string/favourite_stop_add</string>
-    <string name="neareststops_context_remasfav">@string/favourite_stop_remove</string>
-    <string name="neareststops_menu_prox_add">@string/prox_alert_add</string>
-    <string name="neareststops_menu_prox_rem">@string/prox_alert_rem</string>
-    <string name="neareststops_menu_time_add">@string/time_alert_add</string>
-    <string name="neareststops_menu_time_rem">@string/time_alert_rem</string>
 </resources>

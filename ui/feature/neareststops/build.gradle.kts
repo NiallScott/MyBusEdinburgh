@@ -56,10 +56,16 @@ kotlin {
 dependencies {
 
     implementation(project(":core:busstops-android"))
+    implementation(project(":core:config"))
     implementation(project(":core:core-domain-android"))
     implementation(project(":core:coroutines-android"))
+    implementation(project(":core:feature"))
+    implementation(project(":core:location-android"))
+    implementation(project(":core:permission-android"))
+    implementation(project(":core:services-android"))
     implementation(project(":ui:feature:alerts:alertscommon"))
     implementation(project(":ui:feature:favouritestops:favouritestopscommon"))
+    implementation(project(":ui:feature:serviceschooser"))
     implementation(project(":ui:text-formatting"))
     implementation(project(":ui:ui-core"))
 
@@ -68,6 +74,9 @@ dependencies {
     implementation(libs.androidx.core)
     implementation(libs.androidx.fragment.compose)
     implementation(libs.androidx.viewmodel.compose)
+
+    // Material Design
+    implementation(libs.material)
 
     // Compose
     implementation(libs.androidx.compose.ui.tooling.preview)
@@ -96,6 +105,11 @@ dependencies {
     androidTestImplementation(libs.androidx.test.uiautomator)
     androidTestImplementation(libs.kotlin.test.junit)
 
+    testImplementation(testFixtures(project(":core:busstops")))
+    testImplementation(testFixtures(project(":core:core-domain")))
+    testImplementation(testFixtures(project(":core:feature")))
+    testImplementation(testFixtures(project(":ui:feature:alerts:alertscommon")))
+    testImplementation(testFixtures(project(":ui:feature:favouritestops:favouritestopscommon")))
     testImplementation(libs.coroutines.test)
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)

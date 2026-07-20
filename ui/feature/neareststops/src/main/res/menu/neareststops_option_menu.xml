@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2012 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,26 +29,8 @@
     xmlns:compat="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/neareststops_context_menu_favourite"
-        android:title="@string/neareststops_context_addasfav"
-        android:icon="@drawable/ic_action_star_border"
+        android:id="@+id/neareststops_option_menu_filter"
+        android:title="@string/neareststops_menu_filter"
+        android:icon="@drawable/ic_action_filter"
         compat:showAsAction="ifRoom" />
-
-    <item
-        android:id="@+id/neareststops_context_menu_showonmap"
-        android:title="@string/neareststops_context_showonmap"
-        android:icon="@drawable/ic_action_map"
-        compat:showAsAction="ifRoom" />
-
-    <item
-        android:id="@+id/neareststops_context_menu_prox_alert"
-        android:title="@string/neareststops_menu_prox_add"
-        android:icon="@drawable/ic_action_location_on"
-        compat:showAsAction="never" />
-
-    <item
-        android:id="@+id/neareststops_context_menu_time_alert"
-        android:title="@string/neareststops_menu_time_add"
-        android:icon="@drawable/ic_action_alarm_add"
-        compat:showAsAction="never" />
 </menu>
