@@ -26,16 +26,11 @@
 
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
-import dagger.hilt.android.scopes.ViewModelScoped
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.coroutines.di.ForViewModelCoroutineScope
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.ui.alerts.UiAlertDropdownMenuItemMultipleStopsRetriever
@@ -63,14 +58,11 @@ internal interface UiFavouriteDropdownMenuGenerator {
     ): Flow<Map<StopIdentifier, UiFavouriteDropdownMenu>?>
 }
 
-@ViewModelScoped
 internal class RealUiFavouriteDropdownMenuGenerator @Inject constructor(
     private val arguments: Arguments,
     private val state: State,
     private val featureRepository: FeatureRepository,
-    private val alertMenuItemsRetriever: UiAlertDropdownMenuItemMultipleStopsRetriever,
-    @param:ForDefaultDispatcher private val defaultCoroutineDispatcher: CoroutineDispatcher,
-    @param:ForViewModelCoroutineScope private val viewModelCoroutineScope: CoroutineScope
+    private val alertMenuItemsRetriever: UiAlertDropdownMenuItemMultipleStopsRetriever
 ) : UiFavouriteDropdownMenuGenerator {
 
     private val hasStopMapFeature by lazy { featureRepository.hasStopMapUiFeature }
