@@ -63,15 +63,16 @@ class UiStopMarker(
     val stopName: StopName,
     val latLng: LatLng,
     val orientation: StopOrientation,
-    val serviceListing: UiServiceListing?) : ClusterItem {
+    val serviceListing: UiServiceListing?
+) : ClusterItem {
 
-    override fun getPosition() = latLng
+    override val position = latLng
 
-    override fun getTitle(): String? = null
+    override val snippet get() = null
 
-    override fun getSnippet(): String? = null
+    override val title get() = null
 
-    override fun getZIndex(): Float? = null
+    override val zIndex get() = null
 
     /**
      * Should the info window be shown?

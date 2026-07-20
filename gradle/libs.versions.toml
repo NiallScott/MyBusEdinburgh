@@ -5,10 +5,10 @@ android-sdk-min = "28"
 android-sdk-target = "37"
 android-build-tools = "37.0.0"
 
-android-gradle-plugin = "9.2.1"
+android-gradle-plugin = "9.3.0"
 coroutines = "1.11.0"
 dagger = "2.60.1"
-kotlin = "2.4.0"
+kotlin = "2.4.10"
 okhttp = "5.4.0"
 retrofit = "3.0.0"
 
@@ -110,9 +110,9 @@ firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 # Play Services
 play-services-location = { module = "com.google.android.gms:play-services-location", version = "21.4.0" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.0.0" }
-play-services-maps-ktx = { module = "com.google.maps.android:maps-ktx", version = "6.0.1" }
-play-services-maps-utils = { module = "com.google.maps.android:android-maps-utils", version = "4.5.2" }
-play-services-maps-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version = "6.0.1" }
+play-services-maps-ktx = { module = "com.google.maps.android:maps-ktx", version = "6.2.0" }
+play-services-maps-utils = { module = "com.google.maps.android:android-maps-utils", version = "5.0.0" }
+play-services-maps-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version = "6.2.0" }
 
 # Testing dependencies.
 androidx-arch-core-test = { module = "androidx.arch.core:core-testing", version = "2.2.0" }
