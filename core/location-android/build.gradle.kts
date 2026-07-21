@@ -48,6 +48,10 @@ android {
     }
 }
 
+kotlin {
+    explicitApi()
+}
+
 dependencies {
 
     implementation(project(":core:coroutines"))

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -50,6 +50,7 @@ import uk.org.rivernile.android.bustracker.core.location.LocationSource
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * This is the Google Play Location implementation of [LocationSource]. This is the preferred
@@ -72,9 +73,11 @@ internal class GooglePlayLocationSource @Inject constructor(
     }
 
     private val userVisibleLocationRequest by lazy {
-        LocationRequest.Builder(
-            Priority.PRIORITY_HIGH_ACCURACY,
-            USER_VISIBLE_LOCATION_INTERVAL_MILLIS)
+        LocationRequest
+            .Builder(
+                Priority.PRIORITY_HIGH_ACCURACY,
+                USER_VISIBLE_LOCATION_INTERVAL_MILLIS
+            )
             .setMinUpdateIntervalMillis(USER_VISIBLE_LOCATION_FASTEST_INTERVAL_MILLIS)
             .setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
             .build()
@@ -125,16 +128,18 @@ internal class GooglePlayLocationSource @Inject constructor(
         Manifest.permission.ACCESS_COARSE_LOCATION,
         Manifest.permission.ACCESS_FINE_LOCATION
     ])
-    private suspend fun getLastLocation() = withTimeoutOrNull(LAST_LOCATION_TIMEOUT_MILLIS) {
-        suspendCoroutine { continuation ->
-            fusedLocationProviderClient.lastLocation.addOnCompleteListener {
-                val result = if (it.isSuccessful) {
-                    it.result
-                } else {
-                    null
-                }
+    private suspend fun getLastLocation(): DeviceLocation? {
+        return withTimeoutOrNull(LAST_LOCATION_TIMEOUT_MILLIS.milliseconds) {
+            suspendCoroutine { continuation ->
+                fusedLocationProviderClient.lastLocation.addOnCompleteListener {
+                    val result = if (it.isSuccessful) {
+                        it.result
+                    } else {
+                        null
+                    }
 
-                continuation.resume(mapToDeviceLocation(result))
+                    continuation.resume(mapToDeviceLocation(result))
+                }
             }
         }
     }

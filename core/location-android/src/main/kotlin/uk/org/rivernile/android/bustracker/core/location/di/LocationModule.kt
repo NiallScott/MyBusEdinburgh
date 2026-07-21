@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,11 +37,10 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import uk.org.rivernile.android.bustracker.core.location.AndroidLocationSupport
-import uk.org.rivernile.android.bustracker.core.location.DistanceCalculator
-import uk.org.rivernile.android.bustracker.core.location.HasLocationFeatureDetector
-import uk.org.rivernile.android.bustracker.core.location.IsLocationEnabledDetector
+import uk.org.rivernile.android.bustracker.core.location.AndroidLocationRepository
+import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.location.LocationSource
 import uk.org.rivernile.android.bustracker.core.location.googleplay.GooglePlayLocationSource
 import uk.org.rivernile.android.bustracker.core.location.platform.PlatformLocationSource
@@ -56,29 +55,16 @@ import javax.inject.Provider
 @Module
 internal interface LocationModule {
 
-    @Suppress("unused")
     @Binds
-    fun bindHasLocationFeatureDetector(
-        androidLocationSupport: AndroidLocationSupport
-    ): HasLocationFeatureDetector
-
-    @Suppress("unused")
-    @Binds
-    fun bindIsLocationEnabledDetector(
-        androidLocationSupport: AndroidLocationSupport
-    ): IsLocationEnabledDetector
-
-    @Suppress("unused")
-    @Binds
-    fun bindDistanceCalculator(
-        androidLocationSupport: AndroidLocationSupport
-    ): DistanceCalculator
+    fun bindLocationRepository(
+        androidLocationRepository: AndroidLocationRepository
+    ): LocationRepository
 
     companion object {
 
         @Provides
         fun provideLocationSource(
-            context: Context,
+            @ApplicationContext context: Context,
             platformLocationSourceProvider: Provider<PlatformLocationSource>,
             googlePlayLocationSourceProvider: Provider<GooglePlayLocationSource>
         ): LocationSource {
@@ -92,11 +78,11 @@ internal interface LocationModule {
 
         @Provides
         fun provideFusedLocationProviderClient(
-            context: Context
+            @ApplicationContext context: Context
         ): FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
 
         @Provides
-        fun provideLocationManager(context: Context): LocationManager =
+        fun provideLocationManager(@ApplicationContext context: Context): LocationManager =
             requireNotNull(context.getSystemService())
     }
 }

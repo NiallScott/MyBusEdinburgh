@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,18 +29,33 @@ package uk.org.rivernile.android.bustracker.core.location
 import kotlinx.coroutines.flow.Flow
 
 /**
- * A fake [IsLocationEnabledDetector] for testing.
+ * A fake [LocationRepository] for testing.
  *
  * @author Niall Scott
  */
-class FakeIsLocationEnabledDetector(
+class FakeLocationRepository(
+    private val onHasLocationFeature: () -> Boolean = { throw NotImplementedError() },
+    private val onHasGpsLocationProvider: () -> Boolean = { throw NotImplementedError() },
     private val onIsLocationEnabledFlow: () -> Flow<Boolean> = { throw NotImplementedError() },
-    private val onIsGpsLocationProviderEnabled: () -> Boolean = { throw NotImplementedError() }
-) : IsLocationEnabledDetector {
+    private val onIsGpsLocationProviderEnabled: () -> Boolean = { throw NotImplementedError() },
+    private val onUserVisibleLocationFlow: () -> Flow<DeviceLocation> =
+        { throw NotImplementedError() },
+    private val onDistanceBetween: (DeviceLocation, DeviceLocation) -> Float =
+        { _, _ -> throw NotImplementedError() }
+) : LocationRepository {
 
-    override val isLocationEnabledFlow: Flow<Boolean>
-        get() = onIsLocationEnabledFlow()
+    override val hasLocationFeature get() = onHasLocationFeature()
 
-    override val isGpsLocationProviderEnabled: Boolean
-        get() = onIsGpsLocationProviderEnabled()
+    override val hasGpsLocationProvider get() = onHasGpsLocationProvider()
+
+    override val isLocationEnabledFlow get() = onIsLocationEnabledFlow()
+
+    override val isGpsLocationProviderEnabled get() = onIsGpsLocationProviderEnabled()
+
+    override val userVisibleLocationFlow get() = onUserVisibleLocationFlow()
+
+    override fun distanceBetween(
+        first: DeviceLocation,
+        second: DeviceLocation
+    ) = onDistanceBetween(first, second)
 }

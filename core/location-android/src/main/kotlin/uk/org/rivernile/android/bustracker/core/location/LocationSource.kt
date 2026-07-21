@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,21 +26,18 @@
 
 package uk.org.rivernile.android.bustracker.core.location
 
+import kotlinx.coroutines.flow.Flow
+
 /**
- * This interface is used to determine if the device the app is running on is capable of using
- * location-aware services.
+ * Implementations of this interface provide [DeviceLocation]s to [LocationRepository]. This acts
+ * as an abstraction layer so that platform-specific implementations can be specified.
  *
  * @author Niall Scott
  */
-interface HasLocationFeatureDetector {
+internal interface LocationSource {
 
     /**
-     * Does the device have location-aware features?
+     * Produce a [Flow] which emits the latest [DeviceLocation] until cancelled.
      */
-    val hasLocationFeature: Boolean
-
-    /**
-     * Does the device have a GPS location provider?
-     */
-    val hasGpsLocationProvider: Boolean
+    val userVisibleLocationFlow: Flow<DeviceLocation>
 }

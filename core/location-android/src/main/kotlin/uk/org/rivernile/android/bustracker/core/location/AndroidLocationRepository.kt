@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,34 +33,43 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * This is the Android-specific implementation of [HasLocationFeatureDetector],
- * [IsLocationEnabledDetector] and [DistanceCalculator].
+ * This is the Android-specific implementation of [LocationRepository].
  *
  * @param context The application [Context].
- * @param packageManager The Android [PackageManager].
- * @param locationManager Used to interact with system location APIs.
+ * @param packageManager The platform [PackageManager].
+ * @param locationManager The platform [LocationManager].
+ * @param locationSource The location source - an abstraction because location can come from
+ * multiple sources.
  * @author Niall Scott
  */
 @Singleton
-internal class AndroidLocationSupport @Inject constructor(
-    private val context: Context,
+internal class AndroidLocationRepository @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val packageManager: PackageManager,
-    private val locationManager: LocationManager
-) : HasLocationFeatureDetector, IsLocationEnabledDetector, DistanceCalculator {
+    private val locationManager: LocationManager,
+    private val locationSource: LocationSource
+) : LocationRepository {
 
-    override val hasLocationFeature get() =
+    override val hasLocationFeature by lazy {
         packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION)
+    }
 
-    override val hasGpsLocationProvider get() =
+    override val hasGpsLocationProvider by lazy {
         packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
+    }
 
     override val isLocationEnabledFlow get() = callbackFlow {
         val locationEnabledReceiver = object : BroadcastReceiver() {
@@ -91,6 +100,16 @@ internal class AndroidLocationSupport @Inject constructor(
     override val isGpsLocationProviderEnabled get() =
         locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override val userVisibleLocationFlow get() = if (hasLocationFeature) {
+        isLocationEnabledFlow
+            .distinctUntilChanged()
+            .flatMapLatest(::createUserVisibleLocationFlow)
+    } else {
+        // The location feature detection is a hard no in this case. Return an empty Flow.
+        emptyFlow()
+    }
+
     override fun distanceBetween(first: DeviceLocation, second: DeviceLocation): Float {
         val results = FloatArray(1)
         Location.distanceBetween(
@@ -104,12 +123,13 @@ internal class AndroidLocationSupport @Inject constructor(
         return results[0]
     }
 
-    /**
-     * Get the current location services enabled state and set the state on the given [channel].
-     *
-     * @param channel The [SendChannel] to send the enabled state to.
-     */
     private suspend fun getAndSendIsLocationEnabled(channel: SendChannel<Boolean>) {
         channel.send(locationManager.isLocationEnabled)
+    }
+
+    private fun createUserVisibleLocationFlow(locationEnabled: Boolean) = if (locationEnabled) {
+        locationSource.userVisibleLocationFlow
+    } else {
+        emptyFlow()
     }
 }
