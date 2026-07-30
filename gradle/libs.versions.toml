@@ -73,7 +73,7 @@ androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "202
 androidx-compose-runtime-annotation = { module = "androidx.compose.runtime:runtime-annotation" }
 androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
-androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.2.1" }
+androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.2.2" }
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version = "1.1.1" }
 androidx-core = { module = "androidx.core:core-ktx", version = "1.19.0" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version = "1.2.1" }
