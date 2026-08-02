@@ -4,12 +4,12 @@ runs:
   using: "composite"
   steps:
     - name: Store APKs
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: apks
         path: '**/*.apk'
     - name: Store reports
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: reports
         path: '**/build/reports/**'
