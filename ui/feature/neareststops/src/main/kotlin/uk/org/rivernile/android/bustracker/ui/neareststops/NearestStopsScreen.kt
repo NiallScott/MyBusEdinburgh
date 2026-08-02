@@ -126,7 +126,8 @@ internal const val TEST_TAG_ERROR_BLURB = "error-blurb"
  * @param onRequestLocationPermissions This is called when location permissions should be requested.
  * @param onShowServicesChooser This is called when the services chooser should be shown.
  * @param onShowLocationSettings This is called when the system location settings should be shown.
- * @param onShowTurnOnGps This is called when UI to turn on GPS should be shown.
+ * @param onShowAppPermissionSettings This is called when UI to allow the user to change app
+ * permission settings should be shown.
  * @author Niall Scott
  */
 @Composable
@@ -144,7 +145,7 @@ internal fun NearestStopsScreen(
     onRequestLocationPermissions: (() -> Unit)? = null,
     onShowServicesChooser: ((Set<ServiceDescriptor>?) -> Unit)? = null,
     onShowLocationSettings: (() -> Unit)? = null,
-    onShowTurnOnGps: (() -> Unit)? = null
+    onShowAppPermissionSettings: (() -> Unit)? = null
 ) {
     val uiState by viewModel.uiStateFlow.collectAsStateWithLifecycle()
 
@@ -163,6 +164,10 @@ internal fun NearestStopsScreen(
         onGrantPermissionClick = viewModel::onGrantPermissionClicked,
         onOpenSettingsClick = viewModel::onOpenSettingsClicked,
         onShowServicesChooserClick = viewModel::onShowServicesChooserClicked,
+        onLocationAccuracyOpenAppSettingsClick =
+            viewModel::onLocationAccuracyOpenAppSettingsClicked,
+        onLocationAccuracyOpenSystemLocationSettingsClick =
+            viewModel::onLocationAccuracyOpenSystemLocationSettingsClicked,
         onActionLaunched = viewModel::onActionLaunched,
         modifier = modifier,
         onShowStopData = onShowStopData,
@@ -176,7 +181,7 @@ internal fun NearestStopsScreen(
         onRequestLocationPermissions = onRequestLocationPermissions,
         onShowServicesChooser = onShowServicesChooser,
         onShowLocationSettings = onShowLocationSettings,
-        onShowTurnOnGps = onShowTurnOnGps
+        onShowAppPermissionSettings = onShowAppPermissionSettings
     )
 }
 
@@ -209,6 +214,10 @@ internal fun NearestStopsScreen(
  * resolution button.
  * @param onShowServicesChooserClick This is called when the user clicks on the menu item to show
  * the services chooser.
+ * @param onLocationAccuracyOpenAppSettingsClick This is called when the user clicks on the button
+ * to open the system settings for the app from the location accuracy banner.
+ * @param onLocationAccuracyOpenSystemLocationSettingsClick This is called when the user clicks on
+ * the button to open the system settings for location settings from the location accuracy banner.
  * @param onActionLaunched This is called when an action has been launched.
  * @param modifier Any [Modifier]s which should be applied.
  * @param onShowStopData This is called when stop data should be shown.
@@ -226,7 +235,8 @@ internal fun NearestStopsScreen(
  * @param onRequestLocationPermissions This is called when location permissions should be requested.
  * @param onShowServicesChooser This is called when the services chooser should be shown.
  * @param onShowLocationSettings This is called when the system location settings should be shown.
- * @param onShowTurnOnGps This is called when UI to turn on GPS should be shown.
+ * @param onShowAppPermissionSettings This is called when UI to allow the user to change app
+ * permission settings should be shown.
  * @author Niall Scott
  */
 @Composable
@@ -245,6 +255,8 @@ internal fun NearestStopsScreenWithState(
     onGrantPermissionClick: () -> Unit,
     onOpenSettingsClick: () -> Unit,
     onShowServicesChooserClick: () -> Unit,
+    onLocationAccuracyOpenAppSettingsClick: () -> Unit,
+    onLocationAccuracyOpenSystemLocationSettingsClick: () -> Unit,
     onActionLaunched: () -> Unit,
     modifier: Modifier = Modifier,
     onShowStopData: ((StopIdentifier) -> Unit)? = null,
@@ -258,17 +270,33 @@ internal fun NearestStopsScreenWithState(
     onRequestLocationPermissions: (() -> Unit)? = null,
     onShowServicesChooser: ((Set<ServiceDescriptor>?) -> Unit)? = null,
     onShowLocationSettings: (() -> Unit)? = null,
-    onShowTurnOnGps: (() -> Unit)? = null
+    onShowAppPermissionSettings: (() -> Unit)? = null
 ) {
     val paddingDouble = dimensionResource(Rcore.dimen.padding_double)
 
-    Box(
+    Column(
         modifier = modifier,
-        contentAlignment = Alignment.Center
     ) {
+        val content = state.content
+
+        if (content is HasLocationAccuracy) {
+            val locationAccuracy = content.locationAccuracy
+
+            if (locationAccuracy != null) {
+                LocationAccuracyHeaderBar(
+                    locationAccuracy = locationAccuracy,
+                    onShowAppSettingsClick = onLocationAccuracyOpenAppSettingsClick,
+                    onShowSystemLocationSettingsClick =
+                        onLocationAccuracyOpenSystemLocationSettingsClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+            }
+        }
+
         val nestedScrollInterop = rememberNestedScrollInteropConnection()
 
-        when (state.content) {
+        when (content) {
             is UiContent.InProgress -> IndeterminateProgress(
                 modifier = Modifier
                     .fillMaxSize()
@@ -278,7 +306,7 @@ internal fun NearestStopsScreenWithState(
                     .verticalScroll(rememberScrollState())
             )
             is UiContent.Content -> Content(
-                nearestStops = state.content.nearestStops,
+                nearestStops = content.nearestStops,
                 onItemClick = onItemClick,
                 onOpenDropdownMenuClick = onOpenDropdownMenuClick,
                 onDropdownMenuDismissed = onDropdownMenuDismissed,
@@ -294,7 +322,7 @@ internal fun NearestStopsScreenWithState(
                     .nestedScroll(nestedScrollInterop)
             )
             is UiContent.Error -> NearestStopsError(
-                error = state.content,
+                error = content,
                 onGrantPermissionClick = onGrantPermissionClick,
                 onOpenSettingsClick = onOpenSettingsClick,
                 modifier = Modifier
@@ -322,7 +350,7 @@ internal fun NearestStopsScreenWithState(
             onRequestLocationPermissions = onRequestLocationPermissions,
             onShowServicesChooser = onShowServicesChooser,
             onShowLocationSettings = onShowLocationSettings,
-            onShowTurnOnGps = onShowTurnOnGps
+            onShowAppPermissionSettings = onShowAppPermissionSettings
         )
     }
 
@@ -587,7 +615,7 @@ private fun LaunchAction(
     onRequestLocationPermissions: (() -> Unit)? = null,
     onShowServicesChooser: ((Set<ServiceDescriptor>?) -> Unit)? = null,
     onShowLocationSettings: (() -> Unit)? = null,
-    onShowTurnOnGps: (() -> Unit)? = null
+    onShowAppPermissionSettings: (() -> Unit)? = null
 ) {
     LaunchedEffect(action) {
         when (action) {
@@ -610,7 +638,7 @@ private fun LaunchAction(
             is UiAction.ShowServicesChooser ->
                 onShowServicesChooser?.invoke(action.selectedServices)
             is UiAction.ShowLocationSettings -> onShowLocationSettings?.invoke()
-            is UiAction.ShowTurnOnGps -> onShowTurnOnGps?.invoke()
+            is UiAction.ShowAppPermissionSettings -> onShowAppPermissionSettings?.invoke()
         }
 
         onActionLaunched()
@@ -689,8 +717,10 @@ private fun NearestStopsScreenPreview(
             onRemoveProximityAlertClick = { },
             onShowOnMapClick = { },
             onGrantPermissionClick = { },
+            onOpenSettingsClick = { },
             onShowServicesChooserClick = { },
-            onOpenSettingsClick = { }
+            onLocationAccuracyOpenAppSettingsClick = { },
+            onLocationAccuracyOpenSystemLocationSettingsClick = { }
         )
     }
 }
@@ -703,7 +733,8 @@ private class UiStateProvider : PreviewParameterProvider<UiState> {
         ),
         UiState(
             content = UiContent.Content(
-                persistentListOf(
+                locationAccuracy = null,
+                nearestStops = persistentListOf(
                     UiNearestStop(
                         stopIdentifier = "1".toNaptanStopIdentifier(),
                         stopName = UiStopName(
@@ -794,10 +825,27 @@ private class UiStateProvider : PreviewParameterProvider<UiState> {
             content = UiContent.Error.LocationOff
         ),
         UiState(
-            content = UiContent.Error.LocationUnknown
+            content = UiContent.Error.LocationUnknown,
         ),
         UiState(
-            content = UiContent.Error.NoNearestStops
+            content = UiContent.Error.NoNearestStops(
+                locationAccuracy = UiLocationAccuracy.GPS_NOT_PRESENT
+            )
+        ),
+        UiState(
+            content = UiContent.Error.NoNearestStops(
+                locationAccuracy = UiLocationAccuracy.PERMISSIONS_NOT_SUFFICIENT
+            )
+        ),
+        UiState(
+            content = UiContent.Error.NoNearestStops(
+                locationAccuracy = UiLocationAccuracy.GPS_DISABLED
+            )
+        ),
+        UiState(
+            content = UiContent.Error.NoNearestStops(
+                locationAccuracy = null
+            )
         )
     )
 }

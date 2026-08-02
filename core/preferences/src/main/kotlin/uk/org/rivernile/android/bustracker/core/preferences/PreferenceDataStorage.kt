@@ -95,13 +95,6 @@ public interface PreferenceDataStorage {
     public suspend fun toggleAutoRefresh()
 
     /**
-     * Set the value of the GPS prompt disabled preference.
-     *
-     * @param isDisabled Is the GPS prompt disabled?
-     */
-    public suspend fun setIsGpsPromptDisabled(isDisabled: Boolean)
-
-    /**
      * Set the value of the last map camera location preference.
      *
      * @param cameraLocation The last map camera location.

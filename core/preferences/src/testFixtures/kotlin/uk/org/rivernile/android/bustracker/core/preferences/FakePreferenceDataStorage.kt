@@ -56,9 +56,6 @@ class FakePreferenceDataStorage(
     var toggleAutoRefreshInvocationCount = 0
         private set
 
-    var isGpsPromptDisabled = false
-        private set
-
     var lastMapCameraLocation: LastMapCameraLocation? = null
         private set
 
@@ -98,10 +95,6 @@ class FakePreferenceDataStorage(
 
     override suspend fun toggleAutoRefresh() {
         toggleAutoRefreshInvocationCount++
-    }
-
-    override suspend fun setIsGpsPromptDisabled(isDisabled: Boolean) {
-        isGpsPromptDisabled = isDisabled
     }
 
     override suspend fun setLastMapCameraLocation(cameraLocation: LastMapCameraLocation) {

@@ -37,6 +37,10 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
 import org.junit.Rule
@@ -81,6 +85,7 @@ class NearestStopsScreenKtTest {
         composeTestRule
             .onNodeWithTag(TEST_TAG_CONTENT_ERROR)
             .assertDoesNotExist()
+        assertLocationAccuracyBarDoesNotExist()
     }
 
     @Test
@@ -90,19 +95,8 @@ class NearestStopsScreenKtTest {
                 NearestStopsScreenWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.Content(
-                            nearestStops = persistentListOf(
-                                UiNearestStop(
-                                    stopIdentifier = "123456".toNaptanStopIdentifier(),
-                                    stopName = UiStopName(
-                                        name = "Stop name",
-                                        locality = "Locality"
-                                    ),
-                                    services = null,
-                                    orientation = StopOrientation.NORTH_EAST,
-                                    distanceMeters = 123,
-                                    dropdownMenu = UiNearestStopDropdownMenu()
-                                )
-                            )
+                            locationAccuracy = null,
+                            nearestStops = nearestStops
                         )
                     )
                 )
@@ -118,6 +112,67 @@ class NearestStopsScreenKtTest {
         composeTestRule
             .onNodeWithTag(TEST_TAG_CONTENT_ERROR)
             .assertDoesNotExist()
+        assertLocationAccuracyBarDoesNotExist()
+    }
+
+    @Test
+    fun showsPopulatedContentWithGpsNotPresentLocationAccuracyBar() {
+        composeTestRule.setContent {
+            MyBusTheme {
+                NearestStopsScreenWithStateWithDefaults(
+                    state = UiState(
+                        content = UiContent.Content(
+                            locationAccuracy = UiLocationAccuracy.GPS_NOT_PRESENT,
+                            nearestStops = nearestStops
+                        )
+                    )
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_LOCATION_ACCURACY_HEADER_BAR_GPS_NOT_PRESENT)
+            .assertExists()
+    }
+
+    @Test
+    fun showsPopulatedContentWithPermissionsNotSufficientLocationAccuracyBar() {
+        composeTestRule.setContent {
+            MyBusTheme {
+                NearestStopsScreenWithStateWithDefaults(
+                    state = UiState(
+                        content = UiContent.Content(
+                            locationAccuracy = UiLocationAccuracy.PERMISSIONS_NOT_SUFFICIENT,
+                            nearestStops = nearestStops
+                        )
+                    )
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_LOCATION_ACCURACY_HEADER_BAR_PERMISSIONS_NOT_SUFFICIENT)
+            .assertExists()
+    }
+
+    @Test
+    fun showsPopulatedContentWithGpsDisabledLocationAccuracyBar() {
+        composeTestRule.setContent {
+            MyBusTheme {
+                NearestStopsScreenWithStateWithDefaults(
+                    state = UiState(
+                        content = UiContent.Content(
+                            locationAccuracy = UiLocationAccuracy.GPS_DISABLED,
+                            nearestStops = nearestStops
+                        )
+                    )
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_LOCATION_ACCURACY_HEADER_BAR_GPS_DISABLED)
+            .assertExists()
     }
 
     @Test
@@ -157,6 +212,7 @@ class NearestStopsScreenKtTest {
                             .getString(R.string.neareststops_error_no_location_feature_blurb)
                     )
             }
+        assertLocationAccuracyBarDoesNotExist()
     }
 
     @Test
@@ -208,6 +264,7 @@ class NearestStopsScreenKtTest {
                     .performClick()
             }
         assertEquals(1, invocationCounter.count)
+        assertLocationAccuracyBarDoesNotExist()
     }
 
     @Test
@@ -259,6 +316,7 @@ class NearestStopsScreenKtTest {
                     .performClick()
             }
         assertEquals(1, invocationCounter.count)
+        assertLocationAccuracyBarDoesNotExist()
     }
 
     @Test
@@ -298,6 +356,7 @@ class NearestStopsScreenKtTest {
                             .getString(R.string.neareststops_error_location_unknown_blurb)
                     )
             }
+        assertLocationAccuracyBarDoesNotExist()
     }
 
     @Test
@@ -306,7 +365,9 @@ class NearestStopsScreenKtTest {
             MyBusTheme {
                 NearestStopsScreenWithStateWithDefaults(
                     state = UiState(
-                        content = UiContent.Error.NoNearestStops
+                        content = UiContent.Error.NoNearestStops(
+                            locationAccuracy = null
+                        )
                     )
                 )
             }
@@ -337,6 +398,64 @@ class NearestStopsScreenKtTest {
                             .getString(R.string.neareststops_error_empty_blurb)
                     )
             }
+        assertLocationAccuracyBarDoesNotExist()
+    }
+
+    @Test
+    fun showsNoNearestStopsErrorWithGpsNotPresentLocationAccuracyBar() {
+        composeTestRule.setContent {
+            MyBusTheme {
+                NearestStopsScreenWithStateWithDefaults(
+                    state = UiState(
+                        content = UiContent.Error.NoNearestStops(
+                            locationAccuracy = UiLocationAccuracy.GPS_NOT_PRESENT
+                        )
+                    )
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_LOCATION_ACCURACY_HEADER_BAR_GPS_NOT_PRESENT)
+            .assertExists()
+    }
+
+    @Test
+    fun showsNoNearestStopsErrorWithPermissionsNotSufficientLocationAccuracyBar() {
+        composeTestRule.setContent {
+            MyBusTheme {
+                NearestStopsScreenWithStateWithDefaults(
+                    state = UiState(
+                        content = UiContent.Error.NoNearestStops(
+                            locationAccuracy = UiLocationAccuracy.PERMISSIONS_NOT_SUFFICIENT
+                        )
+                    )
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_LOCATION_ACCURACY_HEADER_BAR_PERMISSIONS_NOT_SUFFICIENT)
+            .assertExists()
+    }
+
+    @Test
+    fun showsNoNearestStopsErrorWithGpsDisabledLocationAccuracyBar() {
+        composeTestRule.setContent {
+            MyBusTheme {
+                NearestStopsScreenWithStateWithDefaults(
+                    state = UiState(
+                        content = UiContent.Error.NoNearestStops(
+                            locationAccuracy = UiLocationAccuracy.GPS_DISABLED
+                        )
+                    )
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_LOCATION_ACCURACY_HEADER_BAR_GPS_DISABLED)
+            .assertExists()
     }
 
     @Test
@@ -860,16 +979,16 @@ class NearestStopsScreenKtTest {
     }
 
     @Test
-    fun showTurnOnGpsActionHandlesNullLambdaThenMarksActionAsLaunched() {
+    fun showAppPermissionSettingsActionHandlesNullLambdaThenMarksActionAsLaunched() {
         val actionLaunchedCounter = InvocationCounter()
         composeTestRule.setContent {
             MyBusTheme {
                 NearestStopsScreenWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.InProgress,
-                        action = UiAction.ShowTurnOnGps
+                        action = UiAction.ShowAppPermissionSettings
                     ),
-                    onShowTurnOnGps = null,
+                    onShowAppPermissionSettings = null,
                     onActionLaunched = actionLaunchedCounter
                 )
             }
@@ -879,7 +998,7 @@ class NearestStopsScreenKtTest {
     }
 
     @Test
-    fun showTurnOnGpsActionCallsLambdaThenMarksActionAsLaunched() {
+    fun showAppPermissionSettingsActionCallsLambdaThenMarksActionAsLaunched() {
         val actionCounter = InvocationCounter()
         val actionLaunchedCounter = InvocationCounter()
         composeTestRule.setContent {
@@ -887,9 +1006,9 @@ class NearestStopsScreenKtTest {
                 NearestStopsScreenWithStateWithDefaults(
                     state = UiState(
                         content = UiContent.InProgress,
-                        action = UiAction.ShowTurnOnGps
+                        action = UiAction.ShowAppPermissionSettings
                     ),
-                    onShowTurnOnGps = actionCounter,
+                    onShowAppPermissionSettings = actionCounter,
                     onActionLaunched = actionLaunchedCounter
                 )
             }
@@ -897,6 +1016,32 @@ class NearestStopsScreenKtTest {
 
         assertEquals(1, actionCounter.count)
         assertEquals(1, actionLaunchedCounter.count)
+    }
+
+    @Test
+    fun clickingOnServiceFilterMenuItemExecutesShowServicesChooserLambda() {
+        val invocationCounter = InvocationCounter()
+        composeTestRule.setContent {
+            MyBusTheme {
+                NearestStopsScreenWithStateWithDefaults(
+                    state = UiState(
+                        content = UiContent.InProgress,
+                        actionButtons = UiActionButtons(
+                            serviceFilterActionButton = UiServiceFilterActionButton(
+                                isEnabled = true
+                            )
+                        )
+                    ),
+                    onShowServicesChooserClick = invocationCounter
+                )
+            }
+        }
+
+        openActionBarOverflowOrOptionsMenu(composeTestRule.activity)
+        onView(withText(composeTestRule.activity.getString(R.string.neareststops_menu_filter)))
+            .perform(click())
+
+        assertEquals(1, invocationCounter.count)
     }
 
     @Composable
@@ -916,6 +1061,9 @@ class NearestStopsScreenKtTest {
         onGrantPermissionClick: () -> Unit = { throw NotImplementedError() },
         onOpenSettingsClick: () -> Unit = { throw NotImplementedError() },
         onShowServicesChooserClick: () -> Unit = { throw NotImplementedError() },
+        onLocationAccuracyOpenAppSettingsClick: () -> Unit = { throw NotImplementedError() },
+        onLocationAccuracyOpenSystemLocationSettingsClick: () -> Unit =
+            { throw NotImplementedError() },
         onActionLaunched: () -> Unit = { throw NotImplementedError() },
         onShowStopData: ((StopIdentifier) -> Unit)? = { throw NotImplementedError() },
         onShowAddFavouriteStop: ((StopIdentifier) -> Unit)? = { throw NotImplementedError() },
@@ -929,7 +1077,7 @@ class NearestStopsScreenKtTest {
         onShowServicesChooser: ((Set<ServiceDescriptor>?) -> Unit)? =
             { throw NotImplementedError() },
         onShowLocationSettings: (() -> Unit)? = { throw NotImplementedError() },
-        onShowTurnOnGps: (() -> Unit)? = { throw NotImplementedError() }
+        onShowAppPermissionSettings: (() -> Unit)? = { throw NotImplementedError() }
     ) {
         NearestStopsScreenWithState(
             state = state,
@@ -946,6 +1094,9 @@ class NearestStopsScreenKtTest {
             onGrantPermissionClick = onGrantPermissionClick,
             onOpenSettingsClick = onOpenSettingsClick,
             onShowServicesChooserClick = onShowServicesChooserClick,
+            onLocationAccuracyOpenAppSettingsClick = onLocationAccuracyOpenAppSettingsClick,
+            onLocationAccuracyOpenSystemLocationSettingsClick =
+                onLocationAccuracyOpenSystemLocationSettingsClick,
             onActionLaunched = onActionLaunched,
             modifier = modifier,
             onShowStopData = onShowStopData,
@@ -959,8 +1110,34 @@ class NearestStopsScreenKtTest {
             onRequestLocationPermissions = onRequestLocationPermissions,
             onShowServicesChooser = onShowServicesChooser,
             onShowLocationSettings = onShowLocationSettings,
-            onShowTurnOnGps = onShowTurnOnGps
+            onShowAppPermissionSettings = onShowAppPermissionSettings
         )
+    }
+
+    private val nearestStops get() = persistentListOf(
+        UiNearestStop(
+            stopIdentifier = "123456".toNaptanStopIdentifier(),
+            stopName = UiStopName(
+                name = "Stop name",
+                locality = "Locality"
+            ),
+            services = null,
+            orientation = StopOrientation.NORTH_EAST,
+            distanceMeters = 123,
+            dropdownMenu = UiNearestStopDropdownMenu()
+        )
+    )
+
+    private fun assertLocationAccuracyBarDoesNotExist() {
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_LOCATION_ACCURACY_HEADER_BAR_GPS_NOT_PRESENT)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_LOCATION_ACCURACY_HEADER_BAR_PERMISSIONS_NOT_SUFFICIENT)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_LOCATION_ACCURACY_HEADER_BAR_GPS_DISABLED)
+            .assertDoesNotExist()
     }
 }
 

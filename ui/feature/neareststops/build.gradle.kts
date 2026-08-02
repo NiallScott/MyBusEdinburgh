@@ -62,6 +62,7 @@ dependencies {
     implementation(project(":core:feature"))
     implementation(project(":core:location-android"))
     implementation(project(":core:permission-android"))
+    implementation(project(":core:preferences-android"))
     implementation(project(":core:services-android"))
     implementation(project(":ui:feature:alerts:alertscommon"))
     implementation(project(":ui:feature:favouritestops:favouritestopscommon"))
@@ -102,6 +103,7 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.espresso)
     androidTestImplementation(libs.androidx.test.uiautomator)
     androidTestImplementation(libs.kotlin.test.junit)
 

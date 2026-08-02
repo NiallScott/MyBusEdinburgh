@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.ui.neareststops
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -40,6 +41,7 @@ import uk.org.rivernile.android.bustracker.core.config.ConfigRepository
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import javax.inject.Inject
 import kotlin.math.absoluteValue
 
@@ -61,7 +63,8 @@ internal class RealNearestStopsRetriever @Inject constructor(
     private val state: State,
     private val locationRepository: LocationRepository,
     private val configRepository: ConfigRepository,
-    private val busStopsRepository: BusStopsRepository
+    private val busStopsRepository: BusStopsRepository,
+    private val preferenceRepository: PreferenceRepository
 ) : NearestStopsRetriever {
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -70,7 +73,6 @@ internal class RealNearestStopsRetriever @Inject constructor(
             state
                 .permissionsStateFlow
                 .filterNotNull()
-                .map(PermissionsState::isPermissionsSufficient)
                 .distinctUntilChanged()
                 .flatMapLatest(::getNearestStopsFlowWithPermissionsState)
         } else {
@@ -80,49 +82,93 @@ internal class RealNearestStopsRetriever @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun getNearestStopsFlowWithPermissionsState(
-        isPermissionsSufficient: Boolean
+        permissionsState: PermissionsState
     ): Flow<NearestStopsState> {
-        return if (isPermissionsSufficient) {
+        return if (permissionsState.isPermissionsSufficient) {
             locationRepository
                 .isLocationEnabledFlow
                 .distinctUntilChanged()
-                .flatMapLatest(::getNearestStopsFlowWithEnabledLocation)
+                .flatMapLatest {
+                    getNearestStopsFlowWithLocationEnabledState(
+                        permissionsState = permissionsState,
+                        isLocationEnabled = it
+                    )
+                }
         } else {
             flowOf(NearestStopsState.Error.InsufficientLocationPermissions)
         }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun getNearestStopsFlowWithEnabledLocation(
+    private fun getNearestStopsFlowWithLocationEnabledState(
+        permissionsState: PermissionsState,
         isLocationEnabled: Boolean
     ): Flow<NearestStopsState> {
         return if (isLocationEnabled) {
             locationRepository
-                .userVisibleLocationFlow
-                .flatMapLatest(::getNearestStopsFlowWithLocation)
-                .onStart { emit(NearestStopsState.Error.LocationUnknown) }
+                .isGpsLocationProviderEnabledFlow
+                .distinctUntilChanged()
+                .flatMapLatest {
+                    getNearestStopsFlowWithGpsProviderEnabledState(
+                        permissionsState = permissionsState,
+                        isGpsProviderEnabled = it
+                    )
+                }
         } else {
             flowOf(NearestStopsState.Error.LocationOff)
         }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
+    private fun getNearestStopsFlowWithGpsProviderEnabledState(
+        permissionsState: PermissionsState,
+        isGpsProviderEnabled: Boolean
+    ): Flow<NearestStopsState> {
+        val locationAccuracyFlow = preferenceRepository
+            .isGpsPromptDisabledFlow
+            .map {
+                createUiLocationAccuracyOrNull(
+                    isGpsPromptDisabled = it,
+                    isDeviceGpsCapable = locationRepository.hasGpsLocationProvider,
+                    permissionsState = permissionsState,
+                    isGpsLocationProviderEnabled = isGpsProviderEnabled
+
+                )
+            }
+            .distinctUntilChanged()
+
+        return locationRepository
+            .userVisibleLocationFlow
+            .combine(locationAccuracyFlow, ::Pair)
+            .flatMapLatest {
+                getNearestStopsFlowWithLocation(
+                    deviceLocation = it.first,
+                    locationAccuracy = it.second
+                )
+            }
+            .onStart { emit(NearestStopsState.Error.LocationUnknown) }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun getNearestStopsFlowWithLocation(
-        deviceLocation: DeviceLocation
+        deviceLocation: DeviceLocation,
+        locationAccuracy: UiLocationAccuracy?
     ): Flow<NearestStopsState> {
         return state
             .selectedServicesFlow
             .flatMapLatest {
                 getNearestStopsFlowWithLocationAndSelectedServices(
                     deviceLocation = deviceLocation,
-                    selectedServices = it
+                    selectedServices = it,
+                    locationAccuracy = locationAccuracy
                 )
             }
     }
 
     private fun getNearestStopsFlowWithLocationAndSelectedServices(
         deviceLocation: DeviceLocation,
-        selectedServices: Set<ServiceDescriptor>?
+        selectedServices: Set<ServiceDescriptor>?,
+        locationAccuracy: UiLocationAccuracy?
     ): Flow<NearestStopsState> {
         val latitudeSpan = configRepository.nearestStopsLatitudeSpan
         val longitudeSpan = configRepository.nearestStopsLongitudeSpan
@@ -149,7 +195,8 @@ internal class RealNearestStopsRetriever @Inject constructor(
                                 .absoluteValue
                                 .toInt()
                         }
-                        ?.ifEmpty { null }
+                        ?.ifEmpty { null },
+                    locationAccuracy = locationAccuracy
                 )
             }
     }

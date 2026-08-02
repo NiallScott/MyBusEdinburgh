@@ -137,6 +137,14 @@ internal class NearestStopsViewModel @Inject constructor(
         )
     }
 
+    fun onLocationAccuracyOpenAppSettingsClicked() {
+        state.action = UiAction.ShowAppPermissionSettings
+    }
+
+    fun onLocationAccuracyOpenSystemLocationSettingsClicked() {
+        state.action = UiAction.ShowLocationSettings
+    }
+
     fun onActionLaunched() {
         state.action = null
     }

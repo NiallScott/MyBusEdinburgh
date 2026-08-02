@@ -54,7 +54,7 @@ kotlin {
 
 dependencies {
 
-    implementation(project(":core:coroutines"))
+    implementation(project(":core:coroutines-android"))
     api(project(":core:location"))
 
     // Play Services

@@ -129,7 +129,7 @@ internal sealed interface UiAction {
     data object ShowLocationSettings : UiAction
 
     /**
-     * Show UI which allows the user to turn on GPS.
+     * Show the app permission settings.
      */
-    data object ShowTurnOnGps : UiAction
+    data object ShowAppPermissionSettings : UiAction
 }

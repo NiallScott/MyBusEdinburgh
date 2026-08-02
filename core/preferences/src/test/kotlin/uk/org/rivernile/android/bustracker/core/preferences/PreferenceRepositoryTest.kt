@@ -209,16 +209,6 @@ class PreferenceRepositoryTest {
     }
 
     @Test
-    fun setIsGpsPromptDisabledCallsMethodInPreferenceDataStorage() = runTest {
-        val dataStorage = FakePreferenceDataStorage()
-        val repository = createPreferenceRepository(preferenceDataStorage = dataStorage)
-
-        repository.setIsGpsPromptDisabled(true)
-
-        assertTrue(dataStorage.isGpsPromptDisabled)
-    }
-
-    @Test
     fun setLastMapCameraLocationCallsMethodInPreferenceDataStorage() = runTest {
         val dataStorage = FakePreferenceDataStorage()
         val repository = createPreferenceRepository(preferenceDataStorage = dataStorage)

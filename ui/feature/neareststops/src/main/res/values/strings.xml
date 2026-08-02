@@ -37,12 +37,18 @@
     <string name="neareststops_error_no_location_feature_title">No location services</string>
     <string name="neareststops_error_no_location_feature_blurb">This device does not have the necessary location services to be able to determine your nearest stops</string>
     <string name="neareststops_error_permission_required_title">Permission required</string>
-    <string name="neareststops_error_permission_required_blurb">To show the nearest stops, you need to grant access to your location</string>
+    <string name="neareststops_error_permission_required_blurb">To show the nearest stops, you need to grant access to your location. Access to precise location will give you the most accurate results.</string>
     <string name="neareststops_error_permission_required_button">Grant permission</string>
     <string name="neareststops_error_location_sources_title">Location services disabled</string>
     <string name="neareststops_error_location_sources_blurb">Please enable location services from system settings</string>
     <string name="neareststops_error_location_sources_button">Open settings</string>
     <string name="neareststops_error_no_location_settings">System location settings does not exist on this device</string>
+    <string name="neareststops_error_no_app_permission_settings">Unable to show app permission settings</string>
+
+    <string name="neareststops_location_accuracy_no_gps">This device is not capable of determining location with high precision. Results may be inaccurate.</string>
+    <string name="neareststops_location_accuracy_insufficient_permission">To get accurate results, precise location permission needs to be granted in system settings</string>
+    <string name="neareststops_location_accuracy_gps_disabled">To get accurate results, GPS/precise location needs to be enabled in system settings</string>
+    <string name="neareststops_location_accuracy_button_open_settings">Settings</string>
 
     <string name="neareststops_service_chooser_title">Select service(s) to filter</string>
 </resources>

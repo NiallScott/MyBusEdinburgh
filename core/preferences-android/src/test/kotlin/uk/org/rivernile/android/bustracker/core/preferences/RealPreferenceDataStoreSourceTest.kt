@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -71,7 +71,7 @@ class RealPreferenceDataStoreSourceTest {
             }
 
             fail("This part of the test should not be reached.")
-        } catch (e: IllegalStateException) {
+        } catch (_: IllegalStateException) {
             assertEquals(listOf(exception), exceptionLogger.loggedThrowables)
         }
     }

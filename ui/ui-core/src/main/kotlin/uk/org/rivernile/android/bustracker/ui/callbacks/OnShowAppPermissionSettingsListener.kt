@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
 /*
- * Copyright (C) 2011 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,27 +21,25 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingTop="@dimen/padding_double"
-    android:paddingStart="?dialogPreferredPadding"
-    android:paddingEnd="?dialogPreferredPadding">
+ *
+ */
 
-    <TextView
-        android:id="@+id/textTurnongps"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/turnongpsdialog_message"
-        android:textAppearance="?textAppearanceBodyMedium" />
+package uk.org.rivernile.android.bustracker.ui.callbacks
 
-    <CheckBox
-        android:id="@+id/chkTurnongps"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/padding_default"
-        android:text="@string/turnongpsdialog_checkbox" />
-</LinearLayout>
+/**
+ * This listener is used to send callbacks from `Fragment`s to [android.app.Activity]s when the user
+ * wishes to open the app permission settings.
+ *
+ * @author Niall Scott
+ */
+public interface OnShowAppPermissionSettingsListener {
+
+    /**
+     * This is called when the user should be shown system settings to allow them to change the
+     * app permission settings.
+     *
+     * @return `true` when the app permission settings is started, otherwise `false` in the event of
+     * an error.
+     */
+    public fun onShowAppPermissionSettings(): Boolean
+}

@@ -34,14 +34,18 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -60,7 +64,8 @@ internal class AndroidLocationRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val packageManager: PackageManager,
     private val locationManager: LocationManager,
-    private val locationSource: LocationSource
+    private val locationSource: LocationSource,
+    @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope
 ) : LocationRepository {
 
     override val hasLocationFeature by lazy {
@@ -71,34 +76,23 @@ internal class AndroidLocationRepository @Inject constructor(
         packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
     }
 
-    override val isLocationEnabledFlow get() = callbackFlow {
-        val locationEnabledReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                val pendingResult = goAsync()
-
-                launch {
-                    try {
-                        getAndSendIsLocationEnabled(channel)
-                    } finally {
-                        pendingResult.finish()
-                    }
-                }
-            }
-        }
-
-        context.registerReceiver(
-            locationEnabledReceiver,
-            IntentFilter(LocationManager.MODE_CHANGED_ACTION)
+    override val isLocationEnabledFlow = _isLocationEnabledFlow
+        .shareIn(
+            scope = applicationCoroutineScope,
+            started = SharingStarted.WhileSubscribed(
+                replayExpirationMillis = 0L
+            ),
+            replay = 1
         )
-        getAndSendIsLocationEnabled(channel)
 
-        awaitClose {
-            context.unregisterReceiver(locationEnabledReceiver)
-        }
-    }
-
-    override val isGpsLocationProviderEnabled get() =
-        locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+    override val isGpsLocationProviderEnabledFlow = _isGpsLocationProviderEnabledFlow
+        .shareIn(
+            scope = applicationCoroutineScope,
+            started = SharingStarted.WhileSubscribed(
+                replayExpirationMillis = 0L
+            ),
+            replay = 1
+        )
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val userVisibleLocationFlow get() = if (hasLocationFeature) {
@@ -123,8 +117,64 @@ internal class AndroidLocationRepository @Inject constructor(
         return results[0]
     }
 
-    private suspend fun getAndSendIsLocationEnabled(channel: SendChannel<Boolean>) {
-        channel.send(locationManager.isLocationEnabled)
+    private val _isLocationEnabledFlow get() = callbackFlow {
+        val locationEnabledReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                val pendingResult = goAsync()
+
+                launch {
+                    try {
+                        getAndSendIsLocationEnabled()
+                    } finally {
+                        pendingResult.finish()
+                    }
+                }
+            }
+        }
+
+        context.registerReceiver(
+            locationEnabledReceiver,
+            IntentFilter(LocationManager.MODE_CHANGED_ACTION)
+        )
+        getAndSendIsLocationEnabled()
+
+        awaitClose {
+            context.unregisterReceiver(locationEnabledReceiver)
+        }
+    }
+
+    private val _isGpsLocationProviderEnabledFlow get() = callbackFlow {
+        val providerEnabledReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                val pendingResult = goAsync()
+
+                launch {
+                    try {
+                        getAndSendIsGpsProviderEnabled()
+                    } finally {
+                        pendingResult.finish()
+                    }
+                }
+            }
+        }
+
+        context.registerReceiver(
+            providerEnabledReceiver,
+            IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)
+        )
+        getAndSendIsGpsProviderEnabled()
+
+        awaitClose {
+            context.unregisterReceiver(providerEnabledReceiver)
+        }
+    }
+
+    private suspend fun ProducerScope<Boolean>.getAndSendIsLocationEnabled() {
+        send(locationManager.isLocationEnabled)
+    }
+
+    private suspend fun ProducerScope<Boolean>.getAndSendIsGpsProviderEnabled() {
+        send(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
     }
 
     private fun createUserVisibleLocationFlow(locationEnabled: Boolean) = if (locationEnabled) {

@@ -53,9 +53,9 @@ public interface LocationRepository {
     public val isLocationEnabledFlow: Flow<Boolean>
 
     /**
-     * Is the GPS location provider enabled?
+     * A [Flow] which emits whether the GPS provider is enabled or not.
      */
-    public val isGpsLocationProviderEnabled: Boolean
+    public val isGpsLocationProviderEnabledFlow: Flow<Boolean>
 
     /**
      * Get a [Flow] which emits the latest [DeviceLocation] and any further location changes until

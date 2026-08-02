@@ -448,7 +448,6 @@ class AndroidPreferenceDataStorageTest {
         dataStorage.toggleSortByTime()
         advanceUntilIdle()
 
-        @Suppress("KotlinConstantConditions")
         assertEquals(!DEFAULT_SERVICE_SORTING, preferences[key])
     }
 
@@ -489,7 +488,6 @@ class AndroidPreferenceDataStorageTest {
         dataStorage.toggleAutoRefresh()
         advanceUntilIdle()
 
-        @Suppress("KotlinConstantConditions")
         assertEquals(!DEFAULT_AUTO_REFRESH, preferences[key])
     }
 
@@ -511,26 +509,6 @@ class AndroidPreferenceDataStorageTest {
         advanceUntilIdle()
 
         assertFalse(preferences[key] ?: throw IllegalStateException())
-    }
-
-    @Test
-    fun setIsGpsPromptDisabledSetsValue() = runTest {
-        val key = booleanPreferencesKey(PREF_DISABLE_GPS_PROMPT)
-        val preferences = mutablePreferencesOf()
-        val dataStorage = createAndroidPreferenceDataStorage(
-            dataStoreSource = FakePreferenceDataStoreSource(
-                onEdit = {
-                    launch {
-                        it(preferences)
-                    }
-                }
-            )
-        )
-
-        dataStorage.setIsGpsPromptDisabled(true)
-        advanceUntilIdle()
-
-        assertTrue(preferences[key] ?: throw IllegalStateException())
     }
 
     @Test

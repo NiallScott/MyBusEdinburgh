@@ -182,12 +182,6 @@ internal class AndroidPreferenceDataStorage @Inject constructor(
         }
     }
 
-    override suspend fun setIsGpsPromptDisabled(isDisabled: Boolean) {
-        dataStoreSource.edit {
-            it[keyDisableGpsPrompt] = isDisabled
-        }
-    }
-
     override suspend fun setLastMapCameraLocation(cameraLocation: LastMapCameraLocation) {
         dataStoreSource.edit {
             it[keyMapLastLatitude] = cameraLocation.latitude.toString()

@@ -73,7 +73,8 @@ internal class RealUiContentRetriever @Inject constructor(
         return when (val state = nearestStopsStateWithServiceColours.nearestStopsState) {
             is NearestStopsState.Stops -> getUiContentFlowWithStops(
                 stops = state.stops,
-                serviceColours = nearestStopsStateWithServiceColours.serviceColours
+                serviceColours = nearestStopsStateWithServiceColours.serviceColours,
+                locationAccuracy = state.locationAccuracy
             )
             is NearestStopsState.Error.NoLocationFeature ->
                 flowOf(UiContent.Error.NoLocationFeature)
@@ -90,7 +91,8 @@ internal class RealUiContentRetriever @Inject constructor(
 
     private fun getUiContentFlowWithStops(
         stops: List<NearestStop>?,
-        serviceColours: Map<ServiceDescriptor, ServiceColours>?
+        serviceColours: Map<ServiceDescriptor, ServiceColours>?,
+        locationAccuracy: UiLocationAccuracy?
     ): Flow<UiContent> {
         return if (!stops.isNullOrEmpty()) {
             val stopIdentifiers = stops.map { it.stopIdentifier }.toSet()
@@ -99,6 +101,7 @@ internal class RealUiContentRetriever @Inject constructor(
                 .getDropdownMenuItemsForStopsFlow(stopIdentifiers)
                 .map { dropdownMenus ->
                     UiContent.Content(
+                        locationAccuracy = locationAccuracy,
                         nearestStops = stops
                             .toUiNearestStops(
                                 serviceColours = serviceColours,
@@ -110,7 +113,11 @@ internal class RealUiContentRetriever @Inject constructor(
                     )
                 }
         } else {
-            flowOf(UiContent.Error.NoNearestStops)
+            flowOf(
+                UiContent.Error.NoNearestStops(
+                    locationAccuracy = locationAccuracy
+                )
+            )
         }
     }
 

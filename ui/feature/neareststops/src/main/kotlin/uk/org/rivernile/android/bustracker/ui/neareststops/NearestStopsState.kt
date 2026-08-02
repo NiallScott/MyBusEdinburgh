@@ -37,9 +37,12 @@ internal sealed interface NearestStopsState {
      * These are the stops available for the current location of the device.
      *
      * @property stops The stops available for the current location of the device.
+     * @property locationAccuracy What is the UI location accuracy state? `null` implies there are
+     * no accuracy issues.
      */
     data class Stops(
-        val stops: List<NearestStop>?
+        val stops: List<NearestStop>?,
+        val locationAccuracy: UiLocationAccuracy?
     ) : NearestStopsState
 
     /**

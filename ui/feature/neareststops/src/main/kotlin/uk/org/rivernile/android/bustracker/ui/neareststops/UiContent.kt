@@ -43,11 +43,13 @@ internal sealed interface UiContent {
     /**
      * Content is available.
      *
+     * @property locationAccuracy The [UiLocationAccuracy] state.
      * @property nearestStops The immutable listing of [UiNearestStop]s.
      */
     data class Content(
+        override val locationAccuracy: UiLocationAccuracy?,
         val nearestStops: ImmutableList<UiNearestStop>
-    ) : UiContent
+    ) : UiContent, HasLocationAccuracy
 
     /**
      * There was an error.
@@ -76,7 +78,23 @@ internal sealed interface UiContent {
 
         /**
          * A location was obtained but there are no nearby stops.
+         *
+         * @property locationAccuracy The [UiLocationAccuracy] state.
          */
-        data object NoNearestStops : Error
+        data class NoNearestStops(
+            override val locationAccuracy: UiLocationAccuracy?
+        ) : Error, HasLocationAccuracy
     }
+}
+
+/**
+ * Denotes that a content item has location accuracy state. This is the case when a state is
+ * derived from a device location.
+ */
+internal sealed interface HasLocationAccuracy {
+
+    /**
+     * The [UiLocationAccuracy] state.
+     */
+    val locationAccuracy: UiLocationAccuracy?
 }

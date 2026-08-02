@@ -31,6 +31,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -79,7 +80,6 @@ import uk.org.rivernile.android.bustracker.ui.HasTabBar
 import uk.org.rivernile.android.bustracker.ui.news.NewsFragment
 import uk.org.rivernile.android.bustracker.ui.search.SearchFragment
 import uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity
-import uk.org.rivernile.android.bustracker.ui.turnongps.TurnOnGpsDialogFragment
 import uk.org.rivernile.edinburghbustracker.android.BuildConfig
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.ActivityMainBinding
@@ -106,8 +106,7 @@ class MainActivity : AppCompatActivity(),
         ExploreFragment.Callbacks,
         FavouriteStopsFragment.Callbacks,
         NearestStopsFragment.Callbacks,
-        SearchFragment.Callbacks,
-        TurnOnGpsDialogFragment.Callbacks {
+        SearchFragment.Callbacks {
 
     companion object {
 
@@ -126,7 +125,6 @@ class MainActivity : AppCompatActivity(),
         private const val DIALOG_REMOVE_PROX_ALERT = "dialogRemoveProxAlert"
         private const val DIALOG_REMOVE_ARRIVAL_ALERT = "dialogRemoveArrivalAlert"
         private const val DIALOG_DELETE_FAVOURITE = "dialogDeleteFavourite"
-        private const val DIALOG_TURN_ON_GPS = "dialogTurnOnGps"
     }
 
     @Inject
@@ -296,9 +294,17 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    override fun onAskTurnOnGps() {
-        TurnOnGpsDialogFragment()
-            .show(supportFragmentManager, DIALOG_TURN_ON_GPS)
+    override fun onShowAppPermissionSettings(): Boolean {
+        return try {
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .setData(Uri.fromParts("package", packageName, null))
+                .let(::startActivity)
+            true
+        } catch (e: ActivityNotFoundException) {
+            exceptionLogger.log(e)
+            false
+        }
     }
 
     override fun onExploreTabSwitched() {

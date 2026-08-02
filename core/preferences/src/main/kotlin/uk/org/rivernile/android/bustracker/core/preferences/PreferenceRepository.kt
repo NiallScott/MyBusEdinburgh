@@ -110,15 +110,6 @@ public class PreferenceRepository @Inject internal constructor(
     }
 
     /**
-     * Set the value of the GPS prompt disabled preference.
-     *
-     * @param isDisabled Is the GPS prompt disabled?
-     */
-    public suspend fun setIsGpsPromptDisabled(isDisabled: Boolean) {
-        preferenceDataStorage.setIsGpsPromptDisabled(isDisabled)
-    }
-
-    /**
      * Set the value of the last map camera location preference.
      *
      * @param cameraLocation The last map camera location.

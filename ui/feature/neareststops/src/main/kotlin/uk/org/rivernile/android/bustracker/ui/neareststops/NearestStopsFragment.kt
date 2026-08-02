@@ -56,6 +56,7 @@ import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddArrivalAlertListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddOrEditFavouriteStopListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddProximityAlertListener
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAppPermissionSettingsListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusStopMapWithStopIdentifierListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmFavouriteRemovalListener
@@ -121,7 +122,7 @@ public class NearestStopsFragment : Fragment() {
                     onRequestLocationPermissions = ::handleRequestLocationPermissions,
                     onShowServicesChooser = ::handleShowServicesChooser,
                     onShowLocationSettings = ::handleShowLocationSettings,
-                    onShowTurnOnGps = ::handleShowTurnOnGps
+                    onShowAppPermissionSettings = ::handleShowAppPermissionSettings
                 )
             }
         }
@@ -227,8 +228,18 @@ public class NearestStopsFragment : Fragment() {
         }
     }
 
-    private fun handleShowTurnOnGps() {
-        callbacks?.onAskTurnOnGps()
+    private fun handleShowAppPermissionSettings() {
+        callbacks?.let { cb ->
+            if (!cb.onShowAppPermissionSettings()) {
+                Toast
+                    .makeText(
+                        requireContext(),
+                        R.string.neareststops_error_no_app_permission_settings,
+                        Toast.LENGTH_SHORT
+                    )
+                    .show()
+            }
+        }
     }
 
     private fun updatePermissions() {
@@ -279,11 +290,6 @@ public class NearestStopsFragment : Fragment() {
         OnShowAddArrivalAlertListener,
         OnShowBusTimesListener,
         OnShowBusStopMapWithStopIdentifierListener,
-        OnShowSystemLocationPreferencesListener {
-
-        /**
-         * This is called when the user should be asked if they want to turn on GPS or not.
-         */
-        public fun onAskTurnOnGps()
-    }
+        OnShowSystemLocationPreferencesListener,
+        OnShowAppPermissionSettingsListener
 }

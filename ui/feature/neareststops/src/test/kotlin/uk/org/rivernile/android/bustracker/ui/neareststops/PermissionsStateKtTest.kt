@@ -45,7 +45,7 @@ class PermissionsStateKtTest {
             coarseLocationPermission = PermissionState.UNGRANTED
         )
 
-        assertFalse(permissionsState.isPermissionsSufficient())
+        assertFalse(permissionsState.isPermissionsSufficient)
     }
 
     @Test
@@ -55,7 +55,7 @@ class PermissionsStateKtTest {
             coarseLocationPermission = PermissionState.UNGRANTED
         )
 
-        assertTrue(permissionsState.isPermissionsSufficient())
+        assertTrue(permissionsState.isPermissionsSufficient)
     }
 
     @Test
@@ -65,7 +65,7 @@ class PermissionsStateKtTest {
             coarseLocationPermission = PermissionState.GRANTED
         )
 
-        assertTrue(permissionsState.isPermissionsSufficient())
+        assertTrue(permissionsState.isPermissionsSufficient)
     }
 
     @Test
@@ -75,6 +75,6 @@ class PermissionsStateKtTest {
             coarseLocationPermission = PermissionState.GRANTED
         )
 
-        assertTrue(permissionsState.isPermissionsSufficient())
+        assertTrue(permissionsState.isPermissionsSufficient)
     }
 }
