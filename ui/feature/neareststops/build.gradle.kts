@@ -110,6 +110,8 @@ dependencies {
     testImplementation(testFixtures(project(":core:busstops")))
     testImplementation(testFixtures(project(":core:core-domain")))
     testImplementation(testFixtures(project(":core:feature")))
+    testImplementation(testFixtures(project(":core:location")))
+    testImplementation(testFixtures(project(":core:services")))
     testImplementation(testFixtures(project(":ui:feature:alerts:alertscommon")))
     testImplementation(testFixtures(project(":ui:feature:favouritestops:favouritestopscommon")))
     testImplementation(libs.coroutines.test)
