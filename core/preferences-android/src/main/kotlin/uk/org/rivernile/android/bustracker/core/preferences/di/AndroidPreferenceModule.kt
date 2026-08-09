@@ -63,8 +63,12 @@ import javax.inject.Singleton
  * @author Niall Scott
  */
 @InstallIn(SingletonComponent::class)
-@Module
-internal class PreferenceModule {
+@Module(
+    includes = [
+        PreferencesModule::class
+    ]
+)
+internal class AndroidPreferenceModule {
 
     companion object {
 

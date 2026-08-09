@@ -26,35 +26,45 @@
 
 package uk.org.rivernile.android.bustracker.core.config
 
-import javax.inject.Inject
-import javax.inject.Singleton
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
- * This repository contains properties which pertain to how the application is configured.
+ * Tests for [ConfigRepository].
  *
  * @author Niall Scott
  */
-public interface ConfigRepository {
+class RealConfigRepositoryTest {
 
-    /**
-     * The nearest stops latitude span.
-     */
-    public val nearestStopsLatitudeSpan: Double
+    @Test
+    fun nearestStopsLatitudeSpanReturnsValueOfNearestStopsLatitudeSpan() {
+        val repository = createConfigRepository(
+            buildConfiguration = FakeBuildConfiguration(
+                onNearestStopsLatitudeSpan = { 1.1 }
+            )
+        )
 
-    /**
-     * The nearest stops longitude span.
-     */
-    public val nearestStopsLongitudeSpan: Double
-}
+        val result = repository.nearestStopsLatitudeSpan
 
-@Singleton
-internal class RealConfigRepository @Inject constructor(
-    private val buildConfiguration: BuildConfiguration
-) : ConfigRepository {
+        assertEquals(1.1, result, 0.00001)
+    }
 
-    override val nearestStopsLatitudeSpan: Double get() =
-        buildConfiguration.nearestStopsLatitudeSpan
+    @Test
+    fun nearestStopsLongitudeSpanReturnsValueOfNearestStopsLongitudeSpan() {
+        val repository = createConfigRepository(
+            buildConfiguration = FakeBuildConfiguration(
+                onNearestStopsLongitudeSpan = { 2.2 }
+            )
+        )
 
-    override val nearestStopsLongitudeSpan: Double get() =
-        buildConfiguration.nearestStopsLongitudeSpan
+        val result = repository.nearestStopsLongitudeSpan
+
+        assertEquals(2.2, result, 0.00001)
+    }
+
+    private fun createConfigRepository(
+        buildConfiguration: BuildConfiguration = FakeBuildConfiguration()
+    ): ConfigRepository {
+        return RealConfigRepository(buildConfiguration)
+    }
 }

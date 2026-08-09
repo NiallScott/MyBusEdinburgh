@@ -64,6 +64,7 @@ include(
     ":core:busstops",
     ":core:busstops-android",
     ":core:config",
+    ":core:config-android",
     ":core:connectivity",
     ":core:connectivity-android",
     ":core:core-domain",

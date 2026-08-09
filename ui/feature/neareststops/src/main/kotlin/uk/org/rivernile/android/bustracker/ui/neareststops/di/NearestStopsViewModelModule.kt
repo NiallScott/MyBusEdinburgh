@@ -35,10 +35,12 @@ import uk.org.rivernile.android.bustracker.ui.neareststops.RealNearestStopsRetri
 import uk.org.rivernile.android.bustracker.ui.neareststops.RealState
 import uk.org.rivernile.android.bustracker.ui.neareststops.RealUiActionButtonsGenerator
 import uk.org.rivernile.android.bustracker.ui.neareststops.RealUiContentRetriever
+import uk.org.rivernile.android.bustracker.ui.neareststops.RealUiLocationAccuracyGenerator
 import uk.org.rivernile.android.bustracker.ui.neareststops.RealUiNearestStopDropdownMenuGenerator
 import uk.org.rivernile.android.bustracker.ui.neareststops.State
 import uk.org.rivernile.android.bustracker.ui.neareststops.UiActionButtonsGenerator
 import uk.org.rivernile.android.bustracker.ui.neareststops.UiContentRetriever
+import uk.org.rivernile.android.bustracker.ui.neareststops.UiLocationAccuracyGenerator
 import uk.org.rivernile.android.bustracker.ui.neareststops.UiNearestStopDropdownMenuGenerator
 
 /**
@@ -66,6 +68,11 @@ internal interface NearestStopsViewModelModule {
 
     @Binds
     fun bindUiContentRetriever(realUiContentRetriever: RealUiContentRetriever): UiContentRetriever
+
+    @Binds
+    fun bindUiLocationAccuracyGenerator(
+        realUiLocationAccuracyGenerator: RealUiLocationAccuracyGenerator
+    ): UiLocationAccuracyGenerator
 
     @Binds
     fun bindUiNearestStopDropdownMenuGenerator(

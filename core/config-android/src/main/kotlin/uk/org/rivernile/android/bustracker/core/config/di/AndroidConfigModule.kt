@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,19 +24,21 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.kotlin.jvm)
-    id("mybus.dagger-convention")
-    `java-test-fixtures`
-}
+package uk.org.rivernile.android.bustracker.core.config.di
 
-kotlin {
-    explicitApi()
-}
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 
-dependencies {
-
-    // Testing dependencies
-    testImplementation(libs.junit)
-    testImplementation(libs.kotlin.test.junit)
-}
+/**
+ * The Android-specific module for providing config dependencies.
+ *
+ * @author Niall Scott
+ */
+@InstallIn(SingletonComponent::class)
+@Module(
+    includes = [
+        ConfigModule::class
+    ]
+)
+internal interface AndroidConfigModule

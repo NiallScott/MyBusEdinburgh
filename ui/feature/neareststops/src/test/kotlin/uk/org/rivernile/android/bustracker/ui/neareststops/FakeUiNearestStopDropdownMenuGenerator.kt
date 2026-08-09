@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,19 +24,22 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.kotlin.jvm)
-    id("mybus.dagger-convention")
-    `java-test-fixtures`
-}
+package uk.org.rivernile.android.bustracker.ui.neareststops
 
-kotlin {
-    explicitApi()
-}
+import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
-dependencies {
+/**
+ * A fake [UiNearestStopDropdownMenuGenerator] for testing.
+ *
+ * @author Niall Scott
+ */
+internal class FakeUiNearestStopDropdownMenuGenerator(
+    private val onGetDropdownMenuItemsForStopsFlow:
+        (Set<StopIdentifier>) -> Flow<Map<StopIdentifier, UiNearestStopDropdownMenu>?> =
+        { throw NotImplementedError() }
+) : UiNearestStopDropdownMenuGenerator {
 
-    // Testing dependencies
-    testImplementation(libs.junit)
-    testImplementation(libs.kotlin.test.junit)
+    override fun getDropdownMenuItemsForStopsFlow(stopIdentifiers: Set<StopIdentifier>) =
+        onGetDropdownMenuItemsForStopsFlow(stopIdentifiers)
 }

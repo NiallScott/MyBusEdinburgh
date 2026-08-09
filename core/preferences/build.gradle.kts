@@ -26,6 +26,7 @@
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    id("mybus.dagger-convention")
     `java-test-fixtures`
 }
 
@@ -36,9 +37,6 @@ kotlin {
 dependencies {
 
     implementation(project(":core:coroutines"))
-
-    // Dependency injection
-    implementation(libs.javax.inject)
 
     // Testing dependencies
     testImplementation(libs.coroutines.test)

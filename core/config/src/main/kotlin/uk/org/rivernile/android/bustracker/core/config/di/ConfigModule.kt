@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,19 +24,29 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.kotlin.jvm)
-    id("mybus.dagger-convention")
-    `java-test-fixtures`
-}
+package uk.org.rivernile.android.bustracker.core.config.di
 
-kotlin {
-    explicitApi()
-}
+import dagger.Binds
+import dagger.Module
+import uk.org.rivernile.android.bustracker.core.config.ConfigRepository
+import uk.org.rivernile.android.bustracker.core.config.RealConfigRepository
 
-dependencies {
+/**
+ * A [Module] for supplying config dependencies.
+ *
+ * @author Niall Scott
+ */
+@Module(
+    includes = [
+        ConfigModule.Bindings::class
+    ]
+)
+public class ConfigModule {
 
-    // Testing dependencies
-    testImplementation(libs.junit)
-    testImplementation(libs.kotlin.test.junit)
+    @Module
+    internal interface Bindings {
+
+        @Binds
+        fun bindConfigRepository(realConfigRepository: RealConfigRepository): ConfigRepository
+    }
 }

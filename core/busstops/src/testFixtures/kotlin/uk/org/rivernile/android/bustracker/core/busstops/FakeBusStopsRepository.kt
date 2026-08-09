@@ -38,6 +38,10 @@ import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 class FakeBusStopsRepository(
     private val onGetNameForStopFlow: (StopIdentifier) -> Flow<StopName?> =
         { throw NotImplementedError() },
+    private val onGetStopDetailsWithinSpanFlow:
+        (Double, Double, Double, Double, Set<ServiceDescriptor>?) ->
+        Flow<List<StopDetailsWithServices>?> =
+        { _, _, _, _, _ -> throw NotImplementedError() },
     private val onGetStopLocation: (StopIdentifier) -> StopLocation? =
         { throw NotImplementedError() }
 ) : BusStopsRepository {
@@ -61,9 +65,13 @@ class FakeBusStopsRepository(
         maxLatitude: Double,
         maxLongitude: Double,
         serviceFilter: Set<ServiceDescriptor>?
-    ): Flow<List<StopDetailsWithServices>?> {
-        throw NotImplementedError()
-    }
+    ) = onGetStopDetailsWithinSpanFlow(
+        minLatitude,
+        minLongitude,
+        maxLatitude,
+        maxLongitude,
+        serviceFilter
+    )
 
     override fun getStopDetailsWithServiceFilterFlow(
         serviceFilter: Set<ServiceDescriptor>?

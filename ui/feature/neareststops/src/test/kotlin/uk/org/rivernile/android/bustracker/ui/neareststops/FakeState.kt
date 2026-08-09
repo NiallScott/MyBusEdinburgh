@@ -39,7 +39,7 @@ internal class FakeState(
     private val onActionFlow: () -> Flow<UiAction?> = { throw NotImplementedError() },
     private val onGetAction: () -> UiAction? = { throw NotImplementedError() },
     private val onSetAction: (UiAction?) -> Unit = { throw NotImplementedError() },
-    private val onPermissionsStateFlow: () -> Flow<PermissionsState> =
+    private val onPermissionsStateFlow: () -> Flow<PermissionsState?> =
         { throw NotImplementedError() },
     private val onGetPermissionsState: () -> PermissionsState? = { throw NotImplementedError() },
     private val onSetPermissionsState: (PermissionsState?) -> Unit = { throw NotImplementedError() },

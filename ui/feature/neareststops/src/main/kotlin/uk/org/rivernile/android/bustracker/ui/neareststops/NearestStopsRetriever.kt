@@ -41,7 +41,6 @@ import uk.org.rivernile.android.bustracker.core.config.ConfigRepository
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
-import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import javax.inject.Inject
 import kotlin.math.absoluteValue
 
@@ -64,7 +63,7 @@ internal class RealNearestStopsRetriever @Inject constructor(
     private val locationRepository: LocationRepository,
     private val configRepository: ConfigRepository,
     private val busStopsRepository: BusStopsRepository,
-    private val preferenceRepository: PreferenceRepository
+    private val locationAccuracyGenerator: UiLocationAccuracyGenerator
 ) : NearestStopsRetriever {
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -105,71 +104,45 @@ internal class RealNearestStopsRetriever @Inject constructor(
         isLocationEnabled: Boolean
     ): Flow<NearestStopsState> {
         return if (isLocationEnabled) {
-            locationRepository
-                .isGpsLocationProviderEnabledFlow
-                .distinctUntilChanged()
-                .flatMapLatest {
-                    getNearestStopsFlowWithGpsProviderEnabledState(
-                        permissionsState = permissionsState,
-                        isGpsProviderEnabled = it
-                    )
-                }
+            getNearestStopsFlowWithDeviceLocation(permissionsState)
         } else {
             flowOf(NearestStopsState.Error.LocationOff)
         }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun getNearestStopsFlowWithGpsProviderEnabledState(
-        permissionsState: PermissionsState,
-        isGpsProviderEnabled: Boolean
+    private fun getNearestStopsFlowWithDeviceLocation(
+        permissionsState: PermissionsState
     ): Flow<NearestStopsState> {
-        val locationAccuracyFlow = preferenceRepository
-            .isGpsPromptDisabledFlow
-            .map {
-                createUiLocationAccuracyOrNull(
-                    isGpsPromptDisabled = it,
-                    isDeviceGpsCapable = locationRepository.hasGpsLocationProvider,
-                    permissionsState = permissionsState,
-                    isGpsLocationProviderEnabled = isGpsProviderEnabled
+        val combinedFlow = combine(
+            locationRepository
+                .userVisibleLocationFlow
+                .onStart<DeviceLocation?> { emit(null) },
+            state.selectedServicesFlow,
+            locationAccuracyGenerator.getUiLocationAccuracyFlow(permissionsState),
+            ::Triple
+        )
 
-                )
-            }
+        return combinedFlow
             .distinctUntilChanged()
-
-        return locationRepository
-            .userVisibleLocationFlow
-            .combine(locationAccuracyFlow, ::Pair)
-            .flatMapLatest {
-                getNearestStopsFlowWithLocation(
-                    deviceLocation = it.first,
-                    locationAccuracy = it.second
-                )
-            }
-            .onStart { emit(NearestStopsState.Error.LocationUnknown) }
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun getNearestStopsFlowWithLocation(
-        deviceLocation: DeviceLocation,
-        locationAccuracy: UiLocationAccuracy?
-    ): Flow<NearestStopsState> {
-        return state
-            .selectedServicesFlow
             .flatMapLatest {
                 getNearestStopsFlowWithLocationAndSelectedServices(
-                    deviceLocation = deviceLocation,
-                    selectedServices = it,
-                    locationAccuracy = locationAccuracy
+                    deviceLocation = it.first,
+                    selectedServices = it.second,
+                    locationAccuracy = it.third
                 )
             }
     }
 
     private fun getNearestStopsFlowWithLocationAndSelectedServices(
-        deviceLocation: DeviceLocation,
+        deviceLocation: DeviceLocation?,
         selectedServices: Set<ServiceDescriptor>?,
         locationAccuracy: UiLocationAccuracy?
     ): Flow<NearestStopsState> {
+        if (deviceLocation == null) {
+            return flowOf(NearestStopsState.Error.LocationUnknown)
+        }
+
         val latitudeSpan = configRepository.nearestStopsLatitudeSpan
         val longitudeSpan = configRepository.nearestStopsLongitudeSpan
 

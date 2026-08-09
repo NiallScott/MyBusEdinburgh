@@ -39,7 +39,7 @@ import kotlin.test.assertTrue
  *
  * @author Niall Scott
  */
-class PreferenceRepositoryTest {
+class RealPreferenceRepositoryTest {
 
     @Test
     fun isDatabaseUpdateWifiOnlyFlowReturnsFlowFromPreferenceDataStorage() = runTest {
@@ -231,7 +231,7 @@ class PreferenceRepositoryTest {
 
     private fun createPreferenceRepository(
         preferenceDataStorage: PreferenceDataStorage = FakePreferenceDataStorage()
-    ): PreferenceRepository {
-        return PreferenceRepository(preferenceDataStorage)
+    ): RealPreferenceRepository {
+        return RealPreferenceRepository(preferenceDataStorage)
     }
 }

@@ -56,7 +56,7 @@ kotlin {
 dependencies {
 
     implementation(project(":core:busstops-android"))
-    implementation(project(":core:config"))
+    implementation(project(":core:config-android"))
     implementation(project(":core:core-domain-android"))
     implementation(project(":core:coroutines-android"))
     implementation(project(":core:feature"))
@@ -108,9 +108,11 @@ dependencies {
     androidTestImplementation(libs.kotlin.test.junit)
 
     testImplementation(testFixtures(project(":core:busstops")))
+    testImplementation(testFixtures(project(":core:config")))
     testImplementation(testFixtures(project(":core:core-domain")))
     testImplementation(testFixtures(project(":core:feature")))
     testImplementation(testFixtures(project(":core:location")))
+    testImplementation(testFixtures(project(":core:preferences")))
     testImplementation(testFixtures(project(":core:services")))
     testImplementation(testFixtures(project(":ui:feature:alerts:alertscommon")))
     testImplementation(testFixtures(project(":ui:feature:favouritestops:favouritestopscommon")))

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,9 +25,27 @@
  */
 
 plugins {
-    alias(libs.plugins.kotlin.jvm)
-    id("mybus.dagger-convention")
-    `java-test-fixtures`
+    id("mybus.android-library")
+    id("mybus.hilt-convention")
+}
+
+android {
+    namespace = "uk.org.rivernile.android.bustracker.core.config"
+
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+        }
+
+        debug {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
+    }
 }
 
 kotlin {
@@ -36,7 +54,5 @@ kotlin {
 
 dependencies {
 
-    // Testing dependencies
-    testImplementation(libs.junit)
-    testImplementation(libs.kotlin.test.junit)
+    api(project(":core:config"))
 }

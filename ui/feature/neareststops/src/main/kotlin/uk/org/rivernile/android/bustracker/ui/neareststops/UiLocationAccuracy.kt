@@ -26,8 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
-import uk.org.rivernile.android.bustracker.core.permission.PermissionState
-
 /**
  * This enum captures the possible states regarding the accuracy of the device's location.
  *
@@ -52,29 +50,3 @@ internal enum class UiLocationAccuracy {
     GPS_DISABLED
 }
 
-/**
- * Given some state, create the resulting [UiLocationAccuracy] or `null` if no action is to be
- * taken.
- *
- * @param isGpsPromptDisabled Has the GPS prompt been disabled by the user?
- * @param isDeviceGpsCapable Is the device capable of receiving GPS locations? This is distinct from
- * whether this functionality is currently active.
- * @param permissionsState The state of the necessary permissions.
- * @param isGpsLocationProviderEnabled Is the system GPS location provider enabled?
- * @return The resulting [UiLocationAccuracy] or `null` if no action is to be taken.
- */
-internal fun createUiLocationAccuracyOrNull(
-    isGpsPromptDisabled: Boolean,
-    isDeviceGpsCapable: Boolean,
-    permissionsState: PermissionsState,
-    isGpsLocationProviderEnabled: Boolean
-): UiLocationAccuracy? {
-    return when {
-        isGpsPromptDisabled -> null
-        !isDeviceGpsCapable -> UiLocationAccuracy.GPS_NOT_PRESENT
-        permissionsState.fineLocationPermission != PermissionState.GRANTED ->
-            UiLocationAccuracy.PERMISSIONS_NOT_SUFFICIENT
-        !isGpsLocationProviderEnabled -> UiLocationAccuracy.GPS_DISABLED
-        else -> null
-    }
-}
