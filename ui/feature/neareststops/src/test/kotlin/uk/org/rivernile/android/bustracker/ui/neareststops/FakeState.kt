@@ -54,6 +54,8 @@ internal class FakeState(
     private val onGetSelectedServices: () -> Set<ServiceDescriptor>? =
         { throw NotImplementedError() },
     private val onSetSelectedServices: (Set<ServiceDescriptor>?) -> Unit =
+        { throw NotImplementedError() },
+    private val onUpdateSelectedStopIdentifier: ((StopIdentifier?) -> StopIdentifier?) -> Unit =
         { throw NotImplementedError() }
 ) : State {
 
@@ -88,4 +90,8 @@ internal class FakeState(
         set(value) {
             onSetSelectedServices(value)
         }
+
+    override fun updateSelectedStopIdentifier(function: (StopIdentifier?) -> StopIdentifier?) {
+        onUpdateSelectedStopIdentifier(function)
+    }
 }

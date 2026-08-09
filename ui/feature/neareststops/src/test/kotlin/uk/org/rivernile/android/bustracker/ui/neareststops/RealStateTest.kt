@@ -218,6 +218,43 @@ class RealStateTest {
         assertEquals(services, state.selectedServices)
     }
 
+    @Test
+    fun updateSelectedStopIdentifierUpdatesValueWhenExistingValueIsNull() = runTest {
+        val state = createState()
+
+        state.selectedStopIdentifierFlow.test {
+            assertNull(awaitItem())
+
+            state.updateSelectedStopIdentifier {
+                assertNull(it)
+                "123456".toNaptanStopIdentifier()
+            }
+
+            assertEquals("123456".toNaptanStopIdentifier(), awaitItem())
+            ensureAllEventsConsumed()
+        }
+        assertEquals("123456".toNaptanStopIdentifier(), state.selectedStopIdentifier)
+    }
+
+    @Test
+    fun updateSelectedStopIdentifierUpdatesValueWhenExistingValueIsNotNull() = runTest {
+        val state = createState()
+        state.selectedStopIdentifier = "123456".toNaptanStopIdentifier()
+
+        state.selectedStopIdentifierFlow.test {
+            assertEquals("123456".toNaptanStopIdentifier(), awaitItem())
+
+            state.updateSelectedStopIdentifier {
+                assertEquals("123456".toNaptanStopIdentifier(), it)
+                null
+            }
+
+            assertNull(awaitItem())
+            ensureAllEventsConsumed()
+        }
+        assertNull(state.selectedStopIdentifier)
+    }
+
     private fun createState(
         savedState: SavedStateHandle = SavedStateHandle()
     ): RealState {

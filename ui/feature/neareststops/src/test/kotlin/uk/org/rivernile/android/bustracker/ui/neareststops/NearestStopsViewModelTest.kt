@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
 import app.cash.turbine.test
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -36,11 +37,13 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
 import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
+import uk.org.rivernile.android.bustracker.core.text.UiStopName
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.milliseconds
@@ -86,7 +89,8 @@ class NearestStopsViewModelTest {
                 }
             ),
             state = FakeState(
-                onActionFlow = { flowOf(UiAction.RequestLocationPermissions) }
+                onActionFlow = { flowOf(UiAction.RequestLocationPermissions) },
+                onSetSelectedStopIdentifier = { }
             )
         )
 
@@ -137,7 +141,8 @@ class NearestStopsViewModelTest {
                         delay(2.milliseconds)
                         emit(UiAction.RequestLocationPermissions)
                     }
-                }
+                },
+                onSetSelectedStopIdentifier = { }
             )
         )
 
@@ -169,6 +174,261 @@ class NearestStopsViewModelTest {
             )
             ensureAllEventsConsumed()
         }
+    }
+
+    @Test
+    fun uiStateFlowWithInProgressStateClearsSelectedStopIdentifier() = runTest {
+        val selectedStopIdentifiers = mutableListOf<StopIdentifier?>()
+        val viewModel = createViewModel(
+            state = FakeState(
+                onActionFlow = { flowOf(null) },
+                onSetSelectedStopIdentifier = { selectedStopIdentifiers += it }
+            ),
+            uiContentRetriever = FakeUiContentRetriever(
+                onUiContentFlow = { flowOf(UiContent.InProgress) }
+            ),
+            uiActionButtonsGenerator = defaultUiActionButtonsGenerator
+        )
+
+        viewModel.uiStateFlow.test {
+            assertEquals(
+                UiState(
+                    content = UiContent.InProgress,
+                    actionButtons = UiActionButtons(),
+                    action = null
+                ),
+                awaitItem()
+            )
+            ensureAllEventsConsumed()
+        }
+        assertEquals(listOf<StopIdentifier?>(null), selectedStopIdentifiers)
+    }
+
+    @Test
+    fun uiStateFlowWithNoLocationFeatureClearsSelectedStopIdentifier() = runTest {
+        val selectedStopIdentifiers = mutableListOf<StopIdentifier?>()
+        val viewModel = createViewModel(
+            state = FakeState(
+                onActionFlow = { flowOf(null) },
+                onSetSelectedStopIdentifier = { selectedStopIdentifiers += it }
+            ),
+            uiContentRetriever = FakeUiContentRetriever(
+                onUiContentFlow = { flowOf(UiContent.Error.NoLocationFeature) }
+            ),
+            uiActionButtonsGenerator = defaultUiActionButtonsGenerator
+        )
+
+        viewModel.uiStateFlow.test {
+            assertEquals(
+                UiState(
+                    content = UiContent.Error.NoLocationFeature,
+                    actionButtons = UiActionButtons(),
+                    action = null
+                ),
+                awaitItem()
+            )
+            ensureAllEventsConsumed()
+        }
+        assertEquals(listOf<StopIdentifier?>(null), selectedStopIdentifiers)
+    }
+
+    @Test
+    fun uiStateFlowWithInsufficientLocationPermissionsClearsSelectedStopIdentifier() = runTest {
+        val selectedStopIdentifiers = mutableListOf<StopIdentifier?>()
+        val viewModel = createViewModel(
+            state = FakeState(
+                onActionFlow = { flowOf(null) },
+                onSetSelectedStopIdentifier = { selectedStopIdentifiers += it }
+            ),
+            uiContentRetriever = FakeUiContentRetriever(
+                onUiContentFlow = { flowOf(UiContent.Error.InsufficientLocationPermissions) }
+            ),
+            uiActionButtonsGenerator = defaultUiActionButtonsGenerator
+        )
+
+        viewModel.uiStateFlow.test {
+            assertEquals(
+                UiState(
+                    content = UiContent.Error.InsufficientLocationPermissions,
+                    actionButtons = UiActionButtons(),
+                    action = null
+                ),
+                awaitItem()
+            )
+            ensureAllEventsConsumed()
+        }
+        assertEquals(listOf<StopIdentifier?>(null), selectedStopIdentifiers)
+    }
+
+    @Test
+    fun uiStateFlowWithLocationOffClearsSelectedStopIdentifier() = runTest {
+        val selectedStopIdentifiers = mutableListOf<StopIdentifier?>()
+        val viewModel = createViewModel(
+            state = FakeState(
+                onActionFlow = { flowOf(null) },
+                onSetSelectedStopIdentifier = { selectedStopIdentifiers += it }
+            ),
+            uiContentRetriever = FakeUiContentRetriever(
+                onUiContentFlow = { flowOf(UiContent.Error.LocationOff) }
+            ),
+            uiActionButtonsGenerator = defaultUiActionButtonsGenerator
+        )
+
+        viewModel.uiStateFlow.test {
+            assertEquals(
+                UiState(
+                    content = UiContent.Error.LocationOff,
+                    actionButtons = UiActionButtons(),
+                    action = null
+                ),
+                awaitItem()
+            )
+            ensureAllEventsConsumed()
+        }
+        assertEquals(listOf<StopIdentifier?>(null), selectedStopIdentifiers)
+    }
+
+    @Test
+    fun uiStateFlowWithLocationUnknownClearsSelectedStopIdentifier() = runTest {
+        val selectedStopIdentifiers = mutableListOf<StopIdentifier?>()
+        val viewModel = createViewModel(
+            state = FakeState(
+                onActionFlow = { flowOf(null) },
+                onSetSelectedStopIdentifier = { selectedStopIdentifiers += it }
+            ),
+            uiContentRetriever = FakeUiContentRetriever(
+                onUiContentFlow = { flowOf(UiContent.Error.LocationUnknown) }
+            ),
+            uiActionButtonsGenerator = defaultUiActionButtonsGenerator
+        )
+
+        viewModel.uiStateFlow.test {
+            assertEquals(
+                UiState(
+                    content = UiContent.Error.LocationUnknown,
+                    actionButtons = UiActionButtons(),
+                    action = null
+                ),
+                awaitItem()
+            )
+            ensureAllEventsConsumed()
+        }
+        assertEquals(listOf<StopIdentifier?>(null), selectedStopIdentifiers)
+    }
+
+    @Test
+    fun uiStateFlowWithNoNearestStopsClearsSelectedStopIdentifier() = runTest {
+        val selectedStopIdentifiers = mutableListOf<StopIdentifier?>()
+        val viewModel = createViewModel(
+            state = FakeState(
+                onActionFlow = { flowOf(null) },
+                onSetSelectedStopIdentifier = { selectedStopIdentifiers += it }
+            ),
+            uiContentRetriever = FakeUiContentRetriever(
+                onUiContentFlow = {
+                    flowOf(
+                        UiContent.Error.NoNearestStops(locationAccuracy = null)
+                    )
+                }
+            ),
+            uiActionButtonsGenerator = defaultUiActionButtonsGenerator
+        )
+
+        viewModel.uiStateFlow.test {
+            assertEquals(
+                UiState(
+                    content = UiContent.Error.NoNearestStops(locationAccuracy = null),
+                    actionButtons = UiActionButtons(),
+                    action = null
+                ),
+                awaitItem()
+            )
+            ensureAllEventsConsumed()
+        }
+        assertEquals(listOf<StopIdentifier?>(null), selectedStopIdentifiers)
+    }
+
+    @Test
+    fun uiStateFlowWithContentClearsSelectedStopIdentifierWhenNotContainedWithinStops() = runTest {
+        val selectedStopIdentifiers = mutableListOf<StopIdentifier?>()
+        val viewModel = createViewModel(
+            state = FakeState(
+                onActionFlow = { flowOf(null) },
+                onUpdateSelectedStopIdentifier = { function ->
+                    selectedStopIdentifiers += function.invoke("987654".toNaptanStopIdentifier())
+                }
+            ),
+            uiContentRetriever = FakeUiContentRetriever(
+                onUiContentFlow = {
+                    flowOf(
+                        UiContent.Content(
+                            nearestStops = persistentListOf(nearestStop),
+                            locationAccuracy = null
+                        )
+                    )
+                }
+            ),
+            uiActionButtonsGenerator = defaultUiActionButtonsGenerator
+        )
+
+        viewModel.uiStateFlow.test {
+            assertEquals(
+                UiState(
+                    content = UiContent.Content(
+                        nearestStops = persistentListOf(nearestStop),
+                        locationAccuracy = null
+                    ),
+                    actionButtons = UiActionButtons(),
+                    action = null
+                ),
+                awaitItem()
+            )
+            ensureAllEventsConsumed()
+        }
+        assertEquals(listOf<StopIdentifier?>(null), selectedStopIdentifiers)
+    }
+
+    @Test
+    fun uiStateFlowWithContentPreservesSelectedStopIdentifierWhenContainedWithinStops() = runTest {
+        val selectedStopIdentifiers = mutableListOf<StopIdentifier?>()
+        val viewModel = createViewModel(
+            state = FakeState(
+                onActionFlow = { flowOf(null) },
+                onUpdateSelectedStopIdentifier = { function ->
+                    selectedStopIdentifiers += function.invoke("123456".toNaptanStopIdentifier())
+                }
+            ),
+            uiContentRetriever = FakeUiContentRetriever(
+                onUiContentFlow = {
+                    flowOf(
+                        UiContent.Content(
+                            nearestStops = persistentListOf(nearestStop),
+                            locationAccuracy = null
+                        )
+                    )
+                }
+            ),
+            uiActionButtonsGenerator = defaultUiActionButtonsGenerator
+        )
+
+        viewModel.uiStateFlow.test {
+            assertEquals(
+                UiState(
+                    content = UiContent.Content(
+                        nearestStops = persistentListOf(nearestStop),
+                        locationAccuracy = null
+                    ),
+                    actionButtons = UiActionButtons(),
+                    action = null
+                ),
+                awaitItem()
+            )
+            ensureAllEventsConsumed()
+        }
+        assertEquals(
+            listOf<StopIdentifier?>("123456".toNaptanStopIdentifier()),
+            selectedStopIdentifiers
+        )
     }
 
     @Test
@@ -561,6 +821,22 @@ class NearestStopsViewModelTest {
             viewModelCoroutineScope = backgroundScope
         )
     }
+
+    private val defaultUiActionButtonsGenerator get() = FakeUiActionButtonsGenerator(
+        onUiActionButtonsFlow = { flowOf(UiActionButtons()) }
+    )
+
+    private val nearestStop get() = UiNearestStop(
+        stopIdentifier = "123456".toNaptanStopIdentifier(),
+        stopName = UiStopName(
+            name = "Stop 1",
+            locality = "Locality 1"
+        ),
+        services = null,
+        orientation = StopOrientation.SOUTH_WEST,
+        distanceMeters = 123,
+        dropdownMenu = UiNearestStopDropdownMenu()
+    )
 
     private class ItemTracker<T> : (T) -> Unit {
 

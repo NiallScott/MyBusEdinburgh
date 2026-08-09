@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import uk.org.rivernile.android.bustracker.core.domain.ParcelableServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.ParcelableStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
@@ -88,6 +89,16 @@ internal interface State {
      * A property which gets and sets the currently filtered services.
      */
     var selectedServices: Set<ServiceDescriptor>?
+
+    /**
+     * Atomically update the selected stop identifier based on the current value. The supplied
+     * lambda may be called more than once if the update is attempted while another write is taking
+     * place.
+     *
+     * @param function The update function. The input is the existing set value for the
+     * [StopIdentifier] and the value which is returned from the lambda is the new value.
+     */
+    fun updateSelectedStopIdentifier(function: (StopIdentifier?) -> StopIdentifier?)
 }
 
 internal const val STATE_SELECTED_STOP_IDENTIFIER = "selectedStopIdentifier"
@@ -133,6 +144,13 @@ internal class RealState @Inject constructor(
                 ?.map { it.toParcelableServiceDescriptor() }
                 ?.let { ArrayList(it) }
         }
+
+    override fun updateSelectedStopIdentifier(function: (StopIdentifier?) -> StopIdentifier?) {
+        _selectedStopIdentifierFlow.update {
+            function(it?.toStopIdentifier())
+                ?.toParcelableStopIdentifier()
+        }
+    }
 
     private val _actionFlow = MutableStateFlow<UiAction?>(null)
 
