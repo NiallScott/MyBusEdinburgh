@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
+import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableSet
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
@@ -35,6 +36,7 @@ import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
  *
  * @author Niall Scott
  */
+@Immutable
 internal sealed interface UiAction {
 
     /**

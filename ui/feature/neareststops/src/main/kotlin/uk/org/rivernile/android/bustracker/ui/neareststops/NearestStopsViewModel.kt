@@ -167,7 +167,7 @@ internal class NearestStopsViewModel @Inject constructor(
      *
      * @param stopIdentifier The identifier of the stop to remove a proximity alert for.
      */
-    fun onRemoveProximityAlertCLicked(stopIdentifier: StopIdentifier) {
+    fun onRemoveProximityAlertClicked(stopIdentifier: StopIdentifier) {
         state.action = UiAction.ShowRemoveProximityAlert(
             stopIdentifier = stopIdentifier
         )

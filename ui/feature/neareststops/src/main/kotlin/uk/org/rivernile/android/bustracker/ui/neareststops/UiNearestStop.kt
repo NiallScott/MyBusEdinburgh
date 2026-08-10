@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
+import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import uk.org.rivernile.android.bustracker.core.busstops.StopName
@@ -48,6 +49,7 @@ import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
  * @property dropdownMenu The dropdown menu for this nearest stop.
  * @author Niall Scott
  */
+@Immutable
 internal data class UiNearestStop(
     val stopIdentifier: StopIdentifier,
     val stopName: UiStopName,

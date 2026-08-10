@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.alerts
 
+import androidx.compose.runtime.Immutable
+
 /**
  * This defines a dropdown menu item for an arrival alert.
  *
@@ -33,6 +35,7 @@ package uk.org.rivernile.android.bustracker.ui.alerts
  * @author Niall Scott
  */
 @JvmInline
+@Immutable
 public value class UiArrivalAlertDropdownMenuItem(
     public val hasArrivalAlert: Boolean
 )
@@ -44,6 +47,7 @@ public value class UiArrivalAlertDropdownMenuItem(
  * @author Niall Scott
  */
 @JvmInline
+@Immutable
 public value class UiProximityAlertDropdownMenuItem(
     public val hasProximityAlert: Boolean
 )

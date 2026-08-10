@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
+import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 
 /**
@@ -33,6 +34,7 @@ import kotlinx.collections.immutable.ImmutableList
  *
  * @author Niall Scott
  */
+@Immutable
 internal sealed interface UiContent {
 
     /**

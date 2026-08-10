@@ -26,12 +26,15 @@
 
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
+import androidx.compose.runtime.Immutable
+
 /**
  * This contains the state of the action buttons.
  *
  * @property serviceFilterActionButton The state for the [UiServiceFilterActionButton].
  * @author Niall Scott
  */
+@Immutable
 internal data class UiActionButtons(
     val serviceFilterActionButton: UiServiceFilterActionButton = UiServiceFilterActionButton()
 )
@@ -42,6 +45,7 @@ internal data class UiActionButtons(
  * @property isEnabled Is the service filter action button enabled?
  * @author Niall Scott
  */
+@Immutable
 internal data class UiServiceFilterActionButton(
     val isEnabled: Boolean = false
 )

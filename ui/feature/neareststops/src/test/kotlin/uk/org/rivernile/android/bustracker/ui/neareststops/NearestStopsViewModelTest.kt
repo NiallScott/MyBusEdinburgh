@@ -617,7 +617,7 @@ class NearestStopsViewModelTest {
             )
         )
 
-        viewModel.onRemoveProximityAlertCLicked("123456".toNaptanStopIdentifier())
+        viewModel.onRemoveProximityAlertClicked("123456".toNaptanStopIdentifier())
 
         assertEquals(
             listOf(

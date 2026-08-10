@@ -159,7 +159,7 @@ internal fun NearestStopsScreen(
         onAddArrivalAlertClick = viewModel::onAddArrivalAlertClicked,
         onRemoveArrivalAlertClick = viewModel::onRemoveArrivalAlertClicked,
         onAddProximityAlertClick = viewModel::onAddProximityAlertClicked,
-        onRemoveProximityAlertClick = viewModel::onRemoveProximityAlertCLicked,
+        onRemoveProximityAlertClick = viewModel::onRemoveProximityAlertClicked,
         onShowOnMapClick = viewModel::onShowOnMapClicked,
         onGrantPermissionClick = viewModel::onGrantPermissionClicked,
         onOpenSettingsClick = viewModel::onOpenSettingsClicked,

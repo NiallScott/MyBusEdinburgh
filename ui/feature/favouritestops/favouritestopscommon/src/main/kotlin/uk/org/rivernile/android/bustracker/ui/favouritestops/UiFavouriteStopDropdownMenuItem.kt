@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
+import androidx.compose.runtime.Immutable
+
 /**
  * This defines a dropdown menu item for a favourite stop.
  *
@@ -33,6 +35,7 @@ package uk.org.rivernile.android.bustracker.ui.favouritestops
  * @author Niall Scott
  */
 @JvmInline
+@Immutable
 public value class UiFavouriteStopDropdownMenuItem(
     public val isFavouriteStop: Boolean
 )

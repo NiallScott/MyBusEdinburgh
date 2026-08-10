@@ -26,12 +26,15 @@
 
 package uk.org.rivernile.android.bustracker.core.domain
 
+import androidx.compose.runtime.Immutable
+
 /**
  * This defines a generic stop identifier. This is fully defined in either [AtcoStopIdentifier] or
  * [NaptanStopIdentifier].
  *
  * @author Niall Scott
  */
+@Immutable
 public sealed interface StopIdentifier {
 
     /**
@@ -48,6 +51,7 @@ public sealed interface StopIdentifier {
  * @property atcoCode The ATCO code as a [String].
  */
 @JvmInline
+@Immutable
 public value class AtcoStopIdentifier(
     public val atcoCode: String
 ) : StopIdentifier {
@@ -61,6 +65,7 @@ public value class AtcoStopIdentifier(
  * @property naptanStopCode The Naptan (SMS) code as a [String].
  */
 @JvmInline
+@Immutable
 public value class NaptanStopIdentifier(
     public val naptanStopCode: String
 ) : StopIdentifier {
