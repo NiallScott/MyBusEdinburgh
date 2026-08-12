@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.core.location.googleplay
 
 import android.Manifest
-import android.location.Location
 import android.os.Looper
 import androidx.annotation.RequiresPermission
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -41,15 +40,16 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withTimeoutOrNull
 import uk.org.rivernile.android.bustracker.core.location.AndroidLocationPermissionChecker
-import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
+import uk.org.rivernile.android.bustracker.core.location.Location
 import uk.org.rivernile.android.bustracker.core.location.LocationSource
+import uk.org.rivernile.android.bustracker.core.location.LocationUpdate
+import uk.org.rivernile.android.bustracker.core.location.toLocation
 import javax.inject.Inject
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -72,7 +72,7 @@ internal class GooglePlayLocationSource @Inject constructor(
         private const val USER_VISIBLE_LOCATION_FASTEST_INTERVAL_MILLIS = 2000L
     }
 
-    private val userVisibleLocationRequest by lazy {
+    private val locationRequest by lazy {
         LocationRequest
             .Builder(
                 Priority.PRIORITY_HIGH_ACCURACY,
@@ -83,12 +83,22 @@ internal class GooglePlayLocationSource @Inject constructor(
             .build()
     }
 
-    override val userVisibleLocationFlow: Flow<DeviceLocation> get() {
+    override val locationUpdatesFlow: Flow<LocationUpdate> get() {
         return if (permissionChecker.checkHasEitherFineOrCoarseLocationPermission()) {
             callbackFlow {
-                getLastLocation()?.let {
-                    send(it)
-                }
+                // Send an initial AwaitingLocation state as getLastLocation() is asynchronous and
+                // may not immediately give us a result. However, this may be very quickly
+                // superseded with an Update state.
+                send(LocationUpdate.AwaitingLocation)
+
+                getLastLocation()
+                    ?.let {
+                        send(
+                            LocationUpdate.Update(
+                                location = it
+                            )
+                        )
+                    }
 
                 // As getLastLocation() is not cancellable and can be long running, make sure we're
                 // still active here.
@@ -97,15 +107,21 @@ internal class GooglePlayLocationSource @Inject constructor(
                 val callback = object : LocationCallback() {
                     override fun onLocationResult(result: LocationResult) {
                         launch {
-                            mapToDeviceLocation(result.lastLocation)?.let {
-                                send(it)
-                            }
+                            result
+                                .lastLocation
+                                ?.let { lastLocation ->
+                                    send(
+                                        LocationUpdate.Update(
+                                            location = lastLocation.toLocation()
+                                        )
+                                    )
+                                }
                         }
                     }
                 }
 
                 fusedLocationProviderClient.requestLocationUpdates(
-                    userVisibleLocationRequest,
+                    locationRequest,
                     callback,
                     Looper.getMainLooper()
                 )
@@ -115,43 +131,27 @@ internal class GooglePlayLocationSource @Inject constructor(
                 }
             }.distinctUntilChanged() // Prevent unnecessary downstream processing.
         } else {
-            emptyFlow()
+            flowOf(LocationUpdate.Error.InsufficientLocationPermissions)
         }
     }
 
     /**
      * Get the last location held by this device.
      *
-     * @return The last [DeviceLocation] held by this device, or `null` if there is none.
+     * @return The last [Location] held by this device, or `null` if there is none.
      */
-    @RequiresPermission(anyOf = [
-        Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.ACCESS_FINE_LOCATION
-    ])
-    private suspend fun getLastLocation(): DeviceLocation? {
+    @RequiresPermission(
+        anyOf = [
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ]
+    )
+    private suspend fun getLastLocation(): Location? {
         return withTimeoutOrNull(LAST_LOCATION_TIMEOUT_MILLIS.milliseconds) {
-            suspendCoroutine { continuation ->
-                fusedLocationProviderClient.lastLocation.addOnCompleteListener {
-                    val result = if (it.isSuccessful) {
-                        it.result
-                    } else {
-                        null
-                    }
-
-                    continuation.resume(mapToDeviceLocation(result))
-                }
-            }
+            fusedLocationProviderClient
+                .lastLocation
+                .await()
+                .toLocation()
         }
-    }
-
-    /**
-     * Given a [Location], map this to a [DeviceLocation]. If the [Location] is `null`, then this
-     * method will return `null`.
-     *
-     * @param location The [Location] to map.
-     * @return The mapped location, or `null` if the input was `null`.
-     */
-    private fun mapToDeviceLocation(location: Location?) = location?.let {
-        DeviceLocation(it.latitude, it.longitude)
     }
 }

@@ -40,7 +40,9 @@ import uk.org.rivernile.android.bustracker.core.busstops.StopLocation
 import uk.org.rivernile.android.bustracker.core.config.ConfigRepository
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
+import uk.org.rivernile.android.bustracker.core.location.LatLon
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
+import uk.org.rivernile.android.bustracker.core.location.toLatLon
 import javax.inject.Inject
 import kotlin.math.absoluteValue
 
@@ -164,7 +166,7 @@ internal class RealNearestStopsRetriever @Inject constructor(
                     stops = stopDetails
                         ?.toNearestStops {
                             locationRepository
-                                .distanceBetween(it.toDeviceLocation(), deviceLocation)
+                                .distanceBetween(it.toLatLon(), deviceLocation.toLatLon())
                                 .absoluteValue
                                 .toInt()
                         }
@@ -174,7 +176,7 @@ internal class RealNearestStopsRetriever @Inject constructor(
             }
     }
 
-    private fun StopLocation.toDeviceLocation() = DeviceLocation(
+    private fun StopLocation.toLatLon() = LatLon(
         latitude = latitude,
         longitude = longitude
     )

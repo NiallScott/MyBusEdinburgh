@@ -33,7 +33,23 @@ package uk.org.rivernile.android.bustracker.core.location
  * @property longitude The longitude.
  * @author Niall Scott
  */
+@Deprecated(
+    message = "Use Location instead."
+)
 public data class DeviceLocation(
     val latitude: Double,
     val longitude: Double
 )
+
+/**
+ * Map a [DeviceLocation] to a [LatLon].
+ *
+ * @return This [DeviceLocation] as a [LatLon].
+ */
+@Suppress("DEPRECATION")
+public fun DeviceLocation.toLatLon(): LatLon {
+    return LatLon(
+        latitude = latitude,
+        longitude = longitude
+    )
+}

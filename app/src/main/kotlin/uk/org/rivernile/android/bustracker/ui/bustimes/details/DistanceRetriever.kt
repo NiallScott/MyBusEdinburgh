@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.onStart
 import uk.org.rivernile.android.bustracker.core.busstops.StopDetails
 import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
+import uk.org.rivernile.android.bustracker.core.location.toLatLon
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import javax.inject.Inject
 
@@ -151,7 +152,10 @@ class DistanceRetriever @Inject constructor(
             DeviceLocation(it.location.latitude, it.location.longitude)
         } ?: return UiItem.Distance.Unknown
 
-        val distanceBetweenMeters = locationRepository.distanceBetween(location, stopLocation)
+        val distanceBetweenMeters = locationRepository.distanceBetween(
+            location.toLatLon(),
+            stopLocation.toLatLon()
+        )
 
         return if (distanceBetweenMeters >= 0f) {
             UiItem.Distance.Known(distanceBetweenMeters / 1000)

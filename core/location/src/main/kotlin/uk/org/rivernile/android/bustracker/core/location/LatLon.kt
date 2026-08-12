@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,50 +24,16 @@
  *
  */
 
-plugins {
-    id("mybus.android-library")
-    id("mybus.hilt-convention")
-}
+package uk.org.rivernile.android.bustracker.core.location
 
-android {
-    namespace = "uk.org.rivernile.android.bustracker.core.location"
-
-    defaultConfig {
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-
-        debug {
-            enableUnitTestCoverage = true
-            enableAndroidTestCoverage = true
-        }
-    }
-}
-
-kotlin {
-    explicitApi()
-}
-
-dependencies {
-
-    implementation(project(":core:coroutines-android"))
-    api(project(":core:location"))
-
-    // Coroutines
-    implementation(libs.coroutines.play.services)
-
-    // Play Services
-    implementation(libs.play.services.location)
-
-    // Testing dependencies
-    androidTestImplementation(libs.androidx.test.runner)
-
-    testImplementation(libs.coroutines.test)
-    testImplementation(libs.junit)
-    testImplementation(libs.kotlin.test.junit)
-    testImplementation(libs.turbine)
-}
+/**
+ * A latitude/longitude pair.
+ *
+ * @property latitude The latitude coordinate.
+ * @property longitude The longitude coordinate.
+ * @author Niall Scott
+ */
+public data class LatLon(
+    val latitude: Double,
+    val longitude: Double
+)

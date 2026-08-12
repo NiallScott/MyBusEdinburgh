@@ -29,7 +29,7 @@ package uk.org.rivernile.android.bustracker.core.location
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Implementations of this interface provide [DeviceLocation]s to [LocationRepository]. This acts
+ * Implementations of this interface provide [LocationUpdate]s to [LocationRepository]. This acts
  * as an abstraction layer so that platform-specific implementations can be specified.
  *
  * @author Niall Scott
@@ -37,7 +37,7 @@ import kotlinx.coroutines.flow.Flow
 internal interface LocationSource {
 
     /**
-     * Produce a [Flow] which emits the latest [DeviceLocation] until cancelled.
+     * Produce a [Flow] which emits [LocationUpdate]s until cancelled.
      */
-    val userVisibleLocationFlow: Flow<DeviceLocation>
+    val locationUpdatesFlow: Flow<LocationUpdate>
 }

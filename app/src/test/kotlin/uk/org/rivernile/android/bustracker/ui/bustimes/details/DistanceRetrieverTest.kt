@@ -41,6 +41,7 @@ import uk.org.rivernile.android.bustracker.core.busstops.StopDetails
 import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
+import uk.org.rivernile.android.bustracker.core.location.LatLon
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
@@ -149,8 +150,8 @@ class DistanceRetrieverTest {
             .thenReturn(flowOf(DeviceLocation(9.0, 8.0)))
         whenever(locationRepository
             .distanceBetween(
-                DeviceLocation(9.0, 8.0),
-                DeviceLocation(1.0, 2.0)
+                LatLon(9.0, 8.0),
+                LatLon(1.0, 2.0)
             )
         ).thenReturn(-1f)
 
@@ -171,8 +172,8 @@ class DistanceRetrieverTest {
             .thenReturn(flowOf(DeviceLocation(9.0, 8.0)))
         whenever(locationRepository
             .distanceBetween(
-                DeviceLocation(9.0, 8.0),
-                DeviceLocation(1.0, 2.0)
+                LatLon(9.0, 8.0),
+                LatLon(1.0, 2.0)
             )
         ).thenReturn(0f)
 
@@ -194,8 +195,8 @@ class DistanceRetrieverTest {
             .thenReturn(flowOf(DeviceLocation(9.0, 8.0)))
         whenever(locationRepository
             .distanceBetween(
-                DeviceLocation(9.0, 8.0),
-                DeviceLocation(1.0, 2.0)
+                LatLon(9.0, 8.0),
+                LatLon(1.0, 2.0)
             )
         ).thenReturn(5200f)
 
@@ -224,8 +225,8 @@ class DistanceRetrieverTest {
             )
         whenever(locationRepository
             .distanceBetween(
-                DeviceLocation(9.0, 8.0),
-                DeviceLocation(1.0, 2.0)
+                LatLon(9.0, 8.0),
+                LatLon(1.0, 2.0)
             )
         ).thenReturn(5200f)
 

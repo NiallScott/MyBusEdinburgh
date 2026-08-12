@@ -26,57 +26,49 @@
 
 package uk.org.rivernile.android.bustracker.core.location
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.content.pm.PackageManager
-import android.location.Location
-import android.location.LocationManager
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.ProducerScope
-import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * This is the Android-specific implementation of [LocationRepository].
+ * The Android-specific implementation of [LocationRepository].
  *
- * @param context The application [Context].
- * @param packageManager The platform [PackageManager].
- * @param locationManager The platform [LocationManager].
+ * @param androidLocationSupport Used as a proxy to the real Android APIs - this exists so the
+ * repository can be tested in unit tests.
+ * @param androidLocationPermissionChecker Used to check location permissions.
  * @param locationSource The location source - an abstraction because location can come from
  * multiple sources.
  * @author Niall Scott
  */
 @Singleton
 internal class AndroidLocationRepository @Inject constructor(
-    @ApplicationContext private val context: Context,
-    private val packageManager: PackageManager,
-    private val locationManager: LocationManager,
+    private val androidLocationSupport: AndroidLocationSupport,
+    private val androidLocationPermissionChecker: AndroidLocationPermissionChecker,
     private val locationSource: LocationSource,
     @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope
 ) : LocationRepository {
 
     override val hasLocationFeature by lazy {
-        packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION)
+        androidLocationSupport.hasLocationFeature
     }
 
     override val hasGpsLocationProvider by lazy {
-        packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
+        androidLocationSupport.hasGpsLocationProvider
     }
 
-    override val isLocationEnabledFlow = _isLocationEnabledFlow
+    override val isLocationEnabledFlow = androidLocationSupport
+        .isLocationEnabledFlow
         .shareIn(
             scope = applicationCoroutineScope,
             started = SharingStarted.WhileSubscribed(
@@ -85,7 +77,8 @@ internal class AndroidLocationRepository @Inject constructor(
             replay = 1
         )
 
-    override val isGpsLocationProviderEnabledFlow = _isGpsLocationProviderEnabledFlow
+    override val isGpsLocationProviderEnabledFlow = androidLocationSupport
+        .isGpsLocationProviderEnabledFlow
         .shareIn(
             scope = applicationCoroutineScope,
             started = SharingStarted.WhileSubscribed(
@@ -94,8 +87,9 @@ internal class AndroidLocationRepository @Inject constructor(
             replay = 1
         )
 
+    @Suppress("OVERRIDE_DEPRECATION", "DEPRECATION")
     @OptIn(ExperimentalCoroutinesApi::class)
-    override val userVisibleLocationFlow get() = if (hasLocationFeature) {
+    override val userVisibleLocationFlow: Flow<DeviceLocation> get() = if (hasLocationFeature) {
         isLocationEnabledFlow
             .distinctUntilChanged()
             .flatMapLatest(::createUserVisibleLocationFlow)
@@ -104,82 +98,55 @@ internal class AndroidLocationRepository @Inject constructor(
         emptyFlow()
     }
 
-    override fun distanceBetween(first: DeviceLocation, second: DeviceLocation): Float {
-        val results = FloatArray(1)
-        Location.distanceBetween(
-            first.latitude,
-            first.longitude,
-            second.latitude,
-            second.longitude,
-            results
-        )
-
-        return results[0]
-    }
-
-    private val _isLocationEnabledFlow get() = callbackFlow {
-        val locationEnabledReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                val pendingResult = goAsync()
-
-                launch {
-                    try {
-                        getAndSendIsLocationEnabled()
-                    } finally {
-                        pendingResult.finish()
-                    }
-                }
-            }
-        }
-
-        context.registerReceiver(
-            locationEnabledReceiver,
-            IntentFilter(LocationManager.MODE_CHANGED_ACTION)
-        )
-        getAndSendIsLocationEnabled()
-
-        awaitClose {
-            context.unregisterReceiver(locationEnabledReceiver)
+    override val locationUpdatesFlow: Flow<LocationUpdate> get() {
+        return if (hasLocationFeature) {
+            getLocationUpdatesFlowWhenHasLocationFeature()
+        } else {
+            flowOf(LocationUpdate.Error.NoLocationFeature)
         }
     }
 
-    private val _isGpsLocationProviderEnabledFlow get() = callbackFlow {
-        val providerEnabledReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                val pendingResult = goAsync()
-
-                launch {
-                    try {
-                        getAndSendIsGpsProviderEnabled()
-                    } finally {
-                        pendingResult.finish()
-                    }
-                }
-            }
-        }
-
-        context.registerReceiver(
-            providerEnabledReceiver,
-            IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)
-        )
-        getAndSendIsGpsProviderEnabled()
-
-        awaitClose {
-            context.unregisterReceiver(providerEnabledReceiver)
-        }
-    }
-
-    private suspend fun ProducerScope<Boolean>.getAndSendIsLocationEnabled() {
-        send(locationManager.isLocationEnabled)
-    }
-
-    private suspend fun ProducerScope<Boolean>.getAndSendIsGpsProviderEnabled() {
-        send(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
-    }
+    override fun distanceBetween(first: LatLon, second: LatLon) =
+        androidLocationSupport.distanceBetween(first, second)
 
     private fun createUserVisibleLocationFlow(locationEnabled: Boolean) = if (locationEnabled) {
-        locationSource.userVisibleLocationFlow
+        locationSource
+            .locationUpdatesFlow
+            .filterIsInstance<LocationUpdate.Update>()
+            .map {
+                val latLon = it.location.latLon
+
+                @Suppress("DEPRECATION")
+                DeviceLocation(
+                    latitude = latLon.latitude,
+                    longitude = latLon.longitude
+                )
+            }
     } else {
         emptyFlow()
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun getLocationUpdatesFlowWhenHasLocationFeature(): Flow<LocationUpdate> {
+        val hasSufficientLocationPermission = androidLocationPermissionChecker
+            .checkHasEitherFineOrCoarseLocationPermission()
+
+        return if (hasSufficientLocationPermission) {
+            isLocationEnabledFlow
+                .distinctUntilChanged()
+                .flatMapLatest(::getLocationsFlowWhenPermissionsIsSufficient)
+        } else {
+            flowOf(LocationUpdate.Error.InsufficientLocationPermissions)
+        }
+    }
+
+    private fun getLocationsFlowWhenPermissionsIsSufficient(
+        isLocationEnabled: Boolean
+    ): Flow<LocationUpdate> {
+        return if (isLocationEnabled) {
+            locationSource.locationUpdatesFlow
+        } else {
+            flowOf(LocationUpdate.Error.LocationOff)
+        }
     }
 }

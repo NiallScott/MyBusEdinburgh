@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,7 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.location.platform
 
 import android.Manifest
-import android.location.Location
+import android.location.Location as AndroidLocation
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
@@ -37,13 +37,14 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.location.AndroidLocationPermissionChecker
-import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
 import uk.org.rivernile.android.bustracker.core.location.LocationSource
+import uk.org.rivernile.android.bustracker.core.location.LocationUpdate
+import uk.org.rivernile.android.bustracker.core.location.toLocation
 import javax.inject.Inject
 
 /**
@@ -68,113 +69,144 @@ internal class PlatformLocationSource @Inject constructor(
         private const val USER_VISIBLE_LOCATION_MIN_DISTANCE_METERS = 10f
     }
 
-    override val userVisibleLocationFlow: Flow<DeviceLocation> get() {
+    override val locationUpdatesFlow: Flow<LocationUpdate> get() {
         return if (permissionChecker.checkHasEitherFineOrCoarseLocationPermission()) {
-            callbackFlow {
-                // Before registering for location updates, immediately obtain the last location
-                // from the OS and send it to the channel. This may be null if there is no previous
-                // location.
-                getBestInitialLocation()?.let {
-                    send(it)
-                }
-
-                val locationListener = object : LocationListener {
-                    override fun onLocationChanged(location: Location) {
-                        launch {
-                            send(location)
-                        }
-                    }
-
-                    @Deprecated("Deprecated in Java")
-                    override fun onStatusChanged(provider: String, status: Int, extras: Bundle?) {
-                        // This is deprecated in Android Q and above. But we don't need anything
-                        // from this callback anyway.
-                    }
-
-                    override fun onProviderEnabled(provider: String) {
-                        // We don't need to concern ourselves about this, as the listener is
-                        // registered against each provider, irrespective of its enabled state.
-                        // Android will deliver new locations for the provider in
-                        // onLocationChanged() when it's enabled, and won't when it's disabled. We
-                        // just register the listener against each provider we're interested in and
-                        // Android does the rest, until we later unregister.
-                    }
-
-                    override fun onProviderDisabled(provider: String) {
-                        // See comment in onProviderEnabled() - it applies here too.
-                    }
-                }
-
-                // Android S introduces LocationManager.hasProvider(), but for backwards
-                // compatibility, we need to loop through all providers to determine existence.
-                locationManager.allProviders.forEach {
-                    if (it == LocationManager.NETWORK_PROVIDER ||
-                        it == LocationManager.GPS_PROVIDER) {
-                        // Request location updates from both network and GPS providers. We'll only
-                        // get location updates from active providers, but we can just ignore their
-                        // active state as the OS will deal with that for us.
-                        //
-                        // Location updates will be delivered on the main thread, but this is fine
-                        // as a coroutine is immediately launched from there, thus not blocking the
-                        // thread.
-                        locationManager.requestLocationUpdates(
-                            it,
-                            USER_VISIBLE_LOCATION_MIN_TIME_MILLIS,
-                            USER_VISIBLE_LOCATION_MIN_DISTANCE_METERS,
-                            locationListener,
-                            Looper.getMainLooper()
+            locationFlow
+                .scan<AndroidLocation?, AndroidLocation?>(null) { accumulator, value ->
+                    value
+                        ?.takeIf { isBetterLocation(it, accumulator) }
+                        ?: accumulator
+                }.map { location ->
+                    if (location != null) {
+                        LocationUpdate.Update(
+                            location = location.toLocation()
                         )
+                    } else {
+                        LocationUpdate.AwaitingLocation
                     }
-                }
-
-                awaitClose {
-                    locationManager.removeUpdates(locationListener)
-                }
-            }.scan<Location, Location?>(null) { accumulator, value ->
-                value.takeIf { isBetterLocation(it, accumulator) } ?: accumulator
-            }.mapNotNull { location ->
-                location?.let {
-                    DeviceLocation(it.latitude, it.longitude)
-                }
-            }.distinctUntilChanged() // Prevent unnecessary downstream processing.
+                }.distinctUntilChanged() // Prevent unnecessary downstream processing.
         } else {
-            emptyFlow()
+            flowOf(LocationUpdate.Error.InsufficientLocationPermissions)
+        }
+    }
+
+    @get:RequiresPermission(
+        anyOf = [
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ]
+    )
+    private val locationFlow get() = callbackFlow {
+        // Before registering for location updates, immediately obtain the last location
+        // from the OS and send it to the channel. This may be null if there is no previous
+        // location.
+        getBestInitialLocation()
+            ?.let {
+                send(it)
+            }
+            ?: send(null)
+
+        val locationListener = object : LocationListener {
+            override fun onLocationChanged(location: AndroidLocation) {
+                launch {
+                    send(location)
+                }
+            }
+
+            @Deprecated("Deprecated in Java")
+            override fun onStatusChanged(provider: String, status: Int, extras: Bundle?) {
+                // This is deprecated in Android Q and above. But we don't need anything
+                // from this callback anyway.
+            }
+
+            override fun onProviderEnabled(provider: String) {
+                // We don't need to concern ourselves about this, as the listener is
+                // registered against each provider, irrespective of its enabled state.
+                // Android will deliver new locations for the provider in
+                // onLocationChanged() when it's enabled, and won't when it's disabled. We
+                // just register the listener against each provider we're interested in and
+                // Android does the rest, until we later unregister.
+            }
+
+            override fun onProviderDisabled(provider: String) {
+                // See comment in onProviderEnabled() - it applies here too.
+            }
+        }
+
+        // Android S introduces LocationManager.hasProvider(), but for backwards
+        // compatibility, we need to loop through all providers to determine existence.
+        locationManager.allProviders.forEach {
+            if (it == LocationManager.NETWORK_PROVIDER ||
+                it == LocationManager.GPS_PROVIDER) {
+                // Request location updates from both network and GPS providers. We'll only
+                // get location updates from active providers, but we can just ignore their
+                // active state as the OS will deal with that for us.
+                //
+                // Location updates will be delivered on the main thread, but this is fine
+                // as a coroutine is immediately launched from there, thus not blocking the
+                // thread.
+                locationManager.requestLocationUpdates(
+                    it,
+                    USER_VISIBLE_LOCATION_MIN_TIME_MILLIS,
+                    USER_VISIBLE_LOCATION_MIN_DISTANCE_METERS,
+                    locationListener,
+                    Looper.getMainLooper()
+                )
+            }
+        }
+
+        awaitClose {
+            locationManager.removeUpdates(locationListener)
         }
     }
 
     /**
-     * Get the best initial fix on a [Location].
+     * Get the best initial fix on a [AndroidLocation].
      *
      * This will loop through all known system location providers and get a location from each
      * provider. They will all be compared to return the best location.
      *
-     * @return A [Location] which contains the best initial location, or `null` if an initial
+     * @return A [AndroidLocation] which contains the best initial location, or `null` if an initial
      * location could not be determined.
      */
-    @RequiresPermission(anyOf = [
-        Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.ACCESS_FINE_LOCATION
-    ])
-    private fun getBestInitialLocation(): Location? {
-        return locationManager.allProviders.fold<String, Location?>(null) { best, provider ->
-            locationManager.getLastKnownLocation(provider)
-                ?.takeIf { isBetterLocation(it, best) } ?: best
-        }
+    @RequiresPermission(
+        anyOf = [
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ]
+    )
+    private fun getBestInitialLocation(): AndroidLocation? {
+        return locationManager
+            .allProviders
+            .fold<String, AndroidLocation?>(null) { best, provider ->
+                val location = try {
+                    locationManager.getLastKnownLocation(provider)
+                } catch (_: SecurityException) {
+                    null
+                }
+
+                location
+                    ?.takeIf { isBetterLocation(it, best) }
+                    ?: best
+            }
     }
 
     /**
-     * Determines whether [newLocation] is a better [Location] fix than the current detected
+     * Determines whether [newLocation] is a better [AndroidLocation] fix than the current detected
      * [currentBestLocation] fix.
      *
      * The algorithm in this method was taken from an old article on the Android Developer site
      * which no longer seems to exist.
      *
-     * @param newLocation The new [Location] fix.
-     * @param currentBestLocation The currently held [Location] fix.
+     * @param newLocation The new [AndroidLocation] fix.
+     * @param currentBestLocation The currently held [AndroidLocation] fix.
      * @return `true` if [newLocation] is a better location fix than [currentBestLocation],
      * otherwise `false`.
      */
-    private fun isBetterLocation(newLocation: Location, currentBestLocation: Location?): Boolean {
+    private fun isBetterLocation(
+        newLocation: AndroidLocation,
+        currentBestLocation: AndroidLocation?
+    ): Boolean {
         // A new location is always better than no location.
         val currentBest = currentBestLocation ?: return true
 

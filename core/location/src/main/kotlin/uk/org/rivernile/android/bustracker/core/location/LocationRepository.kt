@@ -70,7 +70,27 @@ public interface LocationRepository {
      *
      * An empty [Flow] will also be returned when device location services are not enabled.
      */
+    @Deprecated(
+        message = "Use locationUpdatesFlow instead."
+    )
     public val userVisibleLocationFlow: Flow<DeviceLocation>
+
+    /**
+     * A [Flow] which emits location updates.
+     *
+     * When location updates are available, then the first emission will be [LocationUpdate.Update]
+     * if a suitable location is immediately available. If not, then
+     * [LocationUpdate.AwaitingLocation] will be emitted while a location is determined.
+     *
+     * When location updates are not available, then a relevant [LocationUpdate.Error] type will be
+     * emitted to signify the reason why location updates cannot be given. This may be emitted after
+     * an [LocationUpdate.Update] is emitted because the system state can change.
+     *
+     * Android implementation note: it's not possible on Android to register a listener against the
+     * system to determine when location permissions have changed. As such, the caller should keep
+     * track of this and restart this [Flow] when the permissions have changed.
+     */
+    public val locationUpdatesFlow: Flow<LocationUpdate>
 
     /**
      * Get the distance, in meters, between [first] and [second].
@@ -80,5 +100,5 @@ public interface LocationRepository {
      * @return The number of meters between the two coordinates. A negative value implies the
      * distance could not be calculated.
      */
-    public fun distanceBetween(first: DeviceLocation, second: DeviceLocation): Float
+    public fun distanceBetween(first: LatLon, second: LatLon): Float
 }

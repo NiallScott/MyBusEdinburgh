@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,6 +30,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 /**
@@ -39,12 +40,9 @@ import javax.inject.Inject
  * our convenience methods up as checking a permission and does not add a warning at the call site
  * claiming the permission has not been checked.
  *
- * @param context The application [Context].
  * @author Niall Scott
  */
-internal class AndroidLocationPermissionChecker @Inject constructor(
-    private val context: Context
-) {
+internal interface AndroidLocationPermissionChecker {
 
     /**
      * Has either [Manifest.permission.ACCESS_FINE_LOCATION] or
@@ -53,15 +51,16 @@ internal class AndroidLocationPermissionChecker @Inject constructor(
      * @return `true` if [Manifest.permission.ACCESS_FINE_LOCATION] or
      * [Manifest.permission.ACCESS_COARSE_LOCATION] has been granted to us, otherwise `false`.
      */
-    fun checkHasEitherFineOrCoarseLocationPermission() =
+    fun checkHasEitherFineOrCoarseLocationPermission(): Boolean
+}
+
+internal class RealAndroidLocationPermissionChecker @Inject constructor(
+    @ApplicationContext private val context: Context
+) : AndroidLocationPermissionChecker {
+
+    override fun checkHasEitherFineOrCoarseLocationPermission() =
         checkFineLocationPermission() || checkCoarseLocationPermission()
 
-    /**
-     * Has [Manifest.permission.ACCESS_FINE_LOCATION] been granted to us?
-     *
-     * @return `true` if [Manifest.permission.ACCESS_FINE_LOCATION] has been granted to us,
-     * otherwise `false`.
-     */
     private fun checkFineLocationPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
             context,
@@ -69,12 +68,6 @@ internal class AndroidLocationPermissionChecker @Inject constructor(
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    /**
-     * Has [Manifest.permission.ACCESS_COARSE_LOCATION] been granted?
-     *
-     * @return `true` if [Manifest.permission.ACCESS_COARSE_LOCATION] has been granted, otherwise
-     * `false`.
-     */
     private fun checkCoarseLocationPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
             context,

@@ -39,9 +39,13 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import uk.org.rivernile.android.bustracker.core.location.AndroidLocationPermissionChecker
 import uk.org.rivernile.android.bustracker.core.location.AndroidLocationRepository
+import uk.org.rivernile.android.bustracker.core.location.AndroidLocationSupport
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.location.LocationSource
+import uk.org.rivernile.android.bustracker.core.location.RealAndroidLocationPermissionChecker
+import uk.org.rivernile.android.bustracker.core.location.RealAndroidLocationSupport
 import uk.org.rivernile.android.bustracker.core.location.googleplay.GooglePlayLocationSource
 import uk.org.rivernile.android.bustracker.core.location.platform.PlatformLocationSource
 import javax.inject.Provider
@@ -56,6 +60,16 @@ import javax.inject.Provider
 internal interface LocationModule {
 
     @Binds
+    fun bindAndroidLocationPermissionChecker(
+        realAndroidLocationPermissionChecker: RealAndroidLocationPermissionChecker
+    ): AndroidLocationPermissionChecker
+
+    @Binds
+    fun bindAndroidLocationSupport(
+        realAndroidLocationSupport: RealAndroidLocationSupport
+    ): AndroidLocationSupport
+
+    @Binds
     fun bindLocationRepository(
         androidLocationRepository: AndroidLocationRepository
     ): LocationRepository
@@ -68,8 +82,7 @@ internal interface LocationModule {
             platformLocationSourceProvider: Provider<PlatformLocationSource>,
             googlePlayLocationSourceProvider: Provider<GooglePlayLocationSource>
         ): LocationSource {
-            return if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) ==
-                ConnectionResult.SUCCESS) {
+            return if (isGooglePlayServicesAvailable(context)) {
                 googlePlayLocationSourceProvider.get()
             } else {
                 platformLocationSourceProvider.get()
@@ -84,5 +97,11 @@ internal interface LocationModule {
         @Provides
         fun provideLocationManager(@ApplicationContext context: Context): LocationManager =
             requireNotNull(context.getSystemService())
+
+        private fun isGooglePlayServicesAvailable(context: Context): Boolean {
+            return GoogleApiAvailability
+                .getInstance()
+                .isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
+        }
     }
 }

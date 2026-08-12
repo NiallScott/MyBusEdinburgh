@@ -42,6 +42,7 @@ import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
 import uk.org.rivernile.android.bustracker.core.location.FakeLocationRepository
+import uk.org.rivernile.android.bustracker.core.location.LatLon
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import kotlin.test.Test
@@ -269,14 +270,14 @@ class RealNearestStopsRetrieverTest {
                 },
                 onDistanceBetween = { stopLocation, deviceLocation ->
                     assertEquals(
-                        DeviceLocation(
+                        LatLon(
                             latitude = 11.1,
                             longitude = 12.2
                         ),
                         stopLocation
                     )
                     assertEquals(
-                        DeviceLocation(
+                        LatLon(
                             latitude = 1.1,
                             longitude = 2.2
                         ),
@@ -338,14 +339,14 @@ class RealNearestStopsRetrieverTest {
                 },
                 onDistanceBetween = { stopLocation, deviceLocation ->
                     assertEquals(
-                        DeviceLocation(
+                        LatLon(
                             latitude = 11.1,
                             longitude = 12.2
                         ),
                         stopLocation
                     )
                     assertEquals(
-                        DeviceLocation(
+                        LatLon(
                             latitude = 1.1,
                             longitude = 2.2
                         ),
@@ -407,14 +408,14 @@ class RealNearestStopsRetrieverTest {
                 },
                 onDistanceBetween = { stopLocation, deviceLocation ->
                     assertEquals(
-                        DeviceLocation(
+                        LatLon(
                             latitude = 11.1,
                             longitude = 12.2
                         ),
                         stopLocation
                     )
                     assertEquals(
-                        DeviceLocation(
+                        LatLon(
                             latitude = 1.1,
                             longitude = 2.2
                         ),

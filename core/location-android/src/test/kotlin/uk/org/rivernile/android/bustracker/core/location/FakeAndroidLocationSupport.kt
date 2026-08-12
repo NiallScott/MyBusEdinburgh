@@ -29,22 +29,19 @@ package uk.org.rivernile.android.bustracker.core.location
 import kotlinx.coroutines.flow.Flow
 
 /**
- * A fake [LocationRepository] for testing.
+ * A fake [AndroidLocationSupport] for testing.
  *
  * @author Niall Scott
  */
-class FakeLocationRepository(
+internal class FakeAndroidLocationSupport(
     private val onHasLocationFeature: () -> Boolean = { throw NotImplementedError() },
     private val onHasGpsLocationProvider: () -> Boolean = { throw NotImplementedError() },
     private val onIsLocationEnabledFlow: () -> Flow<Boolean> = { throw NotImplementedError() },
     private val onIsGpsLocationProviderEnabledFlow: () -> Flow<Boolean> =
         { throw NotImplementedError() },
-    private val onUserVisibleLocationFlow: () -> Flow<DeviceLocation> =
-        { throw NotImplementedError() },
-    private val onLocationUpdatesFlow: () -> Flow<LocationUpdate> = { throw NotImplementedError() },
     private val onDistanceBetween: (LatLon, LatLon) -> Float =
         { _, _ -> throw NotImplementedError() }
-) : LocationRepository {
+) : AndroidLocationSupport {
 
     override val hasLocationFeature get() = onHasLocationFeature()
 
@@ -53,13 +50,6 @@ class FakeLocationRepository(
     override val isLocationEnabledFlow get() = onIsLocationEnabledFlow()
 
     override val isGpsLocationProviderEnabledFlow get() = onIsGpsLocationProviderEnabledFlow()
-
-    @Deprecated(
-        message = "Use locationUpdatesFlow instead."
-    )
-    override val userVisibleLocationFlow get() = onUserVisibleLocationFlow()
-
-    override val locationUpdatesFlow get() = onLocationUpdatesFlow()
 
     override fun distanceBetween(
         first: LatLon,
