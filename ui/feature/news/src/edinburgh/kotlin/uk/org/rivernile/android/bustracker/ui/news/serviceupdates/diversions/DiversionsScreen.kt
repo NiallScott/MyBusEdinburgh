@@ -32,7 +32,7 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -117,7 +117,7 @@ private fun LaunchAction(
 ) {
     val actionLauncher = LocalDiversionsActionLauncher.current
 
-    LaunchedEffect(action) {
+    SideEffect(action) {
         when (action) {
             is UiDiversionAction.ShowUrl -> actionLauncher.launchUrl(action.url)
         }

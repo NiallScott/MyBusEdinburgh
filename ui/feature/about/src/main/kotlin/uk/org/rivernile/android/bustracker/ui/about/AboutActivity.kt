@@ -61,7 +61,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -263,7 +263,7 @@ private fun LaunchAction(
 ) {
     val actionLauncher = LocalAboutActionLauncher.current
 
-    LaunchedEffect(action) {
+    SideEffect(action) {
         when (action) {
             is UiAction.ShowStoreListing ->
                 actionLauncher.launchStoreListing()

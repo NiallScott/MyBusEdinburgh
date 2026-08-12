@@ -15,7 +15,7 @@ retrofit = "3.0.0"
 # AndroidX
 androidx-activity = "1.13.0"
 androidx-benchmark = "1.4.1"
-androidx-fragment = "1.8.9"
+androidx-fragment = "1.9.0"
 androidx-hilt = "1.4.0"
 androidx-lifecycle = "2.11.0"
 androidx-room = "2.8.4"
@@ -69,8 +69,8 @@ kotlin-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime-jvm", versi
 androidx-activity = { module = "androidx.activity:activity-ktx", version.ref = "androidx-activity" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
 androidx-annotation = { module = "androidx.annotation:annotation", version = "1.10.0" }
-androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.1" }
-androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2026.06.01" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.8.0" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2026.08.00" }
 androidx-compose-runtime = { module = "androidx.compose.runtime:runtime" }
 androidx-compose-runtime-annotation = { module = "androidx.compose.runtime:runtime-annotation" }
 androidx-compose-ui = { module = "androidx.compose.ui:ui" }
@@ -111,9 +111,9 @@ firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 # Play Services
 play-services-location = { module = "com.google.android.gms:play-services-location", version = "21.4.0" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.0.0" }
-play-services-maps-ktx = { module = "com.google.maps.android:maps-ktx", version = "6.2.0" }
-play-services-maps-utils = { module = "com.google.maps.android:android-maps-utils", version = "5.0.0" }
-play-services-maps-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version = "6.2.0" }
+play-services-maps-ktx = { module = "com.google.maps.android:maps-ktx", version = "6.3.0" }
+play-services-maps-utils = { module = "com.google.maps.android:android-maps-utils", version = "5.1.1" }
+play-services-maps-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version = "6.3.0" }
 
 # Testing dependencies.
 androidx-arch-core-test = { module = "androidx.arch.core:core-testing", version = "2.2.0" }

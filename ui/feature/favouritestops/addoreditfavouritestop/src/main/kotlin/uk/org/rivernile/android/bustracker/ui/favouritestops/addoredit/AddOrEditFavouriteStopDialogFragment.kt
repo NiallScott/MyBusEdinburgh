@@ -49,6 +49,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
@@ -311,7 +312,7 @@ private fun FavouriteStopNameTextField(
 
     val focusRequester = remember { FocusRequester() }
 
-    LaunchedEffect(Unit) {
+    SideEffect(Unit) {
         focusRequester.requestFocus()
     }
 
@@ -352,7 +353,7 @@ private fun TitleStringResEffect(
     @StringRes titleStringRes: Int,
     onTitleStringResChanged: (Int) -> Unit
 ) {
-    LaunchedEffect(titleStringRes) {
+    SideEffect(titleStringRes) {
         onTitleStringResChanged(titleStringRes)
     }
 }
@@ -362,7 +363,7 @@ private fun PositiveButtonEffect(
     isPositiveButtonEnabled: Boolean,
     onPositiveButtonEnabledStateChanged: (Boolean) -> Unit
 ) {
-    LaunchedEffect(isPositiveButtonEnabled) {
+    SideEffect(isPositiveButtonEnabled) {
         onPositiveButtonEnabledStateChanged(isPositiveButtonEnabled)
     }
 }
@@ -373,7 +374,7 @@ private fun LaunchAction(
     onActionLaunched: () -> Unit,
     onDismissDialog: () -> Unit
 ) {
-    LaunchedEffect(action) {
+    SideEffect(action) {
         when (action) {
             is UiAction.DismissDialog -> onDismissDialog()
         }
