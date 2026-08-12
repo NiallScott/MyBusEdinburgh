@@ -34,15 +34,14 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.busstops.StopLocation
 import uk.org.rivernile.android.bustracker.core.config.ConfigRepository
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
-import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
 import uk.org.rivernile.android.bustracker.core.location.LatLon
+import uk.org.rivernile.android.bustracker.core.location.Location
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
-import uk.org.rivernile.android.bustracker.core.location.toLatLon
+import uk.org.rivernile.android.bustracker.core.location.LocationUpdate
 import javax.inject.Inject
 import kotlin.math.absoluteValue
 
@@ -69,57 +68,19 @@ internal class RealNearestStopsRetriever @Inject constructor(
 ) : NearestStopsRetriever {
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override val nearestStopsStateFlow: Flow<NearestStopsState> get() {
-        return if (locationRepository.hasLocationFeature) {
-            state
-                .permissionsStateFlow
-                .filterNotNull()
-                .distinctUntilChanged()
-                .flatMapLatest(::getNearestStopsFlowWithPermissionsState)
-        } else {
-            flowOf(NearestStopsState.Error.NoLocationFeature)
-        }
-    }
+    override val nearestStopsStateFlow get() = state
+        .permissionsStateFlow
+        .filterNotNull()
+        .distinctUntilChanged()
+        .flatMapLatest(::getNearestStopsFlowWithPermissionsState)
+        .distinctUntilChanged()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun getNearestStopsFlowWithPermissionsState(
         permissionsState: PermissionsState
     ): Flow<NearestStopsState> {
-        return if (permissionsState.isPermissionsSufficient) {
-            locationRepository
-                .isLocationEnabledFlow
-                .distinctUntilChanged()
-                .flatMapLatest {
-                    getNearestStopsFlowWithLocationEnabledState(
-                        permissionsState = permissionsState,
-                        isLocationEnabled = it
-                    )
-                }
-        } else {
-            flowOf(NearestStopsState.Error.InsufficientLocationPermissions)
-        }
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun getNearestStopsFlowWithLocationEnabledState(
-        permissionsState: PermissionsState,
-        isLocationEnabled: Boolean
-    ): Flow<NearestStopsState> {
-        return if (isLocationEnabled) {
-            getNearestStopsFlowWithDeviceLocation(permissionsState)
-        } else {
-            flowOf(NearestStopsState.Error.LocationOff)
-        }
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun getNearestStopsFlowWithDeviceLocation(
-        permissionsState: PermissionsState
-    ): Flow<NearestStopsState> {
         val combinedFlow = combine(
-            locationRepository
-                .userVisibleLocationFlow
-                .onStart<DeviceLocation?> { emit(null) },
+            locationRepository.locationUpdatesFlow,
             state.selectedServicesFlow,
             locationAccuracyGenerator.getUiLocationAccuracyFlow(permissionsState),
             ::Triple
@@ -128,30 +89,47 @@ internal class RealNearestStopsRetriever @Inject constructor(
         return combinedFlow
             .distinctUntilChanged()
             .flatMapLatest {
-                getNearestStopsFlowWithLocationAndSelectedServices(
-                    deviceLocation = it.first,
+                getNearestStopsFlowWithLocationUpdateAndSelectedServices(
+                    locationUpdate = it.first,
                     selectedServices = it.second,
                     locationAccuracy = it.third
                 )
             }
     }
 
-    private fun getNearestStopsFlowWithLocationAndSelectedServices(
-        deviceLocation: DeviceLocation?,
+    private fun getNearestStopsFlowWithLocationUpdateAndSelectedServices(
+        locationUpdate: LocationUpdate,
         selectedServices: Set<ServiceDescriptor>?,
         locationAccuracy: UiLocationAccuracy?
     ): Flow<NearestStopsState> {
-        if (deviceLocation == null) {
-            return flowOf(NearestStopsState.Error.LocationUnknown)
+        return when (locationUpdate) {
+            is LocationUpdate.AwaitingLocation -> flowOf(NearestStopsState.Error.LocationUnknown)
+            is LocationUpdate.Update -> getNearestStopsFlowWithLocationAndSelectedServices(
+                location = locationUpdate.location,
+                selectedServices = selectedServices,
+                locationAccuracy = locationAccuracy
+            )
+            is LocationUpdate.Error.NoLocationFeature ->
+                flowOf(NearestStopsState.Error.NoLocationFeature)
+            is LocationUpdate.Error.InsufficientLocationPermissions ->
+                flowOf(NearestStopsState.Error.InsufficientLocationPermissions)
+            is LocationUpdate.Error.LocationOff -> flowOf(NearestStopsState.Error.LocationOff)
         }
+    }
 
+    private fun getNearestStopsFlowWithLocationAndSelectedServices(
+        location: Location,
+        selectedServices: Set<ServiceDescriptor>?,
+        locationAccuracy: UiLocationAccuracy?
+    ): Flow<NearestStopsState> {
+        val latLon = location.latLon
         val latitudeSpan = configRepository.nearestStopsLatitudeSpan
         val longitudeSpan = configRepository.nearestStopsLongitudeSpan
 
-        val minLatitude = deviceLocation.latitude - latitudeSpan
-        val maxLatitude = deviceLocation.latitude + latitudeSpan
-        val minLongitude = deviceLocation.longitude - longitudeSpan
-        val maxLongitude = deviceLocation.longitude + longitudeSpan
+        val minLatitude = latLon.latitude - latitudeSpan
+        val maxLatitude = latLon.latitude + latitudeSpan
+        val minLongitude = latLon.longitude - longitudeSpan
+        val maxLongitude = latLon.longitude + longitudeSpan
 
         return busStopsRepository
             .getStopDetailsWithinSpanFlow(
@@ -166,7 +144,7 @@ internal class RealNearestStopsRetriever @Inject constructor(
                     stops = stopDetails
                         ?.toNearestStops {
                             locationRepository
-                                .distanceBetween(it.toLatLon(), deviceLocation.toLatLon())
+                                .distanceBetween(it.toLatLon(), latLon)
                                 .absoluteValue
                                 .toInt()
                         }

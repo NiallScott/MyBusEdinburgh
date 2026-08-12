@@ -151,7 +151,7 @@ internal class GooglePlayLocationSource @Inject constructor(
             fusedLocationProviderClient
                 .lastLocation
                 .await()
-                .toLocation()
+                ?.toLocation()
         }
     }
 }

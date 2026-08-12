@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
 import app.cash.turbine.test
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
@@ -40,10 +39,11 @@ import uk.org.rivernile.android.bustracker.core.config.ConfigRepository
 import uk.org.rivernile.android.bustracker.core.config.FakeConfigRepository
 import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
-import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
 import uk.org.rivernile.android.bustracker.core.location.FakeLocationRepository
 import uk.org.rivernile.android.bustracker.core.location.LatLon
+import uk.org.rivernile.android.bustracker.core.location.Location
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
+import uk.org.rivernile.android.bustracker.core.location.LocationUpdate
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -63,9 +63,6 @@ class RealNearestStopsRetrieverTest {
         val retriever = createRetriever(
             state = FakeState(
                 onPermissionsStateFlow = { flowOf(null) }
-            ),
-            locationRepository = FakeLocationRepository(
-                onHasLocationFeature = { true }
             )
         )
 
@@ -77,8 +74,18 @@ class RealNearestStopsRetrieverTest {
     @Test
     fun nearestStopsStateFlowEmitsNoLocationFeatureWhenNoLocationFeature() = runTest {
         val retriever = createRetriever(
+            state = FakeState(
+                onPermissionsStateFlow = { flowOf(sufficientPermissions) },
+                onSelectedServicesFlow = { flowOf(null) }
+            ),
             locationRepository = FakeLocationRepository(
-                onHasLocationFeature = { false }
+                onLocationUpdatesFlow = { flowOf(LocationUpdate.Error.NoLocationFeature) }
+            ),
+            locationAccuracyGenerator = FakeUiLocationAccuracyGenerator(
+                onGetUiLocationAccuracyFlow = { permissionsState ->
+                    assertEquals(sufficientPermissions, permissionsState)
+                    flowOf(null)
+                }
             )
         )
 
@@ -92,10 +99,19 @@ class RealNearestStopsRetrieverTest {
     fun nearestStopsStateFlowEmitsInsufficientLocationPermissionsWhenNoPermissions() = runTest {
         val retriever = createRetriever(
             state = FakeState(
-                onPermissionsStateFlow = { flowOf(insufficientPermissions) }
+                onPermissionsStateFlow = { flowOf(insufficientPermissions) },
+                onSelectedServicesFlow = { flowOf(null) }
             ),
             locationRepository = FakeLocationRepository(
-                onHasLocationFeature = { true }
+                onLocationUpdatesFlow = {
+                    flowOf(LocationUpdate.Error.InsufficientLocationPermissions)
+                }
+            ),
+            locationAccuracyGenerator = FakeUiLocationAccuracyGenerator(
+                onGetUiLocationAccuracyFlow = { permissionsState ->
+                    assertEquals(insufficientPermissions, permissionsState)
+                    flowOf(null)
+                }
             )
         )
 
@@ -109,11 +125,17 @@ class RealNearestStopsRetrieverTest {
     fun nearestStopsStateFlowEmitsLocationOffWhenLocationIsNotEnabled() = runTest {
         val retriever = createRetriever(
             state = FakeState(
-                onPermissionsStateFlow = { flowOf(sufficientPermissions) }
+                onPermissionsStateFlow = { flowOf(sufficientPermissions) },
+                onSelectedServicesFlow = { flowOf(null) }
             ),
             locationRepository = FakeLocationRepository(
-                onHasLocationFeature = { true },
-                onIsLocationEnabledFlow = { flowOf(false) }
+                onLocationUpdatesFlow = { flowOf(LocationUpdate.Error.LocationOff) }
+            ),
+            locationAccuracyGenerator = FakeUiLocationAccuracyGenerator(
+                onGetUiLocationAccuracyFlow = { permissionsState ->
+                    assertEquals(sufficientPermissions, permissionsState)
+                    flowOf(null)
+                }
             )
         )
 
@@ -131,9 +153,7 @@ class RealNearestStopsRetrieverTest {
                 onSelectedServicesFlow = { flowOf(null) }
             ),
             locationRepository = FakeLocationRepository(
-                onHasLocationFeature = { true },
-                onIsLocationEnabledFlow = { flowOf(true) },
-                onUserVisibleLocationFlow = ::emptyFlow
+                onLocationUpdatesFlow = { flowOf(LocationUpdate.AwaitingLocation) }
             ),
             locationAccuracyGenerator = FakeUiLocationAccuracyGenerator(
                 onGetUiLocationAccuracyFlow = { permissionsState ->
@@ -157,11 +177,17 @@ class RealNearestStopsRetrieverTest {
                 onSelectedServicesFlow = { flowOf(null) }
             ),
             locationRepository = FakeLocationRepository(
-                onHasLocationFeature = { true },
-                onIsLocationEnabledFlow = { flowOf(true) },
-                onUserVisibleLocationFlow = {
+                onLocationUpdatesFlow = {
                     flowOf(
-                        DeviceLocation(latitude = 1.1, longitude = 2.2)
+                        LocationUpdate.AwaitingLocation,
+                        LocationUpdate.Update(
+                            location = Location(
+                                latLon = LatLon(
+                                    latitude = 1.1,
+                                    longitude = 2.2
+                                )
+                            )
+                        )
                     )
                 }
             ),
@@ -209,11 +235,17 @@ class RealNearestStopsRetrieverTest {
                 onSelectedServicesFlow = { flowOf(null) }
             ),
             locationRepository = FakeLocationRepository(
-                onHasLocationFeature = { true },
-                onIsLocationEnabledFlow = { flowOf(true) },
-                onUserVisibleLocationFlow = {
+                onLocationUpdatesFlow = {
                     flowOf(
-                        DeviceLocation(latitude = 1.1, longitude = 2.2)
+                        LocationUpdate.AwaitingLocation,
+                        LocationUpdate.Update(
+                            location = Location(
+                                latLon = LatLon(
+                                    latitude = 1.1,
+                                    longitude = 2.2
+                                )
+                            )
+                        )
                     )
                 }
             ),
@@ -261,11 +293,17 @@ class RealNearestStopsRetrieverTest {
                 onSelectedServicesFlow = { flowOf(null) }
             ),
             locationRepository = FakeLocationRepository(
-                onHasLocationFeature = { true },
-                onIsLocationEnabledFlow = { flowOf(true) },
-                onUserVisibleLocationFlow = {
+                onLocationUpdatesFlow = {
                     flowOf(
-                        DeviceLocation(latitude = 1.1, longitude = 2.2)
+                        LocationUpdate.AwaitingLocation,
+                        LocationUpdate.Update(
+                            location = Location(
+                                latLon = LatLon(
+                                    latitude = 1.1,
+                                    longitude = 2.2
+                                )
+                            )
+                        )
                     )
                 },
                 onDistanceBetween = { stopLocation, deviceLocation ->
@@ -330,11 +368,17 @@ class RealNearestStopsRetrieverTest {
                 onSelectedServicesFlow = { flowOf(setOf(serviceDescriptor)) }
             ),
             locationRepository = FakeLocationRepository(
-                onHasLocationFeature = { true },
-                onIsLocationEnabledFlow = { flowOf(true) },
-                onUserVisibleLocationFlow = {
+                onLocationUpdatesFlow = {
                     flowOf(
-                        DeviceLocation(latitude = 1.1, longitude = 2.2)
+                        LocationUpdate.AwaitingLocation,
+                        LocationUpdate.Update(
+                            location = Location(
+                                latLon = LatLon(
+                                    latitude = 1.1,
+                                    longitude = 2.2
+                                )
+                            )
+                        )
                     )
                 },
                 onDistanceBetween = { stopLocation, deviceLocation ->
@@ -399,11 +443,17 @@ class RealNearestStopsRetrieverTest {
                 onSelectedServicesFlow = { flowOf(null) }
             ),
             locationRepository = FakeLocationRepository(
-                onHasLocationFeature = { true },
-                onIsLocationEnabledFlow = { flowOf(true) },
-                onUserVisibleLocationFlow = {
+                onLocationUpdatesFlow = {
                     flowOf(
-                        DeviceLocation(latitude = 1.1, longitude = 2.2)
+                        LocationUpdate.AwaitingLocation,
+                        LocationUpdate.Update(
+                            location = Location(
+                                latLon = LatLon(
+                                    latitude = 1.1,
+                                    longitude = 2.2
+                                )
+                            )
+                        )
                     )
                 },
                 onDistanceBetween = { stopLocation, deviceLocation ->
