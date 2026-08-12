@@ -62,7 +62,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -617,7 +617,7 @@ private fun LaunchAction(
     onShowLocationSettings: (() -> Unit)? = null,
     onShowAppPermissionSettings: (() -> Unit)? = null
 ) {
-    LaunchedEffect(action) {
+    SideEffect(action) {
         when (action) {
             is UiAction.ShowStopData -> onShowStopData?.invoke(action.stopIdentifier)
             is UiAction.ShowAddFavouriteStop ->
