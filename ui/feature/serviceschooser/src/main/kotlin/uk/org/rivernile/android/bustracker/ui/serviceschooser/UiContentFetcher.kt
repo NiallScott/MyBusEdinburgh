@@ -70,7 +70,7 @@ internal class RealUiContentFetcher @Inject constructor(
 
     private fun createUiContent(
         params: ServicesChooserParams?,
-        operatorServices: Map<UiServiceChooserItem.Operator, List<ServiceWithColour>>?,
+        operatorServices: Map<UiServiceChooserItem.Operator, Set<ServiceWithColour>>?,
         selectedServices: Set<ServiceDescriptor>
     ): UiContent {
         if (params == null) {

@@ -41,9 +41,9 @@ class FakeServicesRepository(
         { throw NotImplementedError() },
     private val onGetServiceDetailsFlow: (StopIdentifier) -> Flow<List<ServiceDetails>?> =
         { throw NotImplementedError() },
-    private val onAllServiceNamesWithColourFlow: () -> Flow<List<ServiceWithColour>?> =
+    private val onAllServiceNamesWithColourFlow: () -> Flow<Set<ServiceWithColour>?> =
         { throw NotImplementedError() },
-    private val onGetServiceNamesWithColourFlow: (StopIdentifier) -> Flow<List<ServiceWithColour>?> =
+    private val onGetServiceNamesWithColourFlow: (StopIdentifier) -> Flow<Set<ServiceWithColour>?> =
         { throw NotImplementedError() },
     private val onHasServicesFlow: () -> Flow<Boolean> = { throw NotImplementedError() }
 ) : ServicesRepository {

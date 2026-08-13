@@ -36,7 +36,7 @@ import uk.org.rivernile.android.bustracker.core.services.ServiceWithColour
  */
 internal class FakeOperatorAndServicesFetcher(
     private val onOperatorAndServicesFlow:
-        () -> Flow<Map<UiServiceChooserItem.Operator, List<ServiceWithColour>>?> =
+        () -> Flow<Map<UiServiceChooserItem.Operator, Set<ServiceWithColour>>?> =
         { throw NotImplementedError() }
 ) : OperatorAndServicesFetcher {
 

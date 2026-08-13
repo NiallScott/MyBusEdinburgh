@@ -63,21 +63,21 @@ public interface ServicesRepository {
     public fun getServiceDetailsFlow(stopIdentifier: StopIdentifier): Flow<List<ServiceDetails>?>
 
     /**
-     * A [Flow] which emits ordered [List]s of [ServiceWithColour] for all known services.
+     * A [Flow] which emits [Set]s of [ServiceWithColour] for all known services.
      */
-    public val allServiceNamesWithColourFlow: Flow<List<ServiceWithColour>?>
+    public val allServiceNamesWithColourFlow: Flow<Set<ServiceWithColour>?>
 
     /**
-     * Get a [Flow] which emits ordered [List]s of [ServiceWithColour] for services which stop at
-     * the given [stopIdentifier].
+     * Get a [Flow] which emits [Set]s of [ServiceWithColour] for services which stop at the given
+     * [stopIdentifier].
      *
      * @param stopIdentifier The stop code to get services for.
-     * @return A [Flow] which emits ordered [List]s of [ServiceWithColour] for services which stop
-     * at the given [stopIdentifier].
+     * @return A [Flow] which emits [Set]s of [ServiceWithColour] for services which stop at the
+     * given [stopIdentifier].
      */
     public fun getServiceNamesWithColourFlow(
         stopIdentifier: StopIdentifier
-    ): Flow<List<ServiceWithColour>?>
+    ): Flow<Set<ServiceWithColour>?>
 
     /**
      * This [Flow] emits whether there are known services.
@@ -128,21 +128,21 @@ internal class RealServicesRepository @Inject constructor(
             }
     }
 
-    override val allServiceNamesWithColourFlow: Flow<List<ServiceWithColour>?> get() =
+    override val allServiceNamesWithColourFlow: Flow<Set<ServiceWithColour>?> get() =
         serviceDao
             .allServiceNamesWithColourFlow
             .map {
-                it?.toServiceWithColourList(serviceColoursGenerator::generateColourOnPrimary)
+                it?.toServiceWithColourSet(serviceColoursGenerator::generateColourOnPrimary)
                     ?.ifEmpty { null }
             }
 
     override fun getServiceNamesWithColourFlow(
         stopIdentifier: StopIdentifier
-    ): Flow<List<ServiceWithColour>?> {
+    ): Flow<Set<ServiceWithColour>?> {
         return serviceDao
             .getServiceNamesWithColourFlow(stopIdentifier.getNaptanCodeOrThrow())
             .map {
-                it?.toServiceWithColourList(serviceColoursGenerator::generateColourOnPrimary)
+                it?.toServiceWithColourSet(serviceColoursGenerator::generateColourOnPrimary)
                     ?.ifEmpty { null }
             }
     }
