@@ -53,12 +53,12 @@ class ServiceWithColourKtTest {
                     colourOnPrimary = 100
                 )
             )
-        ).toServiceWithColourList {
+        ).toServiceWithColourSet {
             fail("Not expecting the colourProducer lambda to be called.")
         }
 
         assertEquals(
-            listOf(
+            setOf(
                 ServiceWithColour(
                     serviceDescriptor = FakeServiceDescriptor(
                         serviceName = "1",

@@ -50,7 +50,7 @@ internal interface OperatorAndServicesFetcher {
      * A [Flow] which emits a mapping of operators to services for the current arguments of the
      * services screen. When there are no items, `null` is emitted.
      */
-    val operatorAndServicesFlow: Flow<Map<UiServiceChooserItem.Operator, List<ServiceWithColour>>?>
+    val operatorAndServicesFlow: Flow<Map<UiServiceChooserItem.Operator, Set<ServiceWithColour>>?>
 }
 
 internal class RealOperatorAndServicesFetcher @Inject constructor(
@@ -66,7 +66,7 @@ internal class RealOperatorAndServicesFetcher @Inject constructor(
 
     private fun getUiContentFlow(
         params: ServicesChooserParams?
-    ): Flow<Map<UiServiceChooserItem.Operator, List<ServiceWithColour>>?> {
+    ): Flow<Map<UiServiceChooserItem.Operator, Set<ServiceWithColour>>?> {
         return when (params) {
             is ServicesChooserParams.AllServices -> allServicesFlow
             is ServicesChooserParams.Stop ->
@@ -91,8 +91,8 @@ internal class RealOperatorAndServicesFetcher @Inject constructor(
 
     private fun combineOperatorNamesAndServices(
         operatorNames: Map<String, OperatorName>?,
-        services: List<ServiceWithColour>?
-    ): Map<UiServiceChooserItem.Operator, List<ServiceWithColour>>? {
+        services: Set<ServiceWithColour>?
+    ): Map<UiServiceChooserItem.Operator, Set<ServiceWithColour>>? {
         return services?.toOperatorServicesMap(operatorNames)
     }
 }

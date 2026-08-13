@@ -380,14 +380,14 @@ class RealUiContentFetcherTest {
     )
 
     private val operatorsAndServices get() =
-        mapOf<UiServiceChooserItem.Operator, List<ServiceWithColour>>(
+        mapOf<UiServiceChooserItem.Operator, Set<ServiceWithColour>>(
             UiServiceChooserItem.Operator.Named(
                 operatorId = "TEST1",
                 operatorName = "Test 1"
-            ) to listOf(service1, service2),
+            ) to setOf(service1, service2),
             UiServiceChooserItem.Operator.Named(
                 operatorId = "TEST2",
                 operatorName = "Test 2"
-            ) to listOf(service3)
+            ) to setOf(service3)
         )
 }
