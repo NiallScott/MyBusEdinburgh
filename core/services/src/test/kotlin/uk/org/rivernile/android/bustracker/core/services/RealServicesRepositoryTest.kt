@@ -455,7 +455,7 @@ class RealServicesRepositoryTest {
 
         repository.allServiceNamesWithColourFlow.test {
             assertEquals(
-                listOf(
+                setOf(
                     ServiceWithColour(
                         serviceDescriptor = FakeServiceDescriptor(
                             serviceName = "1",
@@ -501,7 +501,7 @@ class RealServicesRepositoryTest {
 
         repository.allServiceNamesWithColourFlow.test {
             assertEquals(
-                listOf(
+                setOf(
                     ServiceWithColour(
                         serviceDescriptor = FakeServiceDescriptor(
                             serviceName = "1",
@@ -544,7 +544,7 @@ class RealServicesRepositoryTest {
 
         repository.allServiceNamesWithColourFlow.test {
             assertEquals(
-                listOf(
+                setOf(
                     ServiceWithColour(
                         serviceDescriptor = FakeServiceDescriptor(
                             serviceName = "1",
@@ -625,7 +625,7 @@ class RealServicesRepositoryTest {
         )
 
         repository.getServiceNamesWithColourFlow("123456".toNaptanStopIdentifier()).test {
-            assertEquals(
+            setOf(
                 listOf(
                     ServiceWithColour(
                         serviceDescriptor = FakeServiceDescriptor(
@@ -672,7 +672,7 @@ class RealServicesRepositoryTest {
         )
 
         repository.getServiceNamesWithColourFlow("123456".toNaptanStopIdentifier()).test {
-            assertEquals(
+            setOf(
                 listOf(
                     ServiceWithColour(
                         serviceDescriptor = FakeServiceDescriptor(
@@ -716,7 +716,7 @@ class RealServicesRepositoryTest {
         )
 
         repository.getServiceNamesWithColourFlow("123456".toNaptanStopIdentifier()).test {
-            assertEquals(
+            setOf(
                 listOf(
                     ServiceWithColour(
                         serviceDescriptor = FakeServiceDescriptor(

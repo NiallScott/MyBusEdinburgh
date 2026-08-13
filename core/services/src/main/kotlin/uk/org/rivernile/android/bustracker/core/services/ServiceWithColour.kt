@@ -43,12 +43,12 @@ public data class ServiceWithColour(
     val colours: ServiceColours?
 )
 
-internal inline fun List<DatabaseServiceWithColour>.toServiceWithColourList(
+internal inline fun Collection<DatabaseServiceWithColour>.toServiceWithColourSet(
     colourProducer: (Int) -> Int?
-): List<ServiceWithColour> {
+): Set<ServiceWithColour> {
     return map {
         it.toServiceWithColour(colourProducer)
-    }
+    }.toSet()
 }
 
 private inline fun DatabaseServiceWithColour.toServiceWithColour(

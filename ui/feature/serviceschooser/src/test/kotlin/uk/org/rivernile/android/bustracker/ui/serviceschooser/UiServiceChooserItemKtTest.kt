@@ -59,12 +59,12 @@ class UiServiceChooserItemKtTest {
             colours = null
         )
 
-        val result = listOf(service1)
+        val result = setOf(service1)
             .toOperatorServicesMap(operators = null)
 
         assertEquals(
-            mapOf<UiServiceChooserItem.Operator, List<ServiceWithColour>>(
-                UiServiceChooserItem.Operator.Unknown to listOf(service1)
+            mapOf<UiServiceChooserItem.Operator, Set<ServiceWithColour>>(
+                UiServiceChooserItem.Operator.Unknown to setOf(service1)
             ),
             result
         )
@@ -80,12 +80,12 @@ class UiServiceChooserItemKtTest {
             colours = null
         )
 
-        val result = listOf(service1)
+        val result = setOf(service1)
             .toOperatorServicesMap(operators = emptyMap())
 
         assertEquals(
-            mapOf<UiServiceChooserItem.Operator, List<ServiceWithColour>>(
-                UiServiceChooserItem.Operator.Unknown to listOf(service1)
+            mapOf<UiServiceChooserItem.Operator, Set<ServiceWithColour>>(
+                UiServiceChooserItem.Operator.Unknown to setOf(service1)
             ),
             result
         )
@@ -101,7 +101,7 @@ class UiServiceChooserItemKtTest {
             colours = null
         )
 
-        val result = listOf(service1)
+        val result = setOf(service1)
             .toOperatorServicesMap(
                 operators = mapOf(
                     "UNKNOWN" to OperatorName(displayName = "")
@@ -109,8 +109,8 @@ class UiServiceChooserItemKtTest {
             )
 
         assertEquals(
-            mapOf<UiServiceChooserItem.Operator, List<ServiceWithColour>>(
-                UiServiceChooserItem.Operator.Unknown to listOf(service1)
+            mapOf<UiServiceChooserItem.Operator, Set<ServiceWithColour>>(
+                UiServiceChooserItem.Operator.Unknown to setOf(service1)
             ),
             result
         )
@@ -126,7 +126,7 @@ class UiServiceChooserItemKtTest {
             colours = null
         )
 
-        val result = listOf(service1)
+        val result = setOf(service1)
             .toOperatorServicesMap(
                 operators = mapOf(
                     "UNKNOWN" to OperatorName(displayName = "Unknown")
@@ -134,8 +134,8 @@ class UiServiceChooserItemKtTest {
             )
 
         assertEquals(
-            mapOf<UiServiceChooserItem.Operator, List<ServiceWithColour>>(
-                UiServiceChooserItem.Operator.Unknown to listOf(service1)
+            mapOf<UiServiceChooserItem.Operator, Set<ServiceWithColour>>(
+                UiServiceChooserItem.Operator.Unknown to setOf(service1)
             ),
             result
         )
@@ -151,7 +151,7 @@ class UiServiceChooserItemKtTest {
             colours = null
         )
 
-        val result = listOf(service1)
+        val result = setOf(service1)
             .toOperatorServicesMap(
                 operators = mapOf(
                     "TEST1" to OperatorName(displayName = "Test 1")
@@ -159,11 +159,11 @@ class UiServiceChooserItemKtTest {
             )
 
         assertEquals(
-            mapOf<UiServiceChooserItem.Operator, List<ServiceWithColour>>(
+            mapOf<UiServiceChooserItem.Operator, Set<ServiceWithColour>>(
                 UiServiceChooserItem.Operator.Named(
                     operatorId = "TEST1",
                     operatorName = "Test 1"
-                ) to listOf(service1)
+                ) to setOf(service1)
             ),
             result
         )
@@ -200,7 +200,7 @@ class UiServiceChooserItemKtTest {
             colours = null
         )
 
-        val result = listOf(service1, service2, service3, service4)
+        val result = setOf(service1, service2, service3, service4)
             .toOperatorServicesMap(
                 operators = mapOf(
                     "TEST1" to OperatorName(displayName = "Test 1"),
@@ -213,12 +213,12 @@ class UiServiceChooserItemKtTest {
                 UiServiceChooserItem.Operator.Named(
                     operatorId = "TEST1",
                     operatorName = "Test 1"
-                ) to listOf(service1, service4),
+                ) to setOf(service1, service4),
                 UiServiceChooserItem.Operator.Named(
                     operatorId = "TEST3",
                     operatorName = "Test 3"
-                ) to listOf(service3),
-                UiServiceChooserItem.Operator.Unknown to listOf(service2)
+                ) to setOf(service3),
+                UiServiceChooserItem.Operator.Unknown to setOf(service2)
             ),
             result
         )
@@ -226,7 +226,7 @@ class UiServiceChooserItemKtTest {
 
     @Test
     fun toUiServiceChooserItemListReturnsNullWhenCollectionIsEmpty() {
-        val result = emptyMap<UiServiceChooserItem.Operator, List<ServiceWithColour>>()
+        val result = emptyMap<UiServiceChooserItem.Operator, Set<ServiceWithColour>>()
             .toUiServiceChooserItemList(
                 selectedServices = emptySet(),
                 comparator = naturalOrder()
@@ -237,11 +237,11 @@ class UiServiceChooserItemKtTest {
 
     @Test
     fun toUiServiceChooserItemListReturnsNullWhenHasSingleOperatorWithNoServices() {
-        val result = mapOf<UiServiceChooserItem.Operator, List<ServiceWithColour>>(
+        val result = mapOf<UiServiceChooserItem.Operator, Set<ServiceWithColour>>(
             UiServiceChooserItem.Operator.Named(
                 operatorId = "TEST1",
                 operatorName = "Test 1"
-            ) to emptyList()
+            ) to emptySet()
         ).toUiServiceChooserItemList(
             selectedServices = emptySet(),
             comparator = naturalOrder()
@@ -252,11 +252,11 @@ class UiServiceChooserItemKtTest {
 
     @Test
     fun toUiServiceChooserItemListReturnsListWithNoItemsSelectedWhenSelectedServicesIsEmpty() {
-        val result = mapOf<UiServiceChooserItem.Operator, List<ServiceWithColour>>(
+        val result = mapOf<UiServiceChooserItem.Operator, Set<ServiceWithColour>>(
             UiServiceChooserItem.Operator.Named(
                 operatorId = "TEST1",
                 operatorName = "Test 1"
-            ) to listOf(
+            ) to setOf(
                 ServiceWithColour(
                     serviceDescriptor = ServiceDescriptor(
                         serviceName = "1",
@@ -294,11 +294,11 @@ class UiServiceChooserItemKtTest {
 
     @Test
     fun toUiServiceChooserItemListReturnsListWithNoItemsSelectedWhenServiceNotSelected() {
-        val result = mapOf<UiServiceChooserItem.Operator, List<ServiceWithColour>>(
+        val result = mapOf<UiServiceChooserItem.Operator, Set<ServiceWithColour>>(
             UiServiceChooserItem.Operator.Named(
                 operatorId = "TEST1",
                 operatorName = "Test 1"
-            ) to listOf(
+            ) to setOf(
                 ServiceWithColour(
                     serviceDescriptor = ServiceDescriptor(
                         serviceName = "1",
@@ -341,11 +341,11 @@ class UiServiceChooserItemKtTest {
 
     @Test
     fun toUiServiceChooserItemListReturnsListWithItemSelectedWhenServiceIsSelected() {
-        val result = mapOf<UiServiceChooserItem.Operator, List<ServiceWithColour>>(
+        val result = mapOf<UiServiceChooserItem.Operator, Set<ServiceWithColour>>(
             UiServiceChooserItem.Operator.Named(
                 operatorId = "TEST1",
                 operatorName = "Test 1"
-            ) to listOf(
+            ) to setOf(
                 ServiceWithColour(
                     serviceDescriptor = ServiceDescriptor(
                         serviceName = "1",
@@ -389,7 +389,7 @@ class UiServiceChooserItemKtTest {
     @Test
     fun toUiServiceChooserItemListSortsItemsInCorrectOrder() {
         val result = mapOf(
-            UiServiceChooserItem.Operator.Unknown to listOf(
+            UiServiceChooserItem.Operator.Unknown to setOf(
                 ServiceWithColour(
                     serviceDescriptor = ServiceDescriptor(
                         serviceName = "100",
@@ -401,11 +401,11 @@ class UiServiceChooserItemKtTest {
             UiServiceChooserItem.Operator.Named(
                 operatorId = "NOSERVICES",
                 operatorName = "No services"
-            ) to emptyList(),
+            ) to emptySet(),
             UiServiceChooserItem.Operator.Named(
                 operatorId = "TEST2",
                 operatorName = "Test 2"
-            ) to listOf(
+            ) to setOf(
                 ServiceWithColour(
                     serviceDescriptor = ServiceDescriptor(
                         serviceName = "4",
@@ -431,7 +431,7 @@ class UiServiceChooserItemKtTest {
             UiServiceChooserItem.Operator.Named(
                 operatorId = "TEST1",
                 operatorName = "Test 1"
-            ) to listOf(
+            ) to setOf(
                 ServiceWithColour(
                     serviceDescriptor = ServiceDescriptor(
                         serviceName = "3",

@@ -79,23 +79,23 @@ internal sealed interface UiServiceChooserItem {
 }
 
 /**
- * Converts this [List] of [ServiceWithColour]s to a [Map] of [UiServiceChooserItem.Operator] to
- * [List] of [ServiceWithColour]. Essentially, it groups services to operators.
+ * Converts this [Collection] of [ServiceWithColour]s to a [Map] of [UiServiceChooserItem.Operator]
+ * to [Set] of [ServiceWithColour]. Essentially, it groups services to operators.
  *
  * The [operators] [Map] is used to take an operator code mapping and convert this in to a
  * human-readable name for the operator.
  *
- * When the input [List] is empty then `null` will be returned. When the service is for an operator
- * for which no name is known, then this service will be grouped in to
+ * When the input [Collection] is empty then `null` will be returned. When the service is for an
+ * operator for which no name is known, then this service will be grouped in to
  * [UiServiceChooserItem.Operator.Unknown].
  *
  * @param operators A mapping of the operator code to the operator name.
- * @return The services grouped to a map of operators to services, or `null` if the input [List] is
- * empty.
+ * @return The services grouped to a map of operators to services, or `null` if the input
+ * [Collection] is empty.
  */
-internal fun List<ServiceWithColour>.toOperatorServicesMap(
+internal fun Collection<ServiceWithColour>.toOperatorServicesMap(
     operators: Map<String, OperatorName>?
-): Map<UiServiceChooserItem.Operator, List<ServiceWithColour>>? {
+): Map<UiServiceChooserItem.Operator, Set<ServiceWithColour>>? {
     if (isEmpty()) {
         return null
     }
@@ -115,7 +115,7 @@ internal fun List<ServiceWithColour>.toOperatorServicesMap(
         } else {
             UiServiceChooserItem.Operator.Unknown
         }
-    }
+    }.mapValues { it.value.toSet() }
 }
 
 /**
@@ -126,7 +126,7 @@ internal fun List<ServiceWithColour>.toOperatorServicesMap(
  * @param comparator The comparator used to sort operators and services.
  * @return A sorted [List] of operators and services, or `null` if the result is empty.
  */
-internal fun Map<UiServiceChooserItem.Operator, List<ServiceWithColour>>.toUiServiceChooserItemList(
+internal fun Map<UiServiceChooserItem.Operator, Set<ServiceWithColour>>.toUiServiceChooserItemList(
     selectedServices: Set<ServiceDescriptor>,
     comparator: Comparator<String>
 ): List<UiServiceChooserItem>? {
