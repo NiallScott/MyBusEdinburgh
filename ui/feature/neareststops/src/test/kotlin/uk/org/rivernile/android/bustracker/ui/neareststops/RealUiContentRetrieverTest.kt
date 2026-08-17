@@ -52,6 +52,23 @@ import kotlin.test.assertNull
 class RealUiContentRetrieverTest {
 
     @Test
+    fun uiContentFlowEmitsInProgressWhenStateIsAwaitingLocation() = runTest {
+        val retriever = createRetriever(
+            nearestStopsRetriever = FakeNearestStopsRetriever(
+                onNearestStopsStateFlow = { flowOf(NearestStopsState.AwaitingLocation) }
+            ),
+            servicesRepository = FakeServicesRepository(
+                onGetColoursForServicesFlow = { flowOf(null) }
+            )
+        )
+
+        retriever.uiContentFlow.test {
+            assertEquals(UiContent.InProgress, awaitItem())
+            awaitComplete()
+        }
+    }
+
+    @Test
     fun uiContentFlowEmitsNoNearestStopsWhenStateStopsIsNull() = runTest {
         val retriever = createRetriever(
             nearestStopsRetriever = FakeNearestStopsRetriever(
@@ -338,7 +355,6 @@ class RealUiContentRetrieverTest {
         )
 
         retriever.uiContentFlow.test {
-            assertEquals(UiContent.InProgress, awaitItem())
             assertEquals(UiContent.Error.LocationUnknown, awaitItem())
             awaitComplete()
         }

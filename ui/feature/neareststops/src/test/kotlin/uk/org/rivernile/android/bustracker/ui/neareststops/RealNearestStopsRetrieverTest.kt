@@ -164,6 +164,7 @@ class RealNearestStopsRetrieverTest {
         )
 
         retriever.nearestStopsStateFlow.test {
+            assertEquals(NearestStopsState.AwaitingLocation, awaitItem())
             assertEquals(NearestStopsState.Error.LocationUnknown, awaitItem())
             awaitComplete()
         }
@@ -215,7 +216,7 @@ class RealNearestStopsRetrieverTest {
         )
 
         retriever.nearestStopsStateFlow.test {
-            assertEquals(NearestStopsState.Error.LocationUnknown, awaitItem())
+            assertEquals(NearestStopsState.AwaitingLocation, awaitItem())
             assertEquals(
                 NearestStopsState.Stops(
                     stops = null,
@@ -273,7 +274,7 @@ class RealNearestStopsRetrieverTest {
         )
 
         retriever.nearestStopsStateFlow.test {
-            assertEquals(NearestStopsState.Error.LocationUnknown, awaitItem())
+            assertEquals(NearestStopsState.AwaitingLocation, awaitItem())
             assertEquals(
                 NearestStopsState.Stops(
                     stops = null,
@@ -348,7 +349,7 @@ class RealNearestStopsRetrieverTest {
         )
 
         retriever.nearestStopsStateFlow.test {
-            assertEquals(NearestStopsState.Error.LocationUnknown, awaitItem())
+            assertEquals(NearestStopsState.AwaitingLocation, awaitItem())
             assertEquals(
                 NearestStopsState.Stops(
                     stops = listOf(nearestStop),
@@ -423,7 +424,7 @@ class RealNearestStopsRetrieverTest {
         )
 
         retriever.nearestStopsStateFlow.test {
-            assertEquals(NearestStopsState.Error.LocationUnknown, awaitItem())
+            assertEquals(NearestStopsState.AwaitingLocation, awaitItem())
             assertEquals(
                 NearestStopsState.Stops(
                     stops = listOf(nearestStop),
@@ -498,7 +499,7 @@ class RealNearestStopsRetrieverTest {
         )
 
         retriever.nearestStopsStateFlow.test {
-            assertEquals(NearestStopsState.Error.LocationUnknown, awaitItem())
+            assertEquals(NearestStopsState.AwaitingLocation, awaitItem())
             assertEquals(
                 NearestStopsState.Stops(
                     stops = listOf(nearestStop),

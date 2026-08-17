@@ -28,18 +28,15 @@ package uk.org.rivernile.android.bustracker.ui.neareststops
 
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * This is used to retrieve the [UiContent] state.
@@ -53,8 +50,6 @@ internal interface UiContentRetriever {
      */
     val uiContentFlow: Flow<UiContent>
 }
-
-private const val LOCATION_UNKNOWN_PROGRESS_MILLIS = 10000L
 
 internal class RealUiContentRetriever @Inject constructor(
     private val nearestStopsRetriever: NearestStopsRetriever,
@@ -71,6 +66,7 @@ internal class RealUiContentRetriever @Inject constructor(
         nearestStopsStateWithServiceColours: NearestStopsStateWithServiceColours
     ): Flow<UiContent> {
         return when (val state = nearestStopsStateWithServiceColours.nearestStopsState) {
+            is NearestStopsState.AwaitingLocation -> flowOf(UiContent.InProgress)
             is NearestStopsState.Stops -> getUiContentFlowWithStops(
                 stops = state.stops,
                 serviceColours = nearestStopsStateWithServiceColours.serviceColours,
@@ -81,11 +77,7 @@ internal class RealUiContentRetriever @Inject constructor(
             is NearestStopsState.Error.InsufficientLocationPermissions ->
                 flowOf(UiContent.Error.InsufficientLocationPermissions)
             is NearestStopsState.Error.LocationOff -> flowOf(UiContent.Error.LocationOff)
-            is NearestStopsState.Error.LocationUnknown -> flow {
-                emit(UiContent.InProgress)
-                delay(LOCATION_UNKNOWN_PROGRESS_MILLIS.milliseconds)
-                emit(UiContent.Error.LocationUnknown)
-            }
+            is NearestStopsState.Error.LocationUnknown -> flowOf(UiContent.Error.LocationUnknown)
         }
     }
 

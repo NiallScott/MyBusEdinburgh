@@ -27,11 +27,13 @@
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
@@ -44,6 +46,7 @@ import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.location.LocationUpdate
 import javax.inject.Inject
 import kotlin.math.absoluteValue
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Used to retrieve the nearest stops to the device. This contains the logic used to determine the
@@ -58,6 +61,8 @@ internal interface NearestStopsRetriever {
      */
     val nearestStopsStateFlow: Flow<NearestStopsState>
 }
+
+private const val LOCATION_UNKNOWN_PROGRESS_MILLIS = 10000L
 
 internal class RealNearestStopsRetriever @Inject constructor(
     private val state: State,
@@ -103,7 +108,11 @@ internal class RealNearestStopsRetriever @Inject constructor(
         locationAccuracy: UiLocationAccuracy?
     ): Flow<NearestStopsState> {
         return when (locationUpdate) {
-            is LocationUpdate.AwaitingLocation -> flowOf(NearestStopsState.Error.LocationUnknown)
+            is LocationUpdate.AwaitingLocation -> flow {
+                emit(NearestStopsState.AwaitingLocation)
+                delay(LOCATION_UNKNOWN_PROGRESS_MILLIS.milliseconds)
+                emit(NearestStopsState.Error.LocationUnknown)
+            }
             is LocationUpdate.Update -> getNearestStopsFlowWithLocationAndSelectedServices(
                 location = locationUpdate.location,
                 selectedServices = selectedServices,

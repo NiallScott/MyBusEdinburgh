@@ -34,6 +34,12 @@ package uk.org.rivernile.android.bustracker.ui.neareststops
 internal sealed interface NearestStopsState {
 
     /**
+     * The location has not yet been determined. If the location continues to not be determined then
+     * this may be followed by a [NearestStopsState.Error.LocationUnknown] state.
+     */
+    data object AwaitingLocation : NearestStopsState
+
+    /**
      * These are the stops available for the current location of the device.
      *
      * @property stops The stops available for the current location of the device.
