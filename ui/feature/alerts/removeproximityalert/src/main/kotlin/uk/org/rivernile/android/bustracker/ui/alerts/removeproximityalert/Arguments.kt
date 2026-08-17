@@ -34,7 +34,7 @@ import uk.org.rivernile.android.bustracker.core.domain.toStopIdentifier
 import javax.inject.Inject
 
 /**
- * This exposes the arguments which the remove arrival alert feature was initialised with.
+ * This exposes the arguments which the remove proximity alert feature was initialised with.
  *
  * @author Niall Scott
  */

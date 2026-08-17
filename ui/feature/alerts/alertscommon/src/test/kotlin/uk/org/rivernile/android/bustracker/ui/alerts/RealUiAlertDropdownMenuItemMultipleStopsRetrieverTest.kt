@@ -232,6 +232,36 @@ class RealUiAlertDropdownMenuItemMultipleStopsRetrieverTest {
     }
 
     @Test
+    fun getUiArrivalAlertDropdownMenuItemsFlowDoesNotEmitDuplicateItems() = runTest {
+        val requestedStops = setOf("123456".toNaptanStopIdentifier())
+        val retriever = createRetriever(
+            alertsRepository = FakeAlertsRepository(
+                onArrivalAlertStopIdentifiersFlow = {
+                    flowOf(
+                        setOf("123456".toNaptanStopIdentifier()),
+                        setOf("123456".toNaptanStopIdentifier())
+                    )
+                }
+            ),
+            featureRepository = FakeFeatureRepository(
+                onHasArrivalAlertFeature = { true }
+            )
+        )
+
+        retriever.getUiArrivalAlertDropdownMenuItemsFlow(requestedStops).test {
+            assertEquals(
+                mapOf<StopIdentifier, UiArrivalAlertDropdownMenuItem>(
+                    "123456".toNaptanStopIdentifier() to UiArrivalAlertDropdownMenuItem(
+                        hasArrivalAlert = true
+                    )
+                ),
+                awaitItem()
+            )
+            awaitComplete()
+        }
+    }
+
+    @Test
     fun getUiProximityAlertDropdownMenuItemsFlowWhenNoProximityAlertFeatureEmitsNull() = runTest {
         val requestedStops = setOf("123456".toNaptanStopIdentifier())
         val retriever = createRetriever(
@@ -408,6 +438,36 @@ class RealUiAlertDropdownMenuItemMultipleStopsRetrieverTest {
                     ),
                     "5".toNaptanStopIdentifier() to UiProximityAlertDropdownMenuItem(
                         hasProximityAlert = false
+                    )
+                ),
+                awaitItem()
+            )
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun getUiProximityAlertDropdownMenuItemsFlowDoesNotEmitDuplicateItems() = runTest {
+        val requestedStops = setOf("123456".toNaptanStopIdentifier())
+        val retriever = createRetriever(
+            alertsRepository = FakeAlertsRepository(
+                onProximityAlertStopIdentifiersFlow = {
+                    flowOf(
+                        setOf("123456".toNaptanStopIdentifier()),
+                        setOf("123456".toNaptanStopIdentifier())
+                    )
+                }
+            ),
+            featureRepository = FakeFeatureRepository(
+                onHasProximityAlertFeature = { true }
+            )
+        )
+
+        retriever.getUiProximityAlertDropdownMenuItemsFlow(requestedStops).test {
+            assertEquals(
+                mapOf<StopIdentifier, UiProximityAlertDropdownMenuItem>(
+                    "123456".toNaptanStopIdentifier() to UiProximityAlertDropdownMenuItem(
+                        hasProximityAlert = true
                     )
                 ),
                 awaitItem()

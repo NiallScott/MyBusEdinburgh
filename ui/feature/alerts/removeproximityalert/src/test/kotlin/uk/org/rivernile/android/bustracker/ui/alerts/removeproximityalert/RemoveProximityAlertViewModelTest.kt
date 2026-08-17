@@ -26,7 +26,10 @@
 
 package uk.org.rivernile.android.bustracker.ui.alerts.removeproximityalert
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -81,16 +84,44 @@ class RemoveProximityAlertViewModelTest {
         assertEquals(1, removalCount)
     }
 
+    @Test
+    fun onUserConfirmRemovalSurvivesViewModelScopeCancellation() = runTest {
+        var removalCount = 0
+        val viewModelCoroutineScope = TestScope(
+            context = StandardTestDispatcher(
+                scheduler = testScheduler
+            )
+        )
+        val viewModel = createViewModel(
+            arguments = FakeArguments(
+                onGetStopIdentifier = { "123456".toNaptanStopIdentifier() }
+            ),
+            alertsRepository = FakeAlertsRepository(
+                onRemoveProximityAlertWithStopIdentifier = { stopIdentifier ->
+                    assertEquals("123456".toNaptanStopIdentifier(), stopIdentifier)
+                    removalCount++
+                }
+            ),
+            viewModelCoroutineScope  =viewModelCoroutineScope
+        )
+
+        viewModelCoroutineScope.cancel()
+        viewModel.onUserConfirmRemoval()
+
+        assertEquals(1, removalCount)
+    }
+
     private fun TestScope.createViewModel(
         arguments: Arguments = FakeArguments(),
-        alertsRepository: AlertsRepository = FakeAlertsRepository()
+        alertsRepository: AlertsRepository = FakeAlertsRepository(),
+        viewModelCoroutineScope: CoroutineScope = backgroundScope
     ): RemoveProximityAlertViewModel {
         return RemoveProximityAlertViewModel(
             arguments = arguments,
             alertsRepository = alertsRepository,
             defaultDispatcher = UnconfinedTestDispatcher(scheduler = testScheduler),
-            applicationCoroutineScope = this,
-            viewModelCoroutineScope = backgroundScope
+            applicationCoroutineScope = backgroundScope,
+            viewModelCoroutineScope = viewModelCoroutineScope
         )
     }
 }
