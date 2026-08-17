@@ -1,5 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
   ~
   ~ This software is provided 'as-is', without any express or implied
   ~ warranty.  In no event will the authors or contributors be held liable for
@@ -23,7 +24,6 @@
   ~     exempt from clause 2.
   ~
   -->
-
 <resources
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -78,8 +78,6 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:enforceNavigationBarContrast" tools:targetApi="q">false</item>
-        <item name="windowActionModeOverlay">true</item>
-        <item name="actionModeCloseDrawable">@drawable/ic_action_close</item>
 
         <item name="preferenceTheme">@style/ThemeOverlay.Preference.MyBus</item>
 

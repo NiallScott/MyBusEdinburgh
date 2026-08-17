@@ -46,20 +46,15 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.view.ActionMode
-import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.isInvisible
-import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.commit
-import com.google.android.material.color.MaterialColors
 import com.google.android.material.search.SearchBar
 import com.google.android.material.search.SearchView
 import dagger.hilt.android.AndroidEntryPoint
@@ -76,7 +71,6 @@ import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.explore.ExploreFragment
 import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment
 import uk.org.rivernile.android.bustracker.ui.HasScrollableContent
-import uk.org.rivernile.android.bustracker.ui.HasTabBar
 import uk.org.rivernile.android.bustracker.ui.news.NewsFragment
 import uk.org.rivernile.android.bustracker.ui.search.SearchFragment
 import uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity
@@ -185,47 +179,6 @@ class MainActivity : AppCompatActivity(),
         super.onNewIntent(intent)
 
         handleIntent(intent)
-    }
-
-    override fun onSupportActionModeStarted(mode: ActionMode) {
-        super.onSupportActionModeStarted(mode)
-
-        @Suppress("DEPRECATION")
-        window.statusBarColor = MaterialColors.getColor(
-            viewBinding.root,
-            com.google.android.material.R.attr.colorSurfaceContainer
-        )
-        viewBinding.apply {
-            appBarLayout.isInvisible = true
-            bottomNavigation.isVisible = false
-        }
-
-        (currentFragment as? HasTabBar)?.isTabBarVisible = false
-
-        ViewCompat.getRootWindowInsets(viewBinding.root)
-                ?.getInsets(WindowInsetsCompat.Type.systemBars())
-                ?.let {
-                    viewBinding.fragmentContainer.updateLayoutParams<MarginLayoutParams> {
-                        bottomMargin = it.bottom
-                    }
-                }
-    }
-
-    override fun onSupportActionModeFinished(mode: ActionMode) {
-        super.onSupportActionModeFinished(mode)
-
-        @Suppress("DEPRECATION")
-        window.statusBarColor = ContextCompat.getColor(this, android.R.color.transparent)
-        viewBinding.apply {
-            appBarLayout.isInvisible = false
-            bottomNavigation.isVisible = true
-        }
-
-        (currentFragment as? HasTabBar)?.isTabBarVisible = true
-
-        viewBinding.fragmentContainer.updateLayoutParams<MarginLayoutParams> {
-            bottomMargin = viewBinding.bottomNavigation.height
-        }
     }
 
     override fun onShowAddOrEditFavouriteStop(stopIdentifier: StopIdentifier) {

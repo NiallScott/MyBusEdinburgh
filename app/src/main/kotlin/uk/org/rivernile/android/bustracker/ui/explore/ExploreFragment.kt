@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.commit
@@ -39,7 +38,6 @@ import com.google.android.material.tabs.TabLayout
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapFragment
 import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment
 import uk.org.rivernile.android.bustracker.ui.HasScrollableContent
-import uk.org.rivernile.android.bustracker.ui.HasTabBar
 import uk.org.rivernile.android.bustracker.ui.favouritestops.FavouriteStopsFragment
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentExploreBinding
@@ -50,7 +48,7 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentExploreB
  *
  * @author Niall Scott
  */
-class ExploreFragment : Fragment(), HasTabBar, HasScrollableContent {
+class ExploreFragment : Fragment(), HasScrollableContent {
 
     companion object {
 
@@ -102,12 +100,6 @@ class ExploreFragment : Fragment(), HasTabBar, HasScrollableContent {
 
         _viewBinding = null
     }
-
-    override var isTabBarVisible: Boolean
-        get() = viewBinding.tabLayout.isVisible
-        set(value) {
-            viewBinding.tabLayout.isVisible = value
-        }
 
     override val scrollableContentIdRes get() =
         (currentFragment as? HasScrollableContent)?.scrollableContentIdRes ?: View.NO_ID
