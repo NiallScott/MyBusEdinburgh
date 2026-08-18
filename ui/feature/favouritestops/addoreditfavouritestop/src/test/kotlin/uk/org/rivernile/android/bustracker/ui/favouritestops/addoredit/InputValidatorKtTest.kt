@@ -53,6 +53,13 @@ class InputValidatorKtTest {
     }
 
     @Test
+    fun isStopNameValidReturnsFalseWhenStopNameIsWhiteSpace() {
+        val result = isStopNameValid(" ")
+
+        assertFalse(result)
+    }
+
+    @Test
     fun isStopNameValidReturnsTrueWhenStopNameIsPopulated() {
         val result = isStopNameValid("A")
 

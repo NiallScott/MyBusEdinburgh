@@ -80,13 +80,12 @@ internal class RealUiFavouriteStopDropdownMenuItemMultipleStopsRetriever @Inject
     private fun createFavouriteStopMenuItems(
         requestedStopIdentifiers: Set<StopIdentifier>,
         favouriteStopsStopIdentifiers: Set<StopIdentifier>?
-    ): Map<StopIdentifier, UiFavouriteStopDropdownMenuItem>? {
+    ): Map<StopIdentifier, UiFavouriteStopDropdownMenuItem> {
         return requestedStopIdentifiers
             .associateWith {
                 UiFavouriteStopDropdownMenuItem(
                     isFavouriteStop = favouriteStopsStopIdentifiers?.contains(it) ?: false
                 )
             }
-            .ifEmpty { null }
     }
 }
