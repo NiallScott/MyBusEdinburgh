@@ -120,6 +120,7 @@ include(
     ":ui:feature:favouritestops:removefavouritestop",
     ":ui:feature:neareststops",
     ":ui:feature:news",
+    ":ui:feature:search",
     ":ui:feature:serviceschooser",
     ":ui:text-formatting",
     ":ui:ui-core",

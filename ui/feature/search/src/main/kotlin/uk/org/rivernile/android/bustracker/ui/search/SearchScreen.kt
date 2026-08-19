@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.neareststops
+package uk.org.rivernile.android.bustracker.ui.search
 
 import android.content.res.Configuration
 import androidx.annotation.DrawableRes
@@ -35,7 +35,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.MutableWindowInsets
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
@@ -45,7 +44,6 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.onConsumedWindowInsetsChanged
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -54,13 +52,9 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
@@ -70,16 +64,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -94,7 +84,6 @@ import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
 import uk.org.rivernile.android.bustracker.core.text.UiStopName
-import uk.org.rivernile.android.bustracker.ui.interop.MenuProvider
 import uk.org.rivernile.android.bustracker.ui.text.PrimaryErrorText
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
@@ -104,14 +93,13 @@ import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 internal const val TEST_TAG_CONTENT_PROGRESS = "content-progress"
 internal const val TEST_TAG_CONTENT_POPULATED = "content-populated"
 internal const val TEST_TAG_CONTENT_ERROR = "content-error"
-internal const val TEST_TAG_ERROR_TITLE = "error-title"
-internal const val TEST_TAG_ERROR_BLURB = "error-blurb"
+internal const val TEST_TAG_ERROR_TEXT = "error-text"
 
 /**
- * The entry point in to the nearest stops screen.
+ * The entry point in to the search screen.
  *
  * @param modifier Any [Modifier]s which should be applied.
- * @param viewModel An instance of [NearestStopsViewModel] to coordinate state.
+ * @param viewModel An instance of [SearchViewModel] to coordinate state.
  * @param onShowStopData This is called when stop data should be shown.
  * @param onShowAddFavouriteStop This is called when the UI to add a favourite stop should be shown.
  * @param onShowRemoveFavouriteStop This is called when the UI to remove a favourite stop should be
@@ -123,18 +111,13 @@ internal const val TEST_TAG_ERROR_BLURB = "error-blurb"
  * shown.
  * @param onShowRemoveProximityAlert This is called when it should be confirmed with the user if a
  * proximity alert should be removed.
- * @param onShowOnMap This is called when the nearest stop should be shown on a map.
- * @param onRequestLocationPermissions This is called when location permissions should be requested.
- * @param onShowServicesChooser This is called when the services chooser should be shown.
- * @param onShowLocationSettings This is called when the system location settings should be shown.
- * @param onShowAppPermissionSettings This is called when UI to allow the user to change app
- * permission settings should be shown.
+ * @param onShowOnMap This is called when the stop search result should be shown on a map.
  * @author Niall Scott
  */
 @Composable
-internal fun NearestStopsScreen(
+internal fun SearchScreen(
     modifier: Modifier = Modifier,
-    viewModel: NearestStopsViewModel = viewModel(),
+    viewModel: SearchViewModel = viewModel(),
     onShowStopData: ((StopIdentifier) -> Unit)? = null,
     onShowAddFavouriteStop: ((StopIdentifier) -> Unit)? = null,
     onShowRemoveFavouriteStop: ((StopIdentifier) -> Unit)? = null,
@@ -142,15 +125,11 @@ internal fun NearestStopsScreen(
     onShowRemoveArrivalAlert: ((StopIdentifier) -> Unit)? = null,
     onShowAddProximityAlert: ((StopIdentifier) -> Unit)? = null,
     onShowRemoveProximityAlert: ((StopIdentifier) -> Unit)? = null,
-    onShowOnMap: ((StopIdentifier) -> Unit)? = null,
-    onRequestLocationPermissions: (() -> Unit)? = null,
-    onShowServicesChooser: ((Set<ServiceDescriptor>?) -> Unit)? = null,
-    onShowLocationSettings: (() -> Unit)? = null,
-    onShowAppPermissionSettings: (() -> Unit)? = null
+    onShowOnMap: ((StopIdentifier) -> Unit)? = null
 ) {
     val uiState by viewModel.uiStateFlow.collectAsStateWithLifecycle()
 
-    NearestStopsScreenWithState(
+    SearchScreenWithState(
         state = uiState,
         onItemClick = viewModel::onItemClicked,
         onOpenDropdownMenuClick = viewModel::onOpenDropdownMenuClicked,
@@ -162,13 +141,6 @@ internal fun NearestStopsScreen(
         onAddProximityAlertClick = viewModel::onAddProximityAlertClicked,
         onRemoveProximityAlertClick = viewModel::onRemoveProximityAlertClicked,
         onShowOnMapClick = viewModel::onShowOnMapClicked,
-        onGrantPermissionClick = viewModel::onGrantPermissionClicked,
-        onOpenSettingsClick = viewModel::onOpenSettingsClicked,
-        onShowServicesChooserClick = viewModel::onShowServicesChooserClicked,
-        onLocationAccuracyOpenAppSettingsClick =
-            viewModel::onLocationAccuracyOpenAppSettingsClicked,
-        onLocationAccuracyOpenSystemLocationSettingsClick =
-            viewModel::onLocationAccuracyOpenSystemLocationSettingsClicked,
         onActionLaunched = viewModel::onActionLaunched,
         modifier = modifier,
         onShowStopData = onShowStopData,
@@ -178,20 +150,16 @@ internal fun NearestStopsScreen(
         onShowRemoveArrivalAlert = onShowRemoveArrivalAlert,
         onShowAddProximityAlert = onShowAddProximityAlert,
         onShowRemoveProximityAlert = onShowRemoveProximityAlert,
-        onShowOnMap = onShowOnMap,
-        onRequestLocationPermissions = onRequestLocationPermissions,
-        onShowServicesChooser = onShowServicesChooser,
-        onShowLocationSettings = onShowLocationSettings,
-        onShowAppPermissionSettings = onShowAppPermissionSettings
+        onShowOnMap = onShowOnMap
     )
 }
 
 /**
- * The entry point in to the nearest stops screen when state is to be passed in directly, for
- * example in tests and previews.
+ * The entry point in to the search screen when state is to be passed in directly, for example in
+ * tests and previews.
  *
  * @param state The current [UiState].
- * @param onItemClick This is called when the user has clicked on the nearest stop.
+ * @param onItemClick This is called when the user has clicked on the stop search result.
  * @param onOpenDropdownMenuClick This is called when the user has clicked on the button to show
  * the dropdown menu.
  * @param onDropdownMenuDismissed This is called when the dropdown meny has been dismissed.
@@ -207,18 +175,8 @@ internal fun NearestStopsScreen(
  * proximity alert.
  * @param onRemoveProximityAlertClick This is called when the user clicks on the menu item to remove
  * a proximity alert.
- * @param onShowOnMapClick This is called when the user clicks on the menu item to show the nearest
- * stop on a map.
- * @param onGrantPermissionClick This is called when the user clicks on the grant permission error
- * resolution button.
- * @param onOpenSettingsClick This is called when the user clicks on the open settings error
- * resolution button.
- * @param onShowServicesChooserClick This is called when the user clicks on the menu item to show
- * the services chooser.
- * @param onLocationAccuracyOpenAppSettingsClick This is called when the user clicks on the button
- * to open the system settings for the app from the location accuracy banner.
- * @param onLocationAccuracyOpenSystemLocationSettingsClick This is called when the user clicks on
- * the button to open the system settings for location settings from the location accuracy banner.
+ * @param onShowOnMapClick This is called when the user clicks on the menu item to show the stop
+ * search result on a map.
  * @param onActionLaunched This is called when an action has been launched.
  * @param modifier Any [Modifier]s which should be applied.
  * @param onShowStopData This is called when stop data should be shown.
@@ -232,16 +190,11 @@ internal fun NearestStopsScreen(
  * shown.
  * @param onShowRemoveProximityAlert This is called when it should be confirmed with the user if a
  * proximity alert should be removed.
- * @param onShowOnMap This is called when the nearest stop should be shown on a map.
- * @param onRequestLocationPermissions This is called when location permissions should be requested.
- * @param onShowServicesChooser This is called when the services chooser should be shown.
- * @param onShowLocationSettings This is called when the system location settings should be shown.
- * @param onShowAppPermissionSettings This is called when UI to allow the user to change app
- * permission settings should be shown.
+ * @param onShowOnMap This is called when the stop search result should be shown on a map.
  * @author Niall Scott
  */
 @Composable
-internal fun NearestStopsScreenWithState(
+internal fun SearchScreenWithState(
     state: UiState,
     onItemClick: (StopIdentifier) -> Unit,
     onOpenDropdownMenuClick: (StopIdentifier) -> Unit,
@@ -253,11 +206,6 @@ internal fun NearestStopsScreenWithState(
     onAddProximityAlertClick: (StopIdentifier) -> Unit,
     onRemoveProximityAlertClick: (StopIdentifier) -> Unit,
     onShowOnMapClick: (StopIdentifier) -> Unit,
-    onGrantPermissionClick: () -> Unit,
-    onOpenSettingsClick: () -> Unit,
-    onShowServicesChooserClick: () -> Unit,
-    onLocationAccuracyOpenAppSettingsClick: () -> Unit,
-    onLocationAccuracyOpenSystemLocationSettingsClick: () -> Unit,
     onActionLaunched: () -> Unit,
     modifier: Modifier = Modifier,
     onShowStopData: ((StopIdentifier) -> Unit)? = null,
@@ -267,47 +215,32 @@ internal fun NearestStopsScreenWithState(
     onShowRemoveArrivalAlert: ((StopIdentifier) -> Unit)? = null,
     onShowAddProximityAlert: ((StopIdentifier) -> Unit)? = null,
     onShowRemoveProximityAlert: ((StopIdentifier) -> Unit)? = null,
-    onShowOnMap: ((StopIdentifier) -> Unit)? = null,
-    onRequestLocationPermissions: (() -> Unit)? = null,
-    onShowServicesChooser: ((Set<ServiceDescriptor>?) -> Unit)? = null,
-    onShowLocationSettings: (() -> Unit)? = null,
-    onShowAppPermissionSettings: (() -> Unit)? = null
+    onShowOnMap: ((StopIdentifier) -> Unit)? = null
 ) {
-    val paddingDouble = dimensionResource(Rcore.dimen.padding_double)
-
-    Column(
-        modifier = modifier,
+    Box(
+        modifier = modifier
     ) {
-        val content = state.content
-
-        if (content is HasLocationAccuracy) {
-            val locationAccuracy = content.locationAccuracy
-
-            if (locationAccuracy != null) {
-                LocationAccuracyHeaderBar(
-                    locationAccuracy = locationAccuracy,
-                    onShowAppSettingsClick = onLocationAccuracyOpenAppSettingsClick,
-                    onShowSystemLocationSettingsClick =
-                        onLocationAccuracyOpenSystemLocationSettingsClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
-            }
-        }
-
-        val nestedScrollInterop = rememberNestedScrollInteropConnection()
-
-        when (content) {
+        when (val content = state.content) {
+            is UiContent.EmptySearchTerm -> EmptySearchTermError(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .safeDrawingPadding()
+                    .padding(dimensionResource(Rcore.dimen.padding_double))
+            )
             is UiContent.InProgress -> IndeterminateProgress(
                 modifier = Modifier
                     .fillMaxSize()
                     .safeDrawingPadding()
-                    .padding(paddingDouble)
-                    .nestedScroll(nestedScrollInterop)
-                    .verticalScroll(rememberScrollState())
+                    .padding(dimensionResource(Rcore.dimen.padding_double))
+            )
+            is UiContent.NoResults -> NoResultsError(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .safeDrawingPadding()
+                    .padding(dimensionResource(Rcore.dimen.padding_double))
             )
             is UiContent.Content -> Content(
-                nearestStops = content.nearestStops,
+                searchResults = content.results,
                 onItemClick = onItemClick,
                 onOpenDropdownMenuClick = onOpenDropdownMenuClick,
                 onDropdownMenuDismissed = onDropdownMenuDismissed,
@@ -320,18 +253,6 @@ internal fun NearestStopsScreenWithState(
                 onShowOnMapClick = onShowOnMapClick,
                 modifier = Modifier
                     .fillMaxSize()
-                    .nestedScroll(nestedScrollInterop)
-            )
-            is UiContent.Error -> NearestStopsError(
-                error = content,
-                onGrantPermissionClick = onGrantPermissionClick,
-                onOpenSettingsClick = onOpenSettingsClick,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .safeDrawingPadding()
-                    .padding(paddingDouble)
-                    .nestedScroll(nestedScrollInterop)
-                    .verticalScroll(rememberScrollState())
             )
         }
     }
@@ -347,18 +268,7 @@ internal fun NearestStopsScreenWithState(
             onShowRemoveArrivalAlert = onShowRemoveArrivalAlert,
             onShowAddProximityAlert = onShowAddProximityAlert,
             onShowRemoveProximityAlert = onShowRemoveProximityAlert,
-            onShowOnMap = onShowOnMap,
-            onRequestLocationPermissions = onRequestLocationPermissions,
-            onShowServicesChooser = onShowServicesChooser,
-            onShowLocationSettings = onShowLocationSettings,
-            onShowAppPermissionSettings = onShowAppPermissionSettings
-        )
-    }
-
-    if (!LocalInspectionMode.current) {
-        NearestStopsOptionMenu(
-            actionButtons = state.actionButtons,
-            onFilterMenuItemClick = onShowServicesChooserClick
+            onShowOnMap = onShowOnMap
         )
     }
 }
@@ -380,10 +290,32 @@ private fun IndeterminateProgress(
     }
 }
 
+@Composable
+private fun EmptySearchTermError(
+    modifier: Modifier = Modifier
+) {
+    ErrorLayout(
+        iconResId = R.drawable.ic_error_search,
+        textResId = R.string.search_error_empty,
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun NoResultsError(
+    modifier: Modifier = Modifier
+) {
+    ErrorLayout(
+        iconResId = R.drawable.ic_error_directions_bus,
+        textResId = R.string.search_error_no_results,
+        modifier = modifier
+    )
+}
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun Content(
-    nearestStops: ImmutableList<UiNearestStop>,
+    searchResults: ImmutableList<UiStopSearchResult>,
     onItemClick: (StopIdentifier) -> Unit,
     onOpenDropdownMenuClick: (StopIdentifier) -> Unit,
     onDropdownMenuDismissed: () -> Unit,
@@ -415,11 +347,11 @@ private fun Content(
             .toPaddingValuesWithListVerticalPadding()
     ) {
         items(
-            items = nearestStops,
+            items = searchResults,
             key = { it.stopIdentifier.toParcelableStopIdentifier() }
         ) {
-            NearestStopItem(
-                nearestStop = it,
+            StopSearchResult(
+                stopSearchResult = it,
                 onClick = { onItemClick(it.stopIdentifier) },
                 onOpenDropdownMenuClick = { onOpenDropdownMenuClick(it.stopIdentifier) },
                 onDropdownMenuDismissed = onDropdownMenuDismissed,
@@ -439,125 +371,21 @@ private fun Content(
 }
 
 @Composable
-private fun NearestStopsError(
-    error: UiContent.Error,
-    onGrantPermissionClick: () -> Unit,
-    onOpenSettingsClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    when (error) {
-        is UiContent.Error.NoLocationFeature -> NoLocationFeatureError(
-            modifier = modifier
-        )
-        is UiContent.Error.InsufficientLocationPermissions -> InsufficientLocationPermissionsError(
-            onGrantPermissionClick = onGrantPermissionClick,
-            modifier = modifier
-        )
-        is UiContent.Error.LocationOff -> LocationOffError(
-            onOpenSettingsClick = onOpenSettingsClick,
-            modifier = modifier
-        )
-        is UiContent.Error.LocationUnknown -> LocationUnknownError(
-            modifier = modifier
-        )
-        is UiContent.Error.NoNearestStops -> NoNearestStopsError(
-            modifier = modifier
-        )
-    }
-}
-
-@Composable
-private fun NoLocationFeatureError(
-    modifier: Modifier = Modifier
-) {
-    ErrorLayout(
-        iconResId = R.drawable.ic_error_location_disabled,
-        titleTextResId = R.string.neareststops_error_no_location_feature_title,
-        blurbTextResId = R.string.neareststops_error_no_location_feature_blurb,
-        modifier = modifier
-    )
-}
-
-@Composable
-private fun InsufficientLocationPermissionsError(
-    onGrantPermissionClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    ErrorLayout(
-        iconResId = R.drawable.ic_error_perm_device_information,
-        titleTextResId = R.string.neareststops_error_permission_required_title,
-        blurbTextResId = R.string.neareststops_error_permission_required_blurb,
-        modifier = modifier
-    ) {
-        TextButton(
-            onClick = onGrantPermissionClick
-        ) {
-            Text(
-                text = stringResource(R.string.neareststops_error_permission_required_button)
-            )
-        }
-    }
-}
-
-@Composable
-private fun LocationOffError(
-    onOpenSettingsClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    ErrorLayout(
-        iconResId = R.drawable.ic_error_location_disabled,
-        titleTextResId = R.string.neareststops_error_location_sources_title,
-        blurbTextResId = R.string.neareststops_error_location_sources_blurb,
-        modifier = modifier
-    ) {
-        TextButton(
-            onClick = onOpenSettingsClick
-        ) {
-            Text(
-                text = stringResource(R.string.neareststops_error_location_sources_button)
-            )
-        }
-    }
-}
-
-@Composable
-private fun LocationUnknownError(
-    modifier: Modifier = Modifier
-) {
-    ErrorLayout(
-        iconResId = R.drawable.ic_error_location_disabled,
-        titleTextResId = R.string.neareststops_error_location_unknown_title,
-        blurbTextResId = R.string.neareststops_error_location_unknown_blurb,
-        modifier = modifier
-    )
-}
-
-@Composable
-private fun NoNearestStopsError(
-    modifier: Modifier = Modifier
-) {
-    ErrorLayout(
-        iconResId = R.drawable.ic_error_my_location,
-        titleTextResId = R.string.neareststops_error_empty_title,
-        blurbTextResId = R.string.neareststops_error_empty_blurb,
-        modifier = modifier
-    )
-}
-
-@Composable
 private fun ErrorLayout(
     @DrawableRes iconResId: Int,
-    @StringRes titleTextResId: Int,
-    @StringRes blurbTextResId: Int,
-    modifier: Modifier = Modifier,
-    resolveButton: (@Composable () -> Unit)? = null
+    @StringRes textResId: Int,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
             .semantics {
                 testTag = TEST_TAG_CONTENT_ERROR
             },
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement
+            .spacedBy(
+                space = dimensionResource(Rcore.dimen.padding_double),
+                alignment = Alignment.CenterVertically
+            ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
@@ -568,36 +396,13 @@ private fun ErrorLayout(
             tint = MaterialTheme.colorScheme.primary
         )
 
-        Spacer(
-            modifier = Modifier
-                .height(dimensionResource(Rcore.dimen.padding_double))
-        )
-
         PrimaryErrorText(
-            text = stringResource(titleTextResId),
-            fontWeight = FontWeight.Bold,
+            text = stringResource(textResId),
             modifier = Modifier
                 .semantics {
-                    testTag = TEST_TAG_ERROR_TITLE
+                    testTag = TEST_TAG_ERROR_TEXT
                 }
         )
-
-        PrimaryErrorText(
-            text = stringResource(blurbTextResId),
-            modifier = Modifier
-                .semantics {
-                    testTag = TEST_TAG_ERROR_BLURB
-                }
-        )
-
-        if (resolveButton != null) {
-            Spacer(
-                modifier = Modifier
-                    .height(dimensionResource(Rcore.dimen.padding_default))
-            )
-
-            resolveButton()
-        }
     }
 }
 
@@ -635,40 +440,10 @@ private fun LaunchAction(
                 onShowRemoveProximityAlert?.invoke(action.stopIdentifier)
             is UiAction.ShowOnMap ->
                 onShowOnMap?.invoke(action.stopIdentifier)
-            is UiAction.RequestLocationPermissions -> onRequestLocationPermissions?.invoke()
-            is UiAction.ShowServicesChooser ->
-                onShowServicesChooser?.invoke(action.selectedServices)
-            is UiAction.ShowLocationSettings -> onShowLocationSettings?.invoke()
-            is UiAction.ShowAppPermissionSettings -> onShowAppPermissionSettings?.invoke()
         }
 
         onActionLaunched()
     }
-}
-
-@Composable
-private fun NearestStopsOptionMenu(
-    actionButtons: UiActionButtons,
-    onFilterMenuItemClick: () -> Unit
-) {
-    MenuProvider(
-        onCreateMenu = { menu, menuInflater ->
-            menuInflater.inflate(R.menu.neareststops_option_menu, menu)
-        },
-        onPrepareMenu = { menu ->
-            checkNotNull(menu.findItem(R.id.neareststops_option_menu_filter))
-                .isEnabled = actionButtons.serviceFilterActionButton.isEnabled
-        },
-        onMenuItemSelected = { item ->
-            when (item.itemId) {
-                R.id.neareststops_option_menu_filter -> {
-                    onFilterMenuItemClick()
-                    true
-                }
-                else -> false
-            }
-        }
-    )
 }
 
 @Composable
@@ -686,25 +461,25 @@ private fun PaddingValues.toPaddingValuesWithListVerticalPadding(): PaddingValue
 }
 
 @Preview(
-    name = "Nearest stops screen - light",
-    group = "Nearest stops screen",
+    name = "Search screen - light",
+    group = "Search screen",
     showBackground = true,
     backgroundColor = 0xFFFFFFFF,
     uiMode = Configuration.UI_MODE_NIGHT_NO
 )
 @Preview(
-    name = "Nearest stops screen - dark",
-    group = "Nearest stops screen",
+    name = "Search screen - dark",
+    group = "Search screen",
     showBackground = true,
     backgroundColor = 0xFF000000,
     uiMode = Configuration.UI_MODE_NIGHT_YES
 )
 @Composable
-private fun NearestStopsScreenPreview(
+private fun SearchScreenPreview(
     @PreviewParameter(UiStateProvider::class) state: UiState
 ) {
     MyBusTheme {
-        NearestStopsScreenWithState(
+        SearchScreenWithState(
             state = state,
             modifier = Modifier.fillMaxSize(),
             onActionLaunched = { },
@@ -717,12 +492,7 @@ private fun NearestStopsScreenPreview(
             onRemoveArrivalAlertClick = { },
             onAddProximityAlertClick = { },
             onRemoveProximityAlertClick = { },
-            onShowOnMapClick = { },
-            onGrantPermissionClick = { },
-            onOpenSettingsClick = { },
-            onShowServicesChooserClick = { },
-            onLocationAccuracyOpenAppSettingsClick = { },
-            onLocationAccuracyOpenSystemLocationSettingsClick = { }
+            onShowOnMapClick = { }
         )
     }
 }
@@ -731,13 +501,18 @@ private class UiStateProvider : PreviewParameterProvider<UiState> {
 
     override val values = sequenceOf(
         UiState(
+            content = UiContent.EmptySearchTerm
+        ),
+        UiState(
             content = UiContent.InProgress
         ),
         UiState(
+            content = UiContent.NoResults
+        ),
+        UiState(
             content = UiContent.Content(
-                locationAccuracy = null,
-                nearestStops = persistentListOf(
-                    UiNearestStop(
+                results = persistentListOf(
+                    UiStopSearchResult(
                         stopIdentifier = "1".toNaptanStopIdentifier(),
                         stopName = UiStopName(
                             name = "Name 1",
@@ -753,10 +528,9 @@ private class UiStateProvider : PreviewParameterProvider<UiState> {
                             )
                         ),
                         orientation = StopOrientation.NORTH,
-                        distanceMeters = 123,
-                        dropdownMenu = UiNearestStopDropdownMenu()
+                        dropdownMenu = UiStopSearchResultDropdownMenu()
                     ),
-                    UiNearestStop(
+                    UiStopSearchResult(
                         stopIdentifier = "2".toNaptanStopIdentifier(),
                         stopName = UiStopName(
                             name = "Name 2",
@@ -764,10 +538,9 @@ private class UiStateProvider : PreviewParameterProvider<UiState> {
                         ),
                         services = null,
                         orientation = StopOrientation.SOUTH_EAST,
-                        distanceMeters = 456,
-                        dropdownMenu = UiNearestStopDropdownMenu()
+                        dropdownMenu = UiStopSearchResultDropdownMenu()
                     ),
-                    UiNearestStop(
+                    UiStopSearchResult(
                         stopIdentifier = "3".toNaptanStopIdentifier(),
                         stopName = UiStopName(
                             name = "Name 3",
@@ -811,42 +584,9 @@ private class UiStateProvider : PreviewParameterProvider<UiState> {
                             )
                         ),
                         orientation = StopOrientation.WEST,
-                        distanceMeters = 789,
-                        dropdownMenu = UiNearestStopDropdownMenu()
+                        dropdownMenu = UiStopSearchResultDropdownMenu()
                     )
                 )
-            )
-        ),
-        UiState(
-            content = UiContent.Error.NoLocationFeature
-        ),
-        UiState(
-            content = UiContent.Error.InsufficientLocationPermissions
-        ),
-        UiState(
-            content = UiContent.Error.LocationOff
-        ),
-        UiState(
-            content = UiContent.Error.LocationUnknown,
-        ),
-        UiState(
-            content = UiContent.Error.NoNearestStops(
-                locationAccuracy = UiLocationAccuracy.GPS_NOT_PRESENT
-            )
-        ),
-        UiState(
-            content = UiContent.Error.NoNearestStops(
-                locationAccuracy = UiLocationAccuracy.PERMISSIONS_NOT_SUFFICIENT
-            )
-        ),
-        UiState(
-            content = UiContent.Error.NoNearestStops(
-                locationAccuracy = UiLocationAccuracy.GPS_DISABLED
-            )
-        ),
-        UiState(
-            content = UiContent.Error.NoNearestStops(
-                locationAccuracy = null
             )
         )
     )
