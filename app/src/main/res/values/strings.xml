@@ -58,23 +58,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
 
     <!--
     ****************
-    * Orientations *
-    ****************
-    -->
-    <string name="orientation_unknown">Faces unknown direction</string>
-    <string-array name="orientations">
-        <item>Faces north</item>
-        <item>Faces north east</item>
-        <item>Faces east</item>
-        <item>Faces south east</item>
-        <item>Faces south</item>
-        <item>Faces south west</item>
-        <item>Faces west</item>
-        <item>Faces north west</item>
-    </string-array>
-
-    <!--
-    ****************
     ****************
     ** Activities **
     ****************
@@ -240,15 +223,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="explore_tab_favourites">Favourites</string>
     <string name="explore_tab_map">Map</string>
     <string name="explore_tab_nearest_stops">Nearest</string>
-
-    <!--
-    ******************************
-    * Strings for SearchFragment *
-    ******************************
-    -->
-    <string name="search_item_no_services">No known services</string>
-    <string name="search_error_empty">Type your search term or enter a stop code to begin</string>
-    <string name="search_error_no_results">No results match your search term</string>
 
     <!--
     ***********************************

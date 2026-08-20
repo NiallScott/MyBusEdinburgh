@@ -33,6 +33,7 @@ import uk.org.rivernile.android.bustracker.core.busstops.StopName
 import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.sortByServiceName
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.text.UiStopName
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
@@ -92,14 +93,10 @@ private fun NearestStop.toUiNearestStop(
         stopName = stopName.toUiStopName(),
         services = serviceListing
             ?.ifEmpty { null }
+            ?.sortByServiceName(serviceNameComparator)
             ?.map {
                 toUiServiceName(it, serviceColours?.get(it))
             }
-            ?.sortedWith(
-                compareBy(serviceNameComparator) {
-                    it.serviceName
-                }
-            )
             ?.toImmutableList(),
         orientation = orientation,
         distanceMeters = distanceMeters,
