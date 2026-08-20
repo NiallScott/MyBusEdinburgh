@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.transformLatest
@@ -82,6 +83,7 @@ internal class RealUiContentRetriever @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     override val uiContentFlow get() = state
         .searchTermFlow
+        .map { it?.trim() }
         .debounce { searchTerm ->
             if (searchTerm.isSearchTermValid()) SEARCH_TERM_DEBOUNCE_PERIOD_MILLIS else 0L
         }
@@ -100,7 +102,7 @@ internal class RealUiContentRetriever @Inject constructor(
     private fun getUiContentFlowWithSearchTerm(searchTerm: String?): Flow<UiContent> {
         return if (searchTerm.isSearchTermValid()) {
             busStopsRepository
-                .getStopSearchResultsFlow(searchTerm.trim())
+                .getStopSearchResultsFlow(searchTerm)
                 .flatMapLatest(::getUiContentFlowWithSearchResults)
                 .onStart { emit(UiContent.InProgress) }
         } else {

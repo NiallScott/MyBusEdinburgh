@@ -118,6 +118,20 @@ class RealUiContentRetrieverTest {
     }
 
     @Test
+    fun uiContentFlowEmitsEmptySearchTermWhenSearchTermIsLessThan3CharsWithSpaces() = runTest {
+        val retriever = createRetriever(
+            state = FakeState(
+                onSearchTermFlow = { flowOf(" ab") }
+            )
+        )
+
+        retriever.uiContentFlow.test {
+            assertEquals(UiContent.EmptySearchTerm, awaitItem())
+            awaitComplete()
+        }
+    }
+
+    @Test
     fun uiContentFlowDoesNotDebounceSearchTermWhenSearchTermIsInvalid() = runTest {
         val searchTerms = listOf("a", "b", "aa", "bb")
         val retriever = createRetriever(
