@@ -9,7 +9,7 @@ android-gradle-plugin = "9.3.1"
 coroutines = "1.11.0"
 dagger = "2.60.1"
 kotlin = "2.4.10"
-okhttp = "5.4.0"
+okhttp = "5.5.0"
 retrofit = "3.0.0"
 
 # AndroidX
