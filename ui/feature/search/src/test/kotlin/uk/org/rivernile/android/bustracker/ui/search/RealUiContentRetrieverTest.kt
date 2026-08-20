@@ -401,7 +401,7 @@ class RealUiContentRetrieverTest {
             servicesRepository = servicesRepository,
             busStopsRepository = busStopsRepository,
             stopSearchResultDropdownMenuGenerator = stopSearchResultDropdownMenuGenerator,
-            serviceNameComparator = serviceNameComparator,
+            alphanumericComparator = serviceNameComparator,
             defaultCoroutineDispatcher = UnconfinedTestDispatcher(scheduler = testScheduler),
             viewModelCoroutineScope = backgroundScope
         )

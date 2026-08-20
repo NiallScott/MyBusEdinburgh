@@ -63,12 +63,14 @@ internal data class UiStopSearchResult(
  *
  * @param serviceColours The service colours mapping.
  * @param dropdownMenus The mapping of produced dropdown menus.
+ * @param stopNameComparator Used to order stops.
  * @param serviceNameComparator Used to sort service names.
  * @return This collection of [StopSearchResult]s as a [List] of [UiStopSearchResult]s.
  */
 internal fun Collection<StopSearchResult>.toUiStopSearchResults(
     serviceColours: Map<ServiceDescriptor, ServiceColours>?,
     dropdownMenus: Map<StopIdentifier, UiStopSearchResultDropdownMenu>?,
+    stopNameComparator: Comparator<String>,
     serviceNameComparator: Comparator<String>
 ) = map { searchResult ->
     searchResult
@@ -79,7 +81,11 @@ internal fun Collection<StopSearchResult>.toUiStopSearchResults(
                 ?: UiStopSearchResultDropdownMenu(),
             serviceNameComparator = serviceNameComparator
         )
-}
+}.sortedWith(
+    compareBy(stopNameComparator) {
+        it.stopName.name
+    }
+)
 
 private fun StopSearchResult.toUiStopSearchResult(
     serviceColours: Map<ServiceDescriptor, ServiceColours>?,

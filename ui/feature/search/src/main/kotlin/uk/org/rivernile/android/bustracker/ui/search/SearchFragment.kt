@@ -78,7 +78,7 @@ public class SearchFragment : Fragment() {
             SearchScreen(
                 modifier = Modifier
                     .consumeWindowInsets(
-                        WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical)
+                        WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
                     ),
                 viewModel = viewModel,
                 onShowStopData = ::handleOnShowStopData,

@@ -74,7 +74,7 @@ internal class RealUiContentRetriever @Inject constructor(
     servicesRepository: ServicesRepository,
     private val busStopsRepository: BusStopsRepository,
     private val stopSearchResultDropdownMenuGenerator: UiStopSearchResultDropdownMenuGenerator,
-    private val serviceNameComparator: Comparator<String>,
+    private val alphanumericComparator: Comparator<String>,
     @ForDefaultDispatcher defaultCoroutineDispatcher: CoroutineDispatcher,
     @ForViewModelCoroutineScope viewModelCoroutineScope: CoroutineScope
 ) : UiContentRetriever {
@@ -124,7 +124,8 @@ internal class RealUiContentRetriever @Inject constructor(
                         .toUiStopSearchResults(
                             serviceColours = serviceColours,
                             dropdownMenus = dropdownMenus,
-                            serviceNameComparator = serviceNameComparator
+                            stopNameComparator = alphanumericComparator,
+                            serviceNameComparator = alphanumericComparator
                         )
                         .toImmutableList()
                 )

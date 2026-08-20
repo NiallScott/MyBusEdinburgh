@@ -54,6 +54,7 @@ class UiStopSearchResultKtTest {
         val result = emptyList<StopSearchResult>().toUiStopSearchResults(
             serviceColours = null,
             dropdownMenus = null,
+            stopNameComparator = naturalOrder(),
             serviceNameComparator = naturalOrder()
         )
 
@@ -89,6 +90,7 @@ class UiStopSearchResultKtTest {
         val result = stopSearchResults.toUiStopSearchResults(
             serviceColours = null,
             dropdownMenus = null,
+            stopNameComparator = naturalOrder(),
             serviceNameComparator = naturalOrder()
         )
 
@@ -124,6 +126,7 @@ class UiStopSearchResultKtTest {
         val result = stopSearchResults.toUiStopSearchResults(
             serviceColours = null,
             dropdownMenus = null,
+            stopNameComparator = naturalOrder(),
             serviceNameComparator = naturalOrder()
         )
 
@@ -172,6 +175,7 @@ class UiStopSearchResultKtTest {
         val result = stopSearchResults.toUiStopSearchResults(
             serviceColours = null,
             dropdownMenus = null,
+            stopNameComparator = naturalOrder(),
             serviceNameComparator = naturalOrder()
         )
 
@@ -220,6 +224,7 @@ class UiStopSearchResultKtTest {
         val result = stopSearchResults.toUiStopSearchResults(
             serviceColours = emptyMap(),
             dropdownMenus = null,
+            stopNameComparator = naturalOrder(),
             serviceNameComparator = naturalOrder()
         )
 
@@ -283,6 +288,7 @@ class UiStopSearchResultKtTest {
                 )
             ),
             dropdownMenus = null,
+            stopNameComparator = naturalOrder(),
             serviceNameComparator = naturalOrder()
         )
 
@@ -346,6 +352,7 @@ class UiStopSearchResultKtTest {
                 )
             ),
             dropdownMenus = null,
+            stopNameComparator = naturalOrder(),
             serviceNameComparator = naturalOrder()
         )
 
@@ -381,6 +388,7 @@ class UiStopSearchResultKtTest {
         val result = stopSearchResults.toUiStopSearchResults(
             serviceColours = null,
             dropdownMenus = emptyMap(),
+            stopNameComparator = naturalOrder(),
             serviceNameComparator = naturalOrder()
         )
 
@@ -420,6 +428,7 @@ class UiStopSearchResultKtTest {
                     isStopMapItemShown = true
                 )
             ),
+            stopNameComparator = naturalOrder(),
             serviceNameComparator = naturalOrder()
         )
 
@@ -461,6 +470,81 @@ class UiStopSearchResultKtTest {
                     isStopMapItemShown = true
                 )
             ),
+            stopNameComparator = naturalOrder(),
+            serviceNameComparator = naturalOrder()
+        )
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun toUiStopSearchResultsSortsStopsByName() {
+        val stopSearchResults = listOf(
+            FakeStopSearchResult(
+                stopIdentifier = "2".toNaptanStopIdentifier(),
+                stopName = FakeStopName(
+                    name = "Stop name 2",
+                    locality = "Locality 2"
+                ),
+                orientation = StopOrientation.NORTH,
+                serviceListing = null
+            ),
+            FakeStopSearchResult(
+                stopIdentifier = "3".toNaptanStopIdentifier(),
+                stopName = FakeStopName(
+                    name = "Stop name 3",
+                    locality = "Locality 3"
+                ),
+                orientation = StopOrientation.NORTH,
+                serviceListing = null
+            ),
+            FakeStopSearchResult(
+                stopIdentifier = "1".toNaptanStopIdentifier(),
+                stopName = FakeStopName(
+                    name = "Stop name 1",
+                    locality = "Locality 1"
+                ),
+                orientation = StopOrientation.NORTH,
+                serviceListing = null
+            )
+        )
+        val expected = listOf(
+            UiStopSearchResult(
+                stopIdentifier = "1".toNaptanStopIdentifier(),
+                stopName = UiStopName(
+                    name = "Stop name 1",
+                    locality = "Locality 1"
+                ),
+                orientation = StopOrientation.NORTH,
+                services = null,
+                dropdownMenu = UiStopSearchResultDropdownMenu()
+            ),
+            UiStopSearchResult(
+                stopIdentifier = "2".toNaptanStopIdentifier(),
+                stopName = UiStopName(
+                    name = "Stop name 2",
+                    locality = "Locality 2"
+                ),
+                orientation = StopOrientation.NORTH,
+                services = null,
+                dropdownMenu = UiStopSearchResultDropdownMenu()
+            ),
+            UiStopSearchResult(
+                stopIdentifier = "3".toNaptanStopIdentifier(),
+                stopName = UiStopName(
+                    name = "Stop name 3",
+                    locality = "Locality 3"
+                ),
+                orientation = StopOrientation.NORTH,
+                services = null,
+                dropdownMenu = UiStopSearchResultDropdownMenu()
+            )
+        )
+
+        val result = stopSearchResults.toUiStopSearchResults(
+            serviceColours = null,
+            dropdownMenus = null,
+            stopNameComparator = naturalOrder(),
             serviceNameComparator = naturalOrder()
         )
 
