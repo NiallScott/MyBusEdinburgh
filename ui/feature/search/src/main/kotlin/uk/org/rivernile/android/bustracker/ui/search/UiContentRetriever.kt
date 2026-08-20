@@ -100,7 +100,7 @@ internal class RealUiContentRetriever @Inject constructor(
     private fun getUiContentFlowWithSearchTerm(searchTerm: String?): Flow<UiContent> {
         return if (searchTerm.isSearchTermValid()) {
             busStopsRepository
-                .getStopSearchResultsFlow(searchTerm)
+                .getStopSearchResultsFlow(searchTerm.trim())
                 .flatMapLatest(::getUiContentFlowWithSearchResults)
                 .onStart { emit(UiContent.InProgress) }
         } else {
@@ -139,7 +139,7 @@ internal class RealUiContentRetriever @Inject constructor(
         .getColoursForServicesFlow()
         .shareIn(
             scope = viewModelCoroutineScope + defaultCoroutineDispatcher,
-            started = SharingStarted.Lazily,
+            started = SharingStarted.WhileSubscribed(5000L),
             replay = 1
         )
 

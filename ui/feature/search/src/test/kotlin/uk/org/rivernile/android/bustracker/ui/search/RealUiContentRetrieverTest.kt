@@ -201,6 +201,26 @@ class RealUiContentRetrieverTest {
     }
 
     @Test
+    fun uiContentFlowTrimsTheSearchTerm() = runTest {
+        val retriever = createRetriever(
+            state = FakeState(
+                onSearchTermFlow = { flowOf(" abc ") }
+            ),
+            busStopsRepository = FakeBusStopsRepository(
+                onGetStopSearchResultsFlow = { searchTerm ->
+                    assertEquals("abc", searchTerm)
+                    flowOf(null)
+                }
+            )
+        )
+
+        retriever.uiContentFlow.test {
+            assertEquals(UiContent.NoResults, awaitItem())
+            awaitComplete()
+        }
+    }
+
+    @Test
     fun uiContentFlowEmitsInProgressWhenDataIsLoading() = runTest {
         val retriever = createRetriever(
             state = FakeState(

@@ -83,11 +83,7 @@ internal fun Collection<StopSearchResult>.toUiStopSearchResults(
                 ?: UiStopSearchResultDropdownMenu(),
             serviceNameComparator = serviceNameComparator
         )
-}.sortedWith(
-    compareBy(stopNameComparator) {
-        it.stopName.name
-    }
-)
+}.sortedWith(stopNameComparator.toUiStopSearchResultComparator())
 
 private fun StopSearchResult.toUiStopSearchResult(
     serviceColours: Map<ServiceDescriptor, ServiceColours>?,
@@ -131,4 +127,24 @@ private fun ServiceColours.toUiServiceColours(): UiServiceColours {
         backgroundColour = colourPrimary,
         textColour = colourOnPrimary
     )
+}
+
+private fun Comparator<String>.toUiStopSearchResultComparator(): Comparator<UiStopSearchResult> {
+    return compareBy<UiStopSearchResult, String>(this) {
+        it.stopName.name
+    }.then(
+        Comparator { a, b ->
+            val aLocality = a.stopName.locality
+            val bLocality = b.stopName.locality
+
+            when {
+                aLocality == bLocality -> 0
+                aLocality == null -> 1
+                bLocality == null -> -1
+                else -> compare(aLocality, bLocality)
+            }
+        }
+    ).thenBy(this) {
+        it.stopIdentifier.toHumanReadableString()
+    }
 }

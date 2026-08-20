@@ -551,6 +551,226 @@ class UiStopSearchResultKtTest {
         assertEquals(expected, result)
     }
 
+    @Test
+    fun toUiStopSearchResultsSortsStopsByLocalityWhenNameIsSame() {
+        val stopSearchResults = listOf(
+            FakeStopSearchResult(
+                stopIdentifier = "2".toNaptanStopIdentifier(),
+                stopName = FakeStopName(
+                    name = "Stop name",
+                    locality = "Locality 2"
+                ),
+                orientation = StopOrientation.NORTH,
+                serviceListing = null
+            ),
+            FakeStopSearchResult(
+                stopIdentifier = "1".toNaptanStopIdentifier(),
+                stopName = FakeStopName(
+                    name = "Stop name",
+                    locality = "Locality 1"
+                ),
+                orientation = StopOrientation.NORTH,
+                serviceListing = null
+            )
+        )
+        val expected = listOf(
+            UiStopSearchResult(
+                stopIdentifier = "1".toNaptanStopIdentifier(),
+                stopName = UiStopName(
+                    name = "Stop name",
+                    locality = "Locality 1"
+                ),
+                orientation = StopOrientation.NORTH,
+                services = null,
+                dropdownMenu = UiStopSearchResultDropdownMenu()
+            ),
+            UiStopSearchResult(
+                stopIdentifier = "2".toNaptanStopIdentifier(),
+                stopName = UiStopName(
+                    name = "Stop name",
+                    locality = "Locality 2"
+                ),
+                orientation = StopOrientation.NORTH,
+                services = null,
+                dropdownMenu = UiStopSearchResultDropdownMenu()
+            )
+        )
+
+        val result = stopSearchResults.toUiStopSearchResults(
+            serviceColours = null,
+            dropdownMenus = null,
+            stopNameComparator = naturalOrder(),
+            serviceNameComparator = naturalOrder()
+        )
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun toUiStopSearchResultsSortsStopsByLocalityWhenFirstLocalityIsNull() {
+        val stopSearchResults = listOf(
+            FakeStopSearchResult(
+                stopIdentifier = "2".toNaptanStopIdentifier(),
+                stopName = FakeStopName(
+                    name = "Stop name",
+                    locality = "Locality 2"
+                ),
+                orientation = StopOrientation.NORTH,
+                serviceListing = null
+            ),
+            FakeStopSearchResult(
+                stopIdentifier = "1".toNaptanStopIdentifier(),
+                stopName = FakeStopName(
+                    name = "Stop name",
+                    locality = null
+                ),
+                orientation = StopOrientation.NORTH,
+                serviceListing = null
+            )
+        )
+        val expected = listOf(
+            UiStopSearchResult(
+                stopIdentifier = "2".toNaptanStopIdentifier(),
+                stopName = UiStopName(
+                    name = "Stop name",
+                    locality = "Locality 2"
+                ),
+                orientation = StopOrientation.NORTH,
+                services = null,
+                dropdownMenu = UiStopSearchResultDropdownMenu()
+            ),
+            UiStopSearchResult(
+                stopIdentifier = "1".toNaptanStopIdentifier(),
+                stopName = UiStopName(
+                    name = "Stop name",
+                    locality = null
+                ),
+                orientation = StopOrientation.NORTH,
+                services = null,
+                dropdownMenu = UiStopSearchResultDropdownMenu()
+            )
+        )
+
+        val result = stopSearchResults.toUiStopSearchResults(
+            serviceColours = null,
+            dropdownMenus = null,
+            stopNameComparator = naturalOrder(),
+            serviceNameComparator = naturalOrder()
+        )
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun toUiStopSearchResultsSortsStopsByLocalityWhenSecondLocalityIsNull() {
+        val stopSearchResults = listOf(
+            FakeStopSearchResult(
+                stopIdentifier = "2".toNaptanStopIdentifier(),
+                stopName = FakeStopName(
+                    name = "Stop name",
+                    locality = null
+                ),
+                orientation = StopOrientation.NORTH,
+                serviceListing = null
+            ),
+            FakeStopSearchResult(
+                stopIdentifier = "1".toNaptanStopIdentifier(),
+                stopName = FakeStopName(
+                    name = "Stop name",
+                    locality = "Locality 1"
+                ),
+                orientation = StopOrientation.NORTH,
+                serviceListing = null
+            )
+        )
+        val expected = listOf(
+            UiStopSearchResult(
+                stopIdentifier = "1".toNaptanStopIdentifier(),
+                stopName = UiStopName(
+                    name = "Stop name",
+                    locality = "Locality 1"
+                ),
+                orientation = StopOrientation.NORTH,
+                services = null,
+                dropdownMenu = UiStopSearchResultDropdownMenu()
+            ),
+            UiStopSearchResult(
+                stopIdentifier = "2".toNaptanStopIdentifier(),
+                stopName = UiStopName(
+                    name = "Stop name",
+                    locality = null
+                ),
+                orientation = StopOrientation.NORTH,
+                services = null,
+                dropdownMenu = UiStopSearchResultDropdownMenu()
+            )
+        )
+
+        val result = stopSearchResults.toUiStopSearchResults(
+            serviceColours = null,
+            dropdownMenus = null,
+            stopNameComparator = naturalOrder(),
+            serviceNameComparator = naturalOrder()
+        )
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun toUiStopSearchResultsSortsStopsByStopIdentifierWhenLocalitiesAreIdentical() {
+        val stopSearchResults = listOf(
+            FakeStopSearchResult(
+                stopIdentifier = "2".toNaptanStopIdentifier(),
+                stopName = FakeStopName(
+                    name = "Stop name",
+                    locality = "Locality"
+                ),
+                orientation = StopOrientation.NORTH,
+                serviceListing = null
+            ),
+            FakeStopSearchResult(
+                stopIdentifier = "1".toNaptanStopIdentifier(),
+                stopName = FakeStopName(
+                    name = "Stop name",
+                    locality = "Locality"
+                ),
+                orientation = StopOrientation.NORTH,
+                serviceListing = null
+            )
+        )
+        val expected = listOf(
+            UiStopSearchResult(
+                stopIdentifier = "1".toNaptanStopIdentifier(),
+                stopName = UiStopName(
+                    name = "Stop name",
+                    locality = "Locality"
+                ),
+                orientation = StopOrientation.NORTH,
+                services = null,
+                dropdownMenu = UiStopSearchResultDropdownMenu()
+            ),
+            UiStopSearchResult(
+                stopIdentifier = "2".toNaptanStopIdentifier(),
+                stopName = UiStopName(
+                    name = "Stop name",
+                    locality = "Locality"
+                ),
+                orientation = StopOrientation.NORTH,
+                services = null,
+                dropdownMenu = UiStopSearchResultDropdownMenu()
+            )
+        )
+
+        val result = stopSearchResults.toUiStopSearchResults(
+            serviceColours = null,
+            dropdownMenus = null,
+            stopNameComparator = naturalOrder(),
+            serviceNameComparator = naturalOrder()
+        )
+
+        assertEquals(expected, result)
+    }
+
     private fun service(id: Int): ServiceDescriptor {
         return FakeServiceDescriptor(
             serviceName = id.toString(),
