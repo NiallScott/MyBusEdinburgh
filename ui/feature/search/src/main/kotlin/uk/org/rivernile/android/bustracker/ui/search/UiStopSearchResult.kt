@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.search
 
+import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import uk.org.rivernile.android.bustracker.core.busstops.StopName
@@ -49,6 +50,7 @@ import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
  * @property dropdownMenu The dropdown meny for this stop search result.
  * @author Niall Scott
  */
+@Immutable
 internal data class UiStopSearchResult(
     val stopIdentifier: StopIdentifier,
     val stopName: UiStopName,

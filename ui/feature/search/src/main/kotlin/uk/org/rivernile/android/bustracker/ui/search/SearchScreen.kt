@@ -79,7 +79,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
-import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
@@ -417,11 +416,7 @@ private fun LaunchAction(
     onShowRemoveArrivalAlert: ((StopIdentifier) -> Unit)? = null,
     onShowAddProximityAlert: ((StopIdentifier) -> Unit)? = null,
     onShowRemoveProximityAlert: ((StopIdentifier) -> Unit)? = null,
-    onShowOnMap: ((StopIdentifier) -> Unit)? = null,
-    onRequestLocationPermissions: (() -> Unit)? = null,
-    onShowServicesChooser: ((Set<ServiceDescriptor>?) -> Unit)? = null,
-    onShowLocationSettings: (() -> Unit)? = null,
-    onShowAppPermissionSettings: (() -> Unit)? = null
+    onShowOnMap: ((StopIdentifier) -> Unit)? = null
 ) {
     SideEffect(action) {
         when (action) {

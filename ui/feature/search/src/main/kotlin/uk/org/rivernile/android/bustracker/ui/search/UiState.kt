@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.search
 
+import androidx.compose.runtime.Immutable
+
 /**
  * The state to render on the UI.
  *
@@ -33,6 +35,7 @@ package uk.org.rivernile.android.bustracker.ui.search
  * @property action An action, if any, to be performed.
  * @author Niall Scott
  */
+@Immutable
 internal data class UiState(
     val content: UiContent = UiContent.InProgress,
     val action: UiAction? = null
