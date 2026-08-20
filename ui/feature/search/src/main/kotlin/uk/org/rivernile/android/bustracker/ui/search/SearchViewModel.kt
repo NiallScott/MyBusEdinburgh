@@ -30,8 +30,13 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForViewModelCoroutineScope
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
@@ -40,41 +45,66 @@ import javax.inject.Inject
 /**
  * The [ViewModel] for the search screen.
  *
+ * @param state The state held for this [ViewModel].
+ * @param uiContentRetriever Used to retrieve [UiContent] to be displayed.
  * @param defaultCoroutineDispatcher The default [CoroutineDispatcher].
  * @param viewModelCoroutineScope The [ViewModel] [CoroutineScope].
  * @author Niall Scott
  */
 @HiltViewModel
 internal class SearchViewModel @Inject constructor(
+    private val state: State,
+    private val uiContentRetriever: UiContentRetriever,
     @ForDefaultDispatcher defaultCoroutineDispatcher: CoroutineDispatcher,
     @ForViewModelCoroutineScope viewModelCoroutineScope: CoroutineScope
 ) : ViewModel(viewModelCoroutineScope) {
 
-    val uiStateFlow: StateFlow<UiState> = MutableStateFlow(UiState())
+    /**
+     * This emits the current [UiState].
+     */
+    val uiStateFlow: StateFlow<UiState> = _uiStateFlow
+        .cleanseSelectedStop()
+        .flowOn(defaultCoroutineDispatcher)
+        .stateIn(
+            scope = viewModelCoroutineScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = UiState()
+        )
 
     /**
-     * This is called when a nearest stop has been clicked.
+     * The user's search term.
+     */
+    var searchTerm: String?
+        get() = state.searchTerm
+        set(value) {
+            state.searchTerm = value
+        }
+
+    /**
+     * This is called when a stop search result has been clicked.
      *
-     * @param stopIdentifier The identifier of the clicked nearest stop.
+     * @param stopIdentifier The identifier of the clicked stop.
      */
     fun onItemClicked(stopIdentifier: StopIdentifier) {
-
+        state.action = UiAction.ShowStopData(
+            stopIdentifier = stopIdentifier
+        )
     }
 
     /**
-     * This is called when the open dropdown button has been clicked on a nearest stop.
+     * This is called when the open dropdown button has been clicked on a stop search result.
      *
      * @param stopIdentifier The identifier of the stop to open the dropdown menu for.
      */
     fun onOpenDropdownMenuClicked(stopIdentifier: StopIdentifier) {
-
+        state.selectedStopIdentifier = stopIdentifier
     }
 
     /**
      * This is called when the dropdown menu has been dismissed.
      */
     fun onDropdownMenuDismissed() {
-
+        dismissDropdownMenu()
     }
 
     /**
@@ -83,7 +113,10 @@ internal class SearchViewModel @Inject constructor(
      * @param stopIdentifier The identifier of the stop to add a favourite stop for.
      */
     fun onAddFavouriteStopClicked(stopIdentifier: StopIdentifier) {
-
+        state.action = UiAction.ShowAddFavouriteStop(
+            stopIdentifier = stopIdentifier
+        )
+        dismissDropdownMenu()
     }
 
     /**
@@ -92,7 +125,10 @@ internal class SearchViewModel @Inject constructor(
      * @param stopIdentifier The identifier of the stop to remove the favourite stop for.
      */
     fun onRemoveFavouriteStopClicked(stopIdentifier: StopIdentifier) {
-
+        state.action = UiAction.ShowRemoveFavouriteStop(
+            stopIdentifier = stopIdentifier
+        )
+        dismissDropdownMenu()
     }
 
     /**
@@ -101,7 +137,10 @@ internal class SearchViewModel @Inject constructor(
      * @param stopIdentifier The identifier of the stop to add an arrival alert for.
      */
     fun onAddArrivalAlertClicked(stopIdentifier: StopIdentifier) {
-
+        state.action = UiAction.ShowAddArrivalAlert(
+            stopIdentifier = stopIdentifier
+        )
+        dismissDropdownMenu()
     }
 
     /**
@@ -110,7 +149,10 @@ internal class SearchViewModel @Inject constructor(
      * @param stopIdentifier The identifier of the stop to remove an arrival alert for.
      */
     fun onRemoveArrivalAlertClicked(stopIdentifier: StopIdentifier) {
-
+        state.action = UiAction.ShowRemoveArrivalAlert(
+            stopIdentifier = stopIdentifier
+        )
+        dismissDropdownMenu()
     }
 
     /**
@@ -119,7 +161,10 @@ internal class SearchViewModel @Inject constructor(
      * @param stopIdentifier The identifier of the stop to add a proximity alert for.
      */
     fun onAddProximityAlertClicked(stopIdentifier: StopIdentifier) {
-
+        state.action = UiAction.ShowAddProximityAlert(
+            stopIdentifier = stopIdentifier
+        )
+        dismissDropdownMenu()
     }
 
     /**
@@ -128,7 +173,10 @@ internal class SearchViewModel @Inject constructor(
      * @param stopIdentifier The identifier of the stop to remove a proximity alert for.
      */
     fun onRemoveProximityAlertClicked(stopIdentifier: StopIdentifier) {
-
+        state.action = UiAction.ShowRemoveProximityAlert(
+            stopIdentifier = stopIdentifier
+        )
+        dismissDropdownMenu()
     }
 
     /**
@@ -137,13 +185,48 @@ internal class SearchViewModel @Inject constructor(
      * @param stopIdentifier The identifier of the stop to show the map for.
      */
     fun onShowOnMapClicked(stopIdentifier: StopIdentifier) {
-
+        state.action = UiAction.ShowOnMap(
+            stopIdentifier = stopIdentifier
+        )
+        dismissDropdownMenu()
     }
 
     /**
      * This is called when an action has been launched.
      */
     fun onActionLaunched() {
+        state.action = null
+    }
 
+    private val _uiStateFlow get() = combine(
+        uiContentRetriever.uiContentFlow,
+        state.actionFlow,
+        ::UiState
+    )
+
+    private fun dismissDropdownMenu() {
+        state.selectedStopIdentifier = null
+    }
+
+    private fun Flow<UiState>.cleanseSelectedStop() = onEach { uiState ->
+        when (val content = uiState.content) {
+            is UiContent.Content -> {
+                // The selected stop identifier should only be preserved if it's within the shown
+                // stops. Otherwise, null it out so that the dropdown menu is not shown again
+                // automatically if/when the stop comes back in to view.
+                val stopIdentifiers = content.results.map { it.stopIdentifier }.toSet()
+
+                state.updateSelectedStopIdentifier { selectedStopIdentifier ->
+                    if (stopIdentifiers.contains(selectedStopIdentifier)) {
+                        selectedStopIdentifier
+                    } else {
+                        null
+                    }
+                }
+            }
+            // When we're not showing the Content layout, then we always null out the selected stop
+            // identifier.
+            else -> state.selectedStopIdentifier = null
+        }
     }
 }

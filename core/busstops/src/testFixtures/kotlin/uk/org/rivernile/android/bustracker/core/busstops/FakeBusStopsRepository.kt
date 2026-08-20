@@ -42,6 +42,8 @@ class FakeBusStopsRepository(
         (Double, Double, Double, Double, Set<ServiceDescriptor>?) ->
         Flow<List<StopDetailsWithServices>?> =
         { _, _, _, _, _ -> throw NotImplementedError() },
+    private val onGetStopSearchResultsFlow: (String) -> Flow<List<StopSearchResult>?> =
+        { throw NotImplementedError() },
     private val onGetStopLocation: (StopIdentifier) -> StopLocation? =
         { throw NotImplementedError() }
 ) : BusStopsRepository {
@@ -79,9 +81,8 @@ class FakeBusStopsRepository(
         throw NotImplementedError()
     }
 
-    override fun getStopSearchResultsFlow(searchTerm: String): Flow<List<StopSearchResult>?> {
-        throw NotImplementedError()
-    }
+    override fun getStopSearchResultsFlow(searchTerm: String) =
+        onGetStopSearchResultsFlow(searchTerm)
 
     override suspend fun getStopLocation(stopIdentifier: StopIdentifier) =
         onGetStopLocation(stopIdentifier)

@@ -30,7 +30,7 @@ import androidx.compose.runtime.Immutable
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
- * This describes the possible actions that can be taken with the nearest stops screen.
+ * This describes the possible actions that can be taken with the search screen.
  *
  * @author Niall Scott
  */
@@ -101,7 +101,7 @@ internal sealed interface UiAction {
     ) : UiAction
 
     /**
-     * Show the nearest stop on a map.
+     * Show the stop search result on a map.
      *
      * @property stopIdentifier The stop identifier to show on a map.
      */

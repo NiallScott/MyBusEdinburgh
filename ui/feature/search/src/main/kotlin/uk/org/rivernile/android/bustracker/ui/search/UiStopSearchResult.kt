@@ -27,9 +27,15 @@
 package uk.org.rivernile.android.bustracker.ui.search
 
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
+import uk.org.rivernile.android.bustracker.core.busstops.StopName
 import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
+import uk.org.rivernile.android.bustracker.core.busstops.StopSearchResult
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.text.UiStopName
+import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 
 /**
@@ -49,3 +55,75 @@ internal data class UiStopSearchResult(
     val services: ImmutableList<UiServiceName>?,
     val dropdownMenu: UiStopSearchResultDropdownMenu
 )
+
+/**
+ * Map this collection of [StopSearchResult] items in to a [List] of [UiStopSearchResult] items,
+ * suitable for displaying on the UI.
+ *
+ * @param serviceColours The service colours mapping.
+ * @param dropdownMenus The mapping of produced dropdown menus.
+ * @param serviceNameComparator Used to sort service names.
+ * @return This collection of [StopSearchResult]s as a [List] of [UiStopSearchResult]s.
+ */
+internal fun Collection<StopSearchResult>.toUiStopSearchResults(
+    serviceColours: Map<ServiceDescriptor, ServiceColours>?,
+    dropdownMenus: Map<StopIdentifier, UiStopSearchResultDropdownMenu>?,
+    serviceNameComparator: Comparator<String>
+) = map { searchResult ->
+    searchResult
+        .toUiStopSearchResult(
+            serviceColours = serviceColours,
+            dropdownMenu = dropdownMenus
+                ?.get(searchResult.stopIdentifier)
+                ?: UiStopSearchResultDropdownMenu(),
+            serviceNameComparator = serviceNameComparator
+        )
+}
+
+private fun StopSearchResult.toUiStopSearchResult(
+    serviceColours: Map<ServiceDescriptor, ServiceColours>?,
+    dropdownMenu: UiStopSearchResultDropdownMenu,
+    serviceNameComparator: Comparator<String>
+): UiStopSearchResult {
+    return UiStopSearchResult(
+        stopIdentifier = stopIdentifier,
+        stopName = stopName.toUiStopName(),
+        services = serviceListing
+            ?.ifEmpty { null }
+            ?.map {
+                toUiServiceName(it, serviceColours?.get(it))
+            }
+            ?.sortedWith(
+                compareBy(serviceNameComparator) {
+                    it.serviceName
+                }
+            )
+            ?.toImmutableList(),
+        orientation = orientation,
+        dropdownMenu = dropdownMenu
+    )
+}
+
+private fun StopName.toUiStopName(): UiStopName {
+    return UiStopName(
+        name = name,
+        locality = locality
+    )
+}
+
+private fun toUiServiceName(
+    serviceDescriptor: ServiceDescriptor,
+    serviceColours: ServiceColours?
+): UiServiceName {
+    return UiServiceName(
+        serviceName = serviceDescriptor.serviceName,
+        colours = serviceColours?.toUiServiceColours()
+    )
+}
+
+private fun ServiceColours.toUiServiceColours(): UiServiceColours {
+    return UiServiceColours(
+        backgroundColour = colourPrimary,
+        textColour = colourOnPrimary
+    )
+}

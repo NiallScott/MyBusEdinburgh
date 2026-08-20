@@ -38,6 +38,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.ui.Modifier
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.fragment.compose.content
 import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
@@ -60,6 +61,7 @@ import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 public class SearchFragment : Fragment() {
 
     private var callbacks: Callbacks? = null
+    private val viewModel by viewModels<SearchViewModel>()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -78,6 +80,7 @@ public class SearchFragment : Fragment() {
                     .consumeWindowInsets(
                         WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical)
                     ),
+                viewModel = viewModel,
                 onShowStopData = ::handleOnShowStopData,
                 onShowAddFavouriteStop = ::handleOnShowAddFavouriteStop,
                 onShowRemoveFavouriteStop = ::handleOnShowConfirmRemoveFavouriteStop,
@@ -95,6 +98,15 @@ public class SearchFragment : Fragment() {
 
         callbacks = null
     }
+
+    /**
+     * The current search term.
+     */
+    public var searchTerm: String?
+        get() = viewModel.searchTerm
+        set(value) {
+            viewModel.searchTerm = value
+        }
 
     private fun handleOnShowStopData(stopIdentifier: StopIdentifier) {
         callbacks?.onShowBusTimes(stopIdentifier)
