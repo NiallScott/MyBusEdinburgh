@@ -559,8 +559,6 @@ class SearchScreenKtTest {
         state: UiState,
         modifier: Modifier = Modifier,
         onItemClick: (StopIdentifier) -> Unit = { throw NotImplementedError() },
-        onOpenDropdownMenuClick: (StopIdentifier) -> Unit = { throw NotImplementedError() },
-        onDropdownMenuDismissed: () -> Unit = { throw NotImplementedError() },
         onAddFavouriteStopClick: (StopIdentifier) -> Unit = { throw NotImplementedError() },
         onRemoveFavouriteStopClick: (StopIdentifier) -> Unit = { throw NotImplementedError() },
         onAddArrivalAlertClick: (StopIdentifier) -> Unit = { throw NotImplementedError() },
@@ -581,8 +579,6 @@ class SearchScreenKtTest {
         SearchScreenWithState(
             state = state,
             onItemClick = onItemClick,
-            onOpenDropdownMenuClick = onOpenDropdownMenuClick,
-            onDropdownMenuDismissed = onDropdownMenuDismissed,
             onAddFavouriteStopClick = onAddFavouriteStopClick,
             onRemoveFavouriteStopClick = onRemoveFavouriteStopClick,
             onAddArrivalAlertClick = onAddArrivalAlertClick,

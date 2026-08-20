@@ -50,6 +50,7 @@ import uk.org.rivernile.android.bustracker.ui.favouritestops.FavouriteStopMenuIt
 import uk.org.rivernile.android.bustracker.ui.favouritestops.UiFavouriteStopDropdownMenuItem
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 
+internal const val TEST_TAG_DROPDOWN_MENU = "dropdown-menu"
 internal const val TEST_TAG_MENU_ITEM_SHOW_ON_MAP = "menu-item-show-on-map"
 
 /**
@@ -77,6 +78,7 @@ internal const val TEST_TAG_MENU_ITEM_SHOW_ON_MAP = "menu-item-show-on-map"
 @Composable
 internal fun StopSearchResultDropdownMenu(
     menu: UiStopSearchResultDropdownMenu,
+    expanded: Boolean,
     onDropdownMenuDismissed: () -> Unit,
     onAddFavouriteStopClick: () -> Unit,
     onRemoveFavouriteStopClick: () -> Unit,
@@ -88,9 +90,12 @@ internal fun StopSearchResultDropdownMenu(
     modifier: Modifier = Modifier
 ) {
     DropdownMenu(
-        expanded = menu.isShown,
+        expanded = expanded,
         onDismissRequest = onDropdownMenuDismissed,
         modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_DROPDOWN_MENU
+            }
     ) {
         menu.favouriteStopDropdownItem?.let {
             FavouriteStopMenuItem(
@@ -174,6 +179,7 @@ private fun StopSearchResultDropdownMenuPreview(
         ) {
             StopSearchResultDropdownMenu(
                 menu = menu,
+                expanded = true,
                 onDropdownMenuDismissed = { },
                 onAddFavouriteStopClick = { },
                 onRemoveFavouriteStopClick = { },
@@ -192,7 +198,6 @@ private class UiStopSearchResultDropdownMenuProvider
 
     override val values = sequenceOf(
         UiStopSearchResultDropdownMenu(
-            isShown = true,
             favouriteStopDropdownItem = UiFavouriteStopDropdownMenuItem(
                 isFavouriteStop = false
             ),
@@ -205,7 +210,6 @@ private class UiStopSearchResultDropdownMenuProvider
             isStopMapItemShown = true
         ),
         UiStopSearchResultDropdownMenu(
-            isShown = true,
             favouriteStopDropdownItem = UiFavouriteStopDropdownMenuItem(
                 isFavouriteStop = true
             ),

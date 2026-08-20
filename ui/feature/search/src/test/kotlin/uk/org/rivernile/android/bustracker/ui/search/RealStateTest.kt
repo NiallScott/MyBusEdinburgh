@@ -30,7 +30,6 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
-import uk.org.rivernile.android.bustracker.core.domain.toParcelableNaptanStopIdentifier
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -123,87 +122,6 @@ class RealStateTest {
             ensureAllEventsConsumed()
         }
         assertEquals("search term", state.searchTerm)
-    }
-
-    @Test
-    fun selectedStopIdentifierIsNullByDefault() = runTest {
-        val state = createState()
-
-        state.selectedStopIdentifierFlow.test {
-            assertNull(awaitItem())
-            ensureAllEventsConsumed()
-        }
-        assertNull(state.selectedStopIdentifier)
-    }
-
-    @Test
-    fun selectedStopIdentifierIsMutatedToTheCorrectValue() = runTest {
-        val state = createState()
-
-        state.selectedStopIdentifierFlow.test {
-            assertNull(awaitItem())
-            state.selectedStopIdentifier = "123456".toNaptanStopIdentifier()
-            assertEquals("123456".toNaptanStopIdentifier(), awaitItem())
-            assertEquals("123456".toNaptanStopIdentifier(), state.selectedStopIdentifier)
-            state.selectedStopIdentifier = null
-            assertNull(awaitItem())
-            assertNull(state.selectedStopIdentifier)
-            ensureAllEventsConsumed()
-        }
-    }
-
-    @Test
-    fun selectedStopIdentifierIsInstantiatedToValueOfSavedState() = runTest {
-        val state = createState(
-            savedState = SavedStateHandle(
-                initialState = mapOf(
-                    STATE_SELECTED_STOP_IDENTIFIER to "123456".toParcelableNaptanStopIdentifier()
-                )
-            )
-        )
-
-        state.selectedStopIdentifierFlow.test {
-            assertEquals("123456".toNaptanStopIdentifier(), awaitItem())
-            ensureAllEventsConsumed()
-        }
-        assertEquals("123456".toNaptanStopIdentifier(), state.selectedStopIdentifier)
-    }
-
-    @Test
-    fun updateSelectedStopIdentifierUpdatesValueWhenExistingValueIsNull() = runTest {
-        val state = createState()
-
-        state.selectedStopIdentifierFlow.test {
-            assertNull(awaitItem())
-
-            state.updateSelectedStopIdentifier {
-                assertNull(it)
-                "123456".toNaptanStopIdentifier()
-            }
-
-            assertEquals("123456".toNaptanStopIdentifier(), awaitItem())
-            ensureAllEventsConsumed()
-        }
-        assertEquals("123456".toNaptanStopIdentifier(), state.selectedStopIdentifier)
-    }
-
-    @Test
-    fun updateSelectedStopIdentifierUpdatesValueWhenExistingValueIsNotNull() = runTest {
-        val state = createState()
-        state.selectedStopIdentifier = "123456".toNaptanStopIdentifier()
-
-        state.selectedStopIdentifierFlow.test {
-            assertEquals("123456".toNaptanStopIdentifier(), awaitItem())
-
-            state.updateSelectedStopIdentifier {
-                assertEquals("123456".toNaptanStopIdentifier(), it)
-                null
-            }
-
-            assertNull(awaitItem())
-            ensureAllEventsConsumed()
-        }
-        assertNull(state.selectedStopIdentifier)
     }
 
     private fun createState(

@@ -233,8 +233,7 @@ class StopSearchResultKtTest {
     }
 
     @Test
-    fun dropdownIndicatorInvokesCallbackOnClick() {
-        val itemClickedCounter = ItemClickedCounter()
+    fun dropdownIndicatorClickShowsDropdownMenu() {
         composeTestRule.setContent {
             MyBusTheme {
                 StopSearchResultWithDefaults(
@@ -247,8 +246,7 @@ class StopSearchResultKtTest {
                         services = null,
                         orientation = StopOrientation.NORTH_EAST,
                         dropdownMenu = UiStopSearchResultDropdownMenu()
-                    ),
-                    onOpenDropdownMenuClick = itemClickedCounter
+                    )
                 )
             }
         }
@@ -259,8 +257,9 @@ class StopSearchResultKtTest {
                 useUnmergedTree = true
             )
             .performClick()
-
-        assertEquals(1, itemClickedCounter.count)
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_DROPDOWN_MENU)
+            .assertExists()
     }
 
     @Test
@@ -295,8 +294,6 @@ class StopSearchResultKtTest {
     private fun StopSearchResultWithDefaults(
         stopSearchResult: UiStopSearchResult,
         onClick: () -> Unit = { throw NotImplementedError() },
-        onOpenDropdownMenuClick: () -> Unit = { throw NotImplementedError() },
-        onDropdownMenuDismissed: () -> Unit = { throw NotImplementedError() },
         onAddFavouriteStopClick: () -> Unit = { throw NotImplementedError() },
         onRemoveFavouriteStopClick: () -> Unit = { throw NotImplementedError() },
         onAddArrivalAlertClick: () -> Unit = { throw NotImplementedError() },
@@ -308,8 +305,6 @@ class StopSearchResultKtTest {
         StopSearchResult(
             stopSearchResult = stopSearchResult,
             onClick = onClick,
-            onOpenDropdownMenuClick = onOpenDropdownMenuClick,
-            onDropdownMenuDismissed = onDropdownMenuDismissed,
             onAddFavouriteStopClick = onAddFavouriteStopClick,
             onRemoveFavouriteStopClick = onRemoveFavouriteStopClick,
             onAddArrivalAlertClick = onAddArrivalAlertClick,

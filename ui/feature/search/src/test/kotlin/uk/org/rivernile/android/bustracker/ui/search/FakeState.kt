@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.ui.search
 
 import kotlinx.coroutines.flow.Flow
-import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
  * A fake [State] for testing.
@@ -40,15 +39,7 @@ internal class FakeState(
     private val onSetAction: (UiAction?) -> Unit = { throw NotImplementedError() },
     private val onSearchTermFlow: () -> Flow<String?> = { throw NotImplementedError() },
     private val onGetSearchTerm: () -> String? = { throw NotImplementedError() },
-    private val onSetSearchTerm: (String?) -> Unit = { throw NotImplementedError() },
-    private val onSelectedStopIdentifierFlow: () -> Flow<StopIdentifier?> =
-        { throw NotImplementedError() },
-    private val onGetSelectedStopIdentifier: () -> StopIdentifier? =
-        { throw NotImplementedError() },
-    private val onSetSelectedStopIdentifier: (StopIdentifier?) -> Unit =
-        { throw NotImplementedError() },
-    private val onUpdateSelectedStopIdentifier: ((StopIdentifier?) -> StopIdentifier?) -> Unit =
-        { throw NotImplementedError() }
+    private val onSetSearchTerm: (String?) -> Unit = { throw NotImplementedError() }
 ) : State {
 
     override val actionFlow get() = onActionFlow()
@@ -66,16 +57,4 @@ internal class FakeState(
         set(value) {
             onSetSearchTerm(value)
         }
-
-    override val selectedStopIdentifierFlow get() = onSelectedStopIdentifierFlow()
-
-    override var selectedStopIdentifier: StopIdentifier?
-        get() = onGetSelectedStopIdentifier()
-        set(value) {
-            onSetSelectedStopIdentifier(value)
-        }
-
-    override fun updateSelectedStopIdentifier(function: (StopIdentifier?) -> StopIdentifier?) {
-        onUpdateSelectedStopIdentifier(function)
-    }
 }

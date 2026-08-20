@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.ui.search
 
 import app.cash.turbine.test
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.emptyFlow
@@ -36,10 +35,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
-import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
-import uk.org.rivernile.android.bustracker.core.text.UiStopName
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.milliseconds
@@ -72,8 +68,7 @@ class SearchViewModelTest {
                             stopIdentifier = "123456".toNaptanStopIdentifier()
                         )
                     )
-                },
-                onSetSelectedStopIdentifier = { }
+                }
             ),
             uiContentRetriever = FakeUiContentRetriever(
                 onUiContentFlow = {
@@ -114,8 +109,7 @@ class SearchViewModelTest {
                             )
                         )
                     }
-                },
-                onSetSelectedStopIdentifier = { }
+                }
             ),
             uiContentRetriever = FakeUiContentRetriever(
                 onUiContentFlow = {
@@ -147,159 +141,6 @@ class SearchViewModelTest {
             )
             ensureAllEventsConsumed()
         }
-    }
-
-    @Test
-    fun uiStateFlowWithEmptySearchTermStateClearsSelectedStopIdentifier() = runTest {
-        val selectedStopIdentifiers = mutableListOf<StopIdentifier?>()
-        val viewModel = createViewModel(
-            state = FakeState(
-                onActionFlow = { flowOf(null) },
-                onSetSelectedStopIdentifier = { selectedStopIdentifiers += it }
-            ),
-            uiContentRetriever = FakeUiContentRetriever(
-                onUiContentFlow = { flowOf(UiContent.EmptySearchTerm) }
-            )
-        )
-
-        viewModel.uiStateFlow.test {
-            assertEquals(
-                UiState(
-                    content = UiContent.EmptySearchTerm,
-                    action = null
-                ),
-                awaitItem()
-            )
-            ensureAllEventsConsumed()
-        }
-        assertEquals(listOf<StopIdentifier?>(null), selectedStopIdentifiers)
-    }
-
-    @Test
-    fun uiStateFlowWithInProgressStateClearsSelectedStopIdentifier() = runTest {
-        val selectedStopIdentifiers = mutableListOf<StopIdentifier?>()
-        val viewModel = createViewModel(
-            state = FakeState(
-                onActionFlow = { flowOf(null) },
-                onSetSelectedStopIdentifier = { selectedStopIdentifiers += it }
-            ),
-            uiContentRetriever = FakeUiContentRetriever(
-                onUiContentFlow = { flowOf(UiContent.InProgress) }
-            )
-        )
-
-        viewModel.uiStateFlow.test {
-            assertEquals(
-                UiState(
-                    content = UiContent.InProgress,
-                    action = null
-                ),
-                awaitItem()
-            )
-            ensureAllEventsConsumed()
-        }
-        assertEquals(listOf<StopIdentifier?>(null), selectedStopIdentifiers)
-    }
-
-    @Test
-    fun uiStateFlowWithNoResultsStateClearsSelectedStopIdentifier() = runTest {
-        val selectedStopIdentifiers = mutableListOf<StopIdentifier?>()
-        val viewModel = createViewModel(
-            state = FakeState(
-                onActionFlow = { flowOf(null) },
-                onSetSelectedStopIdentifier = { selectedStopIdentifiers += it }
-            ),
-            uiContentRetriever = FakeUiContentRetriever(
-                onUiContentFlow = { flowOf(UiContent.NoResults) }
-            )
-        )
-
-        viewModel.uiStateFlow.test {
-            assertEquals(
-                UiState(
-                    content = UiContent.NoResults,
-                    action = null
-                ),
-                awaitItem()
-            )
-            ensureAllEventsConsumed()
-        }
-        assertEquals(listOf<StopIdentifier?>(null), selectedStopIdentifiers)
-    }
-
-    @Test
-    fun uiStateFlowWithContentClearsSelectedStopIdentifierWhenNotContainedWithinStops() = runTest {
-        val selectedStopIdentifiers = mutableListOf<StopIdentifier?>()
-        val viewModel = createViewModel(
-            state = FakeState(
-                onActionFlow = { flowOf(null) },
-                onUpdateSelectedStopIdentifier = { function ->
-                    selectedStopIdentifiers += function.invoke("987654".toNaptanStopIdentifier())
-                }
-            ),
-            uiContentRetriever = FakeUiContentRetriever(
-                onUiContentFlow = {
-                    flowOf(
-                        UiContent.Content(
-                            results = persistentListOf(stopSearchResult)
-                        )
-                    )
-                }
-            )
-        )
-
-        viewModel.uiStateFlow.test {
-            assertEquals(
-                UiState(
-                    content = UiContent.Content(
-                        results = persistentListOf(stopSearchResult)
-                    ),
-                    action = null
-                ),
-                awaitItem()
-            )
-            ensureAllEventsConsumed()
-        }
-        assertEquals(listOf<StopIdentifier?>(null), selectedStopIdentifiers)
-    }
-
-    @Test
-    fun uiStateFlowWithContentPreservesSelectedStopIdentifierWhenContainedWithinStops() = runTest {
-        val selectedStopIdentifiers = mutableListOf<StopIdentifier?>()
-        val viewModel = createViewModel(
-            state = FakeState(
-                onActionFlow = { flowOf(null) },
-                onUpdateSelectedStopIdentifier = { function ->
-                    selectedStopIdentifiers += function.invoke("123456".toNaptanStopIdentifier())
-                }
-            ),
-            uiContentRetriever = FakeUiContentRetriever(
-                onUiContentFlow = {
-                    flowOf(
-                        UiContent.Content(
-                            results = persistentListOf(stopSearchResult)
-                        )
-                    )
-                }
-            )
-        )
-
-        viewModel.uiStateFlow.test {
-            assertEquals(
-                UiState(
-                    content = UiContent.Content(
-                        results = persistentListOf(stopSearchResult)
-                    ),
-                    action = null
-                ),
-                awaitItem()
-            )
-            ensureAllEventsConsumed()
-        }
-        assertEquals(
-            listOf<StopIdentifier?>("123456".toNaptanStopIdentifier()),
-            selectedStopIdentifiers
-        )
     }
 
     @Test
@@ -342,50 +183,12 @@ class SearchViewModelTest {
     }
 
     @Test
-    fun onOpenDropdownMenuClickedSetsSelectedStopIdentifier() = runTest {
-        val itemTracker = ItemTracker<StopIdentifier?>()
-        val viewModel = createViewModel(
-            state = FakeState(
-                onActionFlow = ::emptyFlow,
-                onSetSelectedStopIdentifier = itemTracker
-            )
-        )
-
-        viewModel.onOpenDropdownMenuClicked("123456".toNaptanStopIdentifier())
-
-        assertEquals(
-            listOf("123456".toNaptanStopIdentifier()),
-            itemTracker.items
-        )
-    }
-
-    @Test
-    fun onDropdownMenuDismissedSetsSelectedStopIdentifierToNull() = runTest {
-        val itemTracker = ItemTracker<StopIdentifier?>()
-        val viewModel = createViewModel(
-            state = FakeState(
-                onActionFlow = ::emptyFlow,
-                onSetSelectedStopIdentifier = itemTracker
-            )
-        )
-
-        viewModel.onDropdownMenuDismissed()
-
-        assertEquals(
-            listOf(null),
-            itemTracker.items
-        )
-    }
-
-    @Test
-    fun onAddFavouriteStopClickedSetsShowAddFavouriteStopActionAndDismissesDropdown() = runTest {
+    fun onAddFavouriteStopClickedSetsShowAddFavouriteStopAction() = runTest {
         val actionTracker = ItemTracker<UiAction?>()
-        val selectedStopIdentifierTracker = ItemTracker<StopIdentifier?>()
         val viewModel = createViewModel(
             state = FakeState(
                 onActionFlow = ::emptyFlow,
-                onSetAction = actionTracker,
-                onSetSelectedStopIdentifier = selectedStopIdentifierTracker
+                onSetAction = actionTracker
             )
         )
 
@@ -397,18 +200,15 @@ class SearchViewModelTest {
             ),
             actionTracker.items
         )
-        assertEquals(listOf(null), selectedStopIdentifierTracker.items)
     }
 
     @Test
-    fun onRemoveFavouriteClickedSetsShowRemoveFavouriteStopActionAndDismissesDropdown() = runTest {
+    fun onRemoveFavouriteClickedSetsShowRemoveFavouriteStopAction() = runTest {
         val actionTracker = ItemTracker<UiAction?>()
-        val selectedStopIdentifierTracker = ItemTracker<StopIdentifier?>()
         val viewModel = createViewModel(
             state = FakeState(
                 onActionFlow = ::emptyFlow,
-                onSetAction = actionTracker,
-                onSetSelectedStopIdentifier = selectedStopIdentifierTracker
+                onSetAction = actionTracker
             )
         )
 
@@ -420,18 +220,15 @@ class SearchViewModelTest {
             ),
             actionTracker.items
         )
-        assertEquals(listOf(null), selectedStopIdentifierTracker.items)
     }
 
     @Test
-    fun onAddArrivalAlertClickedSetsShowAddArrivalAlertActionAndDismissesDropdown() = runTest {
+    fun onAddArrivalAlertClickedSetsShowAddArrivalAlertAction() = runTest {
         val actionTracker = ItemTracker<UiAction?>()
-        val selectedStopIdentifierTracker = ItemTracker<StopIdentifier?>()
         val viewModel = createViewModel(
             state = FakeState(
                 onActionFlow = ::emptyFlow,
-                onSetAction = actionTracker,
-                onSetSelectedStopIdentifier = selectedStopIdentifierTracker
+                onSetAction = actionTracker
             )
         )
 
@@ -443,44 +240,37 @@ class SearchViewModelTest {
             ),
             actionTracker.items
         )
-        assertEquals(listOf(null), selectedStopIdentifierTracker.items)
     }
 
     @Test
-    fun onRemoveArrivalAlertClickedSetsShowRemoveArrivalAlertActionAndDismissesDropdown() =
-        runTest {
-            val actionTracker = ItemTracker<UiAction?>()
-            val selectedStopIdentifierTracker = ItemTracker<StopIdentifier?>()
-            val viewModel = createViewModel(
-                state = FakeState(
-                    onActionFlow = ::emptyFlow,
-                    onSetAction = actionTracker,
-                    onSetSelectedStopIdentifier = selectedStopIdentifierTracker
-                )
-            )
-
-            viewModel.onRemoveArrivalAlertClicked("123456".toNaptanStopIdentifier())
-
-            assertEquals(
-                listOf(
-                    UiAction.ShowRemoveArrivalAlert(
-                        stopIdentifier = "123456".toNaptanStopIdentifier()
-                    )
-                ),
-                actionTracker.items
-            )
-            assertEquals(listOf(null), selectedStopIdentifierTracker.items)
-        }
-
-    @Test
-    fun onAddProxAlertClickedSetsShowAddProxAlertActionAndDismissesDropdown() = runTest {
+    fun onRemoveArrivalAlertClickedSetsShowRemoveArrivalAlertAction() = runTest {
         val actionTracker = ItemTracker<UiAction?>()
-        val selectedStopIdentifierTracker = ItemTracker<StopIdentifier?>()
         val viewModel = createViewModel(
             state = FakeState(
                 onActionFlow = ::emptyFlow,
-                onSetAction = actionTracker,
-                onSetSelectedStopIdentifier = selectedStopIdentifierTracker
+                onSetAction = actionTracker
+            )
+        )
+
+        viewModel.onRemoveArrivalAlertClicked("123456".toNaptanStopIdentifier())
+
+        assertEquals(
+            listOf(
+                UiAction.ShowRemoveArrivalAlert(
+                    stopIdentifier = "123456".toNaptanStopIdentifier()
+                )
+            ),
+            actionTracker.items
+        )
+    }
+
+    @Test
+    fun onAddProxAlertClickedSetsShowAddProxAlertAction() = runTest {
+        val actionTracker = ItemTracker<UiAction?>()
+        val viewModel = createViewModel(
+            state = FakeState(
+                onActionFlow = ::emptyFlow,
+                onSetAction = actionTracker
             )
         )
 
@@ -492,18 +282,15 @@ class SearchViewModelTest {
             ),
             actionTracker.items
         )
-        assertEquals(listOf(null), selectedStopIdentifierTracker.items)
     }
 
     @Test
-    fun onRemoveProxAlertClickedSetsShowRemoveProxAlertActionAndDismissesDropdown() = runTest {
+    fun onRemoveProxAlertClickedSetsShowRemoveProxAlertAction() = runTest {
         val actionTracker = ItemTracker<UiAction?>()
-        val selectedStopIdentifierTracker = ItemTracker<StopIdentifier?>()
         val viewModel = createViewModel(
             state = FakeState(
                 onActionFlow = ::emptyFlow,
-                onSetAction = actionTracker,
-                onSetSelectedStopIdentifier = selectedStopIdentifierTracker
+                onSetAction = actionTracker
             )
         )
 
@@ -517,18 +304,15 @@ class SearchViewModelTest {
             ),
             actionTracker.items
         )
-        assertEquals(listOf(null), selectedStopIdentifierTracker.items)
     }
 
     @Test
-    fun onShowOnMapClickedSetsShowOnMapActionAndDismissesDropdown() = runTest {
+    fun onShowOnMapClickedSetsShowOnMapAction() = runTest {
         val actionTracker = ItemTracker<UiAction?>()
-        val selectedStopIdentifierTracker = ItemTracker<StopIdentifier?>()
         val viewModel = createViewModel(
             state = FakeState(
                 onActionFlow = ::emptyFlow,
-                onSetAction = actionTracker,
-                onSetSelectedStopIdentifier = selectedStopIdentifierTracker
+                onSetAction = actionTracker
             )
         )
 
@@ -540,7 +324,6 @@ class SearchViewModelTest {
             ),
             actionTracker.items
         )
-        assertEquals(listOf(null), selectedStopIdentifierTracker.items)
     }
 
     @Test
@@ -573,17 +356,6 @@ class SearchViewModelTest {
             viewModelCoroutineScope = backgroundScope
         )
     }
-
-    private val stopSearchResult get() = UiStopSearchResult(
-        stopIdentifier = "123456".toNaptanStopIdentifier(),
-        stopName = UiStopName(
-            name = "Stop 1",
-            locality = "Locality 1"
-        ),
-        services = null,
-        orientation = StopOrientation.SOUTH_WEST,
-        dropdownMenu = UiStopSearchResultDropdownMenu()
-    )
 
     private class ItemTracker<T> : (T) -> Unit {
 

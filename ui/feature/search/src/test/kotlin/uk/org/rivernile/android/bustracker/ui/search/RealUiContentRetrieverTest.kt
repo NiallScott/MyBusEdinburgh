@@ -350,7 +350,6 @@ class RealUiContentRetrieverTest {
                     flowOf(
                         mapOf(
                             "123456".toNaptanStopIdentifier() to UiStopSearchResultDropdownMenu(
-                                isShown = true,
                                 isStopMapItemShown = true
                             )
                         )
@@ -391,7 +390,6 @@ class RealUiContentRetrieverTest {
                                 )
                             ),
                             dropdownMenu = UiStopSearchResultDropdownMenu(
-                                isShown = true,
                                 isStopMapItemShown = true
                             )
                         )

@@ -54,9 +54,6 @@ class RealUiStopSearchResultDropdownMenuGeneratorTest {
     @Test
     fun getDropdownMenuItemsForStopsFlowWhenStopsIsEmptyEmitsNull() = runTest {
         val generator = createUiStopSearchResultDropdownMenuGenerator(
-            state = FakeState(
-                onSelectedStopIdentifierFlow = { flowOf(null) }
-            ),
             featureRepository = FakeFeatureRepository(
                 onHasStopMapUiFeature = { true }
             ),
@@ -78,9 +75,6 @@ class RealUiStopSearchResultDropdownMenuGeneratorTest {
     @Test
     fun getDropdownMenuItemsForStopsFlowWhenStopMapFeatureDisabled() = runTest {
         val generator = createUiStopSearchResultDropdownMenuGenerator(
-            state = FakeState(
-                onSelectedStopIdentifierFlow = { flowOf(null) }
-            ),
             featureRepository = FakeFeatureRepository(
                 onHasStopMapUiFeature = { false }
             ),
@@ -97,7 +91,6 @@ class RealUiStopSearchResultDropdownMenuGeneratorTest {
             assertEquals(
                 mapOf<StopIdentifier, UiStopSearchResultDropdownMenu>(
                     "123456".toNaptanStopIdentifier() to UiStopSearchResultDropdownMenu(
-                        isShown = false,
                         favouriteStopDropdownItem = null,
                         arrivalAlertDropdownItem = null,
                         proximityAlertDropdownItem = null,
@@ -113,9 +106,6 @@ class RealUiStopSearchResultDropdownMenuGeneratorTest {
     @Test
     fun getDropdownMenuItemsForStopsFlowWhenFavouritesNull() = runTest {
         val generator = createUiStopSearchResultDropdownMenuGenerator(
-            state = FakeState(
-                onSelectedStopIdentifierFlow = { flowOf(null) }
-            ),
             featureRepository = FakeFeatureRepository(
                 onHasStopMapUiFeature = { true }
             ),
@@ -132,7 +122,6 @@ class RealUiStopSearchResultDropdownMenuGeneratorTest {
             assertEquals(
                 mapOf<StopIdentifier, UiStopSearchResultDropdownMenu>(
                     "123456".toNaptanStopIdentifier() to UiStopSearchResultDropdownMenu(
-                        isShown = false,
                         favouriteStopDropdownItem = null,
                         arrivalAlertDropdownItem = null,
                         proximityAlertDropdownItem = null,
@@ -148,9 +137,6 @@ class RealUiStopSearchResultDropdownMenuGeneratorTest {
     @Test
     fun getDropdownMenuItemsForStopsFlowWhenFavouritesEmpty() = runTest {
         val generator = createUiStopSearchResultDropdownMenuGenerator(
-            state = FakeState(
-                onSelectedStopIdentifierFlow = { flowOf(null) }
-            ),
             featureRepository = FakeFeatureRepository(
                 onHasStopMapUiFeature = { true }
             ),
@@ -167,7 +153,6 @@ class RealUiStopSearchResultDropdownMenuGeneratorTest {
             assertEquals(
                 mapOf<StopIdentifier, UiStopSearchResultDropdownMenu>(
                     "123456".toNaptanStopIdentifier() to UiStopSearchResultDropdownMenu(
-                        isShown = false,
                         favouriteStopDropdownItem = null,
                         arrivalAlertDropdownItem = null,
                         proximityAlertDropdownItem = null,
@@ -183,9 +168,6 @@ class RealUiStopSearchResultDropdownMenuGeneratorTest {
     @Test
     fun getDropdownMenuItemsForStopsFlowWhenFavouritesDoNotContainStop() = runTest {
         val generator = createUiStopSearchResultDropdownMenuGenerator(
-            state = FakeState(
-                onSelectedStopIdentifierFlow = { flowOf(null) }
-            ),
             featureRepository = FakeFeatureRepository(
                 onHasStopMapUiFeature = { true }
             ),
@@ -210,7 +192,6 @@ class RealUiStopSearchResultDropdownMenuGeneratorTest {
             assertEquals(
                 mapOf<StopIdentifier, UiStopSearchResultDropdownMenu>(
                     "123456".toNaptanStopIdentifier() to UiStopSearchResultDropdownMenu(
-                        isShown = false,
                         favouriteStopDropdownItem = null,
                         arrivalAlertDropdownItem = null,
                         proximityAlertDropdownItem = null,
@@ -226,9 +207,6 @@ class RealUiStopSearchResultDropdownMenuGeneratorTest {
     @Test
     fun getDropdownMenuItemsForStopsFlowWhenFavouritesContainStop() = runTest {
         val generator = createUiStopSearchResultDropdownMenuGenerator(
-            state = FakeState(
-                onSelectedStopIdentifierFlow = { flowOf(null) }
-            ),
             featureRepository = FakeFeatureRepository(
                 onHasStopMapUiFeature = { true }
             ),
@@ -253,7 +231,6 @@ class RealUiStopSearchResultDropdownMenuGeneratorTest {
             assertEquals(
                 mapOf<StopIdentifier, UiStopSearchResultDropdownMenu>(
                     "123456".toNaptanStopIdentifier() to UiStopSearchResultDropdownMenu(
-                        isShown = false,
                         favouriteStopDropdownItem = UiFavouriteStopDropdownMenuItem(
                             isFavouriteStop = true
                         ),
@@ -271,9 +248,6 @@ class RealUiStopSearchResultDropdownMenuGeneratorTest {
     @Test
     fun getDropdownMenuItemsForStopsFlowWhenAlertsNull() = runTest {
         val generator = createUiStopSearchResultDropdownMenuGenerator(
-            state = FakeState(
-                onSelectedStopIdentifierFlow = { flowOf(null) }
-            ),
             featureRepository = FakeFeatureRepository(
                 onHasStopMapUiFeature = { true }
             ),
@@ -290,7 +264,6 @@ class RealUiStopSearchResultDropdownMenuGeneratorTest {
             assertEquals(
                 mapOf<StopIdentifier, UiStopSearchResultDropdownMenu>(
                     "123456".toNaptanStopIdentifier() to UiStopSearchResultDropdownMenu(
-                        isShown = false,
                         favouriteStopDropdownItem = null,
                         arrivalAlertDropdownItem = null,
                         proximityAlertDropdownItem = null,
@@ -306,9 +279,6 @@ class RealUiStopSearchResultDropdownMenuGeneratorTest {
     @Test
     fun getDropdownMenuItemsForStopsFlowWhenAlertsEmpty() = runTest {
         val generator = createUiStopSearchResultDropdownMenuGenerator(
-            state = FakeState(
-                onSelectedStopIdentifierFlow = { flowOf(null) }
-            ),
             featureRepository = FakeFeatureRepository(
                 onHasStopMapUiFeature = { true }
             ),
@@ -325,7 +295,6 @@ class RealUiStopSearchResultDropdownMenuGeneratorTest {
             assertEquals(
                 mapOf<StopIdentifier, UiStopSearchResultDropdownMenu>(
                     "123456".toNaptanStopIdentifier() to UiStopSearchResultDropdownMenu(
-                        isShown = false,
                         favouriteStopDropdownItem = null,
                         arrivalAlertDropdownItem = null,
                         proximityAlertDropdownItem = null,
@@ -341,9 +310,6 @@ class RealUiStopSearchResultDropdownMenuGeneratorTest {
     @Test
     fun getDropdownMenuItemsForStopsFlowWhenAlertsDoNotContainStop() = runTest {
         val generator = createUiStopSearchResultDropdownMenuGenerator(
-            state = FakeState(
-                onSelectedStopIdentifierFlow = { flowOf(null) }
-            ),
             featureRepository = FakeFeatureRepository(
                 onHasStopMapUiFeature = { true }
             ),
@@ -376,7 +342,6 @@ class RealUiStopSearchResultDropdownMenuGeneratorTest {
             assertEquals(
                 mapOf<StopIdentifier, UiStopSearchResultDropdownMenu>(
                     "123456".toNaptanStopIdentifier() to UiStopSearchResultDropdownMenu(
-                        isShown = false,
                         favouriteStopDropdownItem = null,
                         arrivalAlertDropdownItem = null,
                         proximityAlertDropdownItem = null,
@@ -392,9 +357,6 @@ class RealUiStopSearchResultDropdownMenuGeneratorTest {
     @Test
     fun getDropdownMenuItemsForStopsFlowWhenAlertsContainStop() = runTest {
         val generator = createUiStopSearchResultDropdownMenuGenerator(
-            state = FakeState(
-                onSelectedStopIdentifierFlow = { flowOf(null) }
-            ),
             featureRepository = FakeFeatureRepository(
                 onHasStopMapUiFeature = { true }
             ),
@@ -427,7 +389,6 @@ class RealUiStopSearchResultDropdownMenuGeneratorTest {
             assertEquals(
                 mapOf<StopIdentifier, UiStopSearchResultDropdownMenu>(
                     "123456".toNaptanStopIdentifier() to UiStopSearchResultDropdownMenu(
-                        isShown = false,
                         favouriteStopDropdownItem = null,
                         arrivalAlertDropdownItem = UiArrivalAlertDropdownMenuItem(
                             hasArrivalAlert = true
@@ -444,78 +405,7 @@ class RealUiStopSearchResultDropdownMenuGeneratorTest {
         }
     }
 
-    @Test
-    fun getDropdownMenuItemsForStopsFlowWhenSelectedStopDoesNotMatch() = runTest {
-        val generator = createUiStopSearchResultDropdownMenuGenerator(
-            state = FakeState(
-                onSelectedStopIdentifierFlow = { flowOf("987654".toNaptanStopIdentifier()) }
-            ),
-            featureRepository = FakeFeatureRepository(
-                onHasStopMapUiFeature = { true }
-            ),
-            favouriteMenuItemRetriever = FakeUiFavouriteStopDropdownMenuItemMultipleStopsRetriever(
-                onGetUiFavouriteStopDropdownMenuItemsFlow = { flowOf(null) }
-            ),
-            alertMenuItemsRetriever = FakeUiAlertDropdownMenuItemMultipleStopsRetriever(
-                onGetUiArrivalAlertDropdownMenuItemsFlow = { flowOf(null) },
-                onGetUiProximityAlertDropdownMenuItemsFlow = { flowOf(null) }
-            )
-        )
-
-        generator.getDropdownMenuItemsForStopsFlow(setOf("123456".toNaptanStopIdentifier())).test {
-            assertEquals(
-                mapOf<StopIdentifier, UiStopSearchResultDropdownMenu>(
-                    "123456".toNaptanStopIdentifier() to UiStopSearchResultDropdownMenu(
-                        isShown = false,
-                        favouriteStopDropdownItem = null,
-                        arrivalAlertDropdownItem = null,
-                        proximityAlertDropdownItem = null,
-                        isStopMapItemShown = true
-                    )
-                ),
-                awaitItem()
-            )
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun getDropdownMenuItemsForStopsFlowWhenSelectedStopMatches() = runTest {
-        val generator = createUiStopSearchResultDropdownMenuGenerator(
-            state = FakeState(
-                onSelectedStopIdentifierFlow = { flowOf("123456".toNaptanStopIdentifier()) }
-            ),
-            featureRepository = FakeFeatureRepository(
-                onHasStopMapUiFeature = { true }
-            ),
-            favouriteMenuItemRetriever = FakeUiFavouriteStopDropdownMenuItemMultipleStopsRetriever(
-                onGetUiFavouriteStopDropdownMenuItemsFlow = { flowOf(null) }
-            ),
-            alertMenuItemsRetriever = FakeUiAlertDropdownMenuItemMultipleStopsRetriever(
-                onGetUiArrivalAlertDropdownMenuItemsFlow = { flowOf(null) },
-                onGetUiProximityAlertDropdownMenuItemsFlow = { flowOf(null) }
-            )
-        )
-
-        generator.getDropdownMenuItemsForStopsFlow(setOf("123456".toNaptanStopIdentifier())).test {
-            assertEquals(
-                mapOf<StopIdentifier, UiStopSearchResultDropdownMenu>(
-                    "123456".toNaptanStopIdentifier() to UiStopSearchResultDropdownMenu(
-                        isShown = true,
-                        favouriteStopDropdownItem = null,
-                        arrivalAlertDropdownItem = null,
-                        proximityAlertDropdownItem = null,
-                        isStopMapItemShown = true
-                    )
-                ),
-                awaitItem()
-            )
-            awaitComplete()
-        }
-    }
-
     private fun createUiStopSearchResultDropdownMenuGenerator(
-        state: State = FakeState(),
         featureRepository: FeatureRepository = FakeFeatureRepository(),
         favouriteMenuItemRetriever: UiFavouriteStopDropdownMenuItemMultipleStopsRetriever =
             FakeUiFavouriteStopDropdownMenuItemMultipleStopsRetriever(),
@@ -523,7 +413,6 @@ class RealUiStopSearchResultDropdownMenuGeneratorTest {
             FakeUiAlertDropdownMenuItemMultipleStopsRetriever()
     ): RealUiStopSearchResultDropdownMenuGenerator {
         return RealUiStopSearchResultDropdownMenuGenerator(
-            state = state,
             featureRepository = featureRepository,
             favouriteMenuItemRetriever = favouriteMenuItemRetriever,
             alertMenuItemsRetriever = alertMenuItemsRetriever

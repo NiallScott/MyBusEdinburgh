@@ -34,7 +34,6 @@ import uk.org.rivernile.android.bustracker.ui.favouritestops.UiFavouriteStopDrop
 /**
  * A dropdown menu for a stop search result.
  *
- * @property isShown Is the menu being shown?
  * @property favouriteStopDropdownItem Properties related to the favourite stop dropdown item.
  * `null` denotes that the item should not be shown.
  * @property arrivalAlertDropdownItem Properties related to the arrival alert dropdown item. `null`
@@ -46,7 +45,6 @@ import uk.org.rivernile.android.bustracker.ui.favouritestops.UiFavouriteStopDrop
  */
 @Immutable
 internal data class UiStopSearchResultDropdownMenu(
-    val isShown: Boolean = false,
     val favouriteStopDropdownItem: UiFavouriteStopDropdownMenuItem? = null,
     val arrivalAlertDropdownItem: UiArrivalAlertDropdownMenuItem? = null,
     val proximityAlertDropdownItem: UiProximityAlertDropdownMenuItem? = null,
