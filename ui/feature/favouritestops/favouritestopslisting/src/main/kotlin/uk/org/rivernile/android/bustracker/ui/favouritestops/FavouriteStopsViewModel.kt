@@ -94,27 +94,6 @@ internal class FavouriteStopsViewModel @Inject constructor(
     }
 
     /**
-     * This is called when the dropdown has been clicked for a favourite stop.
-     *
-     * @param stopIdentifier The identifier of the favourite stop for which a dropdown should be
-     * shown.
-     */
-    fun onItemOpenDropdownClicked(stopIdentifier: StopIdentifier) {
-        if (!arguments.isShortcutMode) {
-            state.selectedStopIdentifier = stopIdentifier
-        }
-    }
-
-    /**
-     * This is called when the dropdown menu has been dismissed.
-     */
-    fun onDropdownMenuDismissed() {
-        if (!arguments.isShortcutMode) {
-            dismissDropdownMenu()
-        }
-    }
-
-    /**
      * This is called when the edit favourite dropdown item has been clicked.
      *
      * @param stopIdentifier The identifier of the stop which is to be edited.
@@ -122,7 +101,6 @@ internal class FavouriteStopsViewModel @Inject constructor(
     fun onEditFavouriteNameClicked(stopIdentifier: StopIdentifier) {
         if (!arguments.isShortcutMode) {
             state.action = UiAction.ShowEditFavouriteStop(stopIdentifier = stopIdentifier)
-            dismissDropdownMenu()
         }
     }
 
@@ -134,7 +112,6 @@ internal class FavouriteStopsViewModel @Inject constructor(
     fun onRemoveFavouriteClicked(stopIdentifier: StopIdentifier) {
         if (!arguments.isShortcutMode) {
             state.action = UiAction.ShowConfirmRemoveFavourite(stopIdentifier = stopIdentifier)
-            dismissDropdownMenu()
         }
     }
 
@@ -154,7 +131,6 @@ internal class FavouriteStopsViewModel @Inject constructor(
                     displayName = savedName
                 )
             )
-            dismissDropdownMenu()
         }
     }
 
@@ -166,7 +142,6 @@ internal class FavouriteStopsViewModel @Inject constructor(
     fun onAddArrivalAlertClicked(stopIdentifier: StopIdentifier) {
         if (!arguments.isShortcutMode) {
             state.action = UiAction.ShowAddArrivalAlert(stopIdentifier = stopIdentifier)
-            dismissDropdownMenu()
         }
     }
 
@@ -178,7 +153,6 @@ internal class FavouriteStopsViewModel @Inject constructor(
     fun onRemoveArrivalAlertClicked(stopIdentifier: StopIdentifier) {
         if (!arguments.isShortcutMode) {
             state.action = UiAction.ShowConfirmRemoveArrivalAlert(stopIdentifier = stopIdentifier)
-            dismissDropdownMenu()
         }
     }
 
@@ -190,7 +164,6 @@ internal class FavouriteStopsViewModel @Inject constructor(
     fun onAddProximityAlertClicked(stopIdentifier: StopIdentifier) {
         if (!arguments.isShortcutMode) {
             state.action = UiAction.ShowAddProximityAlert(stopIdentifier = stopIdentifier)
-            dismissDropdownMenu()
         }
     }
 
@@ -203,7 +176,6 @@ internal class FavouriteStopsViewModel @Inject constructor(
     fun onRemoveProximityAlertClicked(stopIdentifier: StopIdentifier) {
         if (!arguments.isShortcutMode) {
             state.action = UiAction.ShowConfirmRemoveProximityAlert(stopIdentifier = stopIdentifier)
-            dismissDropdownMenu()
         }
     }
 
@@ -215,7 +187,6 @@ internal class FavouriteStopsViewModel @Inject constructor(
     fun onShowOnMapClicked(stopIdentifier: StopIdentifier) {
         if (!arguments.isShortcutMode) {
             state.action = UiAction.ShowOnMap(stopIdentifier = stopIdentifier)
-            dismissDropdownMenu()
         }
     }
 
@@ -247,9 +218,5 @@ internal class FavouriteStopsViewModel @Inject constructor(
         } else {
             UiContent.Empty
         }
-    }
-
-    private fun dismissDropdownMenu() {
-        state.selectedStopIdentifier = null
     }
 }

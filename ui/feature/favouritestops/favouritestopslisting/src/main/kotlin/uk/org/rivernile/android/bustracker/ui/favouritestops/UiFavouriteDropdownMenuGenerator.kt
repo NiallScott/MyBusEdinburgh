@@ -60,7 +60,6 @@ internal interface UiFavouriteDropdownMenuGenerator {
 
 internal class RealUiFavouriteDropdownMenuGenerator @Inject constructor(
     private val arguments: Arguments,
-    private val state: State,
     private val featureRepository: FeatureRepository,
     private val alertMenuItemsRetriever: UiAlertDropdownMenuItemMultipleStopsRetriever
 ) : UiFavouriteDropdownMenuGenerator {
@@ -92,15 +91,13 @@ internal class RealUiFavouriteDropdownMenuGenerator @Inject constructor(
     ): Flow<Map<StopIdentifier, UiFavouriteDropdownMenu>?> {
         return if (!isShortcutMode) {
             combine(
-                state.selectedStopIdentifierFlow,
                 alertMenuItemsRetriever.getUiArrivalAlertDropdownMenuItemsFlow(stopIdentifiers),
                 alertMenuItemsRetriever.getUiProximityAlertDropdownMenuItemsFlow(stopIdentifiers)
-            ) { selectedStopIdentifier, arrivalAlertMenuItems, proximityAlertMenuItems ->
+            ) { arrivalAlertMenuItems, proximityAlertMenuItems ->
                 createDropdownMenusForStops(
                     stopIdentifiers = stopIdentifiers,
                     arrivalAlertMenuItems = arrivalAlertMenuItems,
-                    proximityAlertMenuItems = proximityAlertMenuItems,
-                    selectedStopIdentifier = selectedStopIdentifier
+                    proximityAlertMenuItems = proximityAlertMenuItems
                 )
             }
         } else {
@@ -111,13 +108,11 @@ internal class RealUiFavouriteDropdownMenuGenerator @Inject constructor(
     private fun createDropdownMenusForStops(
         stopIdentifiers: Set<StopIdentifier>,
         arrivalAlertMenuItems: Map<StopIdentifier, UiArrivalAlertDropdownMenuItem>?,
-        proximityAlertMenuItems: Map<StopIdentifier, UiProximityAlertDropdownMenuItem>?,
-        selectedStopIdentifier: StopIdentifier?
+        proximityAlertMenuItems: Map<StopIdentifier, UiProximityAlertDropdownMenuItem>?
     ): Map<StopIdentifier, UiFavouriteDropdownMenu> {
         return stopIdentifiers
             .associateWith { stopIdentifier ->
                 UiFavouriteDropdownMenu(
-                    isShown = stopIdentifier == selectedStopIdentifier,
                     isShortcutItemShown = hasShortcutFeature,
                     arrivalAlertDropdownItem = arrivalAlertMenuItems?.get(stopIdentifier),
                     proximityAlertDropdownItem = proximityAlertMenuItems?.get(stopIdentifier),

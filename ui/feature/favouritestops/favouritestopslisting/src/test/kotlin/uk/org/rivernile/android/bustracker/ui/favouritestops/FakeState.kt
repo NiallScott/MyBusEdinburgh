@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
 import kotlinx.coroutines.flow.Flow
-import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
  * A fake [State] for testing.
@@ -37,13 +36,7 @@ import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 internal class FakeState(
     private val onActionFlow: () -> Flow<UiAction?> = { throw NotImplementedError() },
     private val onGetAction: () -> UiAction? = { throw NotImplementedError() },
-    private val onSetAction: (UiAction?) -> Unit = { throw NotImplementedError() },
-    private val onSelectedStopIdentifierFlow: () -> Flow<StopIdentifier?> =
-        { throw NotImplementedError() },
-    private val onGetSelectedStopIdentifier: () -> StopIdentifier? =
-        { throw NotImplementedError() },
-    private val onSetSelectedStopIdentifier: (StopIdentifier?) -> Unit =
-        { throw NotImplementedError() }
+    private val onSetAction: (UiAction?) -> Unit = { throw NotImplementedError() }
 ) : State {
 
     override val actionFlow get() = onActionFlow()
@@ -52,13 +45,5 @@ internal class FakeState(
         get() = onGetAction()
         set(value) {
             onSetAction(value)
-        }
-
-    override val selectedStopIdentifierFlow get() = onSelectedStopIdentifierFlow()
-
-    override var selectedStopIdentifier: StopIdentifier?
-        get() = onGetSelectedStopIdentifier()
-        set(value) {
-            onSetSelectedStopIdentifier(value)
         }
 }

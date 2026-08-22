@@ -588,8 +588,6 @@ class FavouriteStopsScreenKtTest {
     private fun FavouriteStopsScreenWithStateWithDefaults(
         state: UiState,
         onItemClicked: (StopIdentifier, String) -> Unit = { _, _ -> throw NotImplementedError() },
-        onOpenDropdownClicked: (StopIdentifier) -> Unit = { throw NotImplementedError() },
-        onDropdownMenuDismissed: () -> Unit = { throw NotImplementedError() },
         onEditFavouriteNameClick: (StopIdentifier) -> Unit = { throw NotImplementedError() },
         onRemoveFavouriteClick: (StopIdentifier) -> Unit = { throw NotImplementedError() },
         onAddShortcutClick: (StopIdentifier, String) -> Unit =
@@ -615,8 +613,6 @@ class FavouriteStopsScreenKtTest {
         FavouriteStopsScreenWithState(
             state = state,
             onItemClicked = onItemClicked,
-            onOpenDropdownClicked = onOpenDropdownClicked,
-            onDropdownMenuDismissed = onDropdownMenuDismissed,
             onEditFavouriteNameClick = onEditFavouriteNameClick,
             onRemoveFavouriteClick = onRemoveFavouriteClick,
             onAddShortcutClick = onAddShortcutClick,

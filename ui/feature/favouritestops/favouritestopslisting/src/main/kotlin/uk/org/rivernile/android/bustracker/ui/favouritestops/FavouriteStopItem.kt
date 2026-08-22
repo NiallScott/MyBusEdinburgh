@@ -43,6 +43,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -59,6 +63,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.text.SmallDecoratedServiceNamesListingText
@@ -70,16 +75,12 @@ internal const val TEST_TAG_FAVOURITE_ICON = "favourite-icon"
 internal const val TEST_TAG_SAVED_NAME = "saved-name"
 internal const val TEST_TAG_SERVICES_LISTING = "services-listing"
 internal const val TEST_TAG_DROPDOWN_INDICATOR = "dropdown-indicator"
-internal const val TEST_TAG_DROPDOWN_MENU = "dropdown-menu"
 
 /**
  * This composes a favourite stop item.
  *
  * @param favouriteStop The favourite stop to render.
  * @param onFavouriteClick This is called when the user has clicked on the favourite stop.
- * @param onOpenDropdownClick This is called when the user has clicked on the button to show the
- * dropdown menu.
- * @param onDropdownMenuDismissed This is called when the dropdown menu has been dismissed.
  * @param onEditFavouriteNameClick This is called when the user clicks on the menu item to edit
  * their favourite stop.
  * @param onRemoveFavouriteClick This is called when the user clicks on the menu item to remove a
@@ -103,8 +104,6 @@ internal const val TEST_TAG_DROPDOWN_MENU = "dropdown-menu"
 internal fun FavouriteStopItem(
     favouriteStop: UiFavouriteStop,
     onFavouriteClick: () -> Unit,
-    onOpenDropdownClick: () -> Unit,
-    onDropdownMenuDismissed: () -> Unit,
     onEditFavouriteNameClick: () -> Unit,
     onRemoveFavouriteClick: () -> Unit,
     onAddShortcutClick: () -> Unit,
@@ -144,9 +143,8 @@ internal fun FavouriteStopItem(
 
         favouriteStop.dropdownMenu?.let { dropdownMenu ->
             DropdownMenuBox(
+                stopIdentifier = favouriteStop.stopIdentifier,
                 dropdownMenu = dropdownMenu,
-                onOpenDropdownClick = onOpenDropdownClick,
-                onDropdownMenuDismissed = onDropdownMenuDismissed,
                 onEditFavouriteNameClick = onEditFavouriteNameClick,
                 onRemoveFavouriteClick = onRemoveFavouriteClick,
                 onAddShortcutClick = onAddShortcutClick,
@@ -232,9 +230,8 @@ private fun FavouriteStopServices(
 
 @Composable
 private fun DropdownMenuBox(
+    stopIdentifier: StopIdentifier,
     dropdownMenu: UiFavouriteDropdownMenu,
-    onOpenDropdownClick: () -> Unit,
-    onDropdownMenuDismissed: () -> Unit,
     onEditFavouriteNameClick: () -> Unit,
     onRemoveFavouriteClick: () -> Unit,
     onAddShortcutClick: () -> Unit,
@@ -249,25 +246,50 @@ private fun DropdownMenuBox(
     Box(
         modifier = modifier
     ) {
+        var expanded by remember(stopIdentifier) {
+            mutableStateOf(false)
+        }
+
         DropdownMenuIconButton(
-            onClick = onOpenDropdownClick
+            onClick = { expanded = true }
         )
 
         FavouriteStopItemDropdownMenu(
             menu = dropdownMenu,
-            onDropdownMenuDismissed = onDropdownMenuDismissed,
-            onEditFavouriteNameClick = onEditFavouriteNameClick,
-            onRemoveFavouriteClick = onRemoveFavouriteClick,
-            onAddShortcutClick = onAddShortcutClick,
-            onAddArrivalAlertClick = onAddArrivalAlertClick,
-            onRemoveArrivalAlertClick = onRemoveArrivalAlertClick,
-            onAddProximityAlertClick = onAddProximityAlertClick,
-            onRemoveProximityAlertClick = onRemoveProximityAlertClick,
-            onShowOnMapClick = onShowOnMapClick,
-            modifier = Modifier
-                .semantics {
-                    testTag = TEST_TAG_DROPDOWN_MENU
-                }
+            expanded = expanded,
+            onDropdownMenuDismissed = { expanded = false },
+            onEditFavouriteNameClick = {
+                onEditFavouriteNameClick()
+                expanded = false
+            },
+            onRemoveFavouriteClick = {
+                onRemoveFavouriteClick()
+                expanded = false
+            },
+            onAddShortcutClick = {
+                onAddShortcutClick()
+                expanded = false
+            },
+            onAddArrivalAlertClick = {
+                onAddArrivalAlertClick()
+                expanded = false
+            },
+            onRemoveArrivalAlertClick = {
+                onRemoveArrivalAlertClick()
+                expanded = false
+            },
+            onAddProximityAlertClick = {
+                onAddProximityAlertClick()
+                expanded = false
+            },
+            onRemoveProximityAlertClick = {
+                onRemoveProximityAlertClick()
+                expanded = false
+            },
+            onShowOnMapClick = {
+                onShowOnMapClick()
+                expanded = false
+            }
         )
     }
 }
@@ -316,8 +338,6 @@ private fun FavouriteStopItemPreview(
         FavouriteStopItem(
             favouriteStop = favouriteStop,
             onFavouriteClick = { },
-            onOpenDropdownClick = { },
-            onDropdownMenuDismissed = { },
             onEditFavouriteNameClick = { },
             onRemoveFavouriteClick = { },
             onAddShortcutClick = { },

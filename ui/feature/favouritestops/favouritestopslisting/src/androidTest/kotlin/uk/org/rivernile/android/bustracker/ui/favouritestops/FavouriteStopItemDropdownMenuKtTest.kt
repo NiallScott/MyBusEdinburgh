@@ -66,9 +66,7 @@ class FavouriteStopItemDropdownMenuKtTest {
         composeTestRule.setContent {
             MyBusTheme {
                 FavouriteStopItemDropdownMenuWithDefaults(
-                    menu = UiFavouriteDropdownMenu(
-                        isShown = true
-                    ),
+                    menu = UiFavouriteDropdownMenu(),
                     onEditFavouriteNameClick = itemClickedCounter
                 )
             }
@@ -92,9 +90,7 @@ class FavouriteStopItemDropdownMenuKtTest {
         composeTestRule.setContent {
             MyBusTheme {
                 FavouriteStopItemDropdownMenuWithDefaults(
-                    menu = UiFavouriteDropdownMenu(
-                        isShown = true
-                    ),
+                    menu = UiFavouriteDropdownMenu(),
                     onRemoveFavouriteClick = itemClickedCounter
                 )
             }
@@ -118,7 +114,6 @@ class FavouriteStopItemDropdownMenuKtTest {
             MyBusTheme {
                 FavouriteStopItemDropdownMenuWithDefaults(
                     menu = UiFavouriteDropdownMenu(
-                        isShown = true,
                         isShortcutItemShown = false
                     )
                 )
@@ -137,7 +132,6 @@ class FavouriteStopItemDropdownMenuKtTest {
             MyBusTheme {
                 FavouriteStopItemDropdownMenuWithDefaults(
                     menu = UiFavouriteDropdownMenu(
-                        isShown = true,
                         isShortcutItemShown = true
                     ),
                     onAddShortcutClick = itemClickedCounter
@@ -165,7 +159,6 @@ class FavouriteStopItemDropdownMenuKtTest {
             MyBusTheme {
                 FavouriteStopItemDropdownMenuWithDefaults(
                     menu = UiFavouriteDropdownMenu(
-                        isShown = true,
                         arrivalAlertDropdownItem = null
                     )
                 )
@@ -184,7 +177,6 @@ class FavouriteStopItemDropdownMenuKtTest {
             MyBusTheme {
                 FavouriteStopItemDropdownMenuWithDefaults(
                     menu = UiFavouriteDropdownMenu(
-                        isShown = true,
                         arrivalAlertDropdownItem = UiArrivalAlertDropdownMenuItem(
                             hasArrivalAlert = false
                         )
@@ -212,7 +204,6 @@ class FavouriteStopItemDropdownMenuKtTest {
             MyBusTheme {
                 FavouriteStopItemDropdownMenuWithDefaults(
                     menu = UiFavouriteDropdownMenu(
-                        isShown = true,
                         arrivalAlertDropdownItem = null
                     )
                 )
@@ -231,7 +222,6 @@ class FavouriteStopItemDropdownMenuKtTest {
             MyBusTheme {
                 FavouriteStopItemDropdownMenuWithDefaults(
                     menu = UiFavouriteDropdownMenu(
-                        isShown = true,
                         arrivalAlertDropdownItem = UiArrivalAlertDropdownMenuItem(
                             hasArrivalAlert = true
                         )
@@ -259,7 +249,6 @@ class FavouriteStopItemDropdownMenuKtTest {
             MyBusTheme {
                 FavouriteStopItemDropdownMenuWithDefaults(
                     menu = UiFavouriteDropdownMenu(
-                        isShown = true,
                         proximityAlertDropdownItem = null
                     )
                 )
@@ -278,7 +267,6 @@ class FavouriteStopItemDropdownMenuKtTest {
             MyBusTheme {
                 FavouriteStopItemDropdownMenuWithDefaults(
                     menu = UiFavouriteDropdownMenu(
-                        isShown = true,
                         proximityAlertDropdownItem = UiProximityAlertDropdownMenuItem(
                             hasProximityAlert = false
                         )
@@ -306,7 +294,6 @@ class FavouriteStopItemDropdownMenuKtTest {
             MyBusTheme {
                 FavouriteStopItemDropdownMenuWithDefaults(
                     menu = UiFavouriteDropdownMenu(
-                        isShown = true,
                         proximityAlertDropdownItem = null
                     )
                 )
@@ -325,7 +312,6 @@ class FavouriteStopItemDropdownMenuKtTest {
             MyBusTheme {
                 FavouriteStopItemDropdownMenuWithDefaults(
                     menu = UiFavouriteDropdownMenu(
-                        isShown = true,
                         proximityAlertDropdownItem = UiProximityAlertDropdownMenuItem(
                             hasProximityAlert = true
                         )
@@ -353,7 +339,6 @@ class FavouriteStopItemDropdownMenuKtTest {
             MyBusTheme {
                 FavouriteStopItemDropdownMenuWithDefaults(
                     menu = UiFavouriteDropdownMenu(
-                        isShown = true,
                         isStopMapItemShown = false
                     )
                 )
@@ -372,7 +357,6 @@ class FavouriteStopItemDropdownMenuKtTest {
             MyBusTheme {
                 FavouriteStopItemDropdownMenuWithDefaults(
                     menu = UiFavouriteDropdownMenu(
-                        isShown = true,
                         isStopMapItemShown = true
                     ),
                     onShowOnMapClick = itemClickedCounter
@@ -401,9 +385,7 @@ class FavouriteStopItemDropdownMenuKtTest {
         composeTestRule.setContent {
             MyBusTheme {
                 FavouriteStopItemDropdownMenuWithDefaults(
-                    menu = UiFavouriteDropdownMenu(
-                        isShown = true
-                    ),
+                    menu = UiFavouriteDropdownMenu(),
                     onDropdownMenuDismissed = itemClickedCounter
                 )
             }
@@ -436,6 +418,7 @@ class FavouriteStopItemDropdownMenuKtTest {
         ) {
             FavouriteStopItemDropdownMenu(
                 menu = menu,
+                expanded = true,
                 onDropdownMenuDismissed = onDropdownMenuDismissed,
                 onEditFavouriteNameClick = onEditFavouriteNameClick,
                 onRemoveFavouriteClick = onRemoveFavouriteClick,

@@ -233,8 +233,7 @@ class FavouriteStopItemKtTest {
     }
 
     @Test
-    fun dropdownIndicatorInvokesCallbackOnClick() {
-        val itemClickedCounter = ItemClickedCounter()
+    fun dropdownIndicatorClickShowsDropdownMenu() {
         composeTestRule.setContent {
             MyBusTheme {
                 FavouriteStopItemWithDefaults(
@@ -243,8 +242,7 @@ class FavouriteStopItemKtTest {
                         savedName = "Saved Name",
                         services = null,
                         dropdownMenu = UiFavouriteDropdownMenu()
-                    ),
-                    onOpenDropdownClick = itemClickedCounter
+                    )
                 )
             }
         }
@@ -255,53 +253,8 @@ class FavouriteStopItemKtTest {
                 useUnmergedTree = true
             )
             .performClick()
-
-        assertEquals(1, itemClickedCounter.count)
-    }
-
-    @Test
-    fun dropdownMenuIsNotComposedWhenDropdownMenuIsNull() {
-        composeTestRule.setContent {
-            MyBusTheme {
-                FavouriteStopItemWithDefaults(
-                    favouriteStop = UiFavouriteStop(
-                        stopIdentifier = "123456".toNaptanStopIdentifier(),
-                        savedName = "Saved Name",
-                        services = null,
-                        dropdownMenu = null
-                    )
-                )
-            }
-        }
-
         composeTestRule
-            .onNodeWithTag(
-                testTag = TEST_TAG_DROPDOWN_MENU,
-                useUnmergedTree = true
-            )
-            .assertDoesNotExist()
-    }
-
-    @Test
-    fun dropdownMenuIsComposedWhenDropdownMenuIsNotNull() {
-        composeTestRule.setContent {
-            MyBusTheme {
-                FavouriteStopItemWithDefaults(
-                    favouriteStop = UiFavouriteStop(
-                        stopIdentifier = "123456".toNaptanStopIdentifier(),
-                        savedName = "Saved Name",
-                        services = null,
-                        dropdownMenu = UiFavouriteDropdownMenu(isShown = true)
-                    )
-                )
-            }
-        }
-
-        composeTestRule
-            .onNodeWithTag(
-                testTag = TEST_TAG_DROPDOWN_MENU,
-                useUnmergedTree = true
-            )
+            .onNodeWithTag(TEST_TAG_DROPDOWN_MENU)
             .assertExists()
     }
 
@@ -333,8 +286,6 @@ class FavouriteStopItemKtTest {
     private fun FavouriteStopItemWithDefaults(
         favouriteStop: UiFavouriteStop,
         onFavouriteClick: () -> Unit = { throw NotImplementedError() },
-        onOpenDropdownClick: () -> Unit = { throw NotImplementedError() },
-        onDropdownMenuDismissed: () -> Unit = { throw NotImplementedError() },
         onEditFavouriteNameClick: () -> Unit = { throw NotImplementedError() },
         onRemoveFavouriteClick: () -> Unit = { throw NotImplementedError() },
         onAddShortcutClick: () -> Unit = { throw NotImplementedError() },
@@ -347,8 +298,6 @@ class FavouriteStopItemKtTest {
         FavouriteStopItem(
             favouriteStop = favouriteStop,
             onFavouriteClick = onFavouriteClick,
-            onOpenDropdownClick = onOpenDropdownClick,
-            onDropdownMenuDismissed = onDropdownMenuDismissed,
             onEditFavouriteNameClick = onEditFavouriteNameClick,
             onRemoveFavouriteClick = onRemoveFavouriteClick,
             onAddShortcutClick = onAddShortcutClick,

@@ -57,6 +57,7 @@ internal const val TEST_TAG_MENU_ITEM_SHOW_ON_MAP = "menu-item-show-on-map"
  * A composable which shows a dropdown menu of items to perform against the stop search result.
  *
  * @param menu The menu data.
+ * @param expanded Whether the menu is expanded or not.
  * @param onDropdownMenuDismissed This is called when the dropdown menu has been dismissed.
  * @param onAddFavouriteStopClick This is called when the user clicks on the menu item to add a
  * favourite stop.

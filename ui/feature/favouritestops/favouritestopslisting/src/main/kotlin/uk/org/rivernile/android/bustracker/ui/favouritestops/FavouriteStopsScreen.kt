@@ -138,8 +138,6 @@ internal fun FavouriteStopsScreen(
     FavouriteStopsScreenWithState(
         state = uiState,
         onItemClicked = viewModel::onItemClicked,
-        onOpenDropdownClicked = viewModel::onItemOpenDropdownClicked,
-        onDropdownMenuDismissed = viewModel::onDropdownMenuDismissed,
         onEditFavouriteNameClick = viewModel::onEditFavouriteNameClicked,
         onRemoveFavouriteClick = viewModel::onRemoveFavouriteClicked,
         onAddArrivalAlertClick = viewModel::onAddArrivalAlertClicked,
@@ -168,8 +166,6 @@ internal fun FavouriteStopsScreen(
  *
  * @param state The current [UiState].
  * @param onItemClicked A lambda to handle the favourite stop being clicked.
- * @param onOpenDropdownClicked A lambda to handle the favourite stop dropdown button being clicked.
- * @param onDropdownMenuDismissed A lambda to handle the favourite stop dropdown being dismissed.
  * @param onEditFavouriteNameClick A lambda to handle a favourite stop edit item being clicked.
  * @param onRemoveFavouriteClick A lambda to handle a favourite stop remove item being clicked.
  * @param onAddShortcutClick A lambda to handle a favourite stop add shortcut item being clicked.
@@ -204,8 +200,6 @@ internal fun FavouriteStopsScreen(
 internal fun FavouriteStopsScreenWithState(
     state: UiState,
     onItemClicked: (StopIdentifier, String) -> Unit,
-    onOpenDropdownClicked: (StopIdentifier) -> Unit,
-    onDropdownMenuDismissed: () -> Unit,
     onEditFavouriteNameClick: (StopIdentifier) -> Unit,
     onRemoveFavouriteClick: (StopIdentifier) -> Unit,
     onAddShortcutClick: (StopIdentifier, String) -> Unit,
@@ -246,8 +240,6 @@ internal fun FavouriteStopsScreenWithState(
             is UiContent.Content -> Content(
                 favouriteStops = state.content.favouriteStops,
                 onItemClicked = onItemClicked,
-                onOpenDropdownClicked = onOpenDropdownClicked,
-                onDropdownMenuDismissed = onDropdownMenuDismissed,
                 onEditFavouriteNameClick = onEditFavouriteNameClick,
                 onRemoveFavouriteClick = onRemoveFavouriteClick,
                 onAddShortcutClick = onAddShortcutClick,
@@ -310,8 +302,6 @@ private fun IndeterminateProgress(
 private fun Content(
     favouriteStops: ImmutableList<UiFavouriteStop>,
     onItemClicked: (StopIdentifier, String) -> Unit,
-    onOpenDropdownClicked: (StopIdentifier) -> Unit,
-    onDropdownMenuDismissed: () -> Unit,
     onEditFavouriteNameClick: (StopIdentifier) -> Unit,
     onRemoveFavouriteClick: (StopIdentifier) -> Unit,
     onAddShortcutClick: (StopIdentifier, String) -> Unit,
@@ -347,8 +337,6 @@ private fun Content(
             FavouriteStopItem(
                 favouriteStop = it,
                 onFavouriteClick = { onItemClicked(it.stopIdentifier, it.savedName) },
-                onOpenDropdownClick = { onOpenDropdownClicked(it.stopIdentifier) },
-                onDropdownMenuDismissed = onDropdownMenuDismissed,
                 onEditFavouriteNameClick = { onEditFavouriteNameClick(it.stopIdentifier) },
                 onRemoveFavouriteClick = { onRemoveFavouriteClick(it.stopIdentifier) },
                 onAddShortcutClick = { onAddShortcutClick(it.stopIdentifier, it.savedName) },
@@ -486,8 +474,6 @@ private fun FavouriteStopsScreenPreview(
             state = state,
             modifier = Modifier.fillMaxSize(),
             onItemClicked = { _, _ -> },
-            onOpenDropdownClicked = { },
-            onDropdownMenuDismissed = { },
             onEditFavouriteNameClick = { },
             onRemoveFavouriteClick = { },
             onAddShortcutClick = { _, _ -> },

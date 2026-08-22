@@ -26,16 +26,10 @@
 
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
-import androidx.lifecycle.SavedStateHandle
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-import uk.org.rivernile.android.bustracker.core.domain.ParcelableStopIdentifier
-import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
-import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
-import uk.org.rivernile.android.bustracker.core.domain.toStopIdentifier
 import javax.inject.Inject
 
 /**
@@ -55,24 +49,10 @@ internal interface State {
      * The current [UiAction] in progress, if any.
      */
     var action: UiAction?
-
-    /**
-     * A [Flow] which emits the currently selected stop identifier.
-     */
-    val selectedStopIdentifierFlow: Flow<StopIdentifier?>
-
-    /**
-     * A property which gets and sets the currently selected stop identifier.
-     */
-    var selectedStopIdentifier: StopIdentifier?
 }
 
-internal const val STATE_SELECTED_STOP_IDENTIFIER = "selectedStopIdentifier"
-
 @ViewModelScoped
-internal class RealState @Inject constructor(
-    private val savedState: SavedStateHandle
-) : State {
+internal class RealState @Inject constructor() : State {
 
     private val _actionFlow = MutableStateFlow<UiAction?>(null)
 
@@ -83,21 +63,4 @@ internal class RealState @Inject constructor(
         set(value) {
             _actionFlow.value = value
         }
-
-    override val selectedStopIdentifierFlow get() = _selectedStopIdentifierFlow
-        .map { it?.toStopIdentifier() }
-
-    override var selectedStopIdentifier: StopIdentifier?
-        get() = savedState
-            .get<ParcelableStopIdentifier>(STATE_SELECTED_STOP_IDENTIFIER)
-            ?.toStopIdentifier()
-        set(value) {
-            savedState[STATE_SELECTED_STOP_IDENTIFIER] = value?.toParcelableStopIdentifier()
-        }
-
-    private val _selectedStopIdentifierFlow = savedState
-        .getStateFlow<ParcelableStopIdentifier?>(
-            key = STATE_SELECTED_STOP_IDENTIFIER,
-            initialValue = null
-        )
 }

@@ -50,6 +50,7 @@ import uk.org.rivernile.android.bustracker.ui.alerts.UiArrivalAlertDropdownMenuI
 import uk.org.rivernile.android.bustracker.ui.alerts.UiProximityAlertDropdownMenuItem
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 
+internal const val TEST_TAG_DROPDOWN_MENU = "dropdown-menu"
 internal const val TEST_TAG_MENU_ITEM_EDIT_FAVOURITE_NAME = "menu-item-edit-favourite-name"
 internal const val TEST_TAG_MENU_ITEM_REMOVE_FAVOURITE = "menu-item-remove-favourite"
 internal const val TEST_TAG_MENU_ITEM_SHOW_ON_MAP = "menu-item-show-on-map"
@@ -59,6 +60,7 @@ internal const val TEST_TAG_MENU_ITEM_ADD_SHORTCUT = "menu-item-add-shortcut"
  * A composable which shows a dropdown menu of items to perform against the favourite stop.
  *
  * @param menu The menu data.
+ * @param expanded Whether the menu is expanded or not.
  * @param onDropdownMenuDismissed This is called when the dropdown menu has been dismissed.
  * @param onEditFavouriteNameClick This is called when the user clicks on the menu item to edit
  * their favourite stop.
@@ -82,6 +84,7 @@ internal const val TEST_TAG_MENU_ITEM_ADD_SHORTCUT = "menu-item-add-shortcut"
 @Composable
 internal fun FavouriteStopItemDropdownMenu(
     menu: UiFavouriteDropdownMenu,
+    expanded: Boolean,
     onDropdownMenuDismissed: () -> Unit,
     onEditFavouriteNameClick: () -> Unit,
     onRemoveFavouriteClick: () -> Unit,
@@ -94,9 +97,12 @@ internal fun FavouriteStopItemDropdownMenu(
     modifier: Modifier = Modifier
 ) {
     DropdownMenu(
-        expanded = menu.isShown,
+        expanded = expanded,
         onDismissRequest = onDropdownMenuDismissed,
         modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_DROPDOWN_MENU
+            }
     ) {
         EditFavouriteNameMenuItem(
             onClick = onEditFavouriteNameClick
@@ -249,6 +255,7 @@ private fun FavouriteStopItemDropdownMenuPreview(
         ) {
             FavouriteStopItemDropdownMenu(
                 menu = menu,
+                expanded = true,
                 onDropdownMenuDismissed = { },
                 onEditFavouriteNameClick = { },
                 onRemoveFavouriteClick = { },
@@ -267,7 +274,6 @@ private class UiFavouriteDropdownMenuProvider : PreviewParameterProvider<UiFavou
 
     override val values = sequenceOf(
         UiFavouriteDropdownMenu(
-            isShown = true,
             isShortcutItemShown = true,
             arrivalAlertDropdownItem = UiArrivalAlertDropdownMenuItem(
                 hasArrivalAlert = false
@@ -278,7 +284,6 @@ private class UiFavouriteDropdownMenuProvider : PreviewParameterProvider<UiFavou
             isStopMapItemShown = true
         ),
         UiFavouriteDropdownMenu(
-            isShown = true,
             isShortcutItemShown = true,
             arrivalAlertDropdownItem = UiArrivalAlertDropdownMenuItem(
                 hasArrivalAlert = true

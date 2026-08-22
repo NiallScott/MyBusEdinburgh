@@ -56,9 +56,6 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
             arguments = FakeArguments(
                 onIsShortcutModeFlow = { flowOf(false) }
             ),
-            state = FakeState(
-                onSelectedStopIdentifierFlow = { flowOf(null) }
-            ),
             featureRepository = FakeFeatureRepository(
                 onHasStopMapUiFeature = { true },
                 onHasPinShortcutFeature = { true }
@@ -80,9 +77,6 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
         val generator = createUiFavouriteDropdownItemsGenerator(
             arguments = FakeArguments(
                 onIsShortcutModeFlow = { flowOf(true) }
-            ),
-            state = FakeState(
-                onSelectedStopIdentifierFlow = { flowOf(null) }
             ),
             featureRepository = FakeFeatureRepository(
                 onHasStopMapUiFeature = { true },
@@ -106,9 +100,6 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
             arguments = FakeArguments(
                 onIsShortcutModeFlow = { flowOf(false) }
             ),
-            state = FakeState(
-                onSelectedStopIdentifierFlow = { flowOf(null) }
-            ),
             featureRepository = FakeFeatureRepository(
                 onHasStopMapUiFeature = { true },
                 onHasPinShortcutFeature = { false }
@@ -123,7 +114,6 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
             assertEquals(
                 mapOf<StopIdentifier, UiFavouriteDropdownMenu>(
                     "123456".toNaptanStopIdentifier() to UiFavouriteDropdownMenu(
-                        isShown = false,
                         isShortcutItemShown = false,
                         arrivalAlertDropdownItem = null,
                         proximityAlertDropdownItem = null,
@@ -142,9 +132,6 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
             arguments = FakeArguments(
                 onIsShortcutModeFlow = { flowOf(false) }
             ),
-            state = FakeState(
-                onSelectedStopIdentifierFlow = { flowOf(null) }
-            ),
             featureRepository = FakeFeatureRepository(
                 onHasStopMapUiFeature = { false },
                 onHasPinShortcutFeature = { true }
@@ -159,7 +146,6 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
             assertEquals(
                 mapOf<StopIdentifier, UiFavouriteDropdownMenu>(
                     "123456".toNaptanStopIdentifier() to UiFavouriteDropdownMenu(
-                        isShown = false,
                         isShortcutItemShown = true,
                         arrivalAlertDropdownItem = null,
                         proximityAlertDropdownItem = null,
@@ -178,9 +164,6 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
             arguments = FakeArguments(
                 onIsShortcutModeFlow = { flowOf(false) }
             ),
-            state = FakeState(
-                onSelectedStopIdentifierFlow = { flowOf(null) }
-            ),
             featureRepository = FakeFeatureRepository(
                 onHasStopMapUiFeature = { true },
                 onHasPinShortcutFeature = { true }
@@ -195,7 +178,6 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
             assertEquals(
                 mapOf<StopIdentifier, UiFavouriteDropdownMenu>(
                     "123456".toNaptanStopIdentifier() to UiFavouriteDropdownMenu(
-                        isShown = false,
                         isShortcutItemShown = true,
                         arrivalAlertDropdownItem = null,
                         proximityAlertDropdownItem = null,
@@ -214,9 +196,6 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
             arguments = FakeArguments(
                 onIsShortcutModeFlow = { flowOf(false) }
             ),
-            state = FakeState(
-                onSelectedStopIdentifierFlow = { flowOf(null) }
-            ),
             featureRepository = FakeFeatureRepository(
                 onHasStopMapUiFeature = { true },
                 onHasPinShortcutFeature = { true }
@@ -231,7 +210,6 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
             assertEquals(
                 mapOf<StopIdentifier, UiFavouriteDropdownMenu>(
                     "123456".toNaptanStopIdentifier() to UiFavouriteDropdownMenu(
-                        isShown = false,
                         isShortcutItemShown = true,
                         arrivalAlertDropdownItem = null,
                         proximityAlertDropdownItem = null,
@@ -249,9 +227,6 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
         val generator = createUiFavouriteDropdownItemsGenerator(
             arguments = FakeArguments(
                 onIsShortcutModeFlow = { flowOf(false) }
-            ),
-            state = FakeState(
-                onSelectedStopIdentifierFlow = { flowOf(null) }
             ),
             featureRepository = FakeFeatureRepository(
                 onHasStopMapUiFeature = { true },
@@ -283,7 +258,6 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
             assertEquals(
                 mapOf<StopIdentifier, UiFavouriteDropdownMenu>(
                     "123456".toNaptanStopIdentifier() to UiFavouriteDropdownMenu(
-                        isShown = false,
                         isShortcutItemShown = true,
                         arrivalAlertDropdownItem = null,
                         proximityAlertDropdownItem = null,
@@ -301,9 +275,6 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
         val generator = createUiFavouriteDropdownItemsGenerator(
             arguments = FakeArguments(
                 onIsShortcutModeFlow = { flowOf(false) }
-            ),
-            state = FakeState(
-                onSelectedStopIdentifierFlow = { flowOf(null) }
             ),
             featureRepository = FakeFeatureRepository(
                 onHasStopMapUiFeature = { true },
@@ -335,7 +306,6 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
             assertEquals(
                 mapOf<StopIdentifier, UiFavouriteDropdownMenu>(
                     "123456".toNaptanStopIdentifier() to UiFavouriteDropdownMenu(
-                        isShown = false,
                         isShortcutItemShown = true,
                         arrivalAlertDropdownItem = UiArrivalAlertDropdownMenuItem(
                             hasArrivalAlert = true
@@ -352,88 +322,14 @@ class RealUiFavouriteDropdownMenuGeneratorTest {
         }
     }
 
-    @Test
-    fun getDropdownMenuItemsForStopsFlowWhenSelectedStopDoesNotMatch() = runTest {
-        val generator = createUiFavouriteDropdownItemsGenerator(
-            arguments = FakeArguments(
-                onIsShortcutModeFlow = { flowOf(false) }
-            ),
-            state = FakeState(
-                onSelectedStopIdentifierFlow = { flowOf("987654".toNaptanStopIdentifier()) }
-            ),
-            featureRepository = FakeFeatureRepository(
-                onHasStopMapUiFeature = { true },
-                onHasPinShortcutFeature = { true }
-            ),
-            alertMenuItemsRetriever = FakeUiAlertDropdownMenuItemMultipleStopsRetriever(
-                onGetUiArrivalAlertDropdownMenuItemsFlow = { flowOf(null) },
-                onGetUiProximityAlertDropdownMenuItemsFlow = { flowOf(null) }
-            )
-        )
-
-        generator.getDropdownMenuItemsForStopsFlow(setOf("123456".toNaptanStopIdentifier())).test {
-            assertEquals(
-                mapOf<StopIdentifier, UiFavouriteDropdownMenu>(
-                    "123456".toNaptanStopIdentifier() to UiFavouriteDropdownMenu(
-                        isShown = false,
-                        isShortcutItemShown = true,
-                        arrivalAlertDropdownItem = null,
-                        proximityAlertDropdownItem = null,
-                        isStopMapItemShown = true
-                    )
-                ),
-                awaitItem()
-            )
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun getDropdownMenuItemsForStopsFlowWhenSelectedStopMatches() = runTest {
-        val generator = createUiFavouriteDropdownItemsGenerator(
-            arguments = FakeArguments(
-                onIsShortcutModeFlow = { flowOf(false) }
-            ),
-            state = FakeState(
-                onSelectedStopIdentifierFlow = { flowOf("123456".toNaptanStopIdentifier()) }
-            ),
-            featureRepository = FakeFeatureRepository(
-                onHasStopMapUiFeature = { true },
-                onHasPinShortcutFeature = { true }
-            ),
-            alertMenuItemsRetriever = FakeUiAlertDropdownMenuItemMultipleStopsRetriever(
-                onGetUiArrivalAlertDropdownMenuItemsFlow = { flowOf(null) },
-                onGetUiProximityAlertDropdownMenuItemsFlow = { flowOf(null) }
-            )
-        )
-
-        generator.getDropdownMenuItemsForStopsFlow(setOf("123456".toNaptanStopIdentifier())).test {
-            assertEquals(
-                mapOf<StopIdentifier, UiFavouriteDropdownMenu>(
-                    "123456".toNaptanStopIdentifier() to UiFavouriteDropdownMenu(
-                        isShown = true,
-                        isShortcutItemShown = true,
-                        arrivalAlertDropdownItem = null,
-                        proximityAlertDropdownItem = null,
-                        isStopMapItemShown = true
-                    )
-                ),
-                awaitItem()
-            )
-            awaitComplete()
-        }
-    }
-
     private fun createUiFavouriteDropdownItemsGenerator(
         arguments: Arguments = FakeArguments(),
-        state: State = FakeState(),
         featureRepository: FeatureRepository = FakeFeatureRepository(),
         alertMenuItemsRetriever: UiAlertDropdownMenuItemMultipleStopsRetriever =
             FakeUiAlertDropdownMenuItemMultipleStopsRetriever()
     ): RealUiFavouriteDropdownMenuGenerator {
         return RealUiFavouriteDropdownMenuGenerator(
             arguments = arguments,
-            state = state,
             featureRepository = featureRepository,
             alertMenuItemsRetriever = alertMenuItemsRetriever
         )

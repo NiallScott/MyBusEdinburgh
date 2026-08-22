@@ -270,8 +270,6 @@ private fun SelectFavouriteStopScreenPreview() {
                 ),
                 modifier = modifier,
                 onItemClicked = { _, _ -> },
-                onOpenDropdownClicked = { },
-                onDropdownMenuDismissed = { },
                 onEditFavouriteNameClick = { },
                 onRemoveFavouriteClick = { },
                 onAddShortcutClick = { _, _ -> },
