@@ -59,7 +59,6 @@ internal interface UiNearestStopDropdownMenuGenerator {
 }
 
 internal class RealUiNearestStopDropdownMenuGenerator @Inject constructor(
-    private val state: State,
     private val featureRepository: FeatureRepository,
     private val favouriteMenuItemRetriever: UiFavouriteStopDropdownMenuItemMultipleStopsRetriever,
     private val alertMenuItemsRetriever: UiAlertDropdownMenuItemMultipleStopsRetriever
@@ -72,14 +71,12 @@ internal class RealUiNearestStopDropdownMenuGenerator @Inject constructor(
     ): Flow<Map<StopIdentifier, UiNearestStopDropdownMenu>?> {
         return if (stopIdentifiers.isNotEmpty()) {
             combine(
-                state.selectedStopIdentifierFlow,
                 favouriteMenuItemRetriever.getUiFavouriteStopDropdownMenuItemsFlow(stopIdentifiers),
                 alertMenuItemsRetriever.getUiArrivalAlertDropdownMenuItemsFlow(stopIdentifiers),
                 alertMenuItemsRetriever.getUiProximityAlertDropdownMenuItemsFlow(stopIdentifiers)
-            ) { selectedStop, favouriteMenus, arrivalAlertMenus, proxAlertMenus ->
+            ) { favouriteMenus, arrivalAlertMenus, proxAlertMenus ->
                 createDropdownMenusForStops(
                     stopIdentifiers = stopIdentifiers,
-                    selectedStopIdentifier = selectedStop,
                     favouriteStopMenuItems = favouriteMenus,
                     arrivalAlertMenuItems = arrivalAlertMenus,
                     proximityAlertMenuItems = proxAlertMenus
@@ -92,7 +89,6 @@ internal class RealUiNearestStopDropdownMenuGenerator @Inject constructor(
 
     private fun createDropdownMenusForStops(
         stopIdentifiers: Set<StopIdentifier>,
-        selectedStopIdentifier: StopIdentifier?,
         favouriteStopMenuItems: Map<StopIdentifier, UiFavouriteStopDropdownMenuItem>?,
         arrivalAlertMenuItems: Map<StopIdentifier, UiArrivalAlertDropdownMenuItem>?,
         proximityAlertMenuItems: Map<StopIdentifier, UiProximityAlertDropdownMenuItem>?,
@@ -100,7 +96,6 @@ internal class RealUiNearestStopDropdownMenuGenerator @Inject constructor(
         return stopIdentifiers
             .associateWith { stopIdentifier ->
                 UiNearestStopDropdownMenu(
-                    isShown = stopIdentifier == selectedStopIdentifier,
                     favouriteStopDropdownItem = favouriteStopMenuItems?.get(stopIdentifier),
                     arrivalAlertDropdownItem = arrivalAlertMenuItems?.get(stopIdentifier),
                     proximityAlertDropdownItem = proximityAlertMenuItems?.get(stopIdentifier),

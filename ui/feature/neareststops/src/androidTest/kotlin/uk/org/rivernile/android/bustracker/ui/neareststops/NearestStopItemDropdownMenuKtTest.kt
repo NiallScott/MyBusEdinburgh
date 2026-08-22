@@ -69,7 +69,6 @@ class NearestStopItemDropdownMenuKtTest {
             MyBusTheme {
                 NearestStopItemDropdownMenuWithDefaults(
                     menu = UiNearestStopDropdownMenu(
-                        isShown = true,
                         favouriteStopDropdownItem = null
                     )
                 )
@@ -88,7 +87,6 @@ class NearestStopItemDropdownMenuKtTest {
             MyBusTheme {
                 NearestStopItemDropdownMenuWithDefaults(
                     menu = UiNearestStopDropdownMenu(
-                        isShown = true,
                         favouriteStopDropdownItem = UiFavouriteStopDropdownMenuItem(
                             isFavouriteStop = false
                         )
@@ -116,7 +114,6 @@ class NearestStopItemDropdownMenuKtTest {
             MyBusTheme {
                 NearestStopItemDropdownMenuWithDefaults(
                     menu = UiNearestStopDropdownMenu(
-                        isShown = true,
                         favouriteStopDropdownItem = null
                     )
                 )
@@ -135,7 +132,6 @@ class NearestStopItemDropdownMenuKtTest {
             MyBusTheme {
                 NearestStopItemDropdownMenuWithDefaults(
                     menu = UiNearestStopDropdownMenu(
-                        isShown = true,
                         favouriteStopDropdownItem = UiFavouriteStopDropdownMenuItem(
                             isFavouriteStop = true
                         )
@@ -163,7 +159,6 @@ class NearestStopItemDropdownMenuKtTest {
             MyBusTheme {
                 NearestStopItemDropdownMenuWithDefaults(
                     menu = UiNearestStopDropdownMenu(
-                        isShown = true,
                         arrivalAlertDropdownItem = null
                     )
                 )
@@ -182,7 +177,6 @@ class NearestStopItemDropdownMenuKtTest {
             MyBusTheme {
                 NearestStopItemDropdownMenuWithDefaults(
                     menu = UiNearestStopDropdownMenu(
-                        isShown = true,
                         arrivalAlertDropdownItem = UiArrivalAlertDropdownMenuItem(
                             hasArrivalAlert = false
                         )
@@ -210,7 +204,6 @@ class NearestStopItemDropdownMenuKtTest {
             MyBusTheme {
                 NearestStopItemDropdownMenuWithDefaults(
                     menu = UiNearestStopDropdownMenu(
-                        isShown = true,
                         arrivalAlertDropdownItem = null
                     )
                 )
@@ -229,7 +222,6 @@ class NearestStopItemDropdownMenuKtTest {
             MyBusTheme {
                 NearestStopItemDropdownMenuWithDefaults(
                     menu = UiNearestStopDropdownMenu(
-                        isShown = true,
                         arrivalAlertDropdownItem = UiArrivalAlertDropdownMenuItem(
                             hasArrivalAlert = true
                         )
@@ -257,7 +249,6 @@ class NearestStopItemDropdownMenuKtTest {
             MyBusTheme {
                 NearestStopItemDropdownMenuWithDefaults(
                     menu = UiNearestStopDropdownMenu(
-                        isShown = true,
                         proximityAlertDropdownItem = null
                     )
                 )
@@ -276,7 +267,6 @@ class NearestStopItemDropdownMenuKtTest {
             MyBusTheme {
                 NearestStopItemDropdownMenuWithDefaults(
                     menu = UiNearestStopDropdownMenu(
-                        isShown = true,
                         proximityAlertDropdownItem = UiProximityAlertDropdownMenuItem(
                             hasProximityAlert = false
                         )
@@ -304,7 +294,6 @@ class NearestStopItemDropdownMenuKtTest {
             MyBusTheme {
                 NearestStopItemDropdownMenuWithDefaults(
                     menu = UiNearestStopDropdownMenu(
-                        isShown = true,
                         proximityAlertDropdownItem = null
                     )
                 )
@@ -323,7 +312,6 @@ class NearestStopItemDropdownMenuKtTest {
             MyBusTheme {
                 NearestStopItemDropdownMenuWithDefaults(
                     menu = UiNearestStopDropdownMenu(
-                        isShown = true,
                         proximityAlertDropdownItem = UiProximityAlertDropdownMenuItem(
                             hasProximityAlert = true
                         )
@@ -351,7 +339,6 @@ class NearestStopItemDropdownMenuKtTest {
             MyBusTheme {
                 NearestStopItemDropdownMenuWithDefaults(
                     menu = UiNearestStopDropdownMenu(
-                        isShown = true,
                         isStopMapItemShown = false
                     )
                 )
@@ -370,7 +357,6 @@ class NearestStopItemDropdownMenuKtTest {
             MyBusTheme {
                 NearestStopItemDropdownMenuWithDefaults(
                     menu = UiNearestStopDropdownMenu(
-                        isShown = true,
                         isStopMapItemShown = true
                     ),
                     onShowOnMapClick = itemClickedCounter
@@ -399,9 +385,7 @@ class NearestStopItemDropdownMenuKtTest {
         composeTestRule.setContent {
             MyBusTheme {
                 NearestStopItemDropdownMenuWithDefaults(
-                    menu = UiNearestStopDropdownMenu(
-                        isShown = true
-                    ),
+                    menu = UiNearestStopDropdownMenu(),
                     onDropdownMenuDismissed = itemClickedCounter
                 )
             }
@@ -433,6 +417,7 @@ class NearestStopItemDropdownMenuKtTest {
         ) {
             NearestStopItemDropdownMenu(
                 menu = menu,
+                expanded = true,
                 onDropdownMenuDismissed = onDropdownMenuDismissed,
                 onAddFavouriteStopClick = onAddFavouriteStopClick,
                 onRemoveFavouriteStopClick = onRemoveFavouriteStopClick,

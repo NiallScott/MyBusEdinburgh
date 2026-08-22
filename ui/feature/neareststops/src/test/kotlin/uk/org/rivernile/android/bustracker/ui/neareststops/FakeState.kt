@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.ui.neareststops
 
 import kotlinx.coroutines.flow.Flow
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
-import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
  * A fake [State] for testing.
@@ -43,19 +42,11 @@ internal class FakeState(
         { throw NotImplementedError() },
     private val onGetPermissionsState: () -> PermissionsState? = { throw NotImplementedError() },
     private val onSetPermissionsState: (PermissionsState?) -> Unit = { throw NotImplementedError() },
-    private val onSelectedStopIdentifierFlow: () -> Flow<StopIdentifier?> =
-        { throw NotImplementedError() },
-    private val onGetSelectedStopIdentifier: () -> StopIdentifier? =
-        { throw NotImplementedError() },
-    private val onSetSelectedStopIdentifier: (StopIdentifier?) -> Unit =
-        { throw NotImplementedError() },
     private val onSelectedServicesFlow: () -> Flow<Set<ServiceDescriptor>?> =
         { throw NotImplementedError() },
     private val onGetSelectedServices: () -> Set<ServiceDescriptor>? =
         { throw NotImplementedError() },
     private val onSetSelectedServices: (Set<ServiceDescriptor>?) -> Unit =
-        { throw NotImplementedError() },
-    private val onUpdateSelectedStopIdentifier: ((StopIdentifier?) -> StopIdentifier?) -> Unit =
         { throw NotImplementedError() }
 ) : State {
 
@@ -74,15 +65,6 @@ internal class FakeState(
         set(value) {
             onSetPermissionsState(value)
         }
-
-    override val selectedStopIdentifierFlow get() = onSelectedStopIdentifierFlow()
-
-    override var selectedStopIdentifier: StopIdentifier?
-        get() = onGetSelectedStopIdentifier()
-        set(value) {
-            onSetSelectedStopIdentifier(value)
-        }
-
     override val selectedServicesFlow get() = onSelectedServicesFlow()
 
     override var selectedServices: Set<ServiceDescriptor>?
@@ -90,8 +72,4 @@ internal class FakeState(
         set(value) {
             onSetSelectedServices(value)
         }
-
-    override fun updateSelectedStopIdentifier(function: (StopIdentifier?) -> StopIdentifier?) {
-        onUpdateSelectedStopIdentifier(function)
-    }
 }

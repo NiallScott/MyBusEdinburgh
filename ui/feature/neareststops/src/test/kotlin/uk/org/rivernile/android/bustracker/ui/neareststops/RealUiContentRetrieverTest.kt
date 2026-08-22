@@ -205,11 +205,9 @@ class RealUiContentRetrieverTest {
                     flowOf(
                         mapOf(
                             "123".toNaptanStopIdentifier() to UiNearestStopDropdownMenu(
-                                isShown = true,
                                 isStopMapItemShown = true
                             ),
                             "456".toNaptanStopIdentifier() to UiNearestStopDropdownMenu(
-                                isShown = false,
                                 isStopMapItemShown = true
                             )
                         )
@@ -232,7 +230,6 @@ class RealUiContentRetrieverTest {
                             orientation = StopOrientation.SOUTH_WEST,
                             distanceMeters = 1,
                             dropdownMenu = UiNearestStopDropdownMenu(
-                                isShown = false,
                                 isStopMapItemShown = true
                             )
                         ),
@@ -277,7 +274,6 @@ class RealUiContentRetrieverTest {
                             orientation = StopOrientation.NORTH_EAST,
                             distanceMeters = 3,
                             dropdownMenu = UiNearestStopDropdownMenu(
-                                isShown = true,
                                 isStopMapItemShown = true
                             )
                         )

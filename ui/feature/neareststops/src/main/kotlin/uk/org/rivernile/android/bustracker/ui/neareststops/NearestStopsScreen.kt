@@ -153,8 +153,6 @@ internal fun NearestStopsScreen(
     NearestStopsScreenWithState(
         state = uiState,
         onItemClick = viewModel::onItemClicked,
-        onOpenDropdownMenuClick = viewModel::onOpenDropdownMenuClicked,
-        onDropdownMenuDismissed = viewModel::onDropdownMenuDismissed,
         onAddFavouriteStopClick = viewModel::onAddFavouriteStopClicked,
         onRemoveFavouriteStopClick = viewModel::onRemoveFavouriteStopClicked,
         onAddArrivalAlertClick = viewModel::onAddArrivalAlertClicked,
@@ -192,9 +190,6 @@ internal fun NearestStopsScreen(
  *
  * @param state The current [UiState].
  * @param onItemClick This is called when the user has clicked on the nearest stop.
- * @param onOpenDropdownMenuClick This is called when the user has clicked on the button to show
- * the dropdown menu.
- * @param onDropdownMenuDismissed This is called when the dropdown meny has been dismissed.
  * @param onAddFavouriteStopClick This is called when the user clicks on the menu item to add a
  * favourite stop.
  * @param onRemoveFavouriteStopClick This is called when the user clicks on the menu item to remove
@@ -244,8 +239,6 @@ internal fun NearestStopsScreen(
 internal fun NearestStopsScreenWithState(
     state: UiState,
     onItemClick: (StopIdentifier) -> Unit,
-    onOpenDropdownMenuClick: (StopIdentifier) -> Unit,
-    onDropdownMenuDismissed: () -> Unit,
     onAddFavouriteStopClick: (StopIdentifier) -> Unit,
     onRemoveFavouriteStopClick: (StopIdentifier) -> Unit,
     onAddArrivalAlertClick: (StopIdentifier) -> Unit,
@@ -309,8 +302,6 @@ internal fun NearestStopsScreenWithState(
             is UiContent.Content -> Content(
                 nearestStops = content.nearestStops,
                 onItemClick = onItemClick,
-                onOpenDropdownMenuClick = onOpenDropdownMenuClick,
-                onDropdownMenuDismissed = onDropdownMenuDismissed,
                 onAddFavouriteStopClick = onAddFavouriteStopClick,
                 onRemoveFavouriteStopClick = onRemoveFavouriteStopClick,
                 onAddArrivalAlertClick = onAddArrivalAlertClick,
@@ -385,8 +376,6 @@ private fun IndeterminateProgress(
 private fun Content(
     nearestStops: ImmutableList<UiNearestStop>,
     onItemClick: (StopIdentifier) -> Unit,
-    onOpenDropdownMenuClick: (StopIdentifier) -> Unit,
-    onDropdownMenuDismissed: () -> Unit,
     onAddFavouriteStopClick: (StopIdentifier) -> Unit,
     onRemoveFavouriteStopClick: (StopIdentifier) -> Unit,
     onAddArrivalAlertClick: (StopIdentifier) -> Unit,
@@ -421,8 +410,6 @@ private fun Content(
             NearestStopItem(
                 nearestStop = it,
                 onClick = { onItemClick(it.stopIdentifier) },
-                onOpenDropdownMenuClick = { onOpenDropdownMenuClick(it.stopIdentifier) },
-                onDropdownMenuDismissed = onDropdownMenuDismissed,
                 onAddFavouriteStopClick = { onAddFavouriteStopClick(it.stopIdentifier) },
                 onRemoveFavouriteStopClick = { onRemoveFavouriteStopClick(it.stopIdentifier) },
                 onAddArrivalAlertClick = { onAddArrivalAlertClick(it.stopIdentifier) },
@@ -709,8 +696,6 @@ private fun NearestStopsScreenPreview(
             modifier = Modifier.fillMaxSize(),
             onActionLaunched = { },
             onItemClick = { },
-            onOpenDropdownMenuClick = { },
-            onDropdownMenuDismissed = { },
             onAddFavouriteStopClick = { },
             onRemoveFavouriteStopClick = { },
             onAddArrivalAlertClick = { },

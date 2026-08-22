@@ -269,8 +269,7 @@ class NearestStopItemKtTest {
     }
 
     @Test
-    fun dropdownIndicatorInvokesCallbackOnClick() {
-        val itemClickedCounter = ItemClickedCounter()
+    fun dropdownIndicatorClickShowsDropdownMenu() {
         composeTestRule.setContent {
             MyBusTheme {
                 NearestStopItemWithDefaults(
@@ -284,8 +283,7 @@ class NearestStopItemKtTest {
                         orientation = StopOrientation.NORTH_EAST,
                         distanceMeters = 123,
                         dropdownMenu = UiNearestStopDropdownMenu()
-                    ),
-                    onOpenDropdownMenuClick = itemClickedCounter
+                    )
                 )
             }
         }
@@ -296,8 +294,9 @@ class NearestStopItemKtTest {
                 useUnmergedTree = true
             )
             .performClick()
-
-        assertEquals(1, itemClickedCounter.count)
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_DROPDOWN_MENU)
+            .assertExists()
     }
 
     @Test
@@ -333,8 +332,6 @@ class NearestStopItemKtTest {
     private fun NearestStopItemWithDefaults(
         nearestStop: UiNearestStop,
         onClick: () -> Unit = { throw NotImplementedError() },
-        onOpenDropdownMenuClick: () -> Unit = { throw NotImplementedError() },
-        onDropdownMenuDismissed: () -> Unit = { throw NotImplementedError() },
         onAddFavouriteStopClick: () -> Unit = { throw NotImplementedError() },
         onRemoveFavouriteStopClick: () -> Unit = { throw NotImplementedError() },
         onAddArrivalAlertClick: () -> Unit = { throw NotImplementedError() },
@@ -346,8 +343,6 @@ class NearestStopItemKtTest {
         NearestStopItem(
             nearestStop = nearestStop,
             onClick = onClick,
-            onOpenDropdownMenuClick = onOpenDropdownMenuClick,
-            onDropdownMenuDismissed = onDropdownMenuDismissed,
             onAddFavouriteStopClick = onAddFavouriteStopClick,
             onRemoveFavouriteStopClick = onRemoveFavouriteStopClick,
             onAddArrivalAlertClick = onAddArrivalAlertClick,

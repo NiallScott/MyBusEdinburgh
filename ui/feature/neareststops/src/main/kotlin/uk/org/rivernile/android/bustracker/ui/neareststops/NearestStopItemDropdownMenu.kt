@@ -50,12 +50,14 @@ import uk.org.rivernile.android.bustracker.ui.favouritestops.FavouriteStopMenuIt
 import uk.org.rivernile.android.bustracker.ui.favouritestops.UiFavouriteStopDropdownMenuItem
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 
+internal const val TEST_TAG_DROPDOWN_MENU = "dropdown-menu"
 internal const val TEST_TAG_MENU_ITEM_SHOW_ON_MAP = "menu-item-show-on-map"
 
 /**
  * A composable which shows a dropdown menu of items to perform against the nearest stop.
  *
  * @param menu The menu data.
+ * @param expanded Whether the menu is expanded or not.
  * @param onDropdownMenuDismissed This is called when the dropdown menu has been dismissed.
  * @param onAddFavouriteStopClick This is called when the user clicks on the menu item to add a
  * favourite stop.
@@ -77,6 +79,7 @@ internal const val TEST_TAG_MENU_ITEM_SHOW_ON_MAP = "menu-item-show-on-map"
 @Composable
 internal fun NearestStopItemDropdownMenu(
     menu: UiNearestStopDropdownMenu,
+    expanded: Boolean,
     onDropdownMenuDismissed: () -> Unit,
     onAddFavouriteStopClick: () -> Unit,
     onRemoveFavouriteStopClick: () -> Unit,
@@ -88,9 +91,12 @@ internal fun NearestStopItemDropdownMenu(
     modifier: Modifier = Modifier
 ) {
     DropdownMenu(
-        expanded = menu.isShown,
+        expanded = expanded,
         onDismissRequest = onDropdownMenuDismissed,
         modifier = modifier
+            .semantics {
+                testTag = TEST_TAG_DROPDOWN_MENU
+            }
     ) {
         menu.favouriteStopDropdownItem?.let {
             FavouriteStopMenuItem(
@@ -173,6 +179,7 @@ private fun NearestStopItemDropdownMenuPreview(
         ) {
             NearestStopItemDropdownMenu(
                 menu = menu,
+                expanded = true,
                 onDropdownMenuDismissed = { },
                 onAddFavouriteStopClick = { },
                 onRemoveFavouriteStopClick = { },
@@ -191,7 +198,6 @@ private class UiNearestStopDropdownMenuProvider
 
     override val values = sequenceOf(
         UiNearestStopDropdownMenu(
-            isShown = true,
             favouriteStopDropdownItem = UiFavouriteStopDropdownMenuItem(
                 isFavouriteStop = false
             ),
@@ -204,7 +210,6 @@ private class UiNearestStopDropdownMenuProvider
             isStopMapItemShown = true
         ),
         UiNearestStopDropdownMenu(
-            isShown = true,
             favouriteStopDropdownItem = UiFavouriteStopDropdownMenuItem(
                 isFavouriteStop = true
             ),

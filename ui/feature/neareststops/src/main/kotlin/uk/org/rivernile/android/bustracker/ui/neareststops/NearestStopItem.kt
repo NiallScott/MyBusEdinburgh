@@ -43,6 +43,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -78,16 +82,12 @@ internal const val TEST_TAG_NEAREST_STOP_NAME = "nearest-stop-name"
 internal const val TEST_TAG_SERVICES_LISTING = "services-listing"
 internal const val TEST_TAG_DISTANCE_TEXT = "distance-text"
 internal const val TEST_TAG_DROPDOWN_INDICATOR = "dropdown-indicator"
-internal const val TEST_TAG_DROPDOWN_MENU = "dropdown-menu"
 
 /**
  * This composes a nearest stop item.
  *
  * @param nearestStop The nearest stop to render.
  * @param onClick This is called when the user has clicked on the nearest stop.
- * @param onOpenDropdownMenuClick This is called when the user has clicked on the button to show
- * the dropdown menu.
- * @param onDropdownMenuDismissed This is called when the dropdown meny has been dismissed.
  * @param onAddFavouriteStopClick This is called when the user clicks on the menu item to add a
  * favourite stop.
  * @param onRemoveFavouriteStopClick This is called when the user clicks on the menu item to remove
@@ -108,8 +108,6 @@ internal const val TEST_TAG_DROPDOWN_MENU = "dropdown-menu"
 internal fun NearestStopItem(
     nearestStop: UiNearestStop,
     onClick: () -> Unit,
-    onOpenDropdownMenuClick: () -> Unit,
-    onDropdownMenuDismissed: () -> Unit,
     onAddFavouriteStopClick: () -> Unit,
     onRemoveFavouriteStopClick: () -> Unit,
     onAddArrivalAlertClick: () -> Unit,
@@ -154,9 +152,8 @@ internal fun NearestStopItem(
         )
 
         DropdownMenuBox(
+            stopIdentifier = nearestStop.stopIdentifier,
             dropdownMenu = nearestStop.dropdownMenu,
-            onOpenDropdownMenuClick = onOpenDropdownMenuClick,
-            onDropdownMenuDismissed = onDropdownMenuDismissed,
             onAddFavouriteStopClick = onAddFavouriteStopClick,
             onRemoveFavouriteStopClick = onRemoveFavouriteStopClick,
             onAddArrivalAlertClick = onAddArrivalAlertClick,
@@ -272,9 +269,8 @@ private fun NearestStopDistanceText(
 
 @Composable
 private fun DropdownMenuBox(
+    stopIdentifier: StopIdentifier,
     dropdownMenu: UiNearestStopDropdownMenu,
-    onOpenDropdownMenuClick: () -> Unit,
-    onDropdownMenuDismissed: () -> Unit,
     onAddFavouriteStopClick: () -> Unit,
     onRemoveFavouriteStopClick: () -> Unit,
     onAddArrivalAlertClick: () -> Unit,
@@ -288,24 +284,46 @@ private fun DropdownMenuBox(
     Box(
         modifier = modifier
     ) {
+        var expanded by remember(stopIdentifier) {
+            mutableStateOf(false)
+        }
+
         DropdownMenuIconButton(
-            onClick = onOpenDropdownMenuClick
+            onClick = { expanded = true }
         )
 
         NearestStopItemDropdownMenu(
             menu = dropdownMenu,
-            onDropdownMenuDismissed = onDropdownMenuDismissed,
-            onAddFavouriteStopClick = onAddFavouriteStopClick,
-            onRemoveFavouriteStopClick = onRemoveFavouriteStopClick,
-            onAddArrivalAlertClick = onAddArrivalAlertClick,
-            onRemoveArrivalAlertClick = onRemoveArrivalAlertClick,
-            onAddProximityAlertClick = onAddProximityAlertClick,
-            onRemoveProximityAlertClick = onRemoveProximityAlertClick,
-            onShowOnMapClick = onShowOnMapClick,
-            modifier = Modifier
-                .semantics {
-                    testTag = TEST_TAG_DROPDOWN_MENU
-                }
+            expanded = expanded,
+            onDropdownMenuDismissed = { expanded = false },
+            onAddFavouriteStopClick = {
+                onAddFavouriteStopClick()
+                expanded = false
+            },
+            onRemoveFavouriteStopClick = {
+                onRemoveFavouriteStopClick()
+                expanded = false
+            },
+            onAddArrivalAlertClick = {
+                onAddArrivalAlertClick()
+                expanded = false
+            },
+            onRemoveArrivalAlertClick = {
+                onRemoveArrivalAlertClick()
+                expanded = false
+            },
+            onAddProximityAlertClick = {
+                onAddProximityAlertClick()
+                expanded = false
+            },
+            onRemoveProximityAlertClick = {
+                onRemoveProximityAlertClick()
+                expanded = false
+            },
+            onShowOnMapClick = {
+                onShowOnMapClick()
+                expanded = false
+            }
         )
     }
 }
@@ -354,8 +372,6 @@ private fun NearestStopItemPreview(
         NearestStopItem(
             nearestStop = nearestStop,
             onClick = { },
-            onOpenDropdownMenuClick = { },
-            onDropdownMenuDismissed = { },
             onAddFavouriteStopClick = { },
             onRemoveFavouriteStopClick = { },
             onAddArrivalAlertClick = { },

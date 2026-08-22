@@ -32,12 +32,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForViewModelCoroutineScope
@@ -67,7 +65,6 @@ internal class NearestStopsViewModel @Inject constructor(
      * This emits the current [UiState].
      */
     val uiStateFlow: StateFlow<UiState> = _uiStateFlow
-        .cleanseSelectedStop()
         .flowOn(defaultCoroutineDispatcher)
         .stateIn(
             scope = viewModelScope,
@@ -87,22 +84,6 @@ internal class NearestStopsViewModel @Inject constructor(
     }
 
     /**
-     * This is called when the open dropdown button has been clicked on a nearest stop.
-     *
-     * @param stopIdentifier The identifier of the stop to open the dropdown menu for.
-     */
-    fun onOpenDropdownMenuClicked(stopIdentifier: StopIdentifier) {
-        state.selectedStopIdentifier = stopIdentifier
-    }
-
-    /**
-     * This is called when the dropdown menu has been dismissed.
-     */
-    fun onDropdownMenuDismissed() {
-        dismissDropdownMenu()
-    }
-
-    /**
      * This is called when the add favourite stop item has been clicked in the dropdown menu.
      *
      * @param stopIdentifier The identifier of the stop to add a favourite stop for.
@@ -111,7 +92,6 @@ internal class NearestStopsViewModel @Inject constructor(
         state.action = UiAction.ShowAddFavouriteStop(
             stopIdentifier = stopIdentifier
         )
-        dismissDropdownMenu()
     }
 
     /**
@@ -123,7 +103,6 @@ internal class NearestStopsViewModel @Inject constructor(
         state.action = UiAction.ShowRemoveFavouriteStop(
             stopIdentifier = stopIdentifier
         )
-        dismissDropdownMenu()
     }
 
     /**
@@ -135,7 +114,6 @@ internal class NearestStopsViewModel @Inject constructor(
         state.action = UiAction.ShowAddArrivalAlert(
             stopIdentifier = stopIdentifier
         )
-        dismissDropdownMenu()
     }
 
     /**
@@ -147,7 +125,6 @@ internal class NearestStopsViewModel @Inject constructor(
         state.action = UiAction.ShowRemoveArrivalAlert(
             stopIdentifier = stopIdentifier
         )
-        dismissDropdownMenu()
     }
 
     /**
@@ -159,7 +136,6 @@ internal class NearestStopsViewModel @Inject constructor(
         state.action = UiAction.ShowAddProximityAlert(
             stopIdentifier = stopIdentifier
         )
-        dismissDropdownMenu()
     }
 
     /**
@@ -171,7 +147,6 @@ internal class NearestStopsViewModel @Inject constructor(
         state.action = UiAction.ShowRemoveProximityAlert(
             stopIdentifier = stopIdentifier
         )
-        dismissDropdownMenu()
     }
 
     /**
@@ -183,7 +158,6 @@ internal class NearestStopsViewModel @Inject constructor(
         state.action = UiAction.ShowOnMap(
             stopIdentifier = stopIdentifier
         )
-        dismissDropdownMenu()
     }
 
     /**
@@ -256,30 +230,4 @@ internal class NearestStopsViewModel @Inject constructor(
         state.actionFlow,
         ::UiState
     )
-
-    private fun dismissDropdownMenu() {
-        state.selectedStopIdentifier = null
-    }
-
-    private fun Flow<UiState>.cleanseSelectedStop() = onEach { uiState ->
-        when (val content = uiState.content) {
-            is UiContent.Content -> {
-                // The selected stop identifier should only be preserved if it's within the shown
-                // stops. Otherwise, null it out so that the dropdown menu is not shown again
-                // automatically if/when the stop comes back in to view.
-                val stopIdentifiers = content.nearestStops.map { it.stopIdentifier }.toSet()
-
-                state.updateSelectedStopIdentifier { selectedStopIdentifier ->
-                    if (stopIdentifiers.contains(selectedStopIdentifier)) {
-                        selectedStopIdentifier
-                    } else {
-                        null
-                    }
-                }
-            }
-            // When we're not showing the Content layout, then we always null out the selected stop
-            // identifier.
-            else -> state.selectedStopIdentifier = null
-        }
-    }
 }
