@@ -28,7 +28,10 @@ package uk.org.rivernile.android.bustracker.ui.neareststops
 
 import app.cash.turbine.test
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.busstops.FakeStopName
 import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
@@ -49,6 +52,7 @@ import kotlin.test.assertNull
  *
  * @author Niall Scott
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class RealUiContentRetrieverTest {
 
     @Test
@@ -58,13 +62,16 @@ class RealUiContentRetrieverTest {
                 onNearestStopsStateFlow = { flowOf(NearestStopsState.AwaitingLocation) }
             ),
             servicesRepository = FakeServicesRepository(
-                onGetColoursForServicesFlow = { flowOf(null) }
+                onGetColoursForServicesFlow = {
+                    assertNull(it)
+                    flowOf(null)
+                }
             )
         )
 
         retriever.uiContentFlow.test {
             assertEquals(UiContent.InProgress, awaitItem())
-            awaitComplete()
+            ensureAllEventsConsumed()
         }
     }
 
@@ -82,7 +89,10 @@ class RealUiContentRetrieverTest {
                 }
             ),
             servicesRepository = FakeServicesRepository(
-                onGetColoursForServicesFlow = { flowOf(null) }
+                onGetColoursForServicesFlow = {
+                    assertNull(it)
+                    flowOf(null)
+                }
             )
         )
 
@@ -93,7 +103,7 @@ class RealUiContentRetrieverTest {
                 ),
                 awaitItem()
             )
-            awaitComplete()
+            ensureAllEventsConsumed()
         }
     }
 
@@ -111,7 +121,10 @@ class RealUiContentRetrieverTest {
                 }
             ),
             servicesRepository = FakeServicesRepository(
-                onGetColoursForServicesFlow = { flowOf(null) }
+                onGetColoursForServicesFlow = {
+                    assertNull(it)
+                    flowOf(null)
+                }
             )
         )
 
@@ -122,7 +135,7 @@ class RealUiContentRetrieverTest {
                 ),
                 awaitItem()
             )
-            awaitComplete()
+            ensureAllEventsConsumed()
         }
     }
 
@@ -282,7 +295,7 @@ class RealUiContentRetrieverTest {
                 ),
                 awaitItem()
             )
-            awaitComplete()
+            ensureAllEventsConsumed()
         }
     }
 
@@ -293,13 +306,16 @@ class RealUiContentRetrieverTest {
                 onNearestStopsStateFlow = { flowOf(NearestStopsState.Error.NoLocationFeature) }
             ),
             servicesRepository = FakeServicesRepository(
-                onGetColoursForServicesFlow = { flowOf(null) }
+                onGetColoursForServicesFlow = {
+                    assertNull(it)
+                    flowOf(null)
+                }
             )
         )
 
         retriever.uiContentFlow.test {
             assertEquals(UiContent.Error.NoLocationFeature, awaitItem())
-            awaitComplete()
+            ensureAllEventsConsumed()
         }
     }
 
@@ -312,13 +328,16 @@ class RealUiContentRetrieverTest {
                 }
             ),
             servicesRepository = FakeServicesRepository(
-                onGetColoursForServicesFlow = { flowOf(null) }
+                onGetColoursForServicesFlow = {
+                    assertNull(it)
+                    flowOf(null)
+                }
             )
         )
 
         retriever.uiContentFlow.test {
             assertEquals(UiContent.Error.InsufficientLocationPermissions, awaitItem())
-            awaitComplete()
+            ensureAllEventsConsumed()
         }
     }
 
@@ -329,13 +348,16 @@ class RealUiContentRetrieverTest {
                 onNearestStopsStateFlow = { flowOf(NearestStopsState.Error.LocationOff) }
             ),
             servicesRepository = FakeServicesRepository(
-                onGetColoursForServicesFlow = { flowOf(null) }
+                onGetColoursForServicesFlow = {
+                    assertNull(it)
+                    flowOf(null)
+                }
             )
         )
 
         retriever.uiContentFlow.test {
             assertEquals(UiContent.Error.LocationOff, awaitItem())
-            awaitComplete()
+            ensureAllEventsConsumed()
         }
     }
 
@@ -346,13 +368,16 @@ class RealUiContentRetrieverTest {
                 onNearestStopsStateFlow = { flowOf(NearestStopsState.Error.LocationUnknown) }
             ),
             servicesRepository = FakeServicesRepository(
-                onGetColoursForServicesFlow = { flowOf(null) }
+                onGetColoursForServicesFlow = {
+                    assertNull(it)
+                    flowOf(null)
+                }
             )
         )
 
         retriever.uiContentFlow.test {
             assertEquals(UiContent.Error.LocationUnknown, awaitItem())
-            awaitComplete()
+            ensureAllEventsConsumed()
         }
     }
 
@@ -361,7 +386,7 @@ class RealUiContentRetrieverTest {
         operatorCode = "TEST$id"
     )
 
-    private fun createRetriever(
+    private fun TestScope.createRetriever(
         nearestStopsRetriever: NearestStopsRetriever = FakeNearestStopsRetriever(),
         servicesRepository: ServicesRepository = FakeServicesRepository(),
         dropdownMenuGenerator: UiNearestStopDropdownMenuGenerator =
@@ -372,7 +397,9 @@ class RealUiContentRetrieverTest {
             nearestStopsRetriever = nearestStopsRetriever,
             servicesRepository = servicesRepository,
             dropdownMenuGenerator = dropdownMenuGenerator,
-            serviceNameComparator = serviceNameComparator
+            serviceNameComparator = serviceNameComparator,
+            defaultCoroutineDispatcher = UnconfinedTestDispatcher(scheduler = testScheduler),
+            viewModelCoroutineScope = backgroundScope
         )
     }
 }

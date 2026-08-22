@@ -27,12 +27,19 @@
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.plus
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForViewModelCoroutineScope
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
@@ -53,24 +60,32 @@ internal interface UiContentRetriever {
 
 internal class RealUiContentRetriever @Inject constructor(
     private val nearestStopsRetriever: NearestStopsRetriever,
-    private val servicesRepository: ServicesRepository,
+    servicesRepository: ServicesRepository,
     private val dropdownMenuGenerator: UiNearestStopDropdownMenuGenerator,
-    private val serviceNameComparator: Comparator<String>
+    private val serviceNameComparator: Comparator<String>,
+    @ForDefaultDispatcher defaultCoroutineDispatcher: CoroutineDispatcher,
+    @ForViewModelCoroutineScope viewModelCoroutineScope: CoroutineScope
 ) : UiContentRetriever {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val uiContentFlow get() = stateWithServiceColoursFlow
-        .flatMapLatest(::getUiContentFlowWithStateAndServices)
+        .flatMapLatest {
+            getUiContentFlowWithStateAndServices(
+                nearestStopsState = it.first,
+                serviceColours = it.second
+            )
+        }
 
     private fun getUiContentFlowWithStateAndServices(
-        nearestStopsStateWithServiceColours: NearestStopsStateWithServiceColours
+        nearestStopsState: NearestStopsState,
+        serviceColours: Map<ServiceDescriptor, ServiceColours>?
     ): Flow<UiContent> {
-        return when (val state = nearestStopsStateWithServiceColours.nearestStopsState) {
+        return when (nearestStopsState) {
             is NearestStopsState.AwaitingLocation -> flowOf(UiContent.InProgress)
             is NearestStopsState.Stops -> getUiContentFlowWithStops(
-                stops = state.stops,
-                serviceColours = nearestStopsStateWithServiceColours.serviceColours,
-                locationAccuracy = state.locationAccuracy
+                stops = nearestStopsState.stops,
+                serviceColours = serviceColours,
+                locationAccuracy = nearestStopsState.locationAccuracy
             )
             is NearestStopsState.Error.NoLocationFeature ->
                 flowOf(UiContent.Error.NoLocationFeature)
@@ -113,15 +128,17 @@ internal class RealUiContentRetriever @Inject constructor(
         }
     }
 
-    private val stateWithServiceColoursFlow: Flow<NearestStopsStateWithServiceColours> get() =
-        combine(
-            nearestStopsRetriever.nearestStopsStateFlow,
-            servicesRepository.getColoursForServicesFlow(),
-            ::NearestStopsStateWithServiceColours
-        )
-
-    private data class NearestStopsStateWithServiceColours(
-        val nearestStopsState: NearestStopsState,
-        val serviceColours: Map<ServiceDescriptor, ServiceColours>?
+    private val stateWithServiceColoursFlow get() = combine(
+        nearestStopsRetriever.nearestStopsStateFlow,
+        serviceColoursFlow,
+        ::Pair
     )
+
+    private val serviceColoursFlow = servicesRepository
+        .getColoursForServicesFlow()
+        .shareIn(
+            scope = viewModelCoroutineScope + defaultCoroutineDispatcher,
+            started = SharingStarted.WhileSubscribed(5000L),
+            replay = 1
+        )
 }
