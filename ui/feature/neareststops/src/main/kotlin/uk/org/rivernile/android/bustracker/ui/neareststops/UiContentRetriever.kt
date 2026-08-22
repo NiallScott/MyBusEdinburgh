@@ -27,20 +27,14 @@
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.plus
-import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.coroutines.di.ForViewModelCoroutineScope
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import javax.inject.Inject
@@ -60,85 +54,104 @@ internal interface UiContentRetriever {
 
 internal class RealUiContentRetriever @Inject constructor(
     private val nearestStopsRetriever: NearestStopsRetriever,
-    servicesRepository: ServicesRepository,
+    private val servicesRepository: ServicesRepository,
     private val dropdownMenuGenerator: UiNearestStopDropdownMenuGenerator,
-    private val serviceNameComparator: Comparator<String>,
-    @ForDefaultDispatcher defaultCoroutineDispatcher: CoroutineDispatcher,
-    @ForViewModelCoroutineScope viewModelCoroutineScope: CoroutineScope
+    private val serviceNameComparator: Comparator<String>
 ) : UiContentRetriever {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override val uiContentFlow get() = stateWithServiceColoursFlow
-        .flatMapLatest {
-            getUiContentFlowWithStateAndServices(
-                nearestStopsState = it.first,
-                serviceColours = it.second
-            )
-        }
+    override val uiContentFlow get() = combine(
+        nearestStopsStateWithDropdownMenusFlow,
+        servicesRepository.getColoursForServicesFlow()
+    ) { nearestStopsStateWithDropdownMenus, serviceColours ->
+        createUiContent(
+            nearestStopsState = nearestStopsStateWithDropdownMenus.nearestStopsState,
+            dropdownMenus = nearestStopsStateWithDropdownMenus.dropdownMenus,
+            serviceColours = serviceColours
+        )
+    }
 
-    private fun getUiContentFlowWithStateAndServices(
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val nearestStopsStateWithDropdownMenusFlow get() = nearestStopsRetriever
+        .nearestStopsStateFlow
+        .flatMapLatest(::getNearestStopsStateWithDropdownMenusFlow)
+
+    private fun createUiContent(
         nearestStopsState: NearestStopsState,
+        dropdownMenus: Map<StopIdentifier, UiNearestStopDropdownMenu>?,
         serviceColours: Map<ServiceDescriptor, ServiceColours>?
-    ): Flow<UiContent> {
+    ): UiContent {
         return when (nearestStopsState) {
-            is NearestStopsState.AwaitingLocation -> flowOf(UiContent.InProgress)
-            is NearestStopsState.Stops -> getUiContentFlowWithStops(
-                stops = nearestStopsState.stops,
-                serviceColours = serviceColours,
-                locationAccuracy = nearestStopsState.locationAccuracy
+            is NearestStopsState.AwaitingLocation -> UiContent.InProgress
+            is NearestStopsState.Stops -> nearestStopsState.toUiContent(
+                dropdownMenus = dropdownMenus,
+                serviceColours = serviceColours
             )
             is NearestStopsState.Error.NoLocationFeature ->
-                flowOf(UiContent.Error.NoLocationFeature)
+                UiContent.Error.NoLocationFeature
             is NearestStopsState.Error.InsufficientLocationPermissions ->
-                flowOf(UiContent.Error.InsufficientLocationPermissions)
-            is NearestStopsState.Error.LocationOff -> flowOf(UiContent.Error.LocationOff)
-            is NearestStopsState.Error.LocationUnknown -> flowOf(UiContent.Error.LocationUnknown)
+                UiContent.Error.InsufficientLocationPermissions
+            is NearestStopsState.Error.LocationOff -> UiContent.Error.LocationOff
+            is NearestStopsState.Error.LocationUnknown -> UiContent.Error.LocationUnknown
         }
     }
 
-    private fun getUiContentFlowWithStops(
-        stops: List<NearestStop>?,
-        serviceColours: Map<ServiceDescriptor, ServiceColours>?,
-        locationAccuracy: UiLocationAccuracy?
-    ): Flow<UiContent> {
-        return if (!stops.isNullOrEmpty()) {
-            val stopIdentifiers = stops.map { it.stopIdentifier }.toSet()
+    private fun NearestStopsState.Stops.toUiContent(
+        dropdownMenus: Map<StopIdentifier, UiNearestStopDropdownMenu>?,
+        serviceColours: Map<ServiceDescriptor, ServiceColours>?
+    ): UiContent {
+        val stops = stops
+            ?.toUiNearestStops(
+                serviceColours = serviceColours,
+                dropdownMenus = dropdownMenus,
+                serviceNameComparator = serviceNameComparator
+            )
+            ?.sortedBy { it.distanceMeters }
 
-            dropdownMenuGenerator
-                .getDropdownMenuItemsForStopsFlow(stopIdentifiers)
-                .map { dropdownMenus ->
-                    UiContent.Content(
-                        locationAccuracy = locationAccuracy,
-                        nearestStops = stops
-                            .toUiNearestStops(
-                                serviceColours = serviceColours,
-                                dropdownMenus = dropdownMenus,
-                                serviceNameComparator = serviceNameComparator
-                            )
-                            .sortedBy { it.distanceMeters }
-                            .toImmutableList()
+        return if (!stops.isNullOrEmpty()) {
+            UiContent.Content(
+                nearestStops = stops.toImmutableList(),
+                locationAccuracy = locationAccuracy
+            )
+        } else {
+            UiContent.Error.NoNearestStops(
+                locationAccuracy = locationAccuracy
+            )
+        }
+    }
+
+    private fun getNearestStopsStateWithDropdownMenusFlow(
+        nearestStopsState: NearestStopsState
+    ): Flow<NearestStopsStateWithDropdownMenus> {
+        return if (nearestStopsState is NearestStopsState.Stops) {
+            val stopIdentifiers = nearestStopsState.stops?.map { it.stopIdentifier }?.toSet()
+
+            if (!stopIdentifiers.isNullOrEmpty()) {
+                dropdownMenuGenerator
+                    .getDropdownMenuItemsForStopsFlow(stopIdentifiers)
+                    .map {
+                        NearestStopsStateWithDropdownMenus(
+                            nearestStopsState = nearestStopsState,
+                            dropdownMenus = it
+                        )
+                    }
+            } else {
+                flowOf(
+                    NearestStopsStateWithDropdownMenus(
+                        nearestStopsState = nearestStopsState
                     )
-                }
+                )
+            }
         } else {
             flowOf(
-                UiContent.Error.NoNearestStops(
-                    locationAccuracy = locationAccuracy
+                NearestStopsStateWithDropdownMenus(
+                    nearestStopsState = nearestStopsState
                 )
             )
         }
     }
 
-    private val stateWithServiceColoursFlow get() = combine(
-        nearestStopsRetriever.nearestStopsStateFlow,
-        serviceColoursFlow,
-        ::Pair
+    private data class NearestStopsStateWithDropdownMenus(
+        val nearestStopsState: NearestStopsState,
+        val dropdownMenus: Map<StopIdentifier, UiNearestStopDropdownMenu>? = null
     )
-
-    private val serviceColoursFlow = servicesRepository
-        .getColoursForServicesFlow()
-        .shareIn(
-            scope = viewModelCoroutineScope + defaultCoroutineDispatcher,
-            started = SharingStarted.WhileSubscribed(5000L),
-            replay = 1
-        )
 }

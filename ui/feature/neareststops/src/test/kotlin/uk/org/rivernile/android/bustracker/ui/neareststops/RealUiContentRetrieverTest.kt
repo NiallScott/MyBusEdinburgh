@@ -30,8 +30,6 @@ import app.cash.turbine.test
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.busstops.FakeStopName
 import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
@@ -71,7 +69,7 @@ class RealUiContentRetrieverTest {
 
         retriever.uiContentFlow.test {
             assertEquals(UiContent.InProgress, awaitItem())
-            ensureAllEventsConsumed()
+            awaitComplete()
         }
     }
 
@@ -103,7 +101,7 @@ class RealUiContentRetrieverTest {
                 ),
                 awaitItem()
             )
-            ensureAllEventsConsumed()
+            awaitComplete()
         }
     }
 
@@ -135,7 +133,7 @@ class RealUiContentRetrieverTest {
                 ),
                 awaitItem()
             )
-            ensureAllEventsConsumed()
+            awaitComplete()
         }
     }
 
@@ -295,7 +293,7 @@ class RealUiContentRetrieverTest {
                 ),
                 awaitItem()
             )
-            ensureAllEventsConsumed()
+            awaitComplete()
         }
     }
 
@@ -315,7 +313,7 @@ class RealUiContentRetrieverTest {
 
         retriever.uiContentFlow.test {
             assertEquals(UiContent.Error.NoLocationFeature, awaitItem())
-            ensureAllEventsConsumed()
+            awaitComplete()
         }
     }
 
@@ -337,7 +335,7 @@ class RealUiContentRetrieverTest {
 
         retriever.uiContentFlow.test {
             assertEquals(UiContent.Error.InsufficientLocationPermissions, awaitItem())
-            ensureAllEventsConsumed()
+            awaitComplete()
         }
     }
 
@@ -357,7 +355,7 @@ class RealUiContentRetrieverTest {
 
         retriever.uiContentFlow.test {
             assertEquals(UiContent.Error.LocationOff, awaitItem())
-            ensureAllEventsConsumed()
+            awaitComplete()
         }
     }
 
@@ -377,7 +375,7 @@ class RealUiContentRetrieverTest {
 
         retriever.uiContentFlow.test {
             assertEquals(UiContent.Error.LocationUnknown, awaitItem())
-            ensureAllEventsConsumed()
+            awaitComplete()
         }
     }
 
@@ -386,7 +384,7 @@ class RealUiContentRetrieverTest {
         operatorCode = "TEST$id"
     )
 
-    private fun TestScope.createRetriever(
+    private fun createRetriever(
         nearestStopsRetriever: NearestStopsRetriever = FakeNearestStopsRetriever(),
         servicesRepository: ServicesRepository = FakeServicesRepository(),
         dropdownMenuGenerator: UiNearestStopDropdownMenuGenerator =
@@ -397,9 +395,7 @@ class RealUiContentRetrieverTest {
             nearestStopsRetriever = nearestStopsRetriever,
             servicesRepository = servicesRepository,
             dropdownMenuGenerator = dropdownMenuGenerator,
-            serviceNameComparator = serviceNameComparator,
-            defaultCoroutineDispatcher = UnconfinedTestDispatcher(scheduler = testScheduler),
-            viewModelCoroutineScope = backgroundScope
+            serviceNameComparator = serviceNameComparator
         )
     }
 }
