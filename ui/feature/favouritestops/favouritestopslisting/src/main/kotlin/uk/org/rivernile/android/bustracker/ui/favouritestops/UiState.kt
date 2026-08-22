@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
+import androidx.compose.runtime.Immutable
+
 /**
  * The state to render on the UI.
  *
@@ -33,6 +35,7 @@ package uk.org.rivernile.android.bustracker.ui.favouritestops
  * @property action An action, if any, to be performed.
  * @author Niall Scott
  */
+@Immutable
 internal data class UiState(
     val content: UiContent = UiContent.InProgress,
     val action: UiAction? = null

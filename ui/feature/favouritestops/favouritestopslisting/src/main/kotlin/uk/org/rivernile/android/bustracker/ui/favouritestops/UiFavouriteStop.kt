@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
+import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
@@ -44,6 +45,7 @@ import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
  * `null` then the dropdown menu is not available for this item.
  * @author Niall Scott
  */
+@Immutable
 internal data class UiFavouriteStop(
     val stopIdentifier: StopIdentifier,
     val savedName: String,

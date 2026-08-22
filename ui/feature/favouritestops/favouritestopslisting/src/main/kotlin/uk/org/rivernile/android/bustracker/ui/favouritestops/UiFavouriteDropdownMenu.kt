@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
+import androidx.compose.runtime.Immutable
 import uk.org.rivernile.android.bustracker.ui.alerts.UiArrivalAlertDropdownMenuItem
 import uk.org.rivernile.android.bustracker.ui.alerts.UiProximityAlertDropdownMenuItem
 
@@ -40,6 +41,7 @@ import uk.org.rivernile.android.bustracker.ui.alerts.UiProximityAlertDropdownMen
  * @property isStopMapItemShown Is the stop map available?
  * @author Niall Scott
  */
+@Immutable
 internal data class UiFavouriteDropdownMenu(
     val isShortcutItemShown: Boolean = false,
     val arrivalAlertDropdownItem: UiArrivalAlertDropdownMenuItem? = null,

@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
+import androidx.compose.runtime.Immutable
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
@@ -33,6 +34,7 @@ import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
  *
  * @author Niall Scott
  */
+@Immutable
 internal sealed interface UiAction {
 
     /**
