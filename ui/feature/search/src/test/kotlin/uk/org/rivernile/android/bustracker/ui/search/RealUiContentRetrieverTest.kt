@@ -32,11 +32,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.busstops.FakeBusStopsRepository
 import uk.org.rivernile.android.bustracker.core.busstops.FakeStopName
 import uk.org.rivernile.android.bustracker.core.busstops.FakeStopSearchResult
 import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
@@ -62,174 +58,15 @@ import kotlin.time.Duration.Companion.milliseconds
 class RealUiContentRetrieverTest {
 
     @Test
-    fun uiContentFlowEmitsEmptySearchTermWhenSearchTermIsNull() = runTest {
+    fun uiContentFlowEmitsEmptySearchTermWhenDataIsEmptySearchTerm() = runTest {
         val retriever = createRetriever(
-            state = FakeState(
-                onSearchTermFlow = { flowOf(null) }
+            stopSearchResultRetriever = FakeStopSearchResultRetriever(
+                onStopSearchResultStateFlow = { flowOf(StopSearchResultState.EmptySearchTerm) }
             )
         )
 
         retriever.uiContentFlow.test {
             assertEquals(UiContent.EmptySearchTerm, awaitItem())
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun uiContentFlowEmitsEmptySearchTermWhenSearchTermIsEmpty() = runTest {
-        val retriever = createRetriever(
-            state = FakeState(
-                onSearchTermFlow = { flowOf("") }
-            )
-        )
-
-        retriever.uiContentFlow.test {
-            assertEquals(UiContent.EmptySearchTerm, awaitItem())
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun uiContentFlowEmitsEmptySearchTermWhenSearchTermIsBlank() = runTest {
-        val retriever = createRetriever(
-            state = FakeState(
-                onSearchTermFlow = { flowOf(" ") }
-            )
-        )
-
-        retriever.uiContentFlow.test {
-            assertEquals(UiContent.EmptySearchTerm, awaitItem())
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun uiContentFlowEmitsEmptySearchTermWhenSearchTermIsLessThan3Chars() = runTest {
-        val retriever = createRetriever(
-            state = FakeState(
-                onSearchTermFlow = { flowOf("ab") }
-            )
-        )
-
-        retriever.uiContentFlow.test {
-            assertEquals(UiContent.EmptySearchTerm, awaitItem())
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun uiContentFlowEmitsEmptySearchTermWhenSearchTermIsLessThan3CharsWithSpaces() = runTest {
-        val retriever = createRetriever(
-            state = FakeState(
-                onSearchTermFlow = { flowOf(" ab") }
-            )
-        )
-
-        retriever.uiContentFlow.test {
-            assertEquals(UiContent.EmptySearchTerm, awaitItem())
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun uiContentFlowDoesNotDebounceSearchTermWhenSearchTermIsInvalid() = runTest {
-        val searchTerms = listOf("a", "b", "aa", "bb")
-        val retriever = createRetriever(
-            state = FakeState(
-                onSearchTermFlow = {
-                    flow {
-                        searchTerms.forEach { searchTerm ->
-                            emit(searchTerm)
-                            delay((SEARCH_TERM_DEBOUNCE_PERIOD_MILLIS - 1L).milliseconds)
-                        }
-                    }
-                }
-            )
-        )
-
-        retriever.uiContentFlow.test {
-            repeat(searchTerms.size) {
-                assertEquals(UiContent.EmptySearchTerm, awaitItem())
-            }
-
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun uiContentFlowDebouncesSearchTermsWhenValidButEmittedTooQuickly() = runTest {
-        val searchTerms = listOf("abc", "abcd")
-        val retriever = createRetriever(
-            state = FakeState(
-                onSearchTermFlow = {
-                    flow {
-                        searchTerms.forEach { searchTerm ->
-                            emit(searchTerm)
-                            delay(SEARCH_TERM_DEBOUNCE_PERIOD_MILLIS.milliseconds)
-                        }
-                    }
-                }
-            ),
-            busStopsRepository = FakeBusStopsRepository(
-                onGetStopSearchResultsFlow = { searchTerm ->
-                    assertEquals(searchTerms.last(), searchTerm)
-                    flowOf(null)
-                }
-            )
-        )
-
-        retriever.uiContentFlow.test {
-            assertEquals(UiContent.NoResults, awaitItem())
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun uiContentFlowDoesNotDebounceSearchTermsWhenValidButEmittedOutsideTimeframe() = runTest {
-        val searchTerms = listOf("abc", "abcd")
-        val searchTermsQueue = ArrayDeque(searchTerms)
-        val retriever = createRetriever(
-            state = FakeState(
-                onSearchTermFlow = {
-                    flow {
-                        searchTerms.forEach { searchTerm ->
-                            emit(searchTerm)
-                            delay((SEARCH_TERM_DEBOUNCE_PERIOD_MILLIS + 1L).milliseconds)
-                        }
-                    }
-                }
-            ),
-            busStopsRepository = FakeBusStopsRepository(
-                onGetStopSearchResultsFlow = { searchTerm ->
-                    assertEquals(searchTermsQueue.removeFirst(), searchTerm)
-                    flowOf(null)
-                }
-            )
-        )
-
-        retriever.uiContentFlow.test {
-            assertEquals(UiContent.NoResults, awaitItem())
-            assertEquals(UiContent.NoResults, awaitItem())
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun uiContentFlowTrimsTheSearchTerm() = runTest {
-        val retriever = createRetriever(
-            state = FakeState(
-                onSearchTermFlow = { flowOf(" abc ") }
-            ),
-            busStopsRepository = FakeBusStopsRepository(
-                onGetStopSearchResultsFlow = { searchTerm ->
-                    assertEquals("abc", searchTerm)
-                    flowOf(null)
-                }
-            )
-        )
-
-        retriever.uiContentFlow.test {
-            assertEquals(UiContent.NoResults, awaitItem())
             awaitComplete()
         }
     }
@@ -237,23 +74,13 @@ class RealUiContentRetrieverTest {
     @Test
     fun uiContentFlowEmitsInProgressWhenDataIsLoading() = runTest {
         val retriever = createRetriever(
-            state = FakeState(
-                onSearchTermFlow = { flowOf("abc") }
-            ),
-            busStopsRepository = FakeBusStopsRepository(
-                onGetStopSearchResultsFlow = { searchTerm ->
-                    assertEquals("abc", searchTerm)
-                    flow {
-                        delay((SEARCH_PROGRESS_DELAY_MILLIS + 1L).milliseconds)
-                        emit(null)
-                    }
-                }
+            stopSearchResultRetriever = FakeStopSearchResultRetriever(
+                onStopSearchResultStateFlow = { flowOf(StopSearchResultState.InProgress) }
             )
         )
 
         retriever.uiContentFlow.test {
             assertEquals(UiContent.InProgress, awaitItem())
-            assertEquals(UiContent.NoResults, awaitItem())
             awaitComplete()
         }
     }
@@ -261,13 +88,9 @@ class RealUiContentRetrieverTest {
     @Test
     fun uiContentFlowEmitsNoResultsWhenSearchEmitsNull() = runTest {
         val retriever = createRetriever(
-            state = FakeState(
-                onSearchTermFlow = { flowOf("abc") }
-            ),
-            busStopsRepository = FakeBusStopsRepository(
-                onGetStopSearchResultsFlow = { searchTerm ->
-                    assertEquals("abc", searchTerm)
-                    flowOf(null)
+            stopSearchResultRetriever = FakeStopSearchResultRetriever(
+                onStopSearchResultStateFlow = {
+                    flowOf(StopSearchResultState.Results(results = null))
                 }
             )
         )
@@ -281,13 +104,9 @@ class RealUiContentRetrieverTest {
     @Test
     fun uiContentFlowEmitsNoResultsWhenSearchEmitsEmptyList() = runTest {
         val retriever = createRetriever(
-            state = FakeState(
-                onSearchTermFlow = { flowOf("abc") }
-            ),
-            busStopsRepository = FakeBusStopsRepository(
-                onGetStopSearchResultsFlow = { searchTerm ->
-                    assertEquals("abc", searchTerm)
-                    flowOf(emptyList())
+            stopSearchResultRetriever = FakeStopSearchResultRetriever(
+                onStopSearchResultStateFlow = {
+                    flowOf(StopSearchResultState.Results(results = emptyList()))
                 }
             )
         )
@@ -301,33 +120,31 @@ class RealUiContentRetrieverTest {
     @Test
     fun uiContentFlowEmitsContentWhenSearchEmitsSearchResults() = runTest {
         val retriever = createRetriever(
-            state = FakeState(
-                onSearchTermFlow = { flowOf("abc") }
-            ),
-            busStopsRepository = FakeBusStopsRepository(
-                onGetStopSearchResultsFlow = { searchTerm ->
-                    assertEquals("abc", searchTerm)
+            stopSearchResultRetriever = FakeStopSearchResultRetriever(
+                onStopSearchResultStateFlow = {
                     flowOf(
-                        listOf(
-                            FakeStopSearchResult(
-                                stopIdentifier = "123456".toNaptanStopIdentifier(),
-                                stopName = FakeStopName(
-                                    name = "Name 1",
-                                    locality = "Locality 1"
-                                ),
-                                orientation = StopOrientation.NORTH_EAST,
-                                serviceListing = listOf(
-                                    FakeServiceDescriptor(
-                                        serviceName = "2",
-                                        operatorCode = "TEST2"
+                        StopSearchResultState.Results(
+                            results = listOf(
+                                FakeStopSearchResult(
+                                    stopIdentifier = "123456".toNaptanStopIdentifier(),
+                                    stopName = FakeStopName(
+                                        name = "Name 1",
+                                        locality = "Locality 1"
                                     ),
-                                    FakeServiceDescriptor(
-                                        serviceName = "1",
-                                        operatorCode = "TEST1"
-                                    ),
-                                    FakeServiceDescriptor(
-                                        serviceName = "3",
-                                        operatorCode = "TEST3"
+                                    orientation = StopOrientation.NORTH_EAST,
+                                    serviceListing = listOf(
+                                        FakeServiceDescriptor(
+                                            serviceName = "2",
+                                            operatorCode = "TEST2"
+                                        ),
+                                        FakeServiceDescriptor(
+                                            serviceName = "1",
+                                            operatorCode = "TEST1"
+                                        ),
+                                        FakeServiceDescriptor(
+                                            serviceName = "3",
+                                            operatorCode = "TEST3"
+                                        )
                                     )
                                 )
                             )
@@ -411,31 +228,68 @@ class RealUiContentRetrieverTest {
                 ),
                 awaitItem()
             )
-            ensureAllEventsConsumed()
+            awaitComplete()
         }
     }
 
-    private fun TestScope.createRetriever(
-        state: State = FakeState(),
+    @Test
+    fun uiContentFlowDoesNotEmitProgressWithinTimeout() = runTest {
+        val retriever = createRetriever(
+            stopSearchResultRetriever = FakeStopSearchResultRetriever(
+                onStopSearchResultStateFlow = {
+                    flow {
+                        emit(StopSearchResultState.InProgress)
+                        delay(SEARCH_PROGRESS_DELAY_MILLIS.milliseconds)
+                        emit(StopSearchResultState.Results(results = null))
+                    }
+                }
+            )
+        )
+
+        retriever.uiContentFlow.test {
+            assertEquals(UiContent.NoResults, awaitItem())
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun uiContentFlowEmitsProgressWhenAfterTimeout() = runTest {
+        val retriever = createRetriever(
+            stopSearchResultRetriever = FakeStopSearchResultRetriever(
+                onStopSearchResultStateFlow = {
+                    flow {
+                        emit(StopSearchResultState.InProgress)
+                        delay((SEARCH_PROGRESS_DELAY_MILLIS + 1L).milliseconds)
+                        emit(StopSearchResultState.Results(results = null))
+                    }
+                }
+            )
+        )
+
+        retriever.uiContentFlow.test {
+            assertEquals(UiContent.InProgress, awaitItem())
+            assertEquals(UiContent.NoResults, awaitItem())
+            awaitComplete()
+        }
+    }
+
+    private fun createRetriever(
+        stopSearchResultRetriever: StopSearchResultRetriever = FakeStopSearchResultRetriever(),
         servicesRepository: ServicesRepository = FakeServicesRepository(
             onGetColoursForServicesFlow = { services ->
                 assertNull(services)
                 flowOf(null)
             }
         ),
-        busStopsRepository: BusStopsRepository = FakeBusStopsRepository(),
         stopSearchResultDropdownMenuGenerator: UiStopSearchResultDropdownMenuGenerator =
             FakeUiStopSearchResultDropdownMenuGenerator(),
         serviceNameComparator: Comparator<String> = naturalOrder()
     ): RealUiContentRetriever {
         return RealUiContentRetriever(
-            state = state,
+            stopSearchResultRetriever = stopSearchResultRetriever,
             servicesRepository = servicesRepository,
-            busStopsRepository = busStopsRepository,
             stopSearchResultDropdownMenuGenerator = stopSearchResultDropdownMenuGenerator,
-            alphanumericComparator = serviceNameComparator,
-            defaultCoroutineDispatcher = UnconfinedTestDispatcher(scheduler = testScheduler),
-            viewModelCoroutineScope = backgroundScope
+            alphanumericComparator = serviceNameComparator
         )
     }
 }

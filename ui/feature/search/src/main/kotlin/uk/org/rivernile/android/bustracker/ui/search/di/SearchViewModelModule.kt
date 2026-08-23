@@ -31,9 +31,11 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import uk.org.rivernile.android.bustracker.ui.search.RealState
+import uk.org.rivernile.android.bustracker.ui.search.RealStopSearchResultRetriever
 import uk.org.rivernile.android.bustracker.ui.search.RealUiContentRetriever
 import uk.org.rivernile.android.bustracker.ui.search.RealUiStopSearchResultDropdownMenuGenerator
 import uk.org.rivernile.android.bustracker.ui.search.State
+import uk.org.rivernile.android.bustracker.ui.search.StopSearchResultRetriever
 import uk.org.rivernile.android.bustracker.ui.search.UiContentRetriever
 import uk.org.rivernile.android.bustracker.ui.search.UiStopSearchResultDropdownMenuGenerator
 
@@ -49,6 +51,11 @@ internal interface SearchViewModelModule {
 
     @Binds
     fun bindState(realState: RealState): State
+
+    @Binds
+    fun bindStopSearchResultRetriever(
+        realStopSearchResultRetriever: RealStopSearchResultRetriever
+    ): StopSearchResultRetriever
 
     @Binds
     fun bindUiContentRetriever(realUiContentRetriever: RealUiContentRetriever): UiContentRetriever

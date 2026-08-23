@@ -27,30 +27,19 @@
 package uk.org.rivernile.android.bustracker.ui.search
 
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.transformLatest
-import kotlinx.coroutines.plus
-import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.busstops.StopSearchResult
-import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.coroutines.di.ForViewModelCoroutineScope
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import javax.inject.Inject
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.contract
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -68,89 +57,105 @@ internal interface UiContentRetriever {
 
 internal const val SEARCH_TERM_DEBOUNCE_PERIOD_MILLIS = 250L
 internal const val SEARCH_PROGRESS_DELAY_MILLIS = 250L
-private const val SEARCH_TERM_MIN_LENGTH = 3
 
 internal class RealUiContentRetriever @Inject constructor(
-    private val state: State,
-    servicesRepository: ServicesRepository,
-    private val busStopsRepository: BusStopsRepository,
+    private val stopSearchResultRetriever: StopSearchResultRetriever,
+    private val servicesRepository: ServicesRepository,
     private val stopSearchResultDropdownMenuGenerator: UiStopSearchResultDropdownMenuGenerator,
-    private val alphanumericComparator: Comparator<String>,
-    @ForDefaultDispatcher defaultCoroutineDispatcher: CoroutineDispatcher,
-    @ForViewModelCoroutineScope viewModelCoroutineScope: CoroutineScope
+    private val alphanumericComparator: Comparator<String>
 ) : UiContentRetriever {
 
-    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-    override val uiContentFlow get() = state
-        .searchTermFlow
-        .map { it?.trim() }
-        .debounce { searchTerm ->
-            if (searchTerm.isSearchTermValid()) SEARCH_TERM_DEBOUNCE_PERIOD_MILLIS else 0L
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override val uiContentFlow get() = combine(
+        stopSearchResultsWithDropdownMenusFlow,
+        servicesRepository.getColoursForServicesFlow()
+    ) { stopSearchResultStateWithDropdownMenus, serviceColours ->
+        createUiContent(
+            stopSearchResultState = stopSearchResultStateWithDropdownMenus.stopSearchResultState,
+            dropdownMenus = stopSearchResultStateWithDropdownMenus.dropdownMenus,
+            serviceColours = serviceColours
+        )
+    }.transformLatest {
+        // If the progress layout is to be shown, we watch to delay the dispatch of this so that
+        // the UI doesn't appear to flicker.
+        if (it is UiContent.InProgress) {
+            delay(SEARCH_PROGRESS_DELAY_MILLIS.milliseconds)
         }
-        .flatMapLatest(::getUiContentFlowWithSearchTerm)
-        .transformLatest {
-            // If the progress layout is to be shown, we watch to delay the dispatch of this so that
-            // the UI doesn't appear to flicker.
-            if (it is UiContent.InProgress) {
-                delay(SEARCH_PROGRESS_DELAY_MILLIS.milliseconds)
-            }
 
-            emit(it)
-        }
+        emit(it)
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun getUiContentFlowWithSearchTerm(searchTerm: String?): Flow<UiContent> {
-        return if (searchTerm.isSearchTermValid()) {
-            busStopsRepository
-                .getStopSearchResultsFlow(searchTerm)
-                .flatMapLatest(::getUiContentFlowWithSearchResults)
-                .onStart { emit(UiContent.InProgress) }
-        } else {
-            flowOf(UiContent.EmptySearchTerm)
+    private val stopSearchResultsWithDropdownMenusFlow get() = stopSearchResultRetriever
+        .stopSearchResultStateFlow
+        .flatMapLatest(::getStopSearchResultStateWithDropdownMenusFlow)
+
+    private fun createUiContent(
+        stopSearchResultState: StopSearchResultState,
+        dropdownMenus: Map<StopIdentifier, UiStopSearchResultDropdownMenu>?,
+        serviceColours: Map<ServiceDescriptor, ServiceColours>?
+    ): UiContent {
+        return when (stopSearchResultState) {
+            is StopSearchResultState.EmptySearchTerm -> UiContent.EmptySearchTerm
+            is StopSearchResultState.InProgress -> UiContent.InProgress
+            is StopSearchResultState.Results -> {
+                val results = stopSearchResultState
+                    .results
+                    ?.toUiStopSearchResults(
+                        serviceColours = serviceColours,
+                        dropdownMenus = dropdownMenus,
+                        stopNameComparator = alphanumericComparator,
+                        serviceNameComparator = alphanumericComparator
+                    )
+                    ?.toImmutableList()
+
+                if (!results.isNullOrEmpty()) {
+                    UiContent.Content(
+                        results = results
+                    )
+                } else {
+                    UiContent.NoResults
+                }
+            }
         }
     }
 
-    private fun getUiContentFlowWithSearchResults(
-        searchResults: List<StopSearchResult>?
-    ): Flow<UiContent> {
-        return if (!searchResults.isNullOrEmpty()) {
-            val stopIdentifiers = searchResults.map { it.stopIdentifier }.toSet()
+    private fun getStopSearchResultStateWithDropdownMenusFlow(
+        stopSearchResultState: StopSearchResultState
+    ): Flow<StopSearchResultStateWithDropdownMenus> {
+        return if (stopSearchResultState is StopSearchResultState.Results) {
+            val stopIdentifiers = stopSearchResultState
+                .results
+                ?.map { it.stopIdentifier }
+                ?.toSet()
 
-            combine(
-                serviceColoursFlow,
+            if (!stopIdentifiers.isNullOrEmpty()) {
                 stopSearchResultDropdownMenuGenerator
                     .getDropdownMenuItemsForStopsFlow(stopIdentifiers)
-            ) { serviceColours, dropdownMenus ->
-                UiContent.Content(
-                    results = searchResults
-                        .toUiStopSearchResults(
-                            serviceColours = serviceColours,
-                            dropdownMenus = dropdownMenus,
-                            stopNameComparator = alphanumericComparator,
-                            serviceNameComparator = alphanumericComparator
+                    .map {
+                        StopSearchResultStateWithDropdownMenus(
+                            stopSearchResultState = stopSearchResultState,
+                            dropdownMenus = it
                         )
-                        .toImmutableList()
+                    }
+            } else {
+                flowOf(
+                    StopSearchResultStateWithDropdownMenus(
+                        stopSearchResultState = stopSearchResultState
+                    )
                 )
             }
         } else {
-            flowOf(UiContent.NoResults)
+            flowOf(
+                StopSearchResultStateWithDropdownMenus(
+                    stopSearchResultState = stopSearchResultState
+                )
+            )
         }
     }
 
-    private val serviceColoursFlow = servicesRepository
-        .getColoursForServicesFlow()
-        .shareIn(
-            scope = viewModelCoroutineScope + defaultCoroutineDispatcher,
-            started = SharingStarted.WhileSubscribed(5000L),
-            replay = 1
-        )
-
-    @OptIn(ExperimentalContracts::class)
-    private fun String?.isSearchTermValid(): Boolean {
-        contract {
-            returns(true) implies (this@isSearchTermValid != null)
-        }
-
-        return !isNullOrBlank() && length >= SEARCH_TERM_MIN_LENGTH
-    }
+    private data class StopSearchResultStateWithDropdownMenus(
+        val stopSearchResultState: StopSearchResultState,
+        val dropdownMenus: Map<StopIdentifier, UiStopSearchResultDropdownMenu>? = null
+    )
 }
