@@ -37,7 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -83,7 +83,7 @@ private const val TAB_DIVERSIONS = 1
 internal fun NewsScreen(
     modifier: Modifier = Modifier,
     viewModel: NewsViewModel = viewModel(),
-    windowSizeClass: WindowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+    windowSizeClass: WindowSizeClass = currentWindowAdaptiveInfoV2().windowSizeClass
 ) {
     val uiState by viewModel.uiStateFlow.collectAsStateWithLifecycle()
 
@@ -378,7 +378,7 @@ private fun NewsScreenPreview() {
                     diversionsCount = 5
                 )
             ),
-            windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass,
+            windowSizeClass = currentWindowAdaptiveInfoV2().windowSizeClass,
             onRefresh = { },
             onIncidentMoreDetailsClicked = { },
             onIncidentActionLaunched = { },
