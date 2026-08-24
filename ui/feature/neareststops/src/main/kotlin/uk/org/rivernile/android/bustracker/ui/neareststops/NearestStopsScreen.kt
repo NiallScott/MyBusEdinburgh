@@ -89,10 +89,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
+import uk.org.rivernile.android.bustracker.core.domain.AtcoStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
-import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
 import uk.org.rivernile.android.bustracker.core.text.UiStopName
 import uk.org.rivernile.android.bustracker.ui.interop.MenuProvider
 import uk.org.rivernile.android.bustracker.ui.text.PrimaryErrorText
@@ -405,7 +406,7 @@ private fun Content(
     ) {
         items(
             items = nearestStops,
-            key = { it.stopIdentifier.toParcelableStopIdentifier() }
+            key = { it.stopIdentifier.lazyListKey }
         ) {
             NearestStopItem(
                 nearestStop = it,
@@ -670,6 +671,13 @@ private fun PaddingValues.toPaddingValuesWithListVerticalPadding(): PaddingValue
         end = calculateEndPadding(layoutDirection),
         bottom = calculateBottomPadding() + paddingDefault
     )
+}
+
+private val StopIdentifier.lazyListKey: String get() {
+    return when (this) {
+        is NaptanStopIdentifier -> "key_naptan_$naptanStopCode"
+        is AtcoStopIdentifier -> "key_atco_$atcoCode"
+    }
 }
 
 @Preview(
