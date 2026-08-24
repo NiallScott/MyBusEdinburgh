@@ -1038,6 +1038,7 @@ class NearestStopsScreenKtTest {
         }
 
         openActionBarOverflowOrOptionsMenu(composeTestRule.activity)
+        composeTestRule.waitForIdle()
         onView(withText(composeTestRule.activity.getString(R.string.neareststops_menu_filter)))
             .perform(click())
 

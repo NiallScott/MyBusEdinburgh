@@ -105,6 +105,7 @@ class MenuProviderKtTest {
         openActionBarOverflowOrOptionsMenu(
             InstrumentationRegistry.getInstrumentation().targetContext
         )
+        composeTestRule.waitForIdle()
         onView(withText("Test 1"))
             .perform(click())
 
