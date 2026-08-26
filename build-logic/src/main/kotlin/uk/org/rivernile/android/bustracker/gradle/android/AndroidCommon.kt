@@ -144,14 +144,13 @@ internal fun CommonExtension.configureDefaults(
                     sdkVersion = 37
                     // TODO: replace with ATD image when it becomes available.
                     systemImageSource = "google_apis"
+                    pageAlignment = ManagedVirtualDevice.PageAlignment.FORCE_16KB_PAGES
                 }
             }
 
             groups {
                 maybeCreate("allApis").apply {
-                    targetDevices += allDevices["pixel3api28"]
-                    targetDevices += allDevices["pixel4api29"]
-                    targetDevices += allDevices["pixel5api30"]
+                    // Removed APIs 28 -> 30 as the emulators were often erroring on start.
                     targetDevices += allDevices["pixel6api31"]
                     targetDevices += allDevices["pixel7api33"]
                     targetDevices += allDevices["pixel8api34"]

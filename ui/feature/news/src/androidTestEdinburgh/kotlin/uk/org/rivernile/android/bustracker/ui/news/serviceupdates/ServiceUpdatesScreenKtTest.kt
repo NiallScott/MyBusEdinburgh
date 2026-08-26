@@ -57,7 +57,12 @@ import kotlin.test.assertEquals
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
-private const val SNACKBAR_TIMEOUT = 5000L
+/*
+ * SnackbarDuration.Short is nominally 4000ms. This leaves generous headroom above that for slower
+ * software-rendered environments (e.g. ATD Gradle Managed Devices), where real-world Snackbar
+ * dismissal can take noticeably longer than on hardware-accelerated emulators.
+ */
+private const val SNACKBAR_TIMEOUT = 10000L
 
 /**
  * Tests for `ServiceUpdatesScreen.kt`.
