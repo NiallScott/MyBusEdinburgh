@@ -71,14 +71,14 @@ class AndroidNewsActionLauncherTest {
             scenario.onActivity {
                 createAndroidNewsActionLauncher(it).launchUrl("https://google.com")
             }
-        }
 
-        intended(
-            allOf(
-                hasAction(Intent.ACTION_VIEW),
-                hasData("https://google.com")
+            intended(
+                allOf(
+                    hasAction(Intent.ACTION_VIEW),
+                    hasData("https://google.com")
+                )
             )
-        )
+        }
     }
 
     private fun createAndroidNewsActionLauncher(context: Context): AndroidNewsActionLauncher {

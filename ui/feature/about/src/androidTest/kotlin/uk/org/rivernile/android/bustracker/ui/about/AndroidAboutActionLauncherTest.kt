@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -74,14 +74,14 @@ class AndroidAboutActionLauncherTest {
             scenario.onActivity {
                 createAboutActionLauncher(it).launchStoreListing()
             }
-        }
 
-        intended(
-            allOf(
-                hasAction(Intent.ACTION_VIEW),
-                hasData("market://details?id=${myPackageName}")
+            intended(
+                allOf(
+                    hasAction(Intent.ACTION_VIEW),
+                    hasData("market://details?id=${myPackageName}")
+                )
             )
-        )
+        }
     }
 
     @Test
@@ -94,14 +94,14 @@ class AndroidAboutActionLauncherTest {
             scenario.onActivity {
                 createAboutActionLauncher(it).launchAuthorWebsite()
             }
-        }
 
-        intended(
-            allOf(
-                hasAction(Intent.ACTION_VIEW),
-                hasData(websiteUrl)
+            intended(
+                allOf(
+                    hasAction(Intent.ACTION_VIEW),
+                    hasData(websiteUrl)
+                )
             )
-        )
+        }
     }
 
     @Test
@@ -114,14 +114,14 @@ class AndroidAboutActionLauncherTest {
             scenario.onActivity {
                 createAboutActionLauncher(it).launchAppWebsite()
             }
-        }
 
-        intended(
-            allOf(
-                hasAction(Intent.ACTION_VIEW),
-                hasData(websiteUrl)
+            intended(
+                allOf(
+                    hasAction(Intent.ACTION_VIEW),
+                    hasData(websiteUrl)
+                )
             )
-        )
+        }
     }
 
     @Test
@@ -134,14 +134,14 @@ class AndroidAboutActionLauncherTest {
             scenario.onActivity {
                 createAboutActionLauncher(it).launchAppBluesky()
             }
-        }
 
-        intended(
-            allOf(
-                hasAction(Intent.ACTION_VIEW),
-                hasData(url)
+            intended(
+                allOf(
+                    hasAction(Intent.ACTION_VIEW),
+                    hasData(url)
+                )
             )
-        )
+        }
     }
 
     @Test
@@ -154,14 +154,14 @@ class AndroidAboutActionLauncherTest {
             scenario.onActivity {
                 createAboutActionLauncher(it).launchPrivacyPolicy()
             }
-        }
 
-        intended(
-            allOf(
-                hasAction(Intent.ACTION_VIEW),
-                hasData(url)
+            intended(
+                allOf(
+                    hasAction(Intent.ACTION_VIEW),
+                    hasData(url)
+                )
             )
-        )
+        }
     }
 
     private fun createAboutActionLauncher(context: Context): AndroidAboutActionLauncher {

@@ -90,58 +90,74 @@ internal fun CommonExtension.configureDefaults(
         @Suppress("UnstableApiUsage")
         managedDevices {
             allDevices {
-                maybeCreate<ManagedVirtualDevice>("pixel2api28").apply {
-                    device = "Pixel 2"
+                maybeCreate<ManagedVirtualDevice>("pixel3api28").apply {
+                    device = "Pixel 3"
                     sdkVersion = 28
                     systemImageSource = "aosp" // No ATD.
                 }
 
-                maybeCreate<ManagedVirtualDevice>("pixel2api29").apply {
-                    device = "Pixel 2"
+                maybeCreate<ManagedVirtualDevice>("pixel4api29").apply {
+                    device = "Pixel 4"
                     sdkVersion = 29
                     systemImageSource = "aosp" // No ATD.
                 }
 
-                maybeCreate<ManagedVirtualDevice>("pixel2api30").apply {
-                    device = "Pixel 2"
+                maybeCreate<ManagedVirtualDevice>("pixel5api30").apply {
+                    device = "Pixel 5"
                     sdkVersion = 30
                     systemImageSource = "aosp-atd"
                 }
 
-                maybeCreate<ManagedVirtualDevice>("pixel2api31").apply {
-                    device = "Pixel 2"
+                maybeCreate<ManagedVirtualDevice>("pixel6api31").apply {
+                    device = "Pixel 6"
                     sdkVersion = 31
                     systemImageSource = "aosp-atd"
                 }
 
-                maybeCreate<ManagedVirtualDevice>("pixel2api33").apply {
-                    device = "Pixel 2"
+                maybeCreate<ManagedVirtualDevice>("pixel7api33").apply {
+                    device = "Pixel 7"
                     sdkVersion = 33
                     systemImageSource = "aosp-atd"
                 }
 
-                maybeCreate<ManagedVirtualDevice>("pixel2api34").apply {
-                    device = "Pixel 2"
+                maybeCreate<ManagedVirtualDevice>("pixel8api34").apply {
+                    device = "Pixel 8"
                     sdkVersion = 34
                     systemImageSource = "aosp-atd"
                 }
 
-                maybeCreate<ManagedVirtualDevice>("pixel2api35").apply {
-                    device = "Pixel 2"
+                maybeCreate<ManagedVirtualDevice>("pixel9api35").apply {
+                    device = "Pixel 9"
                     sdkVersion = 35
                     systemImageSource = "aosp-atd"
+                }
+
+                maybeCreate<ManagedVirtualDevice>("pixel10api36").apply {
+                    device = "Pixel 10"
+                    sdkVersion = 36
+                    systemImageSource = "aosp-atd"
+                }
+
+                maybeCreate<ManagedVirtualDevice>("pixel10api37").apply {
+                    // TODO: replace with Pixel 11 when device definition becomes available.
+                    device = "Pixel 10"
+                    sdkVersion = 37
+                    // TODO: replace with ATD image when it becomes available.
+                    systemImageSource = "google_apis"
                 }
             }
 
             groups {
                 maybeCreate("allApis").apply {
-                    targetDevices += allDevices["pixel2api28"]
-                    targetDevices += allDevices["pixel2api29"]
-                    targetDevices += allDevices["pixel2api30"]
-                    targetDevices += allDevices["pixel2api31"]
-                    targetDevices += allDevices["pixel2api33"]
-                    targetDevices += allDevices["pixel2api34"]
-                    // API 35 is excluded for now as it doesn't seem to work.
+                    targetDevices += allDevices["pixel3api28"]
+                    targetDevices += allDevices["pixel4api29"]
+                    targetDevices += allDevices["pixel5api30"]
+                    targetDevices += allDevices["pixel6api31"]
+                    targetDevices += allDevices["pixel7api33"]
+                    targetDevices += allDevices["pixel8api34"]
+                    targetDevices += allDevices["pixel9api35"]
+                    targetDevices += allDevices["pixel10api36"]
+                    targetDevices += allDevices["pixel10api37"]
                 }
             }
         }

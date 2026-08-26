@@ -385,7 +385,9 @@ class FavouriteStopItemDropdownMenuKtTest {
         composeTestRule.setContent {
             MyBusTheme {
                 FavouriteStopItemDropdownMenuWithDefaults(
-                    menu = UiFavouriteDropdownMenu(),
+                    menu = UiFavouriteDropdownMenu(
+                        isStopMapItemShown = true
+                    ),
                     onDropdownMenuDismissed = itemClickedCounter
                 )
             }

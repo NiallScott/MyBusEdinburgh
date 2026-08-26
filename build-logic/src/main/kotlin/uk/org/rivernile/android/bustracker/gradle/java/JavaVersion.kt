@@ -29,5 +29,5 @@ package uk.org.rivernile.android.bustracker.gradle.java
 import org.gradle.api.JavaVersion
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-internal val myBusJavaVersion get() = JavaVersion.VERSION_17
-internal val myBusJvmTarget get() = JvmTarget.JVM_17
+internal val myBusJavaVersion get() = JavaVersion.VERSION_21
+internal val myBusJvmTarget get() = JvmTarget.JVM_21

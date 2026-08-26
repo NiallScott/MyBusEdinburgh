@@ -58,13 +58,15 @@ android {
 
 baselineProfile {
     managedDevices += listOf(
-        "pixel2api28",
-        "pixel2api29",
-        "pixel2api30",
-        "pixel2api31",
-        "pixel2api33",
-        "pixel2api34"
-        // TODO: add API 35 when it starts working.
+        "pixel3api28",
+        "pixel4api29",
+        "pixel5api30",
+        "pixel6api31",
+        "pixel7api33",
+        "pixel8api34",
+        "pixel9api35",
+        "pixel10api36",
+        "pixel10api37"
     )
     useConnectedDevices = false
 }

@@ -385,7 +385,9 @@ class NearestStopItemDropdownMenuKtTest {
         composeTestRule.setContent {
             MyBusTheme {
                 NearestStopItemDropdownMenuWithDefaults(
-                    menu = UiNearestStopDropdownMenu(),
+                    menu = UiNearestStopDropdownMenu(
+                        isStopMapItemShown = true
+                    ),
                     onDropdownMenuDismissed = itemClickedCounter
                 )
             }

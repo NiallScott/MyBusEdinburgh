@@ -138,14 +138,14 @@ class BusStopMapActivityTest {
             scenario.onActivity { activity ->
                 activity.onShowBusTimes("123456".toNaptanStopIdentifier())
             }
-        }
 
-        intended(
-            allOf(
-                hasComponent(DisplayStopDataActivity::class.java.name),
-                hasExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, "123456")
+            intended(
+                allOf(
+                    hasComponent(DisplayStopDataActivity::class.java.name),
+                    hasExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, "123456")
+                )
             )
-        )
+        }
     }
 
     private val applicationContext get() = ApplicationProvider.getApplicationContext<Context>()

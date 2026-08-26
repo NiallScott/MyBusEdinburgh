@@ -385,7 +385,9 @@ class StopSearchResultDropdownMenuKtTest {
         composeTestRule.setContent {
             MyBusTheme {
                 StopSearchResultDropdownMenuWithDefaults(
-                    menu = UiStopSearchResultDropdownMenu(),
+                    menu = UiStopSearchResultDropdownMenu(
+                        isStopMapItemShown = true
+                    ),
                     onDropdownMenuDismissed = itemClickedCounter
                 )
             }

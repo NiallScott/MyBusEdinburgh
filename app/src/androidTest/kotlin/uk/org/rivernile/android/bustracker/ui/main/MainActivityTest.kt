@@ -93,9 +93,9 @@ class MainActivityTest {
             openActionBarOverflowOrOptionsMenu(ApplicationProvider.getApplicationContext())
             onView(withText(R.string.preferences_title))
                 .perform(click())
-        }
 
-        intended(hasComponent(SettingsActivity::class.java.name))
+            intended(hasComponent(SettingsActivity::class.java.name))
+        }
     }
 
     @Test
@@ -104,9 +104,9 @@ class MainActivityTest {
             openActionBarOverflowOrOptionsMenu(ApplicationProvider.getApplicationContext())
             onView(withText(Rabout.string.about_title))
                 .perform(click())
-        }
 
-        intended(hasComponent(AboutActivity::class.java.name))
+            intended(hasComponent(AboutActivity::class.java.name))
+        }
     }
 
     @Test
