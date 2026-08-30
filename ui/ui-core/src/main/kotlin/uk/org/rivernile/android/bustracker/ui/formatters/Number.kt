@@ -55,10 +55,17 @@ public val LocalNumberFormatter: ProvidableCompositionLocal<NumberFormat> =
  * in [LocalConfiguration]. This is because the [LocalConfiguration] may have a locale change which
  * may mean the number format has changed.
  *
+ * @param maximumFractionDigits The maximum number of fraction digits to display.
  * @return A [NumberFormat] instance suitable for formatting numbers.
  * @author Niall Scott
  */
 @Composable
-public fun rememberNumberFormatter(): NumberFormat = remember(LocalConfiguration.current) {
-    NumberFormat.getInstance()
+public fun rememberNumberFormatter(
+    maximumFractionDigits: Int = 2
+): NumberFormat = remember(LocalConfiguration.current) {
+    NumberFormat
+        .getInstance()
+        .apply {
+            this.maximumFractionDigits = maximumFractionDigits
+        }
 }

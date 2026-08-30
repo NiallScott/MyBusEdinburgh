@@ -1,0 +1,78 @@
+/*
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty.  In no event will the authors or contributors be held liable for
+ * any damages arising from the use of this software.
+ *
+ * The aforementioned copyright holder(s) hereby grant you a
+ * non-transferrable right to use this software for any purpose (including
+ * commercial applications), and to modify it and redistribute it, subject to
+ * the following conditions:
+ *
+ *  1. This notice may not be removed or altered from any file it appears in.
+ *
+ *  2. Any modifications made to this software, except those defined in
+ *     clause 3 of this agreement, must be released under this license, and
+ *     the source code of any modifications must be made available on a
+ *     publically accessible (and locateable) website, or sent to the
+ *     original author of this software.
+ *
+ *  3. Software modifications that do not alter the functionality of the
+ *     software but are simply adaptations to a specific environment are
+ *     exempt from clause 2.
+ *
+ */
+
+package uk.org.rivernile.android.bustracker.ui.stopdetails
+
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
+
+/**
+ * This represents a service item to be displayed on the stop details screen.
+ *
+ * @author Niall Scott
+ */
+internal sealed interface UiServicesItem {
+
+    /**
+     * The represents an operator item.
+     */
+    sealed interface Operator : UiServicesItem {
+
+        /**
+         * The operator is unknown.
+         */
+        data object Unknown : Operator
+
+        /**
+         * The operator is known.
+         *
+         * @param operatorId The ID of the operator.
+         * @param operatorName The display name of the operator.
+         */
+        data class Named(
+            val operatorId: String,
+            val operatorName: String
+        ) : Operator
+    }
+
+    /**
+     * This represents a service item.
+     *
+     * @property serviceDescriptor A descriptor for the service.
+     * @property serviceName The service name details.
+     * @property description A description of the service.
+     */
+    data class Service(
+        val serviceDescriptor: ServiceDescriptor,
+        val serviceName: UiServiceName,
+        val description: String?
+    ) : UiServicesItem
+
+    /**
+     * This represents an item which informs the user that no services are available for the stop.
+     */
+    data object NoServices : UiServicesItem
+}

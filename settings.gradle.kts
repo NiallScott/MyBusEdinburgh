@@ -122,6 +122,7 @@ include(
     ":ui:feature:news",
     ":ui:feature:search",
     ":ui:feature:serviceschooser",
+    ":ui:feature:stopdetails",
     ":ui:text-formatting",
     ":ui:ui-core",
     ":ui:widget:contentview",

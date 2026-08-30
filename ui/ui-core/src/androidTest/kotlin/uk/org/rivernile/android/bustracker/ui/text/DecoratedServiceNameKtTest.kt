@@ -188,6 +188,58 @@ class DecoratedServiceNameKtTest {
             }
     }
 
+    @Test
+    fun mediumDecoratedServiceNameTextRendersItemWithNoColoursSpecified() {
+        composeTestRule.setContent {
+            MyBusTheme {
+                MediumDecoratedServiceNameText(
+                    service = UiServiceName(
+                        serviceName = "1"
+                    )
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithText(
+                text = "1",
+                useUnmergedTree = true
+            )
+            .onParent()
+            .apply {
+                assertIsDisplayed()
+                assertWidthIsAtLeastHeight()
+            }
+    }
+
+    @Test
+    fun mediumDecoratedServiceNameTextRendersItemWhenColoursAreSpecified() {
+        composeTestRule.setContent {
+            MyBusTheme {
+                MediumDecoratedServiceNameText(
+                    service = UiServiceName(
+                        serviceName = "1",
+                        colours = UiServiceColours(
+                            backgroundColour = Color.Red.toArgb(),
+                            textColour = Color.White.toArgb()
+                        )
+                    )
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithText(
+                text = "1",
+                useUnmergedTree = true
+            )
+            .onParent()
+            .apply {
+                assertIsDisplayed()
+                assertWidthIsAtLeastHeight()
+            }
+    }
+
     private fun SemanticsNodeInteraction.assertWidthIsAtLeastHeight() {
         assertWidthIsAtLeast(getUnclippedBoundsInRoot().height)
     }

@@ -221,6 +221,52 @@ public fun SmallDecoratedServiceNameText(
     )
 }
 
+/**
+ * A [Composable] which renders the given [service] as a single item in the medium style.
+ *
+ * @param service The [UiServiceName] to render.
+ * @param modifier Any [Modifier] to be applied.
+ * @param fontSize See [Text].
+ * @param fontStyle See [Text].
+ * @param fontWeight See [Text].
+ * @param fontFamily See [Text].
+ * @param letterSpacing See [Text].
+ * @param lineHeight See [Text].
+ * @param style See [Text].
+ * @param backgroundShape See [SmallDecoratedServiceNameText].
+ * @param padding See [SmallDecoratedServiceNameText].
+ * @see Text
+ * @author Niall Scott
+ */
+@Composable
+public fun MediumDecoratedServiceNameText(
+    service: UiServiceName,
+    modifier: Modifier = Modifier,
+    fontSize: TextUnit = TextUnit.Unspecified,
+    fontStyle: FontStyle? = null,
+    fontWeight: FontWeight? = null,
+    fontFamily: FontFamily? = null,
+    letterSpacing: TextUnit = TextUnit.Unspecified,
+    lineHeight: TextUnit = TextUnit.Unspecified,
+    style: TextStyle = MaterialTheme.typography.titleMedium,
+    backgroundShape: Shape = MaterialTheme.shapes.small,
+    padding: PaddingValues = PaddingValues(8.dp)
+) {
+    DecoratedServiceNameText(
+        service = service,
+        modifier = modifier,
+        fontSize = fontSize,
+        fontStyle = fontStyle,
+        fontWeight = fontWeight,
+        fontFamily = fontFamily,
+        letterSpacing = letterSpacing,
+        lineHeight = lineHeight,
+        style = style,
+        backgroundShape = backgroundShape,
+        padding = padding
+    )
+}
+
 internal const val TEST_TAG_DECORATED_SERVICE_NAME = "decorated-service-name"
 
 /**
