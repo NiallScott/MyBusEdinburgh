@@ -39,6 +39,7 @@ import uk.org.rivernile.android.bustracker.core.busstops.FakeStopLocation
 import uk.org.rivernile.android.bustracker.core.busstops.FakeStopName
 import uk.org.rivernile.android.bustracker.core.busstops.StopDetails
 import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
+import uk.org.rivernile.android.bustracker.core.domain.toAtcoStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
 import uk.org.rivernile.android.bustracker.core.location.LatLon
@@ -248,7 +249,8 @@ class DistanceRetrieverTest {
         PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED)
 
     private val stopDetails get() = FakeStopDetails(
-        "123456".toNaptanStopIdentifier(),
+        naptanStopIdentifier = "123456".toNaptanStopIdentifier(),
+        atcoStopIdentifier = "atco123456".toAtcoStopIdentifier(),
         FakeStopName(
             "Name",
             "Locality"

@@ -28,12 +28,14 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
+import uk.org.rivernile.android.bustracker.core.domain.AtcoStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
 
 /**
  * The Room specific implementation of [StopDetails].
  *
  * @property naptanStopIdentifier See [StopDetails.naptanStopIdentifier].
+ * @property atcoStopIdentifier See [StopDetails.atcoStopIdentifier].
  * @property stopName See [StopDetails.stopName].
  * @property location See [StopDetails.location].
  * @property orientation See [StopDetails.orientation].
@@ -41,6 +43,7 @@ import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
  */
 internal data class RoomStopDetails(
     @ColumnInfo("naptan_code") override val naptanStopIdentifier: NaptanStopIdentifier,
+    @ColumnInfo("atco_code") override val atcoStopIdentifier: AtcoStopIdentifier,
     @Embedded override val stopName: RoomStopName,
     @Embedded override val location: RoomStopLocation,
     @ColumnInfo("bearing") override val orientation: StopOrientation

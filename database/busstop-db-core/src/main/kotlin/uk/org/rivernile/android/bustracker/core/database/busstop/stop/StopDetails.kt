@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 
+import uk.org.rivernile.android.bustracker.core.domain.AtcoStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
 
 /**
@@ -36,9 +37,14 @@ import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
 public interface StopDetails {
 
     /**
-     * The stop identifier.
+     * The NaPTAN stop identifier.
      */
     public val naptanStopIdentifier: NaptanStopIdentifier
+
+    /**
+     * The ATCO stop identifier.
+     */
+    public val atcoStopIdentifier: AtcoStopIdentifier
 
     /**
      * The name details for the stop.

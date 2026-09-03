@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 
+import uk.org.rivernile.android.bustracker.core.domain.AtcoStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
 
 /**
@@ -35,6 +36,7 @@ import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
  */
 data class FakeStopDetails(
     override val naptanStopIdentifier: NaptanStopIdentifier,
+    override val atcoStopIdentifier: AtcoStopIdentifier,
     override val stopName: StopName,
     override val location: StopLocation,
     override val orientation: StopOrientation

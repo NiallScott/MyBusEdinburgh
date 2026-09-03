@@ -87,7 +87,6 @@ class StopDetailsScreenKtTest {
                     state = UiState(
                         content = UiContent.Content(
                             stopDetails = UiStopDetails(
-                                stopIdentifier = "123456".toNaptanStopIdentifier(),
                                 naptanCode = "123456".toNaptanStopIdentifier(),
                                 atcoCode = "ATCO987654".toAtcoStopIdentifier(),
                                 latLon = UiLatLon(
@@ -232,7 +231,7 @@ class StopDetailsScreenKtTest {
     private fun StopDetailsScreenWithStateWithDefaults(
         state: UiState,
         modifier: Modifier = Modifier,
-        onStopMapClick: (StopIdentifier) -> Unit = { throw NotImplementedError() },
+        onStopMapClick: () -> Unit = { throw NotImplementedError() },
         onGrantPermissionsClick: () -> Unit = { throw NotImplementedError() },
         onTurnOnLocationClick: () -> Unit = { throw NotImplementedError() },
         onActionLaunched: () -> Unit = { throw NotImplementedError() },

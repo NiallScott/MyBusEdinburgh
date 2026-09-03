@@ -38,6 +38,8 @@ import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 class FakeBusStopsRepository(
     private val onGetNameForStopFlow: (StopIdentifier) -> Flow<StopName?> =
         { throw NotImplementedError() },
+    private val onGetBusStopDetailsFlow: (StopIdentifier) -> Flow<StopDetails?> =
+        { throw NotImplementedError() },
     private val onGetStopDetailsWithinSpanFlow:
         (Double, Double, Double, Double, Set<ServiceDescriptor>?) ->
         Flow<List<StopDetailsWithServices>?> =
@@ -51,9 +53,8 @@ class FakeBusStopsRepository(
     override fun getNameForStopFlow(stopIdentifier: StopIdentifier) =
         onGetNameForStopFlow(stopIdentifier)
 
-    override fun getBusStopDetailsFlow(stopIdentifier: StopIdentifier): Flow<StopDetails?> {
-        throw NotImplementedError()
-    }
+    override fun getBusStopDetailsFlow(stopIdentifier: StopIdentifier) =
+        onGetBusStopDetailsFlow(stopIdentifier)
 
     override fun getBusStopDetailsFlow(
         stopIdentifiers: Set<StopIdentifier>

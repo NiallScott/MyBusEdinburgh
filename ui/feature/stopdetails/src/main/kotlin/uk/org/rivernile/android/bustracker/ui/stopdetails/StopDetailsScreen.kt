@@ -50,6 +50,8 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -63,7 +65,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -154,7 +158,7 @@ internal fun StopDetailsScreen(
 @Composable
 internal fun StopDetailsScreenWithState(
     state: UiState,
-    onStopMapClick: (StopIdentifier) -> Unit,
+    onStopMapClick: () -> Unit,
     onGrantPermissionClick: () -> Unit,
     onTurnOnLocationClick: () -> Unit,
     onActionLaunched: () -> Unit,
@@ -166,12 +170,16 @@ internal fun StopDetailsScreenWithState(
     Box(
         modifier = modifier
     ) {
+        val nestedScrollInterop = rememberNestedScrollInteropConnection()
+
         when (val content = state.content) {
             is UiContent.InProgress -> IndeterminateProgress(
                 modifier = Modifier
                     .fillMaxSize()
                     .safeDrawingPadding()
                     .padding(dimensionResource(Rcore.dimen.padding_double))
+                    .nestedScroll(nestedScrollInterop)
+                    .verticalScroll(rememberScrollState())
             )
             is UiContent.Content -> Content(
                 stopDetails = content.stopDetails,
@@ -181,12 +189,15 @@ internal fun StopDetailsScreenWithState(
                 onTurnOnLocationClick = onTurnOnLocationClick,
                 modifier = Modifier
                     .fillMaxSize()
+                    .nestedScroll(nestedScrollInterop)
             )
             is UiContent.NoStopDetailsError -> NoStopDetailsError(
                 modifier = Modifier
                     .fillMaxSize()
                     .safeDrawingPadding()
                     .padding(dimensionResource(Rcore.dimen.padding_double))
+                    .nestedScroll(nestedScrollInterop)
+                    .verticalScroll(rememberScrollState())
             )
         }
     }
@@ -224,7 +235,7 @@ private fun IndeterminateProgress(
 private fun Content(
     stopDetails: UiStopDetails,
     servicesItems: ImmutableList<UiServicesItem>,
-    onStopMapClick: (StopIdentifier) -> Unit,
+    onStopMapClick: () -> Unit,
     onGrantPermissionClick: () -> Unit,
     onTurnOnLocationClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -253,7 +264,7 @@ private fun Content(
         ) {
             StopDetailsItem(
                 stopDetails = stopDetails,
-                onStopMapClick = { onStopMapClick(stopDetails.stopIdentifier) },
+                onStopMapClick = onStopMapClick,
                 onGrantPermissionClick = onGrantPermissionClick,
                 onTurnOnLocationClick = onTurnOnLocationClick,
                 modifier = Modifier
@@ -420,7 +431,6 @@ private class UiStateProvider : PreviewParameterProvider<UiState> {
         UiState(
             content = UiContent.Content(
                 stopDetails = UiStopDetails(
-                    stopIdentifier = "123456".toNaptanStopIdentifier(),
                     naptanCode = "123456".toNaptanStopIdentifier(),
                     atcoCode = "ATCO987654".toAtcoStopIdentifier(),
                     latLon = UiLatLon(

@@ -43,6 +43,7 @@ import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
 import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.ParcelableServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toAtcoStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toParcelableNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
@@ -70,7 +71,8 @@ class StopMarkersRetrieverTest {
     private lateinit var serviceListingRetriever: ServiceListingRetriever
 
     private val stopDetails1 = FakeStopDetails(
-        "123456".toNaptanStopIdentifier(),
+        naptanStopIdentifier = "123456".toNaptanStopIdentifier(),
+        atcoStopIdentifier = "atco123456".toAtcoStopIdentifier(),
         FakeStopName(
             "Stop name 1",
             "Locality 1"
@@ -82,7 +84,8 @@ class StopMarkersRetrieverTest {
         StopOrientation.NORTH
     )
     private val stopDetails2 = FakeStopDetails(
-        "987654".toNaptanStopIdentifier(),
+        naptanStopIdentifier = "987654".toNaptanStopIdentifier(),
+        atcoStopIdentifier = "atco987654".toAtcoStopIdentifier(),
         FakeStopName(
             "Stop name 2",
             "Locality 2"
@@ -94,7 +97,8 @@ class StopMarkersRetrieverTest {
         StopOrientation.NORTH_EAST
     )
     private val stopDetails3 = FakeStopDetails(
-        "246802".toNaptanStopIdentifier(),
+        naptanStopIdentifier = "246802".toNaptanStopIdentifier(),
+        atcoStopIdentifier = "atco246802".toAtcoStopIdentifier(),
         FakeStopName(
             "Stop name 3",
             "Locality 4"

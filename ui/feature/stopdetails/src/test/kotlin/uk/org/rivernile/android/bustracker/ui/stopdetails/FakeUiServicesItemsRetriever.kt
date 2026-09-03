@@ -24,23 +24,21 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.busstops
+package uk.org.rivernile.android.bustracker.ui.stopdetails
 
-import uk.org.rivernile.android.bustracker.core.domain.AtcoStopIdentifier
-import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
+import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
- * A fake [StopDetails] for testing.
+ * A fake [UiServicesItemsRetriever] for testing.
  *
  * @author Niall Scott
  */
-data class FakeStopDetails(
-    override val naptanStopIdentifier: NaptanStopIdentifier,
-    override val atcoStopIdentifier: AtcoStopIdentifier,
-    override val stopName: StopName,
-    override val location: StopLocation,
-    override val orientation: StopOrientation
-) : StopDetails {
+internal class FakeUiServicesItemsRetriever(
+    private val onGetUiServicesItemsFlow: (StopIdentifier) -> Flow<List<UiServicesItem>> =
+        { throw NotImplementedError() }
+) : UiServicesItemsRetriever {
 
-    override val stopIdentifier get() = naptanStopIdentifier
+    override fun getUiServicesItemsFlow(stopIdentifier: StopIdentifier) =
+        onGetUiServicesItemsFlow(stopIdentifier)
 }

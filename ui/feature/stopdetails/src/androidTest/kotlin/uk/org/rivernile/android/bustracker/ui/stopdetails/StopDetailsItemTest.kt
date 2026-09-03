@@ -65,7 +65,6 @@ class StopDetailsItemTest {
             MyBusTheme {
                 StopDetailsItemWithDefaults(
                     stopDetails = UiStopDetails(
-                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         naptanCode = "123456".toNaptanStopIdentifier(),
                         atcoCode = "ATCO987654".toAtcoStopIdentifier(),
                         latLon = UiLatLon(
@@ -91,7 +90,6 @@ class StopDetailsItemTest {
             MyBusTheme {
                 StopDetailsItemWithDefaults(
                     stopDetails = UiStopDetails(
-                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         naptanCode = "123456".toNaptanStopIdentifier(),
                         atcoCode = "ATCO987654".toAtcoStopIdentifier(),
                         latLon = UiLatLon(
@@ -117,7 +115,6 @@ class StopDetailsItemTest {
             MyBusTheme {
                 StopDetailsItemWithDefaults(
                     stopDetails = UiStopDetails(
-                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         naptanCode = "123456".toNaptanStopIdentifier(),
                         atcoCode = "ATCO987654".toAtcoStopIdentifier(),
                         latLon = UiLatLon(
@@ -154,7 +151,6 @@ class StopDetailsItemTest {
             MyBusTheme {
                 StopDetailsItemWithDefaults(
                     stopDetails = UiStopDetails(
-                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         naptanCode = "123456".toNaptanStopIdentifier(),
                         atcoCode = "ATCO987654".toAtcoStopIdentifier(),
                         latLon = UiLatLon(
@@ -191,7 +187,6 @@ class StopDetailsItemTest {
             MyBusTheme {
                 StopDetailsItemWithDefaults(
                     stopDetails = UiStopDetails(
-                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         naptanCode = "123456".toNaptanStopIdentifier(),
                         atcoCode = "ATCO987654".toAtcoStopIdentifier(),
                         latLon = UiLatLon(
@@ -232,7 +227,6 @@ class StopDetailsItemTest {
             MyBusTheme {
                 StopDetailsItemWithDefaults(
                     stopDetails = UiStopDetails(
-                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         naptanCode = "123456".toNaptanStopIdentifier(),
                         atcoCode = "ATCO987654".toAtcoStopIdentifier(),
                         latLon = UiLatLon(
@@ -259,7 +253,6 @@ class StopDetailsItemTest {
             MyBusTheme {
                 StopDetailsItemWithDefaults(
                     stopDetails = UiStopDetails(
-                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         naptanCode = "123456".toNaptanStopIdentifier(),
                         atcoCode = "ATCO987654".toAtcoStopIdentifier(),
                         latLon = UiLatLon(
@@ -308,7 +301,6 @@ class StopDetailsItemTest {
             MyBusTheme {
                 StopDetailsItemWithDefaults(
                     stopDetails = UiStopDetails(
-                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         naptanCode = "123456".toNaptanStopIdentifier(),
                         atcoCode = "ATCO987654".toAtcoStopIdentifier(),
                         latLon = UiLatLon(
@@ -356,7 +348,6 @@ class StopDetailsItemTest {
             MyBusTheme {
                 StopDetailsItemWithDefaults(
                     stopDetails = UiStopDetails(
-                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         naptanCode = "123456".toNaptanStopIdentifier(),
                         atcoCode = "ATCO987654".toAtcoStopIdentifier(),
                         latLon = UiLatLon(
@@ -401,7 +392,6 @@ class StopDetailsItemTest {
             MyBusTheme {
                 StopDetailsItemWithDefaults(
                     stopDetails = UiStopDetails(
-                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         naptanCode = "123456".toNaptanStopIdentifier(),
                         atcoCode = "ATCO987654".toAtcoStopIdentifier(),
                         latLon = UiLatLon(
@@ -446,7 +436,6 @@ class StopDetailsItemTest {
             MyBusTheme {
                 StopDetailsItemWithDefaults(
                     stopDetails = UiStopDetails(
-                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         naptanCode = "123456".toNaptanStopIdentifier(),
                         atcoCode = "ATCO987654".toAtcoStopIdentifier(),
                         latLon = UiLatLon(
@@ -501,7 +490,6 @@ class StopDetailsItemTest {
             MyBusTheme {
                 StopDetailsItemWithDefaults(
                     stopDetails = UiStopDetails(
-                        stopIdentifier = "123456".toNaptanStopIdentifier(),
                         naptanCode = "123456".toNaptanStopIdentifier(),
                         atcoCode = "ATCO987654".toAtcoStopIdentifier(),
                         latLon = UiLatLon(

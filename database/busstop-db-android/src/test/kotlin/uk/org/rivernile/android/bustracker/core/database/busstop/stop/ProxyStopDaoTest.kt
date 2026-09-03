@@ -32,6 +32,7 @@ import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabase
 import uk.org.rivernile.android.bustracker.core.database.busstop.FakeBusStopDatabase
 import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toAtcoStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import kotlin.test.Test
@@ -390,6 +391,7 @@ class ProxyStopDaoTest {
 
     private val firstStopDetails get() = FakeStopDetails(
         naptanStopIdentifier = "1".toNaptanStopIdentifier(),
+        atcoStopIdentifier = "atco1".toAtcoStopIdentifier(),
         stopName = FakeStopName(
             name = "Name 1",
             locality = "Locality 1"
@@ -403,6 +405,7 @@ class ProxyStopDaoTest {
 
     private val secondStopDetails get() = FakeStopDetails(
         naptanStopIdentifier = "2".toNaptanStopIdentifier(),
+        atcoStopIdentifier = "2".toAtcoStopIdentifier(),
         stopName = FakeStopName(
             name = "Name 2",
             locality = "Locality 2"

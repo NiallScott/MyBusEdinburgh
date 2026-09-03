@@ -65,7 +65,7 @@ internal abstract class RoomStopDao : StopDao {
     abstract override fun getLocationForStopFlow(naptanStopCode: String): Flow<RoomStopLocation?>
 
     @Query("""
-        SELECT naptan_code, name, locality, latitude, longitude, bearing
+        SELECT naptan_code, atco_code, name, locality, latitude, longitude, bearing
         FROM stop
         WHERE naptan_code = :naptanStopCode
         LIMIT 1
@@ -73,7 +73,7 @@ internal abstract class RoomStopDao : StopDao {
     abstract override fun getStopDetailsFlow(naptanStopCode: String): Flow<RoomStopDetails?>
 
     @Query("""
-        SELECT naptan_code, name, locality, latitude, longitude, bearing
+        SELECT naptan_code, atco_code, name, locality, latitude, longitude, bearing
         FROM stop
         WHERE naptan_code IN (:naptanStopCodes)
     """)
@@ -140,7 +140,7 @@ internal abstract class RoomStopDao : StopDao {
     ): Flow<List<RoomStopSearchResult>>
 
     @get:Query("""
-        SELECT naptan_code, name, locality, latitude, longitude, bearing
+        SELECT naptan_code, atco_code, name, locality, latitude, longitude, bearing
         FROM stop
         WHERE latitude NOT NULL
         AND longitude NOT NULL
@@ -177,7 +177,7 @@ internal abstract class RoomStopDao : StopDao {
     ): RoomRawQuery {
         val sqlQuery = buildString {
             append("""
-                SELECT naptan_code, name, locality, latitude, longitude, bearing
+                SELECT naptan_code, atco_code, name, locality, latitude, longitude, bearing
                 FROM stop
                 WHERE id IN (
                     SELECT stop_id

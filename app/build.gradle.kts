@@ -167,6 +167,7 @@ dependencies {
     implementation(project(":ui:feature:news"))
     implementation(project(":ui:feature:search"))
     implementation(project(":ui:feature:serviceschooser"))
+    implementation(project(":ui:feature:stopdetails"))
     implementation(project(":ui:text-formatting"))
     implementation(project(":ui:ui-core"))
     implementation(project(":ui:widget:contentview"))

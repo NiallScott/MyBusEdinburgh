@@ -514,7 +514,7 @@ private fun ListLine1Text(
     Text(
         text = text,
         color = MaterialTheme.colorScheme.onSurface,
-        style = MaterialTheme.typography.titleSmall
+        style = MaterialTheme.typography.titleMedium
     )
 }
 
@@ -571,7 +571,6 @@ private class UiStopDetailsProvider : PreviewParameterProvider<UiStopDetails> {
 
     override val values = sequenceOf(
         UiStopDetails(
-            stopIdentifier = "123456".toNaptanStopIdentifier(),
             naptanCode = "123456".toNaptanStopIdentifier(),
             atcoCode = "ATCO987654".toAtcoStopIdentifier(),
             latLon = UiLatLon(
@@ -583,7 +582,6 @@ private class UiStopDetailsProvider : PreviewParameterProvider<UiStopDetails> {
             isMapShown = false
         ),
         UiStopDetails(
-            stopIdentifier = "123456".toNaptanStopIdentifier(),
             naptanCode = "123456".toNaptanStopIdentifier(),
             atcoCode = "ATCO987654".toAtcoStopIdentifier(),
             latLon = UiLatLon(
@@ -595,7 +593,6 @@ private class UiStopDetailsProvider : PreviewParameterProvider<UiStopDetails> {
             isMapShown = true
         ),
         UiStopDetails(
-            stopIdentifier = "123456".toNaptanStopIdentifier(),
             naptanCode = "123456".toNaptanStopIdentifier(),
             atcoCode = "ATCO987654".toAtcoStopIdentifier(),
             latLon = UiLatLon(
@@ -607,7 +604,6 @@ private class UiStopDetailsProvider : PreviewParameterProvider<UiStopDetails> {
             isMapShown = true
         ),
         UiStopDetails(
-            stopIdentifier = "123456".toNaptanStopIdentifier(),
             naptanCode = "123456".toNaptanStopIdentifier(),
             atcoCode = "ATCO987654".toAtcoStopIdentifier(),
             latLon = UiLatLon(
@@ -619,7 +615,6 @@ private class UiStopDetailsProvider : PreviewParameterProvider<UiStopDetails> {
             isMapShown = true
         ),
         UiStopDetails(
-            stopIdentifier = "123456".toNaptanStopIdentifier(),
             naptanCode = "123456".toNaptanStopIdentifier(),
             atcoCode = "ATCO987654".toAtcoStopIdentifier(),
             latLon = UiLatLon(
@@ -631,7 +626,6 @@ private class UiStopDetailsProvider : PreviewParameterProvider<UiStopDetails> {
             isMapShown = true
         ),
         UiStopDetails(
-            stopIdentifier = "123456".toNaptanStopIdentifier(),
             naptanCode = "123456".toNaptanStopIdentifier(),
             atcoCode = "ATCO987654".toAtcoStopIdentifier(),
             latLon = UiLatLon(
@@ -643,7 +637,6 @@ private class UiStopDetailsProvider : PreviewParameterProvider<UiStopDetails> {
             isMapShown = true
         ),
         UiStopDetails(
-            stopIdentifier = "123456".toNaptanStopIdentifier(),
             naptanCode = "123456".toNaptanStopIdentifier(),
             atcoCode = "ATCO987654".toAtcoStopIdentifier(),
             latLon = UiLatLon(
@@ -657,7 +650,6 @@ private class UiStopDetailsProvider : PreviewParameterProvider<UiStopDetails> {
             isMapShown = true
         ),
         UiStopDetails(
-            stopIdentifier = "123456".toNaptanStopIdentifier(),
             naptanCode = "123456".toNaptanStopIdentifier(),
             atcoCode = "ATCO987654".toAtcoStopIdentifier(),
             latLon = UiLatLon(

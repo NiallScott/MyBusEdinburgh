@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
 import javax.inject.Inject
+import kotlin.math.absoluteValue
 
 /**
  * @author Niall Scott
@@ -156,7 +157,7 @@ internal class RealAndroidLocationSupport @Inject constructor(
             results
         )
 
-        return results[0]
+        return results[0].absoluteValue
     }
 
     private suspend fun ProducerScope<Boolean>.getAndSendIsLocationEnabled() {

@@ -27,44 +27,95 @@
 package uk.org.rivernile.android.bustracker.ui.stopdetails
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.stateIn
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForViewModelCoroutineScope
-import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import javax.inject.Inject
 
 /**
  * This is the [ViewModel] for the stop details screen.
  *
+ * @param arguments The arguments this [ViewModel] was started with.
+ * @param state The transient state.
+ * @param contentRetriever Used to retrieve the [UiContent].
  * @param defaultCoroutineDispatcher The default [CoroutineDispatcher].
  * @param viewModelCoroutineScope The [ViewModel] [CoroutineScope].
  * @author Niall Scott
  */
 @HiltViewModel
 internal class StopDetailsViewModel @Inject constructor(
+    private val arguments: Arguments,
+    private val state: State,
+    private val contentRetriever: UiContentRetriever,
     @ForDefaultDispatcher defaultCoroutineDispatcher: CoroutineDispatcher,
     @ForViewModelCoroutineScope viewModelCoroutineScope: CoroutineScope
 ) : ViewModel(viewModelCoroutineScope) {
 
-    val uiStateFlow: StateFlow<UiState> = MutableStateFlow(UiState())
+    /**
+     * This emits the current [UiState].
+     */
+    val uiStateFlow: StateFlow<UiState> = _uiStateFlow
+        .flowOn(defaultCoroutineDispatcher)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = UiState()
+        )
 
-    fun onStopMapClicked(stopIdentifier: StopIdentifier) {
-
+    /**
+     * This is called when the stop map has been clicked.
+     */
+    fun onStopMapClicked() {
+        arguments
+            .stopIdentifier
+            ?.let {
+                state.action = UiAction.ShowOnMap(
+                    stopIdentifier = it
+                )
+            }
     }
 
+    /**
+     * This is called when the grant permissions button has been clicked.
+     */
     fun onGrantPermissionClicked() {
-
+        state.action = UiAction.RequestLocationPermissions
     }
 
+    /**
+     * This is called when the turn on location button has been clicked.
+     */
     fun onTurnOnLocationClicked() {
-
+        state.action = UiAction.ShowLocationSettings
     }
 
+    /**
+     * This is called when an action has been launched.
+     */
     fun onActionLaunched() {
-
+        state.action = null
     }
+
+    /**
+     * This is called when the permission state is to be updated.
+     *
+     * @param permissionsState The new [PermissionsState].
+     */
+    fun onUpdatePermissionsState(permissionsState: PermissionsState) {
+        state.permissionsState = permissionsState
+    }
+
+    private val _uiStateFlow get() = combine(
+        contentRetriever.uiContentFlow,
+        state.actionFlow,
+        ::UiState
+    )
 }

@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.core.busstops
 
+import uk.org.rivernile.android.bustracker.core.domain.AtcoStopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
     as DatabaseStopDetails
@@ -38,9 +40,20 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetail
 public interface StopDetails {
 
     /**
-     * Used to identify the stop.
+     * Used to identify the stop. This is most likely identifier to either [naptanStopIdentifier] or
+     * [atcoStopIdentifier] - but this field should be used as the unique identifier of the stop.
      */
     public val stopIdentifier: StopIdentifier
+
+    /**
+     * The NaPTAN identifier of the stop.
+     */
+    public val naptanStopIdentifier: NaptanStopIdentifier
+
+    /**
+     * The ATCO identifier of the stop.
+     */
+    public val atcoStopIdentifier: AtcoStopIdentifier
 
     /**
      * The stop name details.
@@ -68,6 +81,10 @@ internal value class WrappedStopDetails(
 ) : StopDetails {
 
     override val stopIdentifier get() = databaseStopDetails.naptanStopIdentifier
+
+    override val naptanStopIdentifier get() = databaseStopDetails.naptanStopIdentifier
+
+    override val atcoStopIdentifier get() = databaseStopDetails.atcoStopIdentifier
 
     override val stopName get() = databaseStopDetails.stopName.toStopName()
 

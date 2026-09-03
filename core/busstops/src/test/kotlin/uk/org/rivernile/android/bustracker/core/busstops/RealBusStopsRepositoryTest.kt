@@ -478,6 +478,7 @@ class RealBusStopsRepositoryTest {
     private fun createDatabaseStopDetails(index: Int = 1): DatabaseStopDetails {
         return DatabaseFakeStopDetails(
             naptanStopIdentifier = "stopCode$index".toNaptanStopIdentifier(),
+            atcoStopIdentifier = "atcoStopCode$index".toAtcoStopIdentifier(),
             stopName = createDatabaseStopName(index),
             location = createDatabaseStopLocation(index),
             orientation = DatabaseStopOrientation.NORTH

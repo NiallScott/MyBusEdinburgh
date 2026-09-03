@@ -58,6 +58,11 @@ dependencies {
     implementation(project(":core:busstops-android"))
     implementation(project(":core:core-domain-android"))
     implementation(project(":core:coroutines-android"))
+    implementation(project(":core:feature"))
+    implementation(project(":core:location-android"))
+    implementation(project(":core:permission-android"))
+    implementation(project(":core:operators-android"))
+    implementation(project(":core:services-android"))
     implementation(project(":ui:ui-core"))
 
     // AndroidX
@@ -94,6 +99,11 @@ dependencies {
     androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.kotlin.test.junit)
 
+    testImplementation(testFixtures(project(":core:busstops")))
+    testImplementation(testFixtures(project(":core:feature")))
+    testImplementation(testFixtures(project(":core:location")))
+    testImplementation(testFixtures(project(":core:operators")))
+    testImplementation(testFixtures(project(":core:services")))
     testImplementation(libs.coroutines.test)
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)

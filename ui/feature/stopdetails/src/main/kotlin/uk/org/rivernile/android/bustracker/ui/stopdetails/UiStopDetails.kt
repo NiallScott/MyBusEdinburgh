@@ -27,15 +27,15 @@
 package uk.org.rivernile.android.bustracker.ui.stopdetails
 
 import com.google.android.gms.maps.model.LatLng
+import uk.org.rivernile.android.bustracker.core.busstops.StopDetails
+import uk.org.rivernile.android.bustracker.core.busstops.StopLocation
 import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
 import uk.org.rivernile.android.bustracker.core.domain.AtcoStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
-import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 
 /**
  * This represents the stop details item.
  *
- * @property stopIdentifier The identifier of the stop.
  * @property naptanCode The Naptan code of the stop.
  * @property atcoCode The ATCO code of the stop.
  * @property latLon The latitude/longitude coordinate of the stop.
@@ -45,7 +45,6 @@ import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
  * @property isMapShown Will the map be shown?
  */
 internal data class UiStopDetails(
-    val stopIdentifier: StopIdentifier,
     val naptanCode: NaptanStopIdentifier,
     val atcoCode: AtcoStopIdentifier,
     val latLon: UiLatLon,
@@ -120,4 +119,38 @@ internal sealed interface UiStopDistance {
     }
 }
 
+/**
+ * Maps this [StopDetails] to a [UiStopDetails].
+ *
+ * @param stopDistance The stop distance details. This will be `null` when the device does not
+ * support location services.
+ * @param isMapShown Is the map to be shown?
+ * @return This [StopDetails] as a [UiStopDetails].
+ */
+internal fun StopDetails.toUiStopDetails(
+    stopDistance: UiStopDistance?,
+    isMapShown: Boolean
+): UiStopDetails {
+    return UiStopDetails(
+        naptanCode = naptanStopIdentifier,
+        atcoCode = atcoStopIdentifier,
+        latLon = location.toUiLatLon(),
+        orientation = orientation,
+        stopDistance = stopDistance,
+        isMapShown = isMapShown
+    )
+}
+
+/**
+ * Maps this [UiLatLon] to a Google Maps [LatLng] object.
+ *
+ * @return This [UiLatLon] as a [LatLng].
+ */
 internal fun UiLatLon.toGoogleMapsLatLng() = LatLng(latitude, longitude)
+
+private fun StopLocation.toUiLatLon(): UiLatLon {
+    return UiLatLon(
+        latitude = latitude,
+        longitude = longitude
+    )
+}

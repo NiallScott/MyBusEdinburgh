@@ -26,11 +26,14 @@
 
 package uk.org.rivernile.android.bustracker.ui.stopdetails
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -38,10 +41,14 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.fragment.compose.content
 import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
+import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusStopMapWithStopIdentifierListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowSystemLocationPreferencesListener
 import uk.org.rivernile.android.bustracker.ui.formatters.LocalNumberFormatter
@@ -56,7 +63,32 @@ import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 @AndroidEntryPoint
 public class StopDetailsFragment : Fragment() {
 
+    public companion object {
+
+        /**
+         * Create a new instance of this [Fragment] with the given stop identifier.
+         *
+         * @param stopIdentifier The identifier of the stop to show details for.
+         * @return A new instance of this [Fragment].
+         */
+        public fun newInstance(
+            stopIdentifier: StopIdentifier?
+        ): StopDetailsFragment {
+            return StopDetailsFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable(ARG_STOP_IDENTIFIER, stopIdentifier?.toParcelableStopIdentifier())
+                }
+            }
+        }
+    }
+
     private var callbacks: Callbacks? = null
+    private val viewModel by viewModels<StopDetailsViewModel>()
+
+    private val requestLocationPermissionsLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+        ::handleLocationPermissionsResult
+    )
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -82,10 +114,17 @@ public class StopDetailsFragment : Fragment() {
                     modifier = Modifier
                         .consumeWindowInsets(
                             WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
-                        )
+                        ),
+                    viewModel = viewModel
                 )
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        updatePermissions()
     }
 
     override fun onDetach() {
@@ -99,11 +138,53 @@ public class StopDetailsFragment : Fragment() {
     }
 
     private fun handleOnRequestLocationPermissions() {
-
+        requestLocationPermissionsLauncher
+            .launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
     }
 
     private fun handleOnShowLocationSettings() {
         callbacks?.onShowSystemLocationPreferences()
+    }
+
+    private fun updatePermissions() {
+        viewModel.onUpdatePermissionsState(
+            permissionsState = PermissionsState(
+                fineLocationPermission =
+                    getPermissionState(Manifest.permission.ACCESS_FINE_LOCATION),
+                coarseLocationPermission =
+                    getPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION)
+            )
+        )
+    }
+
+    private fun getPermissionState(permission: String) =
+        getPermissionState(
+            ContextCompat.checkSelfPermission(requireContext(), permission) ==
+                PackageManager.PERMISSION_GRANTED
+        )
+
+    private fun getPermissionState(isGranted: Boolean) =
+        if (isGranted) PermissionState.GRANTED else PermissionState.UNGRANTED
+
+    private fun handleLocationPermissionsResult(states: Map<String, Boolean>) {
+        val fineLocationState = states[Manifest.permission.ACCESS_FINE_LOCATION]
+            ?.let(::getPermissionState)
+            ?: getPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+        val coarseLocationState = states[Manifest.permission.ACCESS_COARSE_LOCATION]
+            ?.let(::getPermissionState)
+            ?: getPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION)
+
+        viewModel.onUpdatePermissionsState(
+            permissionsState = PermissionsState(
+                fineLocationPermission = fineLocationState,
+                coarseLocationPermission = coarseLocationState
+            )
+        )
     }
 
     /**

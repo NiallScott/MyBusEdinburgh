@@ -43,6 +43,7 @@ import uk.org.rivernile.android.bustracker.core.busstops.FakeStopName
 import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
 import uk.org.rivernile.android.bustracker.core.domain.FakeServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.toAtcoStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -168,7 +169,8 @@ class AlertsRetrieverTest {
             timeTriggerMinutes = 5
         )
         val stopDetails = FakeStopDetails(
-            "123456".toNaptanStopIdentifier(),
+            naptanStopIdentifier = "123456".toNaptanStopIdentifier(),
+            atcoStopIdentifier = "atco123456".toAtcoStopIdentifier(),
             FakeStopName(
                 "Stop name",
                 "Locality"
@@ -221,7 +223,8 @@ class AlertsRetrieverTest {
             timeTriggerMinutes = 10
         )
         val stopDetails = FakeStopDetails(
-            "123456".toNaptanStopIdentifier(),
+            naptanStopIdentifier = "123456".toNaptanStopIdentifier(),
+            atcoStopIdentifier = "atco123456".toAtcoStopIdentifier(),
             FakeStopName(
                 "Stop name",
                 "Locality"
@@ -273,7 +276,8 @@ class AlertsRetrieverTest {
             timeTriggerMinutes = 5
         )
         val stopDetails1 = FakeStopDetails(
-            "123456".toNaptanStopIdentifier(),
+            naptanStopIdentifier = "123456".toNaptanStopIdentifier(),
+            atcoStopIdentifier = "atco123456".toAtcoStopIdentifier(),
             FakeStopName(
                 "Stop name",
                 "Locality"
@@ -285,7 +289,8 @@ class AlertsRetrieverTest {
             StopOrientation.SOUTH
         )
         val stopDetails2 = FakeStopDetails(
-            "123456".toNaptanStopIdentifier(),
+            naptanStopIdentifier = "123456".toNaptanStopIdentifier(),
+            atcoStopIdentifier = "atco123456".toAtcoStopIdentifier(),
             FakeStopName(
                 "New stop name",
                 "New locality"
@@ -397,7 +402,8 @@ class AlertsRetrieverTest {
             distanceFromMeters = 250
         )
         val stopDetails = FakeStopDetails(
-            "123456".toNaptanStopIdentifier(),
+            naptanStopIdentifier = "123456".toNaptanStopIdentifier(),
+            atcoStopIdentifier = "atco123456".toAtcoStopIdentifier(),
             FakeStopName(
                 "Stop name",
                 "Locality"
@@ -443,7 +449,8 @@ class AlertsRetrieverTest {
             distanceFromMeters = 500
         )
         val stopDetails = FakeStopDetails(
-            "123456".toNaptanStopIdentifier(),
+            naptanStopIdentifier = "123456".toNaptanStopIdentifier(),
+            atcoStopIdentifier = "atco123456".toAtcoStopIdentifier(),
             FakeStopName(
                 "Stop name",
                 "Locality"
@@ -492,7 +499,8 @@ class AlertsRetrieverTest {
             distanceFromMeters = 250
         )
         val stopDetails1 = FakeStopDetails(
-            "123456".toNaptanStopIdentifier(),
+            naptanStopIdentifier = "123456".toNaptanStopIdentifier(),
+            atcoStopIdentifier = "atco123456".toAtcoStopIdentifier(),
             FakeStopName(
                 "Stop name",
                 "Locality"
@@ -504,7 +512,8 @@ class AlertsRetrieverTest {
             StopOrientation.SOUTH
         )
         val stopDetails2 = FakeStopDetails(
-            "123456".toNaptanStopIdentifier(),
+            naptanStopIdentifier = "123456".toNaptanStopIdentifier(),
+            atcoStopIdentifier = "atco123456".toAtcoStopIdentifier(),
             FakeStopName(
                 "New stop name",
                 "New locality"
@@ -565,7 +574,8 @@ class AlertsRetrieverTest {
             distanceFromMeters = 250
         )
         val stopDetails1 = FakeStopDetails(
-            "123456".toNaptanStopIdentifier(),
+            naptanStopIdentifier = "123456".toNaptanStopIdentifier(),
+            atcoStopIdentifier = "atco123456".toAtcoStopIdentifier(),
             FakeStopName(
                 "Stop name",
                 "Locality"
@@ -577,7 +587,8 @@ class AlertsRetrieverTest {
             StopOrientation.SOUTH
         )
         val stopDetails2 = FakeStopDetails(
-            "123456".toNaptanStopIdentifier(),
+            naptanStopIdentifier = "123456".toNaptanStopIdentifier(),
+            atcoStopIdentifier = "atco123456".toAtcoStopIdentifier(),
             FakeStopName(
                 "New stop name",
                 "New locality"
@@ -652,7 +663,8 @@ class AlertsRetrieverTest {
             distanceFromMeters = 250
         )
         val stopDetails1 = FakeStopDetails(
-            "123456".toNaptanStopIdentifier(),
+            naptanStopIdentifier = "123456".toNaptanStopIdentifier(),
+            atcoStopIdentifier = "atco123456".toAtcoStopIdentifier(),
             FakeStopName(
                 "Stop name",
                 "Locality"
@@ -664,7 +676,8 @@ class AlertsRetrieverTest {
             StopOrientation.SOUTH
         )
         val stopDetails2 = FakeStopDetails(
-            "987654".toNaptanStopIdentifier(),
+            naptanStopIdentifier = "987654".toNaptanStopIdentifier(),
+            atcoStopIdentifier = "atco987654".toAtcoStopIdentifier(),
             FakeStopName(
                 "Stop name 2",
                 "Locality 2"
@@ -676,7 +689,8 @@ class AlertsRetrieverTest {
             StopOrientation.UNKNOWN
         )
         val stopDetails3 = FakeStopDetails(
-            "123456".toNaptanStopIdentifier(),
+            naptanStopIdentifier = "123456".toNaptanStopIdentifier(),
+            atcoStopIdentifier = "atco123456".toAtcoStopIdentifier(),
             FakeStopName(
                 "New stop name",
                 "New locality"

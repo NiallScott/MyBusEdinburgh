@@ -24,23 +24,26 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.busstops
+package uk.org.rivernile.android.bustracker.ui.stopdetails
 
-import uk.org.rivernile.android.bustracker.core.domain.AtcoStopIdentifier
-import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 
 /**
- * A fake [StopDetails] for testing.
+ * This class encapsulates the permissions that the details screen would like, and their current
+ * state.
  *
- * @author Niall Scott
+ * @property fineLocationPermission The state of the fine location permission.
+ * @property coarseLocationPermission The state of the coarse location permission.
  */
-data class FakeStopDetails(
-    override val naptanStopIdentifier: NaptanStopIdentifier,
-    override val atcoStopIdentifier: AtcoStopIdentifier,
-    override val stopName: StopName,
-    override val location: StopLocation,
-    override val orientation: StopOrientation
-) : StopDetails {
+internal data class PermissionsState(
+    val fineLocationPermission: PermissionState = PermissionState.UNGRANTED,
+    val coarseLocationPermission: PermissionState = PermissionState.UNGRANTED
+)
 
-    override val stopIdentifier get() = naptanStopIdentifier
+/**
+ * Is the current state sufficient for allowing nearest stops to obtain a device location?
+ */
+internal val PermissionsState.isPermissionsSufficient: Boolean get() {
+    return coarseLocationPermission == PermissionState.GRANTED ||
+        fineLocationPermission == PermissionState.GRANTED
 }

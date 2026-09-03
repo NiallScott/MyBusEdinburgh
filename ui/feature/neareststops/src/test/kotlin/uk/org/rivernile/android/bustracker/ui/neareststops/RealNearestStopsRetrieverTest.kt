@@ -322,7 +322,7 @@ class RealNearestStopsRetrieverTest {
                         ),
                         deviceLocation
                     )
-                    -12.34f
+                    12.34f
                 }
             ),
             configRepository = FakeConfigRepository(
@@ -397,7 +397,7 @@ class RealNearestStopsRetrieverTest {
                         ),
                         deviceLocation
                     )
-                    -12.34f
+                    12.34f
                 }
             ),
             configRepository = FakeConfigRepository(
@@ -472,7 +472,7 @@ class RealNearestStopsRetrieverTest {
                         ),
                         deviceLocation
                     )
-                    -12.34f
+                    12.34f
                 }
             ),
             configRepository = FakeConfigRepository(

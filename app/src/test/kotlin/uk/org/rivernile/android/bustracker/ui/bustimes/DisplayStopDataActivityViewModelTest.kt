@@ -41,11 +41,11 @@ import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.busstops.StopDetails
-import uk.org.rivernile.android.bustracker.core.busstops.StopLocation
-import uk.org.rivernile.android.bustracker.core.busstops.StopName
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopDetails
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopLocation
+import uk.org.rivernile.android.bustracker.core.busstops.FakeStopName
 import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
-import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.toAtcoStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
@@ -160,14 +160,17 @@ class DisplayStopDataActivityViewModelTest {
 
     @Test
     fun busStopDetailsWithStopCodeWhichIsFoundReturnsDetails() = runTest {
-        val details = MockStopDetails(
-            "123456".toNaptanStopIdentifier(),
-            MockStopName(
+        val details = FakeStopDetails(
+            naptanStopIdentifier = "123456".toNaptanStopIdentifier(),
+            atcoStopIdentifier = "atco123456".toAtcoStopIdentifier(),
+            FakeStopName(
                 "Name",
-                "Locality"),
-            MockStopLocation(
+                "Locality"
+            ),
+            FakeStopLocation(
                 1.2,
-                3.4),
+                3.4
+            ),
             StopOrientation.SOUTH)
         whenever(busStopsRepository.getBusStopDetailsFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(flowOf(details))
@@ -181,14 +184,17 @@ class DisplayStopDataActivityViewModelTest {
 
     @Test
     fun busStopDetailsWithStopCodesCanUpdateData() = runTest {
-        val details = MockStopDetails(
-            "123456".toNaptanStopIdentifier(),
-            MockStopName(
+        val details = FakeStopDetails(
+            naptanStopIdentifier = "123456".toNaptanStopIdentifier(),
+            atcoStopIdentifier = "atco123456".toAtcoStopIdentifier(),
+            FakeStopName(
                 "Name",
-                "Locality"),
-            MockStopLocation(
+                "Locality"
+            ),
+            FakeStopLocation(
                 1.2,
-                3.4),
+                3.4
+            ),
             StopOrientation.SOUTH)
         whenever(busStopsRepository.getBusStopDetailsFlow("123456".toNaptanStopIdentifier()))
             .thenReturn(intervalFlowOf(0L, 10L, null, details, null))
@@ -598,18 +604,20 @@ class DisplayStopDataActivityViewModelTest {
 
     @Test
     fun onStreetViewMenuItemClickedShowsStreetViewWhenStopDetailsIsNotNull() = runTest {
-        val details = MockStopDetails(
-                "123456".toNaptanStopIdentifier(),
-                MockStopName(
-                        "Name",
-                        "Locality"),
-                MockStopLocation(
-                    1.2,
-                    3.4
-                ),
-                StopOrientation.SOUTH)
+        val details = FakeStopDetails(
+            naptanStopIdentifier = "123456".toNaptanStopIdentifier(),
+            atcoStopIdentifier = "atco123456".toAtcoStopIdentifier(),
+            FakeStopName(
+                "Name",
+                "Locality"),
+            FakeStopLocation(
+                1.2,
+                3.4
+            ),
+            StopOrientation.SOUTH
+        )
         whenever(busStopsRepository.getBusStopDetailsFlow("123456".toNaptanStopIdentifier()))
-                .thenReturn(flowOf(details))
+            .thenReturn(flowOf(details))
         val showStreetView = viewModel.showStreetViewLiveData.test()
         viewModel.stopDetailsLiveData.test()
 
@@ -620,18 +628,4 @@ class DisplayStopDataActivityViewModelTest {
 
         showStreetView.assertValues(details)
     }
-
-    private data class MockStopName(
-        override val name: String,
-        override val locality: String?) : StopName
-
-    private data class MockStopLocation(
-        override val latitude: Double,
-        override val longitude: Double) : StopLocation
-
-    private data class MockStopDetails(
-        override val stopIdentifier: StopIdentifier,
-        override val stopName: StopName,
-        override val location: StopLocation,
-        override val orientation: StopOrientation) : StopDetails
 }

@@ -45,7 +45,6 @@ import uk.org.rivernile.android.bustracker.core.location.Location
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.location.LocationUpdate
 import javax.inject.Inject
-import kotlin.math.absoluteValue
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -154,7 +153,6 @@ internal class RealNearestStopsRetriever @Inject constructor(
                         ?.toNearestStops {
                             locationRepository
                                 .distanceBetween(it.toLatLon(), latLon)
-                                .absoluteValue
                                 .toInt()
                         }
                         ?.ifEmpty { null },

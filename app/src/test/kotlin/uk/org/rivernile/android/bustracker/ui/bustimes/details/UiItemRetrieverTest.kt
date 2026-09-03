@@ -41,6 +41,7 @@ import uk.org.rivernile.android.bustracker.core.busstops.FakeStopDetails
 import uk.org.rivernile.android.bustracker.core.busstops.FakeStopLocation
 import uk.org.rivernile.android.bustracker.core.busstops.FakeStopName
 import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
+import uk.org.rivernile.android.bustracker.core.domain.toAtcoStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
@@ -329,7 +330,8 @@ class UiItemRetrieverTest {
     }
 
     private fun createStopDetails() = FakeStopDetails(
-        "123456".toNaptanStopIdentifier(),
+        naptanStopIdentifier = "123456".toNaptanStopIdentifier(),
+        atcoStopIdentifier = "atco123456".toAtcoStopIdentifier(),
         FakeStopName(
             "Stop name",
             "Locality"

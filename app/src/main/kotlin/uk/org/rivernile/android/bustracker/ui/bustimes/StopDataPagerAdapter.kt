@@ -33,8 +33,8 @@ import androidx.fragment.app.commitNow
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
-import uk.org.rivernile.android.bustracker.ui.bustimes.details.StopDetailsFragment
 import uk.org.rivernile.android.bustracker.ui.bustimes.times.BusTimesFragment
+import uk.org.rivernile.android.bustracker.ui.stopdetails.StopDetailsFragment
 import uk.org.rivernile.edinburghbustracker.android.R
 
 /**
