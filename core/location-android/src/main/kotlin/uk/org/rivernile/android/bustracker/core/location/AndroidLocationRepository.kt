@@ -31,11 +31,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
 import javax.inject.Inject
@@ -87,17 +84,6 @@ internal class AndroidLocationRepository @Inject constructor(
             replay = 1
         )
 
-    @Suppress("OVERRIDE_DEPRECATION", "DEPRECATION")
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override val userVisibleLocationFlow: Flow<DeviceLocation> get() = if (hasLocationFeature) {
-        isLocationEnabledFlow
-            .distinctUntilChanged()
-            .flatMapLatest(::createUserVisibleLocationFlow)
-    } else {
-        // The location feature detection is a hard no in this case. Return an empty Flow.
-        emptyFlow()
-    }
-
     override val locationUpdatesFlow: Flow<LocationUpdate> get() {
         return if (hasLocationFeature) {
             getLocationUpdatesFlowWhenHasLocationFeature()
@@ -108,23 +94,6 @@ internal class AndroidLocationRepository @Inject constructor(
 
     override fun distanceBetween(first: LatLon, second: LatLon) =
         androidLocationSupport.distanceBetween(first, second)
-
-    private fun createUserVisibleLocationFlow(locationEnabled: Boolean) = if (locationEnabled) {
-        locationSource
-            .locationUpdatesFlow
-            .filterIsInstance<LocationUpdate.Update>()
-            .map {
-                val latLon = it.location.latLon
-
-                @Suppress("DEPRECATION")
-                DeviceLocation(
-                    latitude = latLon.latitude,
-                    longitude = latLon.longitude
-                )
-            }
-    } else {
-        emptyFlow()
-    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun getLocationUpdatesFlowWhenHasLocationFeature(): Flow<LocationUpdate> {

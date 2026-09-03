@@ -39,8 +39,6 @@ class FakeLocationRepository(
     private val onIsLocationEnabledFlow: () -> Flow<Boolean> = { throw NotImplementedError() },
     private val onIsGpsLocationProviderEnabledFlow: () -> Flow<Boolean> =
         { throw NotImplementedError() },
-    private val onUserVisibleLocationFlow: () -> Flow<DeviceLocation> =
-        { throw NotImplementedError() },
     private val onLocationUpdatesFlow: () -> Flow<LocationUpdate> = { throw NotImplementedError() },
     private val onDistanceBetween: (LatLon, LatLon) -> Float =
         { _, _ -> throw NotImplementedError() }
@@ -53,11 +51,6 @@ class FakeLocationRepository(
     override val isLocationEnabledFlow get() = onIsLocationEnabledFlow()
 
     override val isGpsLocationProviderEnabledFlow get() = onIsGpsLocationProviderEnabledFlow()
-
-    @Deprecated(
-        message = "Use locationUpdatesFlow instead."
-    )
-    override val userVisibleLocationFlow get() = onUserVisibleLocationFlow()
 
     override val locationUpdatesFlow get() = onLocationUpdatesFlow()
 

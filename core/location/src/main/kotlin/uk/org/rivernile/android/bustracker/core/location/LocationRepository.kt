@@ -58,24 +58,6 @@ public interface LocationRepository {
     public val isGpsLocationProviderEnabledFlow: Flow<Boolean>
 
     /**
-     * Get a [Flow] which emits the latest [DeviceLocation] and any further location changes until
-     * cancelled.
-     *
-     * Callers should check [hasLocationFeature] first before requesting this [Flow]. When
-     * [hasLocationFeature] is `false`, the [Flow] returned by this property will only be an empty
-     * [Flow].
-     *
-     * Callers should also check to see if location permissions have been granted. If they have not
-     * been, this property will return an empty [Flow].
-     *
-     * An empty [Flow] will also be returned when device location services are not enabled.
-     */
-    @Deprecated(
-        message = "Use locationUpdatesFlow instead."
-    )
-    public val userVisibleLocationFlow: Flow<DeviceLocation>
-
-    /**
      * A [Flow] which emits location updates.
      *
      * When location updates are available, then the first emission will be [LocationUpdate.Update]

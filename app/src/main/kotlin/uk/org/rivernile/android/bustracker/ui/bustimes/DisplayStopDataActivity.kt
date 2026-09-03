@@ -29,6 +29,7 @@ package uk.org.rivernile.android.bustracker.ui.bustimes
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -49,7 +50,6 @@ import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.alerts.time.AddTimeAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity
-import uk.org.rivernile.android.bustracker.ui.bustimes.details.StopDetailsFragment
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.edinburghbustracker.android.BuildConfig
 import uk.org.rivernile.edinburghbustracker.android.R
@@ -66,6 +66,7 @@ import uk.org.rivernile.android.bustracker.ui.favouritestops.addoredit.AddOrEdit
 import uk.org.rivernile.android.bustracker.ui.alerts.removearrivalalert.RemoveArrivalAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.alerts.removeproximityalert.RemoveProximityAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.favouritestops.remove.RemoveFavouriteStopDialogFragment
+import uk.org.rivernile.android.bustracker.ui.stopdetails.StopDetailsFragment
 
 /**
  * The purpose of this [AppCompatActivity] is to display to the user live departure times and
@@ -193,10 +194,22 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
         addMenuProvider(menuProvider)
     }
 
-    override fun showMapForStop(stopIdentifier: StopIdentifier) {
+    override fun onShowBusStopMapWithStopIdentifier(stopIdentifier: StopIdentifier) {
         Intent(this, BusStopMapActivity::class.java)
             .putExtra(BusStopMapActivity.EXTRA_STOP_CODE, stopIdentifier.toNaptanCodeOrThrow())
             .let(this::startActivity)
+    }
+
+    override fun onShowSystemLocationPreferences(): Boolean {
+        return try {
+            Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .let(this::startActivity)
+            true
+        } catch (e: ActivityNotFoundException) {
+            exceptionLogger.log(e)
+            false
+        }
     }
 
     /**

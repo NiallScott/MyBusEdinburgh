@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.map
 
-import androidx.annotation.DrawableRes
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
@@ -51,8 +50,11 @@ class StopMapMarkerDecorator @Inject constructor() {
      * @param orientation The orientation of the stop.
      */
     fun applyStopDirectionToMarker(markerOptions: MarkerOptions, orientation: StopOrientation) {
-        markerOptions.icon(BitmapDescriptorFactory.fromResource(
-                getStopDirectionDrawableResourceId(orientation)))
+        markerOptions
+            .icon(
+                BitmapDescriptorFactory
+                    .fromResource(orientation.toIconDrawableResId())
+            )
     }
 
     /**
@@ -62,17 +64,10 @@ class StopMapMarkerDecorator @Inject constructor() {
      * @param orientation The orientation of the stop.
      */
     fun applyStopDirectionToMarker(marker: Marker, orientation: StopOrientation) {
-        marker.setIcon(BitmapDescriptorFactory.fromResource(
-                getStopDirectionDrawableResourceId(orientation)))
+        marker
+            .setIcon(
+                BitmapDescriptorFactory
+                    .fromResource(orientation.toIconDrawableResId())
+            )
     }
-
-    /**
-     * Get a drawable resource ID for a given orientation.
-     *
-     * @param orientation The orientation.
-     * @return A drawable resource ID for a given orientation.
-     */
-    @DrawableRes
-    fun getStopDirectionDrawableResourceId(orientation: StopOrientation) =
-        orientation.toIconDrawableResId()
 }
