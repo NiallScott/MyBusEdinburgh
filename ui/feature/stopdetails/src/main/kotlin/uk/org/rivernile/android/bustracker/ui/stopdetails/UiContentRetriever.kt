@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.onStart
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import javax.inject.Inject
 
@@ -68,7 +67,6 @@ internal class RealUiContentRetriever @Inject constructor(
                     servicesItemsRetriever.getUiServicesItemsFlow(stopIdentifier),
                     ::createUiContent
                 )
-                .onStart { emit(UiContent.InProgress) }
         } else {
             flowOf(UiContent.NoStopDetailsError)
         }

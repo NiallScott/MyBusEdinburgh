@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.ui.stopdetails
 
 import app.cash.turbine.test
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
@@ -56,32 +55,6 @@ class RealUiContentRetrieverTest {
 
         retriever.uiContentFlow.test {
             assertEquals(UiContent.NoStopDetailsError, awaitItem())
-            awaitComplete()
-        }
-    }
-
-    @Test
-    fun uiContentFlowEmitsInProgressOnStart() = runTest {
-        val retriever = createRetriever(
-            arguments = FakeArguments(
-                onStopIdentifierFlow = { flowOf("123456".toNaptanStopIdentifier()) }
-            ),
-            stopDetailsRetriever = FakeUiStopDetailsRetriever(
-                onGetUiStopDetailsFlow = {
-                    assertEquals("123456".toNaptanStopIdentifier(), it)
-                    emptyFlow()
-                }
-            ),
-            servicesItemsRetriever = FakeUiServicesItemsRetriever(
-                onGetUiServicesItemsFlow = {
-                    assertEquals("123456".toNaptanStopIdentifier(), it)
-                    emptyFlow()
-                }
-            )
-        )
-
-        retriever.uiContentFlow.test {
-            assertEquals(UiContent.InProgress, awaitItem())
             awaitComplete()
         }
     }
@@ -125,7 +98,6 @@ class RealUiContentRetrieverTest {
         )
 
         retriever.uiContentFlow.test {
-            assertEquals(UiContent.InProgress, awaitItem())
             assertEquals(UiContent.NoStopDetailsError, awaitItem())
             awaitComplete()
         }
@@ -184,7 +156,6 @@ class RealUiContentRetrieverTest {
         )
 
         retriever.uiContentFlow.test {
-            assertEquals(UiContent.InProgress, awaitItem())
             assertEquals(
                 UiContent.Content(
                     stopDetails = UiStopDetails(

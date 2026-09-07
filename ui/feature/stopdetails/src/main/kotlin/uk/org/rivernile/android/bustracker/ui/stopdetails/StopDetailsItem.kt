@@ -50,10 +50,7 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -235,9 +232,13 @@ private fun GoogleStopMapItem(
     onStopMapClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var mapLoaded by remember { mutableStateOf(false) }
-    val cameraPositionState = rememberCameraPositionState()
-    val markerState = rememberUpdatedMarkerState()
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition
+            .fromLatLngZoom(
+                latLon.toGoogleMapsLatLng(),
+                GOOGLE_MAP_ZOOM_LEVEL
+            )
+    }
 
     GoogleMap(
         modifier = modifier
@@ -255,27 +256,25 @@ private fun GoogleStopMapItem(
                 mapToolbarEnabled = false
             )
         },
-        onMapClick = { onStopMapClick() },
-        onMapLoaded = { mapLoaded = true }
+        onMapClick = { onStopMapClick() }
     ) {
         Marker(
-            state = markerState,
-            icon = BitmapDescriptorFactory
-                .fromResource(orientation.toIconDrawableResId())
+            state = rememberUpdatedMarkerState(
+                position = latLon.toGoogleMapsLatLng()
+            ),
+            icon = remember(orientation) {
+                BitmapDescriptorFactory
+                    .fromResource(orientation.toIconDrawableResId())
+            }
         )
     }
 
-    if (mapLoaded) {
-        SideEffect(latLon, orientation) {
-            val googleMapsLatLng = latLon.toGoogleMapsLatLng()
-
-            cameraPositionState.position = CameraPosition
-                .fromLatLngZoom(
-                    googleMapsLatLng,
-                    GOOGLE_MAP_ZOOM_LEVEL
-                )
-            markerState.position = googleMapsLatLng
-        }
+    SideEffect(latLon) {
+        cameraPositionState.position = CameraPosition
+            .fromLatLngZoom(
+                latLon.toGoogleMapsLatLng(),
+                GOOGLE_MAP_ZOOM_LEVEL
+            )
     }
 }
 
