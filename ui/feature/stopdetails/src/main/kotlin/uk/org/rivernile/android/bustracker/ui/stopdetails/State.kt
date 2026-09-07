@@ -52,6 +52,17 @@ internal interface State {
     var action: UiAction?
 
     /**
+     * This emits whether we are in a resumed state. This is used to control the use of heavy
+     * resources which should not be used while this screen is not currently being shown.
+     */
+    val isResumedFlow: Flow<Boolean>
+
+    /**
+     * Are we currently resumed?
+     */
+    var isResumed: Boolean
+
+    /**
      * This emits the current [PermissionsState].
      */
     val permissionsStateFlow: Flow<PermissionsState?>
@@ -75,6 +86,15 @@ internal class RealState @Inject constructor() : State {
         }
 
     @OptIn(ExperimentalCoroutinesApi::class)
+    override val isResumedFlow get() = _isResumedFlow.asFlow()
+
+    override var isResumed: Boolean
+        get() = _isResumedFlow.value
+        set(value) {
+            _isResumedFlow.value = value
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     override val permissionsStateFlow get() = _permissionsFlow.asFlow()
 
     override var permissionsState: PermissionsState?
@@ -84,6 +104,8 @@ internal class RealState @Inject constructor() : State {
         }
 
     private val _actionFlow = MutableStateFlow<UiAction?>(null)
+
+    private val _isResumedFlow = MutableStateFlow(false)
 
     private val _permissionsFlow = MutableStateFlow<PermissionsState?>(null)
 }

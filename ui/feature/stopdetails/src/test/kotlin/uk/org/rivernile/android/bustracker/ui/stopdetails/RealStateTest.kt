@@ -31,7 +31,9 @@ import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /**
  * Tests for [RealState].
@@ -69,6 +71,31 @@ class RealStateTest {
             state.action = null
             assertNull(awaitItem())
             assertNull(state.action)
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun isResumedHasDefaultValue() = runTest {
+        val state = createState()
+
+        state.isResumedFlow.test {
+            assertFalse(awaitItem())
+            assertFalse(state.isResumed)
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun isResumedIsMutatedToTheCorrectValue() = runTest {
+        val state = createState()
+
+        state.isResumedFlow.test {
+            assertFalse(awaitItem())
+            assertFalse(state.isResumed)
+            state.isResumed = true
+            assertTrue(awaitItem())
+            assertTrue(state.isResumed)
             ensureAllEventsConsumed()
         }
     }

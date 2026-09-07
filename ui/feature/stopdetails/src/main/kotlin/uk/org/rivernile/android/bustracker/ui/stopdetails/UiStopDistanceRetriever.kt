@@ -29,7 +29,9 @@ package uk.org.rivernile.android.bustracker.ui.stopdetails
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -76,10 +78,17 @@ internal class RealUiStopDistanceRetriever @Inject constructor(
             .permissionsStateFlow
             .filterNotNull()
             .distinctUntilChanged()
-            .flatMapLatest {
+            .combine(
+                state
+                    .isResumedFlow
+                    .distinctUntilChanged(),
+                ::Pair
+            )
+            .flatMapLatest { (permissionsState, isResumed) ->
                 getUiStopDistanceFlowWithPermissionsState(
                     stopLocation = stopLocation,
-                    permissionsState = it
+                    isResumed = isResumed,
+                    permissionsState = permissionsState
                 )
             }
     }
@@ -87,19 +96,24 @@ internal class RealUiStopDistanceRetriever @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun getUiStopDistanceFlowWithPermissionsState(
         stopLocation: StopLocation,
+        isResumed: Boolean,
         permissionsState: PermissionsState
     ): Flow<UiStopDistance?> {
-        return if (permissionsState.isPermissionsSufficient) {
-            locationRepository
-                .locationUpdatesFlow
-                .flatMapLatest {
-                    getUiStopDistanceWithLocationUpdate(
-                        stopLocation = stopLocation,
-                        locationUpdate = it
-                    )
-                }
+        return if (isResumed) {
+            if (permissionsState.isPermissionsSufficient) {
+                locationRepository
+                    .locationUpdatesFlow
+                    .flatMapLatest {
+                        getUiStopDistanceWithLocationUpdate(
+                            stopLocation = stopLocation,
+                            locationUpdate = it
+                        )
+                    }
+            } else {
+                flowOf(UiStopDistance.InsufficientLocationPermissions)
+            }
         } else {
-            flowOf(UiStopDistance.InsufficientLocationPermissions)
+            emptyFlow()
         }
     }
 

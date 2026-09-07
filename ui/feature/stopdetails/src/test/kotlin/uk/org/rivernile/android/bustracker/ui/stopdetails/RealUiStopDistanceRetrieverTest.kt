@@ -48,9 +48,31 @@ import kotlin.test.assertNull
 class RealUiStopDistanceRetrieverTest {
 
     @Test
+    fun getUiStopDistanceFlowDoesNotEmitWhenIsResumedIsFalse() = runTest {
+        val retriever = createRetriever(
+            state = FakeState(
+                onIsResumedFlow = { flowOf(false) },
+                onPermissionsStateFlow = {
+                    flowOf(
+                        PermissionsState(
+                            fineLocationPermission = PermissionState.GRANTED,
+                            coarseLocationPermission = PermissionState.GRANTED
+                        )
+                    )
+                }
+            )
+        )
+
+        retriever.getUiStopDistanceFlow(stopLocation).test {
+            awaitComplete()
+        }
+    }
+
+    @Test
     fun getUiStopDistanceFlowDoesNotEmitWhenPermissionsIsNull() = runTest {
         val retriever = createRetriever(
             state = FakeState(
+                onIsResumedFlow = { flowOf(true) },
                 onPermissionsStateFlow = { flowOf(null) }
             )
         )
@@ -64,6 +86,7 @@ class RealUiStopDistanceRetrieverTest {
     fun getUiStopDistanceFlowEmitsInsufficientLocationPermissionsWhenBadPermissions() = runTest {
         val retriever = createRetriever(
             state = FakeState(
+                onIsResumedFlow = { flowOf(true) },
                 onPermissionsStateFlow = {
                     flowOf(
                         PermissionsState(
@@ -85,6 +108,7 @@ class RealUiStopDistanceRetrieverTest {
     fun getUiStopDistanceFlowEmitsObtainingLocationFollowedByLocationUnknown() = runTest {
         val retriever = createRetriever(
             state = FakeState(
+                onIsResumedFlow = { flowOf(true) },
                 onPermissionsStateFlow = {
                     flowOf(
                         PermissionsState(
@@ -110,6 +134,7 @@ class RealUiStopDistanceRetrieverTest {
     fun getUiStopDistanceFlowEmitsKilometersDistance() = runTest {
         val retriever = createRetriever(
             state = FakeState(
+                onIsResumedFlow = { flowOf(true) },
                 onPermissionsStateFlow = {
                     flowOf(
                         PermissionsState(
@@ -167,6 +192,7 @@ class RealUiStopDistanceRetrieverTest {
     fun getUiStopDistanceFlowEmitsMetersDistance() = runTest {
         val retriever = createRetriever(
             state = FakeState(
+                onIsResumedFlow = { flowOf(true) },
                 onPermissionsStateFlow = {
                     flowOf(
                         PermissionsState(
@@ -224,6 +250,7 @@ class RealUiStopDistanceRetrieverTest {
     fun getUiStopDistanceFlowEmitsNullWhenNoLocationFeature() = runTest {
         val retriever = createRetriever(
             state = FakeState(
+                onIsResumedFlow = { flowOf(true) },
                 onPermissionsStateFlow = {
                     flowOf(
                         PermissionsState(
@@ -248,6 +275,7 @@ class RealUiStopDistanceRetrieverTest {
     fun getUiStopDistanceFlowEmitsInsufficientLocationPermissions() = runTest {
         val retriever = createRetriever(
             state = FakeState(
+                onIsResumedFlow = { flowOf(true) },
                 onPermissionsStateFlow = {
                     flowOf(
                         PermissionsState(
@@ -274,6 +302,7 @@ class RealUiStopDistanceRetrieverTest {
     fun getUiStopDistanceFlowEmitsLocationOff() = runTest {
         val retriever = createRetriever(
             state = FakeState(
+                onIsResumedFlow = { flowOf(true) },
                 onPermissionsStateFlow = {
                     flowOf(
                         PermissionsState(

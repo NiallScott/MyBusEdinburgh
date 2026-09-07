@@ -124,7 +124,14 @@ public class StopDetailsFragment : Fragment() {
     override fun onResume() {
         super.onResume()
 
+        viewModel.onResumeStateChanged(isResumed = true)
         updatePermissions()
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        viewModel.onResumeStateChanged(isResumed = false)
     }
 
     override fun onDetach() {

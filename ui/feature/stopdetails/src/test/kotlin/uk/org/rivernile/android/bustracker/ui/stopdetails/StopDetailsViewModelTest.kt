@@ -183,6 +183,25 @@ class StopDetailsViewModelTest {
     }
 
     @Test
+    fun onResumeStateChangedSetsResumedState() = runTest {
+        val resumedStateTracker = ItemTracker<Boolean>()
+        val viewModel = createViewModel(
+            state = FakeState(
+                onActionFlow = ::emptyFlow,
+                onSetIsResumed = resumedStateTracker
+            )
+        )
+
+        viewModel.onResumeStateChanged(isResumed = false)
+        viewModel.onResumeStateChanged(isResumed = true)
+
+        assertEquals(
+            listOf(false, true),
+            resumedStateTracker.items
+        )
+    }
+
+    @Test
     fun onUpdatePermissionsStateSetsPermissionsState() = runTest {
         val permissionsStatesTracker = ItemTracker<PermissionsState?>()
         val viewModel = createViewModel(

@@ -77,7 +77,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.collections.immutable.ImmutableList
@@ -125,11 +124,7 @@ internal fun StopDetailsScreen(
     modifier: Modifier = Modifier,
     viewModel: StopDetailsViewModel = viewModel()
 ) {
-    val uiState by viewModel.uiStateFlow.collectAsStateWithLifecycle(
-        // The minActiveState is set to RESUMED so that locations aren't continually monitored while
-        // this screen is not the user's active focus.
-        minActiveState = Lifecycle.State.RESUMED
-    )
+    val uiState by viewModel.uiStateFlow.collectAsStateWithLifecycle()
 
     StopDetailsScreenWithState(
         state = uiState,

@@ -37,6 +37,9 @@ internal class FakeState(
     private val onActionFlow: () -> Flow<UiAction?> = { throw NotImplementedError() },
     private val onGetAction: () -> UiAction? = { throw NotImplementedError() },
     private val onSetAction: (UiAction?) -> Unit = { throw NotImplementedError() },
+    private val onIsResumedFlow: () -> Flow<Boolean> = { throw NotImplementedError() },
+    private val onGetIsResumed: () -> Boolean = { throw NotImplementedError() },
+    private val onSetIsResumed: (Boolean) -> Unit = { throw NotImplementedError() },
     private val onPermissionsStateFlow: () -> Flow<PermissionsState?> =
         { throw NotImplementedError() },
     private val onGetPermissionsState: () -> PermissionsState? = { throw NotImplementedError() },
@@ -49,6 +52,14 @@ internal class FakeState(
         get() = onGetAction()
         set(value) {
             onSetAction(value)
+        }
+
+    override val isResumedFlow get() = onIsResumedFlow()
+
+    override var isResumed: Boolean
+        get() = onGetIsResumed()
+        set(value) {
+            onSetIsResumed(value)
         }
 
     override val permissionsStateFlow get() = onPermissionsStateFlow()

@@ -105,6 +105,15 @@ internal class StopDetailsViewModel @Inject constructor(
     }
 
     /**
+     * Update the resumed state.
+     *
+     * @param isResumed Are we resumed?
+     */
+    fun onResumeStateChanged(isResumed: Boolean) {
+        state.isResumed = isResumed
+    }
+
+    /**
      * This is called when the permission state is to be updated.
      *
      * @param permissionsState The new [PermissionsState].
