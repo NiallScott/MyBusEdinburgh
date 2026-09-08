@@ -44,11 +44,11 @@ import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
-import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmRemoveProximityAlertListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmRemoveArrivalAlertListener
 import uk.org.rivernile.android.bustracker.ui.HasScrollableContent
+import uk.org.rivernile.android.bustracker.ui.googlemaps.MapStyleApplicator
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentAlertManagerBinding
 import javax.inject.Inject

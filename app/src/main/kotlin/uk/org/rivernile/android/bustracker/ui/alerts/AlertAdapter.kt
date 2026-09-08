@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,8 +33,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
-import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
+import uk.org.rivernile.android.bustracker.ui.googlemaps.MapStyleApplicator
 import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemAlertProximityBinding
 import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemAlertTimeBinding
 
@@ -51,12 +51,12 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemAlertTim
  * @author Niall Scott
  */
 class AlertAdapter(
-        context: Context,
-        private val textFormattingUtils: TextFormattingUtils,
-        private val stopMapMarkerDecorator: StopMapMarkerDecorator,
-        private val mapStyleApplicator: MapStyleApplicator,
-        private val clickListener: OnAlertItemClickListener)
-    : ListAdapter<UiAlert, RecyclerView.ViewHolder>(ItemEquator()) {
+    context: Context,
+    private val textFormattingUtils: TextFormattingUtils,
+    private val stopMapMarkerDecorator: StopMapMarkerDecorator,
+    private val mapStyleApplicator: MapStyleApplicator,
+    private val clickListener: OnAlertItemClickListener
+) : ListAdapter<UiAlert, RecyclerView.ViewHolder>(ItemEquator()) {
 
     companion object {
 

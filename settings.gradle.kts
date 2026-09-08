@@ -123,6 +123,7 @@ include(
     ":ui:feature:search",
     ":ui:feature:serviceschooser",
     ":ui:feature:stopdetails",
+    ":ui:google-maps",
     ":ui:text-formatting",
     ":ui:ui-core",
     ":ui:widget:contentview",

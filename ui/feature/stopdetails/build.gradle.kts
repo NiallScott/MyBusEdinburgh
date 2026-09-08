@@ -63,6 +63,7 @@ dependencies {
     implementation(project(":core:permission-android"))
     implementation(project(":core:operators-android"))
     implementation(project(":core:services-android"))
+    implementation(project(":ui:google-maps"))
     implementation(project(":ui:ui-core"))
 
     // AndroidX

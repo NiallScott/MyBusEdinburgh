@@ -34,8 +34,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
-import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
+import uk.org.rivernile.android.bustracker.ui.googlemaps.MapStyleApplicator
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemAlertTimeBinding
 
@@ -50,12 +50,12 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemAlertTim
  * @author Niall Scott
  */
 class ArrivalAlertViewHolder(
-        private val viewBinding: ListItemAlertTimeBinding,
-        private val textFormattingUtils: TextFormattingUtils,
-        private val stopMapMarkerDecorator: StopMapMarkerDecorator,
-        private val mapStyleApplicator: MapStyleApplicator,
-        private val clickListener: OnAlertItemClickListener)
-    : RecyclerView.ViewHolder(viewBinding.root) {
+    private val viewBinding: ListItemAlertTimeBinding,
+    private val textFormattingUtils: TextFormattingUtils,
+    private val stopMapMarkerDecorator: StopMapMarkerDecorator,
+    private val mapStyleApplicator: MapStyleApplicator,
+    private val clickListener: OnAlertItemClickListener
+) : RecyclerView.ViewHolder(viewBinding.root) {
 
     private var alert: UiAlert.ArrivalAlert? = null
     private var map: GoogleMap? = null

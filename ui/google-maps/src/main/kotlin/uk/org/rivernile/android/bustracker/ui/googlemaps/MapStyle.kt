@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,23 +24,20 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.map
+package uk.org.rivernile.android.bustracker.ui.googlemaps
 
 import android.content.Context
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.MapStyleOptions
-import uk.org.rivernile.android.bustracker.utils.NightModeDetector
-import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.android.bustracker.ui.theme.NightModeDetector
 import javax.inject.Inject
 
 /**
- * This class is used to apply the correct styling to a supplied [GoogleMap].
+ * This is used to apply the correct styling to a supplied [GoogleMap].
  *
- * @param nightModeDetector Used to detect whether night mode is enabled or not.
  * @author Niall Scott
  */
-class MapStyleApplicator @Inject constructor(
-        private val nightModeDetector: NightModeDetector) {
+public interface MapStyleApplicator {
 
     /**
      * Apply the correct map styling to the supplied [map].
@@ -49,13 +46,44 @@ class MapStyleApplicator @Inject constructor(
      * instance.
      * @param map The [GoogleMap] to apply the styling to.
      */
-    fun applyMapStyle(context: Context, map: GoogleMap) {
-        val mapStyle = if (nightModeDetector.isNightMode(context)) {
-            MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style_night)
-        } else {
-            null
-        }
+    public fun applyMapStyle(context: Context, map: GoogleMap)
+}
 
-        map.setMapStyle(mapStyle)
+/**
+ * Get a [MapStyleOptions] which decorates a Google Map according to the dark mode state of the
+ * device. If `null` is returned then the map should not be decorated.
+ *
+ * Be aware, [MapStyleOptions] does not implement [equals] or [hashCode].
+ *
+ * @param context The [Context] used to load resources.
+ * @param isDark Should the dark theme be used?
+ * @return The [MapStyleOptions] to apply, or `null` if the default map style is to be applied.
+ */
+public fun darkThemeAwareMapStyleOptions(
+    context: Context,
+    isDark: Boolean
+): MapStyleOptions? {
+    return if (isDark) {
+        MapStyleOptions
+            .loadRawResourceStyle(context, R.raw.map_style_night)
+    } else {
+        null
+    }
+}
+
+internal class RealMapStyleApplicator @Inject constructor(
+    private val nightModeDetector: NightModeDetector
+) : MapStyleApplicator {
+
+    override fun applyMapStyle(
+        context: Context,
+        map: GoogleMap
+    ) {
+        map.setMapStyle(
+            darkThemeAwareMapStyleOptions(
+                context = context,
+                isDark = nightModeDetector.isNightMode(context)
+            )
+        )
     }
 }

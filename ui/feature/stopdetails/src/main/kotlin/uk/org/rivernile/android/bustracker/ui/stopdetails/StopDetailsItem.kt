@@ -30,6 +30,7 @@ import android.content.res.Configuration
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -66,6 +67,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -80,6 +82,7 @@ import androidx.window.core.layout.WindowSizeClass
 import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -94,6 +97,7 @@ import uk.org.rivernile.android.bustracker.core.domain.toAtcoStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.ui.formatters.LocalNumberFormatter
 import uk.org.rivernile.android.bustracker.ui.formatters.rememberNumberFormatter
+import uk.org.rivernile.android.bustracker.ui.googlemaps.darkThemeAwareMapStyleOptions
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 
@@ -260,6 +264,7 @@ private fun GoogleStopMapItem(
             GoogleMapOptions()
                 .liteMode(true)
         },
+        properties = rememberMapProperties(),
         uiSettings = remember {
             MapUiSettings(
                 compassEnabled = false,
@@ -283,6 +288,21 @@ private fun GoogleStopMapItem(
 
     SideEffect(latLon) {
         cameraPositionState.position = latLon.toCameraPosition()
+    }
+}
+
+@Composable
+private fun rememberMapProperties(): MapProperties {
+    val context = LocalContext.current
+    val isDark = isSystemInDarkTheme()
+
+    return remember(isDark) {
+        MapProperties(
+            mapStyleOptions = darkThemeAwareMapStyleOptions(
+                context = context,
+                isDark = isDark
+            )
+        )
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,27 +24,22 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.utils
+package uk.org.rivernile.android.bustracker.ui.theme
 
-import android.content.Context
-import android.content.res.Configuration
-import javax.inject.Inject
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 
 /**
- * This class is used to detect whether night mode is enabled or not.
+ * A [Module] for providing theme related dependencies.
  *
  * @author Niall Scott
  */
-class NightModeDetector @Inject constructor() {
+@InstallIn(SingletonComponent::class)
+@Module
+internal interface ThemeModule {
 
-    /**
-     * Is night mode enabled for the given [Context]?
-     *
-     * @param context The [Context] to determine night mode for.
-     * @return `true` if the [Context] has night mode enabled, otherwise `false`.
-     */
-    fun isNightMode(context: Context): Boolean {
-        return context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
-                Configuration.UI_MODE_NIGHT_YES
-    }
+    @Binds
+    fun bindNightModeDetector(realNightModeDetector: RealNightModeDetector): NightModeDetector
 }

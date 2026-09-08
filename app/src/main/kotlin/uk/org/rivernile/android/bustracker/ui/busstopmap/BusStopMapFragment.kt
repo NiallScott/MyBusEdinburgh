@@ -68,8 +68,8 @@ import uk.org.rivernile.android.bustracker.core.domain.toParcelableServiceDescri
 import uk.org.rivernile.android.bustracker.core.domain.toStopIdentifier
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
-import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener
+import uk.org.rivernile.android.bustracker.ui.googlemaps.MapStyleApplicator
 import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment
 import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserParams
 import uk.org.rivernile.android.bustracker.utils.Event
@@ -129,6 +129,7 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
             }
         }
     }
+
     @Inject
     lateinit var googleApiAvailability: GoogleApiAvailability
     @Inject
