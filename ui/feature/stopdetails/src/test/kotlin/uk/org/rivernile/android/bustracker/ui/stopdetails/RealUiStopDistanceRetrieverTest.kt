@@ -27,7 +27,10 @@
 package uk.org.rivernile.android.bustracker.ui.stopdetails
 
 import app.cash.turbine.test
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.busstops.FakeStopLocation
 import uk.org.rivernile.android.bustracker.core.location.FakeLocationRepository
@@ -322,6 +325,78 @@ class RealUiStopDistanceRetrieverTest {
         retriever.getUiStopDistanceFlow(stopLocation).test {
             assertEquals(UiStopDistance.LocationOff, awaitItem())
             awaitComplete()
+        }
+    }
+
+    @Test
+    fun getUiStopDistanceFlowEmitsAfterResumedBecomesTrue() = runTest {
+        val isResumedFlow = MutableSharedFlow<Boolean>()
+        val retriever = createRetriever(
+            state = FakeState(
+                onIsResumedFlow = { isResumedFlow },
+                onPermissionsStateFlow = {
+                    flowOf(
+                        PermissionsState(
+                            fineLocationPermission = PermissionState.GRANTED,
+                            coarseLocationPermission = PermissionState.GRANTED
+                        )
+                    )
+                }
+            ),
+            locationRepository = FakeLocationRepository(
+                onLocationUpdatesFlow = {
+                    flowOf(LocationUpdate.Error.LocationOff)
+                }
+            )
+        )
+
+        retriever.getUiStopDistanceFlow(stopLocation).test {
+            ensureAllEventsConsumed()
+            isResumedFlow.emit(true)
+            assertEquals(UiStopDistance.LocationOff, awaitItem())
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun getUiStopDistanceFlowStopsEmittingWhenResumedBecomesFalse() = runTest {
+        val isResumedFlow = MutableSharedFlow<Boolean>()
+        val locationUpdatesFlow = MutableSharedFlow<LocationUpdate>()
+        var locationFlowStartedCount = 0
+        var locationFlowStoppedCount = 0
+        val retriever = createRetriever(
+            state = FakeState(
+                onIsResumedFlow = { isResumedFlow },
+                onPermissionsStateFlow = {
+                    flowOf(
+                        PermissionsState(
+                            fineLocationPermission = PermissionState.GRANTED,
+                            coarseLocationPermission = PermissionState.GRANTED
+                        )
+                    )
+                }
+            ),
+            locationRepository = FakeLocationRepository(
+                onLocationUpdatesFlow = {
+                    locationUpdatesFlow
+                        .onStart { locationFlowStartedCount++ }
+                        .onCompletion { locationFlowStoppedCount++ }
+                }
+            )
+        )
+
+        retriever.getUiStopDistanceFlow(stopLocation).test {
+            isResumedFlow.emit(true)
+            locationUpdatesFlow.emit(LocationUpdate.Error.LocationOff)
+            assertEquals(UiStopDistance.LocationOff, awaitItem())
+            assertEquals(1, locationFlowStartedCount)
+            assertEquals(0, locationFlowStoppedCount)
+
+            isResumedFlow.emit(false)
+            assertEquals(1, locationFlowStartedCount)
+            assertEquals(1, locationFlowStoppedCount)
+
+            ensureAllEventsConsumed()
         }
     }
 

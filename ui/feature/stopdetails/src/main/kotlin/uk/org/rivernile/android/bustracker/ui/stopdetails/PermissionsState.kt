@@ -41,7 +41,7 @@ internal data class PermissionsState(
 )
 
 /**
- * Is the current state sufficient for allowing nearest stops to obtain a device location?
+ * Is the current state sufficient for allowing stop details to obtain a device location?
  */
 internal val PermissionsState.isPermissionsSufficient: Boolean get() {
     return coarseLocationPermission == PermissionState.GRANTED ||
