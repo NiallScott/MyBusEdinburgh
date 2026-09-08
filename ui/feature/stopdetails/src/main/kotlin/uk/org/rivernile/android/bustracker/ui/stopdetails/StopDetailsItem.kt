@@ -602,6 +602,7 @@ private fun ListLine1Text(
 ) {
     Text(
         text = text,
+        modifier = modifier,
         color = MaterialTheme.colorScheme.onSurface,
         style = MaterialTheme.typography.titleMedium
     )

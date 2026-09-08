@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.stopdetails
 
+import androidx.compose.runtime.Immutable
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import uk.org.rivernile.android.bustracker.core.busstops.StopDetails
@@ -45,6 +46,7 @@ import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
  * device does not have location features.
  * @property isMapShown Will the map be shown?
  */
+@Immutable
 internal data class UiStopDetails(
     val naptanCode: NaptanStopIdentifier,
     val atcoCode: AtcoStopIdentifier,
@@ -61,6 +63,7 @@ internal data class UiStopDetails(
  * @property longitude The longitude.
  * @author Niall Scott
  */
+@Immutable
 internal data class UiLatLon(
     val latitude: Double,
     val longitude: Double
@@ -71,6 +74,7 @@ internal data class UiLatLon(
  *
  * @author Niall Scott
  */
+@Immutable
 internal sealed interface UiStopDistance {
 
     /**

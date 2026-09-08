@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.stopdetails
 
+import androidx.compose.runtime.Immutable
+
 /**
  * This defines the state to be displayed on the stop details screen.
  *
@@ -33,6 +35,7 @@ package uk.org.rivernile.android.bustracker.ui.stopdetails
  * @property action Actions to be performed, if any.
  * @author Niall Scott
  */
+@Immutable
 internal data class UiState(
     val content: UiContent = UiContent.InProgress,
     val action: UiAction? = null

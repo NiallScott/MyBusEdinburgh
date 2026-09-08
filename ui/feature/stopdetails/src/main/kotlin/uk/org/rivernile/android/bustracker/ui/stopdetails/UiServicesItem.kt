@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.stopdetails
 
+import androidx.compose.runtime.Immutable
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.operators.OperatorName
 import uk.org.rivernile.android.bustracker.core.services.ServiceColours
@@ -38,6 +39,7 @@ import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
  *
  * @author Niall Scott
  */
+@Immutable
 internal sealed interface UiServicesItem {
 
     /**
