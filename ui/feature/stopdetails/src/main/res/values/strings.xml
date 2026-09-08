@@ -28,7 +28,7 @@
     <string name="stopdetails_not_found">No details are available for this stop</string>
     <string name="stopdetails_naptan_identifier_label">NaPTAN code</string>
     <string name="stopdetails_atco_identifier_label">ATCO code</string>
-    <string name="stopdetails_stop_orientation_label">Orientation</string>
+    <string name="stopdetails_stop_orientation_label">Direction</string>
     <string name="stopdetails_stop_distance_label">Distance</string>
     <string name="stopdetails_stop_distance_insufficient_permissions_btn_grant">Grant location permissions</string>
     <string name="stopdetails_stop_distance_location_off_btn_turn_on">Turn on location services</string>

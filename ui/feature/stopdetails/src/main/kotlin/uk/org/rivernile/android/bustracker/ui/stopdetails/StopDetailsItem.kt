@@ -33,20 +33,32 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.MutableWindowInsets
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.onConsumedWindowInsetsChanged
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.plus
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
@@ -62,9 +74,11 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
+import androidx.window.core.layout.WindowSizeClass
 import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CameraPosition
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
@@ -88,7 +102,6 @@ internal const val TEST_TAG_ITEM_NAPTAN = "item-naptan"
 internal const val TEST_TAG_ITEM_ATCO = "item-atco"
 internal const val TEST_TAG_ITEM_ORIENTATION = "item-orientation"
 internal const val TEST_TAG_ITEM_DISTANCE = "item-distance"
-private const val GOOGLE_MAP_ZOOM_LEVEL = 17f
 
 /**
  * The stop details item.
@@ -110,88 +123,81 @@ internal fun StopDetailsItem(
     onTurnOnLocationClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val paddingDefault = dimensionResource(Rcore.dimen.padding_default)
-    val paddingDouble = dimensionResource(Rcore.dimen.padding_double)
-
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement
-            .spacedBy(paddingDefault)
+    ConstraintLayout(
+        modifier = modifier
     ) {
-        if (stopDetails.isMapShown) {
+        val largeWidthMode = currentWindowAdaptiveInfoV2()
+            .windowSizeClass
+            .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+        val paddingDouble = dimensionResource(Rcore.dimen.padding_double)
+        val (mapRef, stopDetailsPanelRef) = createRefs()
+        val isMapShown = stopDetails.isMapShown
+
+        if (isMapShown) {
             StopMapItem(
                 latLon = stopDetails.latLon,
                 orientation = stopDetails.orientation,
                 onStopMapClick = onStopMapClick,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1.7777778f)
-            )
-        } else {
-            Spacer(
-                modifier = Modifier
-                    .height(paddingDefault)
+                    .constrainAs(mapRef) {
+                        top.linkTo(parent.top)
+                        start.linkTo(parent.start)
+
+                        if (largeWidthMode) {
+                            width = Dimension.percent(0.4f)
+                            height = Dimension.fillToConstraints
+                            bottom.linkTo(stopDetailsPanelRef.bottom)
+                        } else {
+                            width = Dimension.fillToConstraints
+                            height = Dimension.ratio("16:9")
+                            end.linkTo(parent.end)
+                        }
+                    }
             )
         }
 
-        StopIdentifiersRow(
+        StopDetailsPanel(
             naptanCode = stopDetails.naptanCode,
             atcoCode = stopDetails.atcoCode,
+            orientation = stopDetails.orientation,
+            stopDistance = stopDetails.stopDistance,
             modifier = Modifier
-                .fillMaxWidth()
-                .height(IntrinsicSize.Min)
-                .padding(
-                    horizontal = paddingDouble
-                )
-        )
+                .constrainAs(stopDetailsPanelRef) {
+                    width = Dimension.fillToConstraints
+                    height = Dimension.wrapContent
+                    end.linkTo(parent.end)
 
-        HorizontalDivider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = paddingDouble
-                )
-        )
-
-        StopOrientationItem(
-            stopOrientation = stopDetails.orientation,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = paddingDouble
-                )
-        )
-
-        HorizontalDivider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = paddingDouble
-                )
-        )
-
-        stopDetails
-            .stopDistance
-            ?.let {
-                StopDistanceItem(
-                    stopDistance = it,
-                    onGrantPermissionClick = onGrantPermissionClick,
-                    onTurnOnLocationClick = onTurnOnLocationClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            horizontal = paddingDouble
+                    if (isMapShown) {
+                        if (largeWidthMode) {
+                            top.linkTo(parent.top)
+                            start.linkTo(mapRef.end)
+                        } else {
+                            top.linkTo(mapRef.bottom)
+                            start.linkTo(parent.start)
+                        }
+                    } else {
+                        top.linkTo(parent.top)
+                        start.linkTo(parent.start)
+                    }
+                }
+                .let {
+                    if (isMapShown && largeWidthMode) {
+                        it.consumeWindowInsets(
+                            WindowInsets.safeDrawing.only(WindowInsetsSides.Start)
                         )
-                )
-
-                HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            horizontal = paddingDouble
-                        )
-                )
-            }
+                    } else {
+                        it
+                    }
+                }
+                .safeDrawingPadding()
+                .padding(
+                    top = dimensionResource(Rcore.dimen.padding_default),
+                    start = paddingDouble,
+                    end = paddingDouble
+                ),
+            onGrantPermissionClick = onGrantPermissionClick,
+            onTurnOnLocationClick = onTurnOnLocationClick
+        )
     }
 }
 
@@ -225,6 +231,7 @@ private fun StopMapItem(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun GoogleStopMapItem(
     latLon: UiLatLon,
@@ -232,16 +239,19 @@ private fun GoogleStopMapItem(
     onStopMapClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val safeDrawingInsets = WindowInsets.safeDrawing
+    val insetsForContentPadding = remember { MutableWindowInsets() }
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition
-            .fromLatLngZoom(
-                latLon.toGoogleMapsLatLng(),
-                GOOGLE_MAP_ZOOM_LEVEL
-            )
+        position = latLon.toCameraPosition()
     }
 
     GoogleMap(
         modifier = modifier
+            .onConsumedWindowInsetsChanged { consumedWindowInsets ->
+                insetsForContentPadding.insets = safeDrawingInsets
+                    .exclude(consumedWindowInsets)
+            }
+            .consumeWindowInsets(insetsForContentPadding)
             .semantics {
                 testTag = TEST_TAG_ITEM_MAP
             },
@@ -256,7 +266,9 @@ private fun GoogleStopMapItem(
                 mapToolbarEnabled = false
             )
         },
-        onMapClick = { onStopMapClick() }
+        onMapClick = { onStopMapClick() },
+        contentPadding = insetsForContentPadding.asPaddingValues() +
+            PaddingValues(dimensionResource(Rcore.dimen.padding_default))
     ) {
         Marker(
             state = rememberUpdatedMarkerState(
@@ -270,11 +282,66 @@ private fun GoogleStopMapItem(
     }
 
     SideEffect(latLon) {
-        cameraPositionState.position = CameraPosition
-            .fromLatLngZoom(
-                latLon.toGoogleMapsLatLng(),
-                GOOGLE_MAP_ZOOM_LEVEL
+        cameraPositionState.position = latLon.toCameraPosition()
+    }
+}
+
+@Composable
+private fun StopDetailsPanel(
+    naptanCode: NaptanStopIdentifier,
+    atcoCode: AtcoStopIdentifier,
+    orientation: StopOrientation,
+    stopDistance: UiStopDistance?,
+    onGrantPermissionClick: () -> Unit,
+    onTurnOnLocationClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement
+            .spacedBy(
+                dimensionResource(Rcore.dimen.padding_default)
             )
+    ) {
+        StopIdentifiersRow(
+            naptanCode = naptanCode,
+            atcoCode = atcoCode,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min)
+        )
+
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+
+        StopOrientationItem(
+            stopOrientation = orientation,
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+
+        stopDistance
+            ?.let {
+                StopDistanceItem(
+                    stopDistance = it,
+                    onGrantPermissionClick = onGrantPermissionClick,
+                    onTurnOnLocationClick = onTurnOnLocationClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+
+                HorizontalDivider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+            }
     }
 }
 
@@ -452,7 +519,10 @@ private fun StopDistanceObtainingLocation(
             text = stringResource(R.string.stopdetails_stop_distance_obtaining_location)
         )
 
-        LinearProgressIndicator()
+        LinearProgressIndicator(
+            modifier = Modifier
+                .weight(1f)
+        )
     }
 }
 

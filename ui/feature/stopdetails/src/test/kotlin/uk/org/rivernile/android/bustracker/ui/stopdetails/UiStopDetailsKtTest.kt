@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.stopdetails
 
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import uk.org.rivernile.android.bustracker.core.busstops.FakeStopDetails
 import uk.org.rivernile.android.bustracker.core.busstops.FakeStopLocation
@@ -106,6 +107,21 @@ class UiStopDetailsKtTest {
             LatLng(1.1, 2.2),
             result
         )
+    }
+
+    @Test
+    fun toCameraPositionMapsToCameraPosition() {
+        val result = UiLatLon(
+            latitude = 1.1,
+            longitude = 2.2
+        ).toCameraPosition()
+        val expected = CameraPosition
+            .fromLatLngZoom(
+                LatLng(1.1, 2.2),
+                GOOGLE_MAP_ZOOM_LEVEL
+            )
+
+        assertEquals(expected, result)
     }
 
     private val stopDetails get() = FakeStopDetails(

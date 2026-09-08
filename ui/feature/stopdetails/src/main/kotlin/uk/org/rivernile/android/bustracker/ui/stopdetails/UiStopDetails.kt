@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.stopdetails
 
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import uk.org.rivernile.android.bustracker.core.busstops.StopDetails
 import uk.org.rivernile.android.bustracker.core.busstops.StopLocation
@@ -147,6 +148,19 @@ internal fun StopDetails.toUiStopDetails(
  * @return This [UiLatLon] as a [LatLng].
  */
 internal fun UiLatLon.toGoogleMapsLatLng() = LatLng(latitude, longitude)
+
+internal const val GOOGLE_MAP_ZOOM_LEVEL = 17f
+
+/**
+ * Maps this [UiLatLon] to a [CameraPosition].
+ *
+ * @return This [UiLatLon] as a [CameraPosition].
+ */
+internal fun UiLatLon.toCameraPosition() = CameraPosition
+    .fromLatLngZoom(
+        toGoogleMapsLatLng(),
+        GOOGLE_MAP_ZOOM_LEVEL
+    )
 
 private fun StopLocation.toUiLatLon(): UiLatLon {
     return UiLatLon(

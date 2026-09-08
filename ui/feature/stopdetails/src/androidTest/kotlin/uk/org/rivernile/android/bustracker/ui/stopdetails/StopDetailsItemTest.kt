@@ -27,9 +27,11 @@
 package uk.org.rivernile.android.bustracker.ui.stopdetails
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertTextEquals
@@ -549,7 +551,9 @@ class StopDetailsItemTest {
         CompositionLocalProvider(
             LocalNumberFormatter provides rememberNumberFormatter(
                 maximumFractionDigits = 2
-            )
+            ),
+            // This is set so the real Google Map is not used during the test.
+            LocalInspectionMode provides true
         ) {
             StopDetailsItem(
                 stopDetails = stopDetails,
@@ -557,6 +561,7 @@ class StopDetailsItemTest {
                 onGrantPermissionClick = onGrantPermissionClick,
                 onTurnOnLocationClick = onTurnOnLocationClick,
                 modifier = modifier
+                    .fillMaxWidth()
             )
         }
     }

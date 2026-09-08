@@ -67,6 +67,7 @@ dependencies {
 
     // AndroidX
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.androidx.core)
     implementation(libs.androidx.fragment.compose)
     implementation(libs.androidx.viewmodel.compose)
@@ -76,6 +77,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.material.compose)
+    implementation(libs.material.compose.adaptive)
 
     // Kotlin immutable collections
     implementation(libs.kotlin.immutable.collections)
