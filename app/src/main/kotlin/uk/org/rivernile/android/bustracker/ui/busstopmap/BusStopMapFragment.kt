@@ -680,7 +680,7 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
      * @param stopIdentifier The stop to show the marker bubble for.
      */
     private fun handleShowMapMarkerInfoWindow(stopIdentifier: StopIdentifier?) {
-        val markers = clusterManager?.markerCollection?.markers ?: return
+        val markers = clusterManager?.markerCollection?.getMarkers() ?: return
 
         stopIdentifier?.let { sc ->
             markers.firstOrNull {
