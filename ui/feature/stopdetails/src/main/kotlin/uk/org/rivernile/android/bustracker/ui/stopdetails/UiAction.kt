@@ -56,4 +56,9 @@ internal sealed interface UiAction {
      * Show the system location settings.
      */
     data object ShowLocationSettings : UiAction
+
+    /**
+     * Show the application permission settings.
+     */
+    data object ShowAppPermissionsSettings : UiAction
 }

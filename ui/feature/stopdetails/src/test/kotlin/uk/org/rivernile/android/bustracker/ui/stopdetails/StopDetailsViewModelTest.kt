@@ -129,22 +129,47 @@ class StopDetailsViewModelTest {
     }
 
     @Test
-    fun onGrantPermissionClickedPerformsRequestLocationPermissionsAction() = runTest {
-        val actionTracker = ItemTracker<UiAction?>()
-        val viewModel = createViewModel(
-            state = FakeState(
-                onActionFlow = ::emptyFlow,
-                onSetAction = actionTracker
+    fun onGrantPermissionClickedPerformsRequestLocationPermissionsActionWhenPermsNotAskedFor() =
+        runTest {
+            var onAskedForPermissionsInvocationCounter = 0
+            val actionTracker = ItemTracker<UiAction?>()
+            val viewModel = createViewModel(
+                state = FakeState(
+                    onActionFlow = ::emptyFlow,
+                    onSetAction = actionTracker,
+                    onGetAskedForPermissions = { false },
+                    onAskedForPermissions = { onAskedForPermissionsInvocationCounter++ }
+                )
             )
-        )
 
-        viewModel.onGrantPermissionClicked()
+            viewModel.onGrantPermissionClicked()
 
-        assertEquals(
-            listOf(UiAction.RequestLocationPermissions),
-            actionTracker.items
-        )
-    }
+            assertEquals(
+                listOf(UiAction.RequestLocationPermissions),
+                actionTracker.items
+            )
+            assertEquals(1, onAskedForPermissionsInvocationCounter)
+        }
+
+    @Test
+    fun onGrantPermissionClickedPerformsShowAppPermissionsSettingsActionWhenPermsAskedFor() =
+        runTest {
+            val actionTracker = ItemTracker<UiAction?>()
+            val viewModel = createViewModel(
+                state = FakeState(
+                    onActionFlow = ::emptyFlow,
+                    onSetAction = actionTracker,
+                    onGetAskedForPermissions = { true }
+                )
+            )
+
+            viewModel.onGrantPermissionClicked()
+
+            assertEquals(
+                listOf(UiAction.ShowAppPermissionsSettings),
+                actionTracker.items
+            )
+        }
 
     @Test
     fun onTurnOnLocationClickedPerformsShowLocationSettingsAction() = runTest {

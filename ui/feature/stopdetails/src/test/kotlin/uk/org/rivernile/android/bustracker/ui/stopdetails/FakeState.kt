@@ -43,7 +43,10 @@ internal class FakeState(
     private val onPermissionsStateFlow: () -> Flow<PermissionsState?> =
         { throw NotImplementedError() },
     private val onGetPermissionsState: () -> PermissionsState? = { throw NotImplementedError() },
-    private val onSetPermissionsState: (PermissionsState?) -> Unit = { throw NotImplementedError() }
+    private val onSetPermissionsState: (PermissionsState?) -> Unit =
+        { throw NotImplementedError() },
+    private val onGetAskedForPermissions: () -> Boolean = { throw NotImplementedError() },
+    private val onAskedForPermissions: () -> Unit = { throw NotImplementedError() }
 ) : State {
 
     override val actionFlow get() = onActionFlow()
@@ -69,4 +72,10 @@ internal class FakeState(
         set(value) {
             onSetPermissionsState(value)
         }
+
+    override val askedForPermissions get() = onGetAskedForPermissions()
+
+    override fun askedForPermissions() {
+        onAskedForPermissions()
+    }
 }

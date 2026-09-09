@@ -39,4 +39,6 @@
     <string name="stopdetails_item_unknown_operator">Unknown Operator</string>
     <string name="stopdetails_item_service_unknown_description">(Description unknown)</string>
     <string name="stopdetails_no_services">No known services for this stop</string>
+    <string name="stopdetails_error_no_location_settings">System location settings does not exist on this device</string>
+    <string name="stopdetails_error_no_app_permission_settings">Unable to show app permission settings</string>
 </resources>

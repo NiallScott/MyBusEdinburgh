@@ -87,7 +87,12 @@ internal class StopDetailsViewModel @Inject constructor(
      * This is called when the grant permissions button has been clicked.
      */
     fun onGrantPermissionClicked() {
-        state.action = UiAction.RequestLocationPermissions
+        if (state.askedForPermissions) {
+            state.action = UiAction.ShowAppPermissionsSettings
+        } else {
+            state.action = UiAction.RequestLocationPermissions
+            state.askedForPermissions()
+        }
     }
 
     /**

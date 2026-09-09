@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.ui.bustimes
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.view.Menu
@@ -205,6 +206,19 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
             Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .let(this::startActivity)
+            true
+        } catch (e: ActivityNotFoundException) {
+            exceptionLogger.log(e)
+            false
+        }
+    }
+
+    override fun onShowAppPermissionSettings(): Boolean {
+        return try {
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .setData(Uri.fromParts("package", packageName, null))
+                .let(::startActivity)
             true
         } catch (e: ActivityNotFoundException) {
             exceptionLogger.log(e)

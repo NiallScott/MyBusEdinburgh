@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.stopdetails
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
@@ -130,7 +131,42 @@ class RealStateTest {
         }
     }
 
-    private fun createState(): RealState {
-        return RealState()
+    @Test
+    fun askedForPermissionsDefaultsToFalse() = runTest {
+        val state = createState()
+        val result = state.askedForPermissions
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun askedForPermissionsIsTrueWhenAskedForPermissions() = runTest {
+        val state = createState()
+        state.askedForPermissions()
+        val result = state.askedForPermissions
+
+        assertTrue(result)
+    }
+
+    @Test
+    fun askedForPermissionsUsesValueInSavedState() = runTest {
+        val state = createState(
+            savedState = SavedStateHandle(
+                initialState = mapOf(
+                    STATE_ASKED_FOR_PERMISSIONS to true
+                )
+            )
+        )
+        val result = state.askedForPermissions
+
+        assertTrue(result)
+    }
+
+    private fun createState(
+        savedState: SavedStateHandle = SavedStateHandle()
+    ): RealState {
+        return RealState(
+            savedState = savedState
+        )
     }
 }

@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.stopdetails
 
+import androidx.lifecycle.SavedStateHandle
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -71,10 +72,24 @@ internal interface State {
      * The current [PermissionsState].
      */
     var permissionsState: PermissionsState?
+
+    /**
+     * Have we asked for permissions?
+     */
+    val askedForPermissions: Boolean
+
+    /**
+     * This is called when we have asked for permissions.
+     */
+    fun askedForPermissions()
 }
 
+internal const val STATE_ASKED_FOR_PERMISSIONS = "askedForPermissions"
+
 @ViewModelScoped
-internal class RealState @Inject constructor() : State {
+internal class RealState @Inject constructor(
+    private val savedState: SavedStateHandle
+) : State {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val actionFlow get() = _actionFlow.asFlow()
@@ -102,6 +117,16 @@ internal class RealState @Inject constructor() : State {
         set(value) {
             _permissionsFlow.value = value
         }
+
+    override var askedForPermissions: Boolean
+        get() = savedState[STATE_ASKED_FOR_PERMISSIONS] ?: false
+        private set(value) {
+            savedState[STATE_ASKED_FOR_PERMISSIONS] = value
+        }
+
+    override fun askedForPermissions() {
+        askedForPermissions = true
+    }
 
     private val _actionFlow = MutableStateFlow<UiAction?>(null)
 

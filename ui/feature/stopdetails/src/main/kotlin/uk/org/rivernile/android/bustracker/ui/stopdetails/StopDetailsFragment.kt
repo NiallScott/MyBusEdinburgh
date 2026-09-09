@@ -33,6 +33,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -49,6 +50,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toParcelableStopIdentifier
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAppPermissionSettingsListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusStopMapWithStopIdentifierListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowSystemLocationPreferencesListener
 import uk.org.rivernile.android.bustracker.ui.formatters.LocalNumberFormatter
@@ -111,6 +113,7 @@ public class StopDetailsFragment : Fragment() {
                     onShowOnMap = ::handleOnShowOnMap,
                     onRequestLocationPermissions = ::handleOnRequestLocationPermissions,
                     onShowLocationSettings = ::handleOnShowLocationSettings,
+                    onShowAppPermissionSettings = ::handleOnShowAppPermissionSettings,
                     modifier = Modifier
                         .consumeWindowInsets(
                             WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
@@ -155,7 +158,31 @@ public class StopDetailsFragment : Fragment() {
     }
 
     private fun handleOnShowLocationSettings() {
-        callbacks?.onShowSystemLocationPreferences()
+        callbacks?.let { cb ->
+            if (!cb.onShowSystemLocationPreferences()) {
+                Toast
+                    .makeText(
+                        requireContext(),
+                        R.string.stopdetails_error_no_location_settings,
+                        Toast.LENGTH_SHORT
+                    )
+                    .show()
+            }
+        }
+    }
+
+    private fun handleOnShowAppPermissionSettings() {
+        callbacks?.let { cb ->
+            if (!cb.onShowAppPermissionSettings()) {
+                Toast
+                    .makeText(
+                        requireContext(),
+                        R.string.stopdetails_error_no_app_permission_settings,
+                        Toast.LENGTH_SHORT
+                    )
+                    .show()
+            }
+        }
     }
 
     private fun updatePermissions() {
@@ -198,6 +225,7 @@ public class StopDetailsFragment : Fragment() {
      * Activities which host this [Fragment] should implement this interface.
      */
     public interface Callbacks :
+        OnShowAppPermissionSettingsListener,
         OnShowBusStopMapWithStopIdentifierListener,
         OnShowSystemLocationPreferencesListener
 }

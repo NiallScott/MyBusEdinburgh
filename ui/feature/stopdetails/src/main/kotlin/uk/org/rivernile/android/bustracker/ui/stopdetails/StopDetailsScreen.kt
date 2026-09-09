@@ -121,6 +121,7 @@ internal fun StopDetailsScreen(
     onShowOnMap: (StopIdentifier) -> Unit,
     onRequestLocationPermissions: () -> Unit,
     onShowLocationSettings: () -> Unit,
+    onShowAppPermissionSettings: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: StopDetailsViewModel = viewModel()
 ) {
@@ -135,6 +136,7 @@ internal fun StopDetailsScreen(
         onShowOnMap = onShowOnMap,
         onRequestLocationPermissions = onRequestLocationPermissions,
         onShowLocationSettings = onShowLocationSettings,
+        onShowAppPermissionSettings = onShowAppPermissionSettings,
         modifier = modifier
     )
 }
@@ -165,6 +167,7 @@ internal fun StopDetailsScreenWithState(
     onShowOnMap: (StopIdentifier) -> Unit,
     onRequestLocationPermissions: () -> Unit,
     onShowLocationSettings: () -> Unit,
+    onShowAppPermissionSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -208,6 +211,7 @@ internal fun StopDetailsScreenWithState(
             onShowOnMap = onShowOnMap,
             onRequestLocationPermissions = onRequestLocationPermissions,
             onShowLocationSettings = onShowLocationSettings,
+            onShowAppPermissionSettings = onShowAppPermissionSettings,
             onActionLaunched = onActionLaunched
         )
     }
@@ -338,13 +342,15 @@ private fun LaunchAction(
     onActionLaunched: () -> Unit,
     onShowOnMap: (StopIdentifier) -> Unit,
     onRequestLocationPermissions: () -> Unit,
-    onShowLocationSettings: () -> Unit
+    onShowLocationSettings: () -> Unit,
+    onShowAppPermissionSettings: () -> Unit
 ) {
     SideEffect(action) {
         when (action) {
             is UiAction.ShowOnMap -> onShowOnMap(action.stopIdentifier)
             is UiAction.RequestLocationPermissions -> onRequestLocationPermissions()
             is UiAction.ShowLocationSettings -> onShowLocationSettings()
+            is UiAction.ShowAppPermissionsSettings -> onShowAppPermissionSettings()
         }
 
         onActionLaunched()
@@ -416,6 +422,7 @@ private fun StopDetailsScreenPreview(
                 onShowOnMap = { },
                 onRequestLocationPermissions = { },
                 onShowLocationSettings = { },
+                onShowAppPermissionSettings = { },
                 modifier = Modifier.fillMaxSize()
             )
         }

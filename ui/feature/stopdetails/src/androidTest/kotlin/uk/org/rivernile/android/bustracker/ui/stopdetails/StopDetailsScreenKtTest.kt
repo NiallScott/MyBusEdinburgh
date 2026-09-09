@@ -227,6 +227,27 @@ class StopDetailsScreenKtTest {
         assertEquals(1, actionLaunchedCounter.count)
     }
 
+    @Test
+    fun showAppPermissionsSettingsActionCallsLambdaThenMarksActionAsLaunched() {
+        val actionCounter = InvocationCounter()
+        val actionLaunchedCounter = InvocationCounter()
+        composeTestRule.setContent {
+            MyBusTheme {
+                StopDetailsScreenWithStateWithDefaults(
+                    state = UiState(
+                        content = UiContent.NoStopDetailsError,
+                        action = UiAction.ShowAppPermissionsSettings
+                    ),
+                    onShowAppPermissionSettings = actionCounter,
+                    onActionLaunched = actionLaunchedCounter
+                )
+            }
+        }
+
+        assertEquals(1, actionCounter.count)
+        assertEquals(1, actionLaunchedCounter.count)
+    }
+
     @Composable
     private fun StopDetailsScreenWithStateWithDefaults(
         state: UiState,
@@ -237,7 +258,8 @@ class StopDetailsScreenKtTest {
         onActionLaunched: () -> Unit = { throw NotImplementedError() },
         onShowOnMap: (StopIdentifier) -> Unit = { throw NotImplementedError() },
         onRequestLocationPermissions: () -> Unit = { throw NotImplementedError() },
-        onShowLocationSettings: () -> Unit = { throw NotImplementedError() }
+        onShowLocationSettings: () -> Unit = { throw NotImplementedError() },
+        onShowAppPermissionSettings: () -> Unit = { throw NotImplementedError() }
     ) {
         StopDetailsScreenWithState(
             state = state,
@@ -248,6 +270,7 @@ class StopDetailsScreenKtTest {
             onShowOnMap = onShowOnMap,
             onRequestLocationPermissions = onRequestLocationPermissions,
             onShowLocationSettings = onShowLocationSettings,
+            onShowAppPermissionSettings = onShowAppPermissionSettings,
             modifier = modifier
         )
     }
