@@ -563,14 +563,30 @@ private fun StopDistanceWithDistanceValue(
 ) {
     ListLine2Text(
         text = when (distance) {
-            is UiStopDistance.Distance.Meters -> stringResource(
-                R.string.stopdetails_stop_distance_format_ms,
-                LocalNumberFormatter.current.format(distance.distance)
-            )
-            is UiStopDistance.Distance.Kilometers -> stringResource(
-                R.string.stopdetails_stop_distance_format_kms,
-                LocalNumberFormatter.current.format(distance.distance)
-            )
+            is UiStopDistance.Distance.Meters -> {
+                val stringResId = if (distance.isLowAccuracy) {
+                    R.string.stopdetails_stop_distance_format_ms_low_accuracy
+                } else {
+                    R.string.stopdetails_stop_distance_format_ms
+                }
+
+                stringResource(
+                    stringResId,
+                    LocalNumberFormatter.current.format(distance.distance)
+                )
+            }
+            is UiStopDistance.Distance.Kilometers -> {
+                val stringResId = if (distance.isLowAccuracy) {
+                    R.string.stopdetails_stop_distance_format_kms_low_accuracy
+                } else {
+                    R.string.stopdetails_stop_distance_format_kms
+                }
+
+                stringResource(
+                    stringResId,
+                    LocalNumberFormatter.current.format(distance.distance)
+                )
+            }
         },
         modifier = modifier
     )
@@ -735,7 +751,8 @@ private class UiStopDetailsProvider : PreviewParameterProvider<UiStopDetails> {
             ),
             orientation = StopOrientation.NORTH_EAST,
             stopDistance = UiStopDistance.Distance.Meters(
-                distance = 123
+                distance = 123,
+                isLowAccuracy = false
             ),
             isMapShown = true
         ),
@@ -748,7 +765,8 @@ private class UiStopDetailsProvider : PreviewParameterProvider<UiStopDetails> {
             ),
             orientation = StopOrientation.NORTH_EAST,
             stopDistance = UiStopDistance.Distance.Kilometers(
-                distance = 1.2345f
+                distance = 1.2345f,
+                isLowAccuracy = true
             ),
             isMapShown = true
         )

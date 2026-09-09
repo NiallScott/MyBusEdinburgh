@@ -122,7 +122,8 @@ class RealUiContentRetrieverTest {
                             ),
                             orientation = StopOrientation.NORTH_EAST,
                             stopDistance = UiStopDistance.Distance.Meters(
-                                distance = 123
+                                distance = 123,
+                                isLowAccuracy = false
                             ),
                             isMapShown = true
                         )
@@ -167,7 +168,8 @@ class RealUiContentRetrieverTest {
                         ),
                         orientation = StopOrientation.NORTH_EAST,
                         stopDistance = UiStopDistance.Distance.Meters(
-                            distance = 123
+                            distance = 123,
+                            isLowAccuracy = false
                         ),
                         isMapShown = true
                     ),

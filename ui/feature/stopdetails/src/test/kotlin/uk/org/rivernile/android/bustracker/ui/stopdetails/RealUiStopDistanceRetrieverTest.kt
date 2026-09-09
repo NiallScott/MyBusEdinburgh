@@ -134,7 +134,7 @@ class RealUiStopDistanceRetrieverTest {
     }
 
     @Test
-    fun getUiStopDistanceFlowEmitsKilometersDistance() = runTest {
+    fun getUiStopDistanceFlowEmitsKilometersDistanceWithHighAccuracy() = runTest {
         val retriever = createRetriever(
             state = FakeState(
                 onIsResumedFlow = { flowOf(true) },
@@ -155,7 +155,8 @@ class RealUiStopDistanceRetrieverTest {
                                 latLon = LatLon(
                                     latitude = 3.3,
                                     longitude = 4.4
-                                )
+                                ),
+                                horizontalAccuracy = 19.999f
                             )
                         )
                     )
@@ -183,7 +184,8 @@ class RealUiStopDistanceRetrieverTest {
         retriever.getUiStopDistanceFlow(stopLocation).test {
             assertEquals(
                 UiStopDistance.Distance.Kilometers(
-                    distance = 1.0f
+                    distance = 1.0f,
+                    isLowAccuracy = false
                 ),
                 awaitItem()
             )
@@ -192,7 +194,7 @@ class RealUiStopDistanceRetrieverTest {
     }
 
     @Test
-    fun getUiStopDistanceFlowEmitsMetersDistance() = runTest {
+    fun getUiStopDistanceFlowEmitsKilometersDistanceWithLowAccuracy() = runTest {
         val retriever = createRetriever(
             state = FakeState(
                 onIsResumedFlow = { flowOf(true) },
@@ -213,7 +215,128 @@ class RealUiStopDistanceRetrieverTest {
                                 latLon = LatLon(
                                     latitude = 3.3,
                                     longitude = 4.4
-                                )
+                                ),
+                                horizontalAccuracy = 20f
+                            )
+                        )
+                    )
+                },
+                onDistanceBetween = { first, second ->
+                    assertEquals(
+                        LatLon(
+                            latitude = 1.1,
+                            longitude = 2.2
+                        ),
+                        first
+                    )
+                    assertEquals(
+                        LatLon(
+                            latitude = 3.3,
+                            longitude = 4.4
+                        ),
+                        second
+                    )
+                    1000f
+                }
+            )
+        )
+
+        retriever.getUiStopDistanceFlow(stopLocation).test {
+            assertEquals(
+                UiStopDistance.Distance.Kilometers(
+                    distance = 1.0f,
+                    isLowAccuracy = true
+                ),
+                awaitItem()
+            )
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun getUiStopDistanceFlowEmitsKilometersDistanceWithLowAccuracyWhenAccuracyUnknown() = runTest {
+        val retriever = createRetriever(
+            state = FakeState(
+                onIsResumedFlow = { flowOf(true) },
+                onPermissionsStateFlow = {
+                    flowOf(
+                        PermissionsState(
+                            fineLocationPermission = PermissionState.GRANTED,
+                            coarseLocationPermission = PermissionState.GRANTED
+                        )
+                    )
+                }
+            ),
+            locationRepository = FakeLocationRepository(
+                onLocationUpdatesFlow = {
+                    flowOf(
+                        LocationUpdate.Update(
+                            location = Location(
+                                latLon = LatLon(
+                                    latitude = 3.3,
+                                    longitude = 4.4
+                                ),
+                                horizontalAccuracy = null
+                            )
+                        )
+                    )
+                },
+                onDistanceBetween = { first, second ->
+                    assertEquals(
+                        LatLon(
+                            latitude = 1.1,
+                            longitude = 2.2
+                        ),
+                        first
+                    )
+                    assertEquals(
+                        LatLon(
+                            latitude = 3.3,
+                            longitude = 4.4
+                        ),
+                        second
+                    )
+                    1000f
+                }
+            )
+        )
+
+        retriever.getUiStopDistanceFlow(stopLocation).test {
+            assertEquals(
+                UiStopDistance.Distance.Kilometers(
+                    distance = 1.0f,
+                    isLowAccuracy = true
+                ),
+                awaitItem()
+            )
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun getUiStopDistanceFlowEmitsMetersDistanceWithHighAccuracy() = runTest {
+        val retriever = createRetriever(
+            state = FakeState(
+                onIsResumedFlow = { flowOf(true) },
+                onPermissionsStateFlow = {
+                    flowOf(
+                        PermissionsState(
+                            fineLocationPermission = PermissionState.GRANTED,
+                            coarseLocationPermission = PermissionState.GRANTED
+                        )
+                    )
+                }
+            ),
+            locationRepository = FakeLocationRepository(
+                onLocationUpdatesFlow = {
+                    flowOf(
+                        LocationUpdate.Update(
+                            location = Location(
+                                latLon = LatLon(
+                                    latitude = 3.3,
+                                    longitude = 4.4
+                                ),
+                                horizontalAccuracy = 19.999f
                             )
                         )
                     )
@@ -241,7 +364,128 @@ class RealUiStopDistanceRetrieverTest {
         retriever.getUiStopDistanceFlow(stopLocation).test {
             assertEquals(
                 UiStopDistance.Distance.Meters(
-                    distance = 999
+                    distance = 999,
+                    isLowAccuracy = false
+                ),
+                awaitItem()
+            )
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun getUiStopDistanceFlowEmitsMetersDistanceWithLowAccuracy() = runTest {
+        val retriever = createRetriever(
+            state = FakeState(
+                onIsResumedFlow = { flowOf(true) },
+                onPermissionsStateFlow = {
+                    flowOf(
+                        PermissionsState(
+                            fineLocationPermission = PermissionState.GRANTED,
+                            coarseLocationPermission = PermissionState.GRANTED
+                        )
+                    )
+                }
+            ),
+            locationRepository = FakeLocationRepository(
+                onLocationUpdatesFlow = {
+                    flowOf(
+                        LocationUpdate.Update(
+                            location = Location(
+                                latLon = LatLon(
+                                    latitude = 3.3,
+                                    longitude = 4.4
+                                ),
+                                horizontalAccuracy = 20f
+                            )
+                        )
+                    )
+                },
+                onDistanceBetween = { first, second ->
+                    assertEquals(
+                        LatLon(
+                            latitude = 1.1,
+                            longitude = 2.2
+                        ),
+                        first
+                    )
+                    assertEquals(
+                        LatLon(
+                            latitude = 3.3,
+                            longitude = 4.4
+                        ),
+                        second
+                    )
+                    999.99f
+                }
+            )
+        )
+
+        retriever.getUiStopDistanceFlow(stopLocation).test {
+            assertEquals(
+                UiStopDistance.Distance.Meters(
+                    distance = 999,
+                    isLowAccuracy = true
+                ),
+                awaitItem()
+            )
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun getUiStopDistanceFlowEmitsMetersDistanceWithLowAccuracyWhenAccuracyIsUnknown() = runTest {
+        val retriever = createRetriever(
+            state = FakeState(
+                onIsResumedFlow = { flowOf(true) },
+                onPermissionsStateFlow = {
+                    flowOf(
+                        PermissionsState(
+                            fineLocationPermission = PermissionState.GRANTED,
+                            coarseLocationPermission = PermissionState.GRANTED
+                        )
+                    )
+                }
+            ),
+            locationRepository = FakeLocationRepository(
+                onLocationUpdatesFlow = {
+                    flowOf(
+                        LocationUpdate.Update(
+                            location = Location(
+                                latLon = LatLon(
+                                    latitude = 3.3,
+                                    longitude = 4.4
+                                ),
+                                horizontalAccuracy = null
+                            )
+                        )
+                    )
+                },
+                onDistanceBetween = { first, second ->
+                    assertEquals(
+                        LatLon(
+                            latitude = 1.1,
+                            longitude = 2.2
+                        ),
+                        first
+                    )
+                    assertEquals(
+                        LatLon(
+                            latitude = 3.3,
+                            longitude = 4.4
+                        ),
+                        second
+                    )
+                    999.99f
+                }
+            )
+        )
+
+        retriever.getUiStopDistanceFlow(stopLocation).test {
+            assertEquals(
+                UiStopDistance.Distance.Meters(
+                    distance = 999,
+                    isLowAccuracy = true
                 ),
                 awaitItem()
             )

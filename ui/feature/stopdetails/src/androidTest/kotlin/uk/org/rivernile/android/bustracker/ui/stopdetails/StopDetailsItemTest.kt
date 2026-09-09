@@ -433,7 +433,7 @@ class StopDetailsItemTest {
     }
 
     @Test
-    fun stopDetailsItemPopulatesDistanceItemWithDistanceInMeters() {
+    fun stopDetailsItemPopulatesDistanceItemWithDistanceInMetersWithHighAccuracy() {
         composeTestRule.setContent {
             MyBusTheme {
                 StopDetailsItemWithDefaults(
@@ -446,7 +446,8 @@ class StopDetailsItemTest {
                         ),
                         orientation = StopOrientation.NORTH_EAST,
                         stopDistance = UiStopDistance.Distance.Meters(
-                            distance = 123
+                            distance = 123,
+                            isLowAccuracy = false
                         ),
                         isMapShown = true
                     )
@@ -487,7 +488,62 @@ class StopDetailsItemTest {
     }
 
     @Test
-    fun stopDetailsItemPopulatesDistanceItemWithDistanceInKilometers() {
+    fun stopDetailsItemPopulatesDistanceItemWithDistanceInMetersWithLowAccuracy() {
+        composeTestRule.setContent {
+            MyBusTheme {
+                StopDetailsItemWithDefaults(
+                    stopDetails = UiStopDetails(
+                        naptanCode = "123456".toNaptanStopIdentifier(),
+                        atcoCode = "ATCO987654".toAtcoStopIdentifier(),
+                        latLon = UiLatLon(
+                            latitude = 1.1,
+                            longitude = 2.2
+                        ),
+                        orientation = StopOrientation.NORTH_EAST,
+                        stopDistance = UiStopDistance.Distance.Meters(
+                            distance = 123,
+                            isLowAccuracy = true
+                        ),
+                        isMapShown = true
+                    )
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_ITEM_DISTANCE)
+            .apply {
+                assertExists()
+
+                onChildAt(0)
+                    .assertTextEquals(
+                        composeTestRule
+                            .activity
+                            .getString(R.string.stopdetails_stop_distance_label)
+                    )
+
+                onChildAt(1)
+                    .apply {
+                        assertTextEquals(
+                            composeTestRule
+                                .activity
+                                .getString(
+                                    R.string.stopdetails_stop_distance_format_ms_low_accuracy,
+                                    NumberFormat
+                                        .getInstance()
+                                        .apply {
+                                            maximumFractionDigits = 2
+                                        }
+                                        .format(123)
+                                )
+                        )
+                        assertHasNoClickAction()
+                    }
+            }
+    }
+
+    @Test
+    fun stopDetailsItemPopulatesDistanceItemWithDistanceInKilometersWithHighAccuracy() {
         composeTestRule.setContent {
             MyBusTheme {
                 StopDetailsItemWithDefaults(
@@ -500,7 +556,8 @@ class StopDetailsItemTest {
                         ),
                         orientation = StopOrientation.NORTH_EAST,
                         stopDistance = UiStopDistance.Distance.Kilometers(
-                            distance = 1.23456f
+                            distance = 1.23456f,
+                            isLowAccuracy = false
                         ),
                         isMapShown = true
                     )
@@ -527,6 +584,61 @@ class StopDetailsItemTest {
                                 .activity
                                 .getString(
                                     R.string.stopdetails_stop_distance_format_kms,
+                                    NumberFormat
+                                        .getInstance()
+                                        .apply {
+                                            maximumFractionDigits = 2
+                                        }
+                                        .format(1.23456f)
+                                )
+                        )
+                        assertHasNoClickAction()
+                    }
+            }
+    }
+
+    @Test
+    fun stopDetailsItemPopulatesDistanceItemWithDistanceInKilometersWithLowAccuracy() {
+        composeTestRule.setContent {
+            MyBusTheme {
+                StopDetailsItemWithDefaults(
+                    stopDetails = UiStopDetails(
+                        naptanCode = "123456".toNaptanStopIdentifier(),
+                        atcoCode = "ATCO987654".toAtcoStopIdentifier(),
+                        latLon = UiLatLon(
+                            latitude = 1.1,
+                            longitude = 2.2
+                        ),
+                        orientation = StopOrientation.NORTH_EAST,
+                        stopDistance = UiStopDistance.Distance.Kilometers(
+                            distance = 1.23456f,
+                            isLowAccuracy = true
+                        ),
+                        isMapShown = true
+                    )
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_ITEM_DISTANCE)
+            .apply {
+                assertExists()
+
+                onChildAt(0)
+                    .assertTextEquals(
+                        composeTestRule
+                            .activity
+                            .getString(R.string.stopdetails_stop_distance_label)
+                    )
+
+                onChildAt(1)
+                    .apply {
+                        assertTextEquals(
+                            composeTestRule
+                                .activity
+                                .getString(
+                                    R.string.stopdetails_stop_distance_format_kms_low_accuracy,
                                     NumberFormat
                                         .getInstance()
                                         .apply {

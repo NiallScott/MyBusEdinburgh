@@ -36,7 +36,8 @@ import android.location.Location as AndroidLocation
  */
 internal fun AndroidLocation.toLocation(): Location {
     return Location(
-        latLon = toLatLon()
+        latLon = toLatLon(),
+        horizontalAccuracy = if (hasAccuracy()) accuracy else null
     )
 }
 

@@ -176,7 +176,8 @@ class AndroidLocationRepositoryTest {
                                 latLon = LatLon(
                                     latitude = 1.1,
                                     longitude = 2.2
-                                )
+                                ),
+                                horizontalAccuracy = 1.23f
                             )
                         ),
                         LocationUpdate.Update(
@@ -184,7 +185,8 @@ class AndroidLocationRepositoryTest {
                                 latLon = LatLon(
                                     latitude = 3.3,
                                     longitude = 4.4
-                                )
+                                ),
+                                horizontalAccuracy = null
                             )
                         )
                     )
@@ -200,7 +202,8 @@ class AndroidLocationRepositoryTest {
                         latLon = LatLon(
                             latitude = 1.1,
                             longitude = 2.2
-                        )
+                        ),
+                        horizontalAccuracy = 1.23f
                     )
                 ),
                 awaitItem()
@@ -211,7 +214,8 @@ class AndroidLocationRepositoryTest {
                         latLon = LatLon(
                             latitude = 3.3,
                             longitude = 4.4
-                        )
+                        ),
+                        horizontalAccuracy = null
                     )
                 ),
                 awaitItem()

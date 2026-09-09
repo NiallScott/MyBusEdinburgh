@@ -66,6 +66,7 @@ internal interface UiStopDistanceRetriever {
 }
 
 internal const val AWAIT_LOCATION_TIMEOUT_SECS = 10
+private const val LOW_ACCURACY_CUTOFF_METERS = 20f
 
 internal class RealUiStopDistanceRetriever @Inject constructor(
     private val state: State,
@@ -128,22 +129,31 @@ internal class RealUiStopDistanceRetriever @Inject constructor(
                 emit(UiStopDistance.LocationUnknown)
             }
             is LocationUpdate.Update -> {
+                val location = locationUpdate.location
                 val distance = locationRepository
                     .distanceBetween(
                         first = stopLocation.toLatLon(),
-                        second = locationUpdate.location.latLon
+                        second = location.latLon
                     )
+                val isLowAccuracy = location
+                    .horizontalAccuracy
+                    ?.let {
+                        it >= LOW_ACCURACY_CUTOFF_METERS
+                    }
+                    ?: true
 
                 if (distance >= 1000f) {
                     flowOf(
                         UiStopDistance.Distance.Kilometers(
-                            distance = distance / 1000f
+                            distance = distance / 1000f,
+                            isLowAccuracy = isLowAccuracy
                         )
                     )
                 } else {
                     flowOf(
                         UiStopDistance.Distance.Meters(
-                            distance = distance.toInt()
+                            distance = distance.toInt(),
+                            isLowAccuracy = isLowAccuracy
                         )
                     )
                 }

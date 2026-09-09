@@ -34,9 +34,11 @@ package uk.org.rivernile.android.bustracker.core.location
  * and when further fields are required.
  *
  * @property latLon The lat/lon coordinates which makes up this location.
+ * @property horizontalAccuracy The horizontal accuracy of the location in meters - or `null` if
+ * accuracy is unknown.
  * @author Niall Scott
  */
-@JvmInline
-public value class Location(
-    public val latLon: LatLon
+public data class Location(
+    val latLon: LatLon,
+    val horizontalAccuracy: Float?
 )

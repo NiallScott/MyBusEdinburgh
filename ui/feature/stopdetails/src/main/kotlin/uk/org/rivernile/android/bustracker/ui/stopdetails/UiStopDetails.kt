@@ -103,23 +103,28 @@ internal sealed interface UiStopDistance {
     sealed interface Distance : UiStopDistance {
 
         /**
+         * Is the distance, derived from the location, low accuracy?
+         */
+        val isLowAccuracy: Boolean
+
+        /**
          * The distance is to be represented in meters.
          *
          * @property distance The number of meters between the device and stop.
          */
-        @JvmInline
-        value class Meters(
-            val distance: Int
+        data class Meters(
+            val distance: Int,
+            override val isLowAccuracy: Boolean
         ) : Distance
 
         /**
          * The distance is to be represented in kilometers.
          *
-         * @param distance The number of kilometers between the device and stop.
+         * @property distance The number of kilometers between the device and stop.
          */
-        @JvmInline
-        value class Kilometers(
-            val distance: Float
+        data class Kilometers(
+            val distance: Float,
+            override val isLowAccuracy: Boolean
         ) : Distance
     }
 }

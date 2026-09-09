@@ -35,7 +35,9 @@
     <string name="stopdetails_stop_distance_obtaining_location">Determining location…</string>
     <string name="stopdetails_stop_distance_unknown">Device location unknown</string>
     <string name="stopdetails_stop_distance_format_ms">%s m</string>
+    <string name="stopdetails_stop_distance_format_ms_low_accuracy">%s m (low accuracy)</string>
     <string name="stopdetails_stop_distance_format_kms">%s km</string>
+    <string name="stopdetails_stop_distance_format_kms_low_accuracy">%s km (low accuracy)</string>
     <string name="stopdetails_item_unknown_operator">Unknown Operator</string>
     <string name="stopdetails_item_service_unknown_description">(Description unknown)</string>
     <string name="stopdetails_no_services">No known services for this stop</string>

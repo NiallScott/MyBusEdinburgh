@@ -186,7 +186,8 @@ class RealNearestStopsRetrieverTest {
                                 latLon = LatLon(
                                     latitude = 1.1,
                                     longitude = 2.2
-                                )
+                                ),
+                                horizontalAccuracy = 1.23f
                             )
                         )
                     )
@@ -244,7 +245,8 @@ class RealNearestStopsRetrieverTest {
                                 latLon = LatLon(
                                     latitude = 1.1,
                                     longitude = 2.2
-                                )
+                                ),
+                                horizontalAccuracy = 1.23f
                             )
                         )
                     )
@@ -302,7 +304,8 @@ class RealNearestStopsRetrieverTest {
                                 latLon = LatLon(
                                     latitude = 1.1,
                                     longitude = 2.2
-                                )
+                                ),
+                                horizontalAccuracy = 1.23f
                             )
                         )
                     )
@@ -377,7 +380,8 @@ class RealNearestStopsRetrieverTest {
                                 latLon = LatLon(
                                     latitude = 1.1,
                                     longitude = 2.2
-                                )
+                                ),
+                                horizontalAccuracy = 1.23f
                             )
                         )
                     )
@@ -452,7 +456,8 @@ class RealNearestStopsRetrieverTest {
                                 latLon = LatLon(
                                     latitude = 1.1,
                                     longitude = 2.2
-                                )
+                                ),
+                                horizontalAccuracy = 1.23f
                             )
                         )
                     )
