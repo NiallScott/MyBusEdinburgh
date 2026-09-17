@@ -18,7 +18,7 @@ androidx-benchmark = "1.4.1"
 androidx-fragment = "1.9.0"
 androidx-hilt = "1.4.0"
 androidx-lifecycle = "2.11.0"
-androidx-room = "2.8.4"
+androidx-room = "2.8.5"
 androidx-work = "2.11.2"
 
 # Testing versions.
