@@ -105,7 +105,7 @@ material-compose = { module = "androidx.compose.material3:material3" }
 material-compose-adaptive = { module = "androidx.compose.material3.adaptive:adaptive" }
 
 # Firebase
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.18.0" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.19.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 
 # Play Services
