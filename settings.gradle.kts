@@ -111,6 +111,7 @@ include(
     ":macrobenchmark:app-macrobenchmark",
     ":testutils",
     ":ui:feature:about",
+    ":ui:feature:alerts:alertmanager",
     ":ui:feature:alerts:alertscommon",
     ":ui:feature:alerts:removearrivalalert",
     ":ui:feature:alerts:removeproximityalert",

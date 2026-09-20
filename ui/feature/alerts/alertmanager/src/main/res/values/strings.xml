@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2026 Niall 'Rivernile' Scott
+  ~
+  ~ This software is provided 'as-is', without any express or implied
+  ~ warranty.  In no event will the authors or contributors be held liable for
+  ~ any damages arising from the use of this software.
+  ~
+  ~ The aforementioned copyright holder(s) hereby grant you a
+  ~ non-transferrable right to use this software for any purpose (including
+  ~ commercial applications), and to modify it and redistribute it, subject to
+  ~ the following conditions:
+  ~
+  ~  1. This notice may not be removed or altered from any file it appears in.
+  ~
+  ~  2. Any modifications made to this software, except those defined in
+  ~     clause 3 of this agreement, must be released under this license, and
+  ~     the source code of any modifications must be made available on a
+  ~     publically accessible (and locateable) website, or sent to the
+  ~     original author of this software.
+  ~
+  ~  3. Software modifications that do not alter the functionality of the
+  ~     software but are simply adaptations to a specific environment are
+  ~     exempt from clause 2.
+  ~
+  -->
+<resources>
+    <string name="alertmanager_btn_remove">Remove</string>
+    <string name="alertmanager_error_no_alerts">No alerts are set\nAlerts can be added while viewing arrival times for a stop</string>
+    <string name="alertmanager_error_no_feature">Alerts are currently unavailable</string>
+
+    <string name="alertmanager_arrival_title">Arrival alert</string>
+    <plurals name="alertmanager_arrival_description_minutes">
+        <item quantity="one">When any of the following services are within %1$d minute or less of %2$s</item>
+        <item quantity="other">When any of the following services are within %1$d minutes or less of %2$s</item>
+    </plurals>
+    <string name="alertmanager_arrival_description_imminent">When any of the following services are due imminently at %s</string>
+    <string name="alertmanager_arrival_supplementary">This alert is removed after 1 hour</string>
+
+    <string name="alertmanager_proximity_title">Proximity alert</string>
+    <string name="alertmanager_proximity_description">When within %1$dm of %2$s</string>
+    <string name="alertmanager_proximity_supplementary">For the most accurate results, turn on GPS. This alert is removed after 1 hour or if the device is restarted.</string>
+    <string name="alertmanager_proximity_btn_location_settings">Location settings</string>
+</resources>
