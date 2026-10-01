@@ -23,7 +23,7 @@ androidx-work = "2.11.2"
 
 # Testing versions.
 espresso = "3.7.0"
-mockito = "5.23.0"
+mockito = "5.24.0"
 
 [libraries]
 # Kotlin Gradle plugin
