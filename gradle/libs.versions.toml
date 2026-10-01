@@ -136,7 +136,7 @@ hilt-test = { module = "com.google.dagger:hilt-android-testing", version.ref = "
 junit = { module = "junit:junit", version = "4.13.2" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
-mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "6.3.0" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "6.4.0" }
 turbine = { module = "app.cash.turbine:turbine", version = "1.2.1" }
 
 [plugins]
