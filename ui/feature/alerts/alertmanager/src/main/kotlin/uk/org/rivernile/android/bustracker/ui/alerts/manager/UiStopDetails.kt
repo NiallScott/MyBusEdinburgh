@@ -29,6 +29,9 @@ package uk.org.rivernile.android.bustracker.ui.alerts.manager
 import androidx.compose.runtime.Immutable
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import uk.org.rivernile.android.bustracker.core.busstops.StopDetails
+import uk.org.rivernile.android.bustracker.core.busstops.StopLocation
+import uk.org.rivernile.android.bustracker.core.busstops.StopName
 import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
 import uk.org.rivernile.android.bustracker.core.text.UiStopName
 
@@ -61,6 +64,19 @@ internal data class UiLatLon(
 )
 
 /**
+ * Map this [StopDetails] to a [UiStopDetails].
+ *
+ * @return This [StopDetails] as a [UiStopDetails].
+ */
+internal fun StopDetails.toUiStopDetails(): UiStopDetails {
+    return UiStopDetails(
+        stopName = stopName.toUiStopName(),
+        latLon = location.toUiLatLon(),
+        orientation = orientation
+    )
+}
+
+/**
  * Maps this [UiLatLon] to a Google Maps [LatLng] object.
  *
  * @return This [UiLatLon] as a [LatLng].
@@ -79,3 +95,17 @@ internal fun UiLatLon.toCameraPosition() = CameraPosition
         toGoogleMapsLatLng(),
         GOOGLE_MAP_ZOOM_LEVEL
     )
+
+private fun StopName.toUiStopName(): UiStopName {
+    return UiStopName(
+        name = name,
+        locality = locality
+    )
+}
+
+private fun StopLocation.toUiLatLon(): UiLatLon {
+    return UiLatLon(
+        latitude = latitude,
+        longitude = longitude
+    )
+}

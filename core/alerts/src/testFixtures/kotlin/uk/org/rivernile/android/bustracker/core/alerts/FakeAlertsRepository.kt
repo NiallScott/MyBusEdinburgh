@@ -62,6 +62,7 @@ class FakeAlertsRepository(
         { throw NotImplementedError() },
     private val onProximityAlertStopIdentifiersFlow: () -> Flow<Set<StopIdentifier>?> =
         { throw NotImplementedError() },
+    private val onAllAlertsFlow: () -> Flow<List<Alert>?> = { throw NotImplementedError() },
     private val onEnsureTasksRunning: () -> Unit = { throw NotImplementedError() }
 ) : AlertsRepository {
 
@@ -121,8 +122,7 @@ class FakeAlertsRepository(
 
     override val proximityAlertStopIdentifiersFlow get() = onProximityAlertStopIdentifiersFlow()
 
-    override val allAlertsFlow: Flow<List<Alert>?>
-        get() = throw NotImplementedError()
+    override val allAlertsFlow get() = onAllAlertsFlow()
 
     override fun ensureTasksRunning() {
         onEnsureTasksRunning()

@@ -61,7 +61,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.ui.RequiresContentPadding
 import uk.org.rivernile.android.bustracker.ui.about.AboutActivity
-import uk.org.rivernile.android.bustracker.ui.alerts.AlertManagerFragment
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.alerts.time.AddTimeAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity
@@ -87,6 +86,7 @@ import uk.org.rivernile.android.bustracker.ui.favouritestops.remove.RemoveFavour
 import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.ui.alerts.manager.AlertManagerFragment
 
 /**
  * This [android.app.Activity] is the root Activity of the app.

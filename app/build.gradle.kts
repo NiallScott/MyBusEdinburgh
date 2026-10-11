@@ -158,6 +158,7 @@ dependencies {
     implementation(project(":endpoint:tracker-endpoint"))
     implementation(project(":endpoint:internal-api-endpoint"))
     implementation(project(":ui:feature:about"))
+    implementation(project(":ui:feature:alerts:alertmanager"))
     implementation(project(":ui:feature:alerts:removearrivalalert"))
     implementation(project(":ui:feature:alerts:removeproximityalert"))
     implementation(project(":ui:feature:favouritestops:addoreditfavouritestop"))

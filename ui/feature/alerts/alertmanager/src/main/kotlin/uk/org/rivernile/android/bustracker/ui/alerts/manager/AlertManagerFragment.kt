@@ -75,7 +75,7 @@ public class AlertManagerFragment : Fragment() {
                 onShowLocationSettings = ::handleOnShowLocationSettings,
                 modifier = Modifier
                     .consumeWindowInsets(
-                        WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
+                        WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical)
                     )
             )
         }

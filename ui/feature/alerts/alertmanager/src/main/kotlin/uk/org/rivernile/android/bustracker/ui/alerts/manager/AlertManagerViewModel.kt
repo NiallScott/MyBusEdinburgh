@@ -27,11 +27,15 @@
 package uk.org.rivernile.android.bustracker.ui.alerts.manager
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.stateIn
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForViewModelCoroutineScope
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
@@ -40,31 +44,70 @@ import javax.inject.Inject
 /**
  * This is the [ViewModel] for the alert manager screen.
  *
+ * @param state The state held for this [ViewModel].
+ * @param uiContentRetriever Used to retrieve [UiContent] state objects.
  * @param defaultCoroutineDispatcher The default [CoroutineDispatcher].
  * @param viewModelCoroutineScope The [ViewModel] [CoroutineScope].
  * @author Niall Scott
  */
 @HiltViewModel
 internal class AlertManagerViewModel @Inject constructor(
+    private val state: State,
+    private val uiContentRetriever: UiContentRetriever,
     @ForDefaultDispatcher defaultCoroutineDispatcher: CoroutineDispatcher,
     @ForViewModelCoroutineScope viewModelCoroutineScope: CoroutineScope
 ) : ViewModel(viewModelCoroutineScope) {
 
-    val uiStateFlow: StateFlow<UiState> = MutableStateFlow(UiState())
+    /**
+     * This emits the current [UiState].
+     */
+    val uiStateFlow: StateFlow<UiState> = _uiContentFlow
+        .flowOn(defaultCoroutineDispatcher)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = UiState()
+        )
 
+    /**
+     * This is called when the remove arrival alert button has been clicked.
+     *
+     * @param stopIdentifier The stop identifier of the arrival alert to be potentially removed.
+     */
     fun onRemoveArrivalAlertClicked(stopIdentifier: StopIdentifier) {
-
+        state.action = UiAction.ShowRemoveArrivalAlert(
+            stopIdentifier = stopIdentifier
+        )
     }
 
+    /**
+     * This is called when the remove proximity alert button has been clicked.
+     *
+     * @param stopIdentifier The stop identifier of the proximity alert to be potentially removed.
+     */
     fun onRemoveProximityAlertClicked(stopIdentifier: StopIdentifier) {
-
+        state.action = UiAction.ShowRemoveProximityAlert(
+            stopIdentifier = stopIdentifier
+        )
     }
 
+    /**
+     * This is called when the location settings button has been clicked.
+     */
     fun onLocationSettingsClicked() {
-
+        state.action = UiAction.ShowLocationSettings
     }
 
+    /**
+     * This is called when an action has been launched.
+     */
     fun onActionLaunched() {
-
+        state.action = null
     }
+
+    private val _uiContentFlow get() = combine(
+        uiContentRetriever.uiContentFlow,
+        state.actionFlow,
+        ::UiState
+    )
 }

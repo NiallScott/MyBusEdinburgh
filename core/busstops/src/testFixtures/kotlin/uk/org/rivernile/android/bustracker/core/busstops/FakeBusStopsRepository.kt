@@ -40,6 +40,9 @@ class FakeBusStopsRepository(
         { throw NotImplementedError() },
     private val onGetBusStopDetailsFlow: (StopIdentifier) -> Flow<StopDetails?> =
         { throw NotImplementedError() },
+    private val onGetBusStopsDetailsFlow:
+        (Set<StopIdentifier>) -> Flow<Map<StopIdentifier, StopDetails>?> =
+        { throw NotImplementedError() },
     private val onGetStopDetailsWithinSpanFlow:
         (Double, Double, Double, Double, Set<ServiceDescriptor>?) ->
         Flow<List<StopDetailsWithServices>?> =
@@ -58,9 +61,7 @@ class FakeBusStopsRepository(
 
     override fun getBusStopDetailsFlow(
         stopIdentifiers: Set<StopIdentifier>
-    ): Flow<Map<StopIdentifier, StopDetails>?> {
-        throw NotImplementedError()
-    }
+    ) = onGetBusStopsDetailsFlow(stopIdentifiers)
 
     override fun getStopDetailsWithinSpanFlow(
         minLatitude: Double,

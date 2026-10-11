@@ -41,7 +41,7 @@ import androidx.test.filters.LargeTest
 import org.junit.Rule
 import uk.org.rivernile.android.bustracker.ui.about.R as Rabout
 import uk.org.rivernile.android.bustracker.ui.about.AboutActivity
-import uk.org.rivernile.android.bustracker.ui.alerts.AlertManagerFragment
+import uk.org.rivernile.android.bustracker.ui.alerts.manager.AlertManagerFragment
 import uk.org.rivernile.android.bustracker.ui.explore.ExploreFragment
 import uk.org.rivernile.android.bustracker.ui.favouritestops.FavouriteStopsFragment
 import uk.org.rivernile.android.bustracker.ui.news.NewsFragment

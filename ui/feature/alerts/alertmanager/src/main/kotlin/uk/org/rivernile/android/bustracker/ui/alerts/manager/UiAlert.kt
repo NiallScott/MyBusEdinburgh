@@ -28,7 +28,15 @@ package uk.org.rivernile.android.bustracker.ui.alerts.manager
 
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
+import uk.org.rivernile.android.bustracker.core.alerts.Alert
+import uk.org.rivernile.android.bustracker.core.alerts.ArrivalAlert
+import uk.org.rivernile.android.bustracker.core.alerts.ProximityAlert
+import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
+import uk.org.rivernile.android.bustracker.core.domain.sortByServiceName
+import uk.org.rivernile.android.bustracker.core.services.ServiceColours
+import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 
 /**
@@ -79,4 +87,109 @@ internal sealed interface UiAlert {
         val distanceFromMeters: Int,
         val isMapShown: Boolean
     ) : UiAlert
+}
+
+/**
+ * Map this [Collection] of [Alert]s in to a [List] of [UiAlert], suitable for display on the UI.
+ *
+ * @param stopDetails A mapping of [UiStopDetails] to match up with alerts.
+ * @param serviceColours A mapping of [ServiceColours] to match up with services.
+ * @param hasMapFeature Should the map be displayed?
+ * @param serviceNameComparator Used to sort the services.
+ * @return This [Collection] of [Alert]s as a [List] of [UiAlert].
+ */
+internal fun Collection<Alert>.toUiAlerts(
+    stopDetails: Map<StopIdentifier, UiStopDetails>?,
+    serviceColours: Map<ServiceDescriptor, ServiceColours>?,
+    hasMapFeature: Boolean,
+    serviceNameComparator: Comparator<String>
+) = map { alert ->
+    alert.toUiAlert(
+        stopDetails = stopDetails?.get(alert.stopIdentifier),
+        serviceColours = serviceColours,
+        hasMapFeature = hasMapFeature,
+        serviceNameComparator = serviceNameComparator
+    )
+}
+
+private fun Alert.toUiAlert(
+    stopDetails: UiStopDetails?,
+    serviceColours: Map<ServiceDescriptor, ServiceColours>?,
+    hasMapFeature: Boolean,
+    serviceNameComparator: Comparator<String>
+): UiAlert {
+    return when (this) {
+        is ArrivalAlert -> toUiArrivalAlert(
+            stopDetails = stopDetails,
+            serviceColours = serviceColours,
+            hasMapFeature = hasMapFeature,
+            serviceNameComparator = serviceNameComparator
+        )
+        is ProximityAlert -> toUiProximityAlert(
+            stopDetails = stopDetails,
+            hasMapFeature = hasMapFeature
+        )
+    }
+}
+
+private fun ArrivalAlert.toUiArrivalAlert(
+    stopDetails: UiStopDetails?,
+    serviceColours: Map<ServiceDescriptor, ServiceColours>?,
+    hasMapFeature: Boolean,
+    serviceNameComparator: Comparator<String>
+): UiAlert.ArrivalAlert {
+    val serviceNames = services
+        .sortByServiceName(serviceNameComparator)
+        .toUiServiceNames(
+            serviceColours = serviceColours
+        )
+        .toImmutableList()
+
+    return UiAlert.ArrivalAlert(
+        id = id,
+        stopIdentifier = stopIdentifier,
+        stopDetails = stopDetails,
+        services = serviceNames,
+        timeTriggerMinutes = timeTriggerMinutes,
+        isMapShown = hasMapFeature
+    )
+}
+
+private fun ProximityAlert.toUiProximityAlert(
+    stopDetails: UiStopDetails?,
+    hasMapFeature: Boolean
+): UiAlert.ProximityAlert {
+    return UiAlert.ProximityAlert(
+        id = id,
+        stopIdentifier = stopIdentifier,
+        stopDetails = stopDetails,
+        distanceFromMeters = distanceFromMeters,
+        isMapShown = hasMapFeature
+    )
+}
+
+private fun Collection<ServiceDescriptor>.toUiServiceNames(
+    serviceColours: Map<ServiceDescriptor, ServiceColours>?
+) = map { serviceDescriptor ->
+    serviceDescriptor.toUiServiceName(
+        serviceColours = serviceColours
+    )
+}
+
+private fun ServiceDescriptor.toUiServiceName(
+    serviceColours: Map<ServiceDescriptor, ServiceColours>?
+): UiServiceName {
+    return UiServiceName(
+        serviceName = serviceName,
+        colours = serviceColours
+            ?.get(this)
+            ?.toUiServiceColours()
+    )
+}
+
+private fun ServiceColours.toUiServiceColours(): UiServiceColours {
+    return UiServiceColours(
+        backgroundColour = colourPrimary,
+        textColour = colourOnPrimary
+    )
 }

@@ -59,6 +59,8 @@ dependencies {
     implementation(project(":core:busstops-android"))
     implementation(project(":core:core-domain-android"))
     implementation(project(":core:coroutines-android"))
+    implementation(project(":core:feature"))
+    implementation(project(":core:services-android"))
     implementation(project(":ui:google-maps"))
     implementation(project(":ui:text-formatting"))
     implementation(project(":ui:ui-core"))
@@ -102,7 +104,11 @@ dependencies {
     androidTestImplementation(libs.kotlin.test.junit)
 
     testImplementation(testFixtures(project(":core:alerts")))
+    testImplementation(testFixtures(project(":core:busstops")))
+    testImplementation(testFixtures(project(":core:feature")))
+    testImplementation(testFixtures(project(":core:services")))
     testImplementation(libs.coroutines.test)
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.turbine)
 }
