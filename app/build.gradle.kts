@@ -199,9 +199,7 @@ dependencies {
 
     // Play Services
     implementation(libs.play.services.maps)
-    implementation(libs.play.services.maps.ktx)
     implementation(libs.play.services.maps.utils)
-    implementation(libs.play.services.maps.utils.ktx)
 
     // Firebase
     implementation(platform(libs.firebase.bom))

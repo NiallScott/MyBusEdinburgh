@@ -8,22 +8,22 @@ android-build-tools = "37.0.0"
 android-gradle-plugin = "9.4.1"
 coroutines = "1.11.0"
 dagger = "2.60.1"
-kotlin = "2.4.20"
+kotlin = "2.4.21"
 okhttp = "5.5.0"
 retrofit = "3.0.0"
 
 # AndroidX
 androidx-activity = "1.13.0"
 androidx-benchmark = "1.5.0"
-androidx-fragment = "1.9.0"
+androidx-fragment = "1.9.1"
 androidx-hilt = "1.4.0"
 androidx-lifecycle = "2.11.0"
 androidx-room = "2.8.5"
-androidx-work = "2.11.2"
+androidx-work = "2.12.0"
 
 # Testing versions.
 espresso = "3.7.0"
-mockito = "5.23.0"
+mockito = "5.24.0"
 
 [libraries]
 # Kotlin Gradle plugin
@@ -68,7 +68,7 @@ kotlin-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime-jvm", versi
 # AndroidX
 androidx-activity = { module = "androidx.activity:activity-ktx", version.ref = "androidx-activity" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
-androidx-annotation = { module = "androidx.annotation:annotation", version = "1.10.0" }
+androidx-annotation = { module = "androidx.annotation:annotation", version = "1.11.0" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.8.0" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2026.09.00" }
 androidx-compose-runtime = { module = "androidx.compose.runtime:runtime" }
@@ -78,7 +78,7 @@ androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.2.2" }
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version = "1.1.2" }
-androidx-core = { module = "androidx.core:core-ktx", version = "1.19.0" }
+androidx-core = { module = "androidx.core:core-ktx", version = "1.19.1" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version = "1.2.1" }
 androidx-fragment = { module = "androidx.fragment:fragment-ktx", version.ref = "androidx-fragment" }
 androidx-fragment-compose = { module = "androidx.fragment:fragment-compose", version.ref = "androidx-fragment" }
@@ -105,16 +105,14 @@ material-compose = { module = "androidx.compose.material3:material3" }
 material-compose-adaptive = { module = "androidx.compose.material3.adaptive:adaptive" }
 
 # Firebase
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.19.0" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "35.0.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 
 # Play Services
 play-services-location = { module = "com.google.android.gms:play-services-location", version = "21.4.0" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.0.0" }
-play-services-maps-compose = { module = "com.google.maps.android:maps-compose", version = "8.6.0" }
-play-services-maps-ktx = { module = "com.google.maps.android:maps-ktx", version = "6.4.1" }
-play-services-maps-utils = { module = "com.google.maps.android:android-maps-utils", version = "5.2.0" }
-play-services-maps-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version = "6.4.1" }
+play-services-maps-compose = { module = "com.google.maps.android:maps-compose", version = "9.0.1" }
+play-services-maps-utils = { module = "com.google.maps.android:android-maps-utils", version = "6.0.0" }
 
 # Testing dependencies.
 androidx-arch-core-test = { module = "androidx.arch.core:core-testing", version = "2.2.0" }
@@ -136,7 +134,7 @@ hilt-test = { module = "com.google.dagger:hilt-android-testing", version.ref = "
 junit = { module = "junit:junit", version = "4.13.2" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
-mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "6.3.0" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "6.4.0" }
 turbine = { module = "app.cash.turbine:turbine", version = "1.2.1" }
 
 [plugins]
