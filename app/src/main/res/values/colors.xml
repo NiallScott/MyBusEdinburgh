@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2013 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -175,10 +175,6 @@
     <color name="md_theme_surfaceContainer_highContrast">#FCEAE8</color>
     <color name="md_theme_surfaceContainerHigh_highContrast">#F6E4E2</color>
     <color name="md_theme_surfaceContainerHighest_highContrast">#F1DEDD</color>
-
-    <!-- Map range ring -->
-    <color name="map_range_ring_stroke">@color/md_theme_primary</color>
-    <color name="map_range_ring_fill">#1AC41411</color>
 
     <!-- Map info window -->
     <color name="map_info_window_title_text">@color/md_theme_onSurface</color>

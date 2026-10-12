@@ -40,7 +40,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="no">No</string>
     <string name="okay">OK</string>
     <string name="yes">Yes</string>
-    <string name="remove">Remove</string>
     <string name="loading">Loading&#8230;</string>
 
     <!--
@@ -153,28 +152,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     ***************
     ***************
     -->
-
-    <!--
-    ************************************
-    * Strings for AlertManagerFragment *
-    ************************************
-    -->
-    <string name="alertmanager_empty"><b>You have no alerts set</b>\nArrival and proximity alerts can be added while viewing arrival times for a stop</string>
-    <string name="alertmanager_prox_title">Proximity alert</string>
-    <string name="alertmanager_prox_subtitle">When within %1$dm of %2$s</string> <!-- %1$d = number of meters. %2$s = bus stop name and code. -->
-    <string name="alertmanager_prox_blurb">For the most accurate results, turn on GPS. This alert is removed after 1 hour or if the device is restarted.</string>
-    <string name="alertmanager_prox_button_location_settings">Location settings</string>
-    <string name="alertmanager_time_title">Arrival alert</string>
-    <plurals name="alertmanager_time_subtitle_single_service">
-        <item quantity="one">When service %1$s is due at %2$s</item>
-        <item quantity="other">When service %1$s is within %3$d minutes of %2$s</item>
-    </plurals>
-    <plurals name="alertmanager_time_subtitle_multiple_services">
-        <item quantity="one">When any of services %1$s are due at %2$s</item>
-        <item quantity="other">When any of services %1$s are within %3$d minutes of %2$s</item>
-    </plurals>
-    <string name="alertmanager_time_blurb">This alert is removed after 1 hour</string>
-    <string name="alertmanager_error_no_location_settings">Unable to show system location settings</string>
 
     <!--
     **********************************
