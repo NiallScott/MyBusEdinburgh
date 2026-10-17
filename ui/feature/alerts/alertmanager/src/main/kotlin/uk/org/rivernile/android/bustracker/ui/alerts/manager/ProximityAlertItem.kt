@@ -43,9 +43,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.dimensionResource
@@ -55,8 +60,11 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isSpecified
 import com.google.android.gms.maps.GoogleMapOptions
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -65,7 +73,9 @@ import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.text.LocalStopNameFormatter
 import uk.org.rivernile.android.bustracker.core.text.UiStopName
+import uk.org.rivernile.android.bustracker.ui.googlemaps.calculateZoom
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
+import kotlin.math.min
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 
 internal const val TEST_TAG_PROXIMITY_ALERT_MAP = "proximity-alert-map"
@@ -76,6 +86,8 @@ internal const val TEST_TAG_PROXIMITY_ALERT_SUPPLEMENTARY_TEXT =
 internal const val TEST_TAG_PROXIMITY_ALERT_LOCATION_SETTINGS_BUTTON =
     "proximity-alert-location-settings-button"
 internal const val TEST_TAG_PROXIMITY_ALERT_REMOVE_BUTTON = "proximity-alert-remove-button"
+private const val MIN_ZOOM_LEVEL = 1f
+private const val MAX_ZOOM_LEVEL = 21f
 
 /**
  * This renders the proximity alert item.
@@ -190,9 +202,20 @@ private fun ProximityAlertGoogleMap(
     val cameraPositionState = rememberCameraPositionState {
         position = latLon.toCameraPosition()
     }
+    var smallestDimension by remember { mutableStateOf(Dp.Unspecified) }
+    val density = LocalDensity.current
 
     GoogleMap(
         modifier = modifier
+            .onSizeChanged { size ->
+                val min = min(size.width, size.height)
+
+                smallestDimension = if (min > 0) {
+                    with(density) { min.toDp() }
+                } else {
+                    Dp.Unspecified
+                }
+            }
             .semantics {
                 testTag = TEST_TAG_PROXIMITY_ALERT_MAP
             },
@@ -220,8 +243,30 @@ private fun ProximityAlertGoogleMap(
         )
     }
 
-    SideEffect(latLon) {
-        cameraPositionState.position = latLon.toCameraPosition()
+    if (smallestDimension.isSpecified) {
+        val minZoomLevel = cameraPositionState.minZoomLevel ?: MIN_ZOOM_LEVEL
+        val maxZoomLevel = cameraPositionState.maxZoomLevel ?: MAX_ZOOM_LEVEL
+
+        SideEffect(
+            latLon,
+            smallestDimension,
+            distanceFromMeters,
+            minZoomLevel,
+            maxZoomLevel
+        ) {
+            cameraPositionState.position = CameraPosition
+                .fromLatLngZoom(
+                    latLon.toGoogleMapsLatLng(),
+                    calculateZoom(
+                        latitude = latLon.latitude,
+                        smallestDimension = smallestDimension,
+                        spanMeters = distanceFromMeters * 2f,
+                        paddingFactor = 1.2f,
+                        minZoom = minZoomLevel,
+                        maxZoom = maxZoomLevel
+                    )
+                )
+        }
     }
 }
 

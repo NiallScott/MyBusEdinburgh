@@ -57,6 +57,9 @@ dependencies {
 
     implementation(project(":ui:ui-core"))
 
+    // AndroidX
+    implementation(libs.androidx.annotation)
+
     // Compose
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
@@ -64,4 +67,7 @@ dependencies {
 
     // Google Maps
     implementation(libs.play.services.maps)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlin.test.junit)
 }
