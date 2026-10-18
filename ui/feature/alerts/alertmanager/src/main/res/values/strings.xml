@@ -26,8 +26,10 @@
   -->
 <resources>
     <string name="alertmanager_btn_remove">Remove</string>
-    <string name="alertmanager_error_no_alerts">No alerts are set\nAlerts can be added while viewing arrival times for a stop</string>
-    <string name="alertmanager_error_no_feature">Alerts are currently unavailable</string>
+    <string name="alertmanager_error_no_alerts_title">No alerts are set</string>
+    <string name="alertmanager_error_no_alerts_description">Alerts can be added while viewing arrival times for a stop</string>
+    <string name="alertmanager_error_no_feature_title">Alerts are currently unavailable</string>
+    <string name="alertmanager_error_no_feature_description">Either your device is not capable of handling alerts, or the feature has been disabled</string>
 
     <string name="alertmanager_arrival_title">Arrival alert</string>
     <plurals name="alertmanager_arrival_description_minutes">

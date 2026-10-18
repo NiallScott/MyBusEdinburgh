@@ -30,7 +30,6 @@ import android.content.res.Configuration
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -43,7 +42,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -70,7 +69,7 @@ import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.text.UiStopName
-import uk.org.rivernile.android.bustracker.ui.text.PrimaryErrorText
+import uk.org.rivernile.android.bustracker.ui.error.ErrorLayout
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
@@ -80,6 +79,8 @@ internal const val TEST_TAG_CONTENT_PROGRESS = "content-progress"
 internal const val TEST_TAG_CONTENT_CONTENT = "content-content"
 internal const val TEST_TAG_ERROR_EMPTY_ALERTS = "content-error-empty-alerts"
 internal const val TEST_TAG_ERROR_NO_ALERTS_FEATURE = "content-error-no-alerts-feature"
+internal const val TEST_TAG_ERROR_TITLE = "error-title"
+internal const val TEST_TAG_ERROR_DESCRIPTION = "error-description"
 private const val CONTENT_TYPE_ARRIVAL_ALERT = 1
 private const val CONTENT_TYPE_PROXIMITY_ALERT = 2
 
@@ -275,7 +276,8 @@ private fun EmptyAlertsError(
     modifier: Modifier = Modifier
 ) {
     ErrorLayout(
-        textResId = R.string.alertmanager_error_no_alerts,
+        titleTextResId = R.string.alertmanager_error_no_alerts_title,
+        descriptionTextResId = R.string.alertmanager_error_no_alerts_description,
         modifier = modifier
             .semantics {
                 testTag = TEST_TAG_ERROR_EMPTY_ALERTS
@@ -288,7 +290,8 @@ private fun NoAlertsFeatureError(
     modifier: Modifier = Modifier
 ) {
     ErrorLayout(
-        textResId = R.string.alertmanager_error_no_feature,
+        titleTextResId = R.string.alertmanager_error_no_feature_title,
+        descriptionTextResId = R.string.alertmanager_error_no_feature_description,
         modifier = modifier
             .semantics {
                 testTag = TEST_TAG_ERROR_NO_ALERTS_FEATURE
@@ -298,30 +301,39 @@ private fun NoAlertsFeatureError(
 
 @Composable
 private fun ErrorLayout(
-    @StringRes textResId: Int,
+    @StringRes titleTextResId: Int,
+    @StringRes descriptionTextResId: Int,
     modifier: Modifier = Modifier
 ) {
-    Column(
+    ErrorLayout(
+        titleText = {
+            Text(
+                text = stringResource(titleTextResId),
+                modifier = Modifier
+                    .semantics {
+                        testTag = TEST_TAG_ERROR_TITLE
+                    }
+            )
+        },
         modifier = modifier,
-        verticalArrangement = Arrangement
-            .spacedBy(
-                space = dimensionResource(Rcore.dimen.padding_double),
-                alignment = Alignment.CenterVertically
-            ),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_error_notifications),
-            contentDescription = null,
-            modifier = Modifier
-                .size(72.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-
-        PrimaryErrorText(
-            text = stringResource(textResId)
-        )
-    }
+        icon = {
+            Icon(
+                painter = painterResource(R.drawable.ic_error_notifications),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(72.dp)
+            )
+        },
+        descriptionText = {
+            Text(
+                text = stringResource(descriptionTextResId),
+                modifier = Modifier
+                    .semantics {
+                        testTag = TEST_TAG_ERROR_DESCRIPTION
+                    }
+            )
+        }
+    )
 }
 
 @Composable

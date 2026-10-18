@@ -30,6 +30,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import kotlinx.collections.immutable.persistentListOf
@@ -141,6 +142,20 @@ class AlertManagerScreenKtTest {
         composeTestRule
             .onNodeWithTag(TEST_TAG_ERROR_NO_ALERTS_FEATURE)
             .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_ERROR_TITLE)
+            .assertTextEquals(
+                composeTestRule
+                    .activity
+                    .getString(R.string.alertmanager_error_no_alerts_title)
+            )
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_ERROR_DESCRIPTION)
+            .assertTextEquals(
+                composeTestRule
+                    .activity
+                    .getString(R.string.alertmanager_error_no_alerts_description)
+            )
     }
 
     @Test
@@ -165,6 +180,20 @@ class AlertManagerScreenKtTest {
         composeTestRule
             .onNodeWithTag(TEST_TAG_ERROR_NO_ALERTS_FEATURE)
             .assertExists()
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_ERROR_TITLE)
+            .assertTextEquals(
+                composeTestRule
+                    .activity
+                    .getString(R.string.alertmanager_error_no_feature_title)
+            )
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_ERROR_DESCRIPTION)
+            .assertTextEquals(
+                composeTestRule
+                    .activity
+                    .getString(R.string.alertmanager_error_no_feature_description)
+            )
     }
 
     @Test
