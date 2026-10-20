@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
 import com.google.android.gms.maps.GoogleMapOptions
+import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
@@ -86,8 +87,6 @@ internal const val TEST_TAG_PROXIMITY_ALERT_SUPPLEMENTARY_TEXT =
 internal const val TEST_TAG_PROXIMITY_ALERT_LOCATION_SETTINGS_BUTTON =
     "proximity-alert-location-settings-button"
 internal const val TEST_TAG_PROXIMITY_ALERT_REMOVE_BUTTON = "proximity-alert-remove-button"
-private const val MIN_ZOOM_LEVEL = 1f
-private const val MAX_ZOOM_LEVEL = 21f
 
 /**
  * This renders the proximity alert item.
@@ -219,13 +218,19 @@ private fun ProximityAlertGoogleMap(
             .semantics {
                 testTag = TEST_TAG_PROXIMITY_ALERT_MAP
             },
+        focusable = false,
         cameraPositionState = cameraPositionState,
         googleMapOptionsFactory = {
             GoogleMapOptions()
                 .liteMode(true)
         },
         properties = rememberMapProperties(),
-        uiSettings = rememberMapUiSettings()
+        uiSettings = rememberMapUiSettings(),
+        mapViewFactory = { context, options ->
+            MapView(context, options).also {
+                it.isClickable = false
+            }
+        }
     ) {
         Circle(
             center = latLon.toGoogleMapsLatLng(),
@@ -244,15 +249,10 @@ private fun ProximityAlertGoogleMap(
     }
 
     if (smallestDimension.isSpecified) {
-        val minZoomLevel = cameraPositionState.minZoomLevel ?: MIN_ZOOM_LEVEL
-        val maxZoomLevel = cameraPositionState.maxZoomLevel ?: MAX_ZOOM_LEVEL
-
         SideEffect(
             latLon,
             smallestDimension,
-            distanceFromMeters,
-            minZoomLevel,
-            maxZoomLevel
+            distanceFromMeters
         ) {
             cameraPositionState.position = CameraPosition
                 .fromLatLngZoom(
@@ -261,9 +261,7 @@ private fun ProximityAlertGoogleMap(
                         latitude = latLon.latitude,
                         smallestDimension = smallestDimension,
                         spanMeters = distanceFromMeters * 2f,
-                        paddingFactor = 1.2f,
-                        minZoom = minZoomLevel,
-                        maxZoom = maxZoomLevel
+                        paddingFactor = 1.2f
                     )
                 )
         }
@@ -301,7 +299,7 @@ private fun ProximityAlertDescriptionText(
                     stopName = stopName
                 )
         ),
-        modifier = Modifier
+        modifier = modifier
             .semantics {
                 testTag = TEST_TAG_PROXIMITY_ALERT_DESCRIPTION
             }

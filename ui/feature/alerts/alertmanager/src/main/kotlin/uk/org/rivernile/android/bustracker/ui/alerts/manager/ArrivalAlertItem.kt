@@ -52,6 +52,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.GoogleMapOptions
+import com.google.android.gms.maps.MapView
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.collections.immutable.persistentListOf
@@ -202,13 +203,19 @@ private fun ArrivalAlertGoogleMap(
             .semantics {
                 testTag = TEST_TAG_ARRIVAL_ALERT_MAP
             },
+        focusable = false,
         cameraPositionState = cameraPositionState,
         googleMapOptionsFactory = {
             GoogleMapOptions()
                 .liteMode(true)
         },
         properties = rememberMapProperties(),
-        uiSettings = rememberMapUiSettings()
+        uiSettings = rememberMapUiSettings(),
+        mapViewFactory = { context, options ->
+            MapView(context, options).also {
+                it.isClickable = false
+            }
+        }
     ) {
         StopMarker(
             latLon = latLon,

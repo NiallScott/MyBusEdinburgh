@@ -30,6 +30,7 @@
     <string name="alertmanager_error_no_alerts_description">Alerts can be added while viewing arrival times for a stop</string>
     <string name="alertmanager_error_no_feature_title">Alerts are currently unavailable</string>
     <string name="alertmanager_error_no_feature_description">Either your device is not capable of handling alerts, or the feature has been disabled</string>
+    <string name="alertmanager_error_no_location_settings">System location settings does not exist on this device</string>
 
     <string name="alertmanager_arrival_title">Arrival alert</string>
     <plurals name="alertmanager_arrival_description_minutes">

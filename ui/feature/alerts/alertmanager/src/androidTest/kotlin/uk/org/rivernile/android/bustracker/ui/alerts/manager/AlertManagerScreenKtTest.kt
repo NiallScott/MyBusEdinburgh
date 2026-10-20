@@ -32,13 +32,16 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import kotlinx.collections.immutable.persistentListOf
 import org.junit.Rule
 import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.text.UiStopName
+import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -55,11 +58,13 @@ class AlertManagerScreenKtTest {
     @Test
     fun showsInProgressWhenContentIsInProgress() {
         composeTestRule.setContent {
-            AlertManagerScreenWithStateWithDefaults(
-                state = UiState(
-                    content = UiContent.InProgress
+            MyBusTheme {
+                AlertManagerScreenWithStateWithDefaults(
+                    state = UiState(
+                        content = UiContent.InProgress
+                    )
                 )
-            )
+            }
         }
 
         composeTestRule
@@ -79,31 +84,33 @@ class AlertManagerScreenKtTest {
     @Test
     fun showsContentWhenContentIsContent() {
         composeTestRule.setContent {
-            AlertManagerScreenWithStateWithDefaults(
-                state = UiState(
-                    content = UiContent.Content(
-                        persistentListOf(
-                            UiAlert.ProximityAlert(
-                                id = 2,
-                                stopIdentifier = "123456".toNaptanStopIdentifier(),
-                                stopDetails = UiStopDetails(
-                                    stopName = UiStopName(
-                                        name = "Stop Name",
-                                        locality = "Locality"
+            MyBusTheme {
+                AlertManagerScreenWithStateWithDefaults(
+                    state = UiState(
+                        content = UiContent.Content(
+                            persistentListOf(
+                                UiAlert.ProximityAlert(
+                                    id = 2,
+                                    stopIdentifier = "123456".toNaptanStopIdentifier(),
+                                    stopDetails = UiStopDetails(
+                                        stopName = UiStopName(
+                                            name = "Stop Name",
+                                            locality = "Locality"
+                                        ),
+                                        latLon = UiLatLon(
+                                            latitude = 1.1,
+                                            longitude = 2.2
+                                        ),
+                                        orientation = StopOrientation.NORTH_EAST
                                     ),
-                                    latLon = UiLatLon(
-                                        latitude = 1.1,
-                                        longitude = 2.2
-                                    ),
-                                    orientation = StopOrientation.NORTH_EAST
-                                ),
-                                distanceFromMeters = 250,
-                                isMapShown = true
+                                    distanceFromMeters = 250,
+                                    isMapShown = true
+                                )
                             )
                         )
                     )
                 )
-            )
+            }
         }
 
         composeTestRule
@@ -123,11 +130,13 @@ class AlertManagerScreenKtTest {
     @Test
     fun showsEmptyAlertsErrorWhenContentIsEmptyAlerts() {
         composeTestRule.setContent {
-            AlertManagerScreenWithStateWithDefaults(
-                state = UiState(
-                    content = UiContent.EmptyAlerts
+            MyBusTheme {
+                AlertManagerScreenWithStateWithDefaults(
+                    state = UiState(
+                        content = UiContent.EmptyAlerts
+                    )
                 )
-            )
+            }
         }
 
         composeTestRule
@@ -161,11 +170,13 @@ class AlertManagerScreenKtTest {
     @Test
     fun showsNoAlertsFeatureErrorWhenContentIsNoAlertsFeature() {
         composeTestRule.setContent {
-            AlertManagerScreenWithStateWithDefaults(
-                state = UiState(
-                    content = UiContent.NoAlertsFeature
+            MyBusTheme {
+                AlertManagerScreenWithStateWithDefaults(
+                    state = UiState(
+                        content = UiContent.NoAlertsFeature
+                    )
                 )
-            )
+            }
         }
 
         composeTestRule
@@ -201,16 +212,18 @@ class AlertManagerScreenKtTest {
         val actionTracker = Tracker<StopIdentifier>()
         val actionLaunchedCounter = InvocationCounter()
         composeTestRule.setContent {
-            AlertManagerScreenWithStateWithDefaults(
-                state = UiState(
-                    content = UiContent.InProgress,
-                    action = UiAction.ShowRemoveArrivalAlert(
-                        stopIdentifier = "123456".toNaptanStopIdentifier()
-                    )
-                ),
-                onShowRemoveArrivalAlert = actionTracker,
-                onActionLaunched = actionLaunchedCounter
-            )
+            MyBusTheme {
+                AlertManagerScreenWithStateWithDefaults(
+                    state = UiState(
+                        content = UiContent.InProgress,
+                        action = UiAction.ShowRemoveArrivalAlert(
+                            stopIdentifier = "123456".toNaptanStopIdentifier()
+                        )
+                    ),
+                    onShowRemoveArrivalAlert = actionTracker,
+                    onActionLaunched = actionLaunchedCounter
+                )
+            }
         }
 
         assertEquals(
@@ -225,16 +238,18 @@ class AlertManagerScreenKtTest {
         val actionTracker = Tracker<StopIdentifier>()
         val actionLaunchedCounter = InvocationCounter()
         composeTestRule.setContent {
-            AlertManagerScreenWithStateWithDefaults(
-                state = UiState(
-                    content = UiContent.InProgress,
-                    action = UiAction.ShowRemoveProximityAlert(
-                        stopIdentifier = "123456".toNaptanStopIdentifier()
-                    )
-                ),
-                onShowRemoveProximityAlert = actionTracker,
-                onActionLaunched = actionLaunchedCounter
-            )
+            MyBusTheme {
+                AlertManagerScreenWithStateWithDefaults(
+                    state = UiState(
+                        content = UiContent.InProgress,
+                        action = UiAction.ShowRemoveProximityAlert(
+                            stopIdentifier = "123456".toNaptanStopIdentifier()
+                        )
+                    ),
+                    onShowRemoveProximityAlert = actionTracker,
+                    onActionLaunched = actionLaunchedCounter
+                )
+            }
         }
 
         assertEquals(
@@ -249,18 +264,132 @@ class AlertManagerScreenKtTest {
         val actionCounter = InvocationCounter()
         val actionLaunchedCounter = InvocationCounter()
         composeTestRule.setContent {
-            AlertManagerScreenWithStateWithDefaults(
-                state = UiState(
-                    content = UiContent.InProgress,
-                    action = UiAction.ShowLocationSettings
-                ),
-                onShowLocationSettings = actionCounter,
-                onActionLaunched = actionLaunchedCounter
-            )
+            MyBusTheme {
+                AlertManagerScreenWithStateWithDefaults(
+                    state = UiState(
+                        content = UiContent.InProgress,
+                        action = UiAction.ShowLocationSettings
+                    ),
+                    onShowLocationSettings = actionCounter,
+                    onActionLaunched = actionLaunchedCounter
+                )
+            }
         }
 
         assertEquals(1, actionCounter.count)
         assertEquals(1, actionLaunchedCounter.count)
+    }
+
+    @Test
+    fun removeArrivalAlertButtonClickCallsOnRemoveArrivalAlertClickLambda() {
+        val removeArrivalAlertTracker = Tracker<StopIdentifier>()
+        composeTestRule.setContent {
+            MyBusTheme {
+                AlertManagerScreenWithStateWithDefaults(
+                    state = UiState(
+                        content = UiContent.Content(
+                            alerts = persistentListOf(
+                                UiAlert.ArrivalAlert(
+                                    id = 1,
+                                    stopIdentifier = "123456".toNaptanStopIdentifier(),
+                                    stopDetails = null,
+                                    services = persistentListOf(),
+                                    timeTriggerMinutes = 5,
+                                    isMapShown = false
+                                ),
+                                UiAlert.ArrivalAlert(
+                                    id = 2,
+                                    stopIdentifier = "987654".toNaptanStopIdentifier(),
+                                    stopDetails = null,
+                                    services = persistentListOf(),
+                                    timeTriggerMinutes = 5,
+                                    isMapShown = false
+                                )
+                            )
+                        )
+                    ),
+                    onRemoveArrivalAlertClick = removeArrivalAlertTracker
+                )
+            }
+        }
+
+        composeTestRule
+            .onAllNodesWithTag(TEST_TAG_ARRIVAL_ALERT_REMOVE_BUTTON)[1]
+            .performClick()
+        assertEquals(
+            listOf("987654".toNaptanStopIdentifier()),
+            removeArrivalAlertTracker.observedValues
+        )
+    }
+
+    @Test
+    fun removeProximityAlertButtonClickCallsOnRemoveProximityAlertClickLambda() {
+        val removeProximityAlertTracker = Tracker<StopIdentifier>()
+        composeTestRule.setContent {
+            MyBusTheme {
+                AlertManagerScreenWithStateWithDefaults(
+                    state = UiState(
+                        content = UiContent.Content(
+                            alerts = persistentListOf(
+                                UiAlert.ProximityAlert(
+                                    id = 1,
+                                    stopIdentifier = "123456".toNaptanStopIdentifier(),
+                                    stopDetails = null,
+                                    distanceFromMeters = 250,
+                                    isMapShown = false
+                                ),
+                                UiAlert.ProximityAlert(
+                                    id = 2,
+                                    stopIdentifier = "987654".toNaptanStopIdentifier(),
+                                    stopDetails = null,
+                                    distanceFromMeters = 250,
+                                    isMapShown = false
+                                )
+                            )
+                        )
+                    ),
+                    onRemoveProximityAlertClick = removeProximityAlertTracker
+                )
+            }
+        }
+
+        composeTestRule
+            .onAllNodesWithTag(TEST_TAG_PROXIMITY_ALERT_REMOVE_BUTTON)[1]
+            .performClick()
+        assertEquals(
+            listOf("987654".toNaptanStopIdentifier()),
+            removeProximityAlertTracker.observedValues
+        )
+    }
+
+    @Test
+    fun showLocationSettingsButtonClickCallsOnLocationSettingsClickLambda() {
+        val invocationCounter = InvocationCounter()
+        composeTestRule.setContent {
+            MyBusTheme {
+                AlertManagerScreenWithStateWithDefaults(
+                    state = UiState(
+                        content = UiContent.Content(
+                            alerts = persistentListOf(
+                                UiAlert.ProximityAlert(
+                                    id = 1,
+                                    stopIdentifier = "123456".toNaptanStopIdentifier(),
+                                    stopDetails = null,
+                                    distanceFromMeters = 250,
+                                    isMapShown = false
+                                )
+                            )
+                        )
+                    ),
+                    onLocationSettingsClick = invocationCounter
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_PROXIMITY_ALERT_LOCATION_SETTINGS_BUTTON)
+            .performClick()
+        assertEquals(1, invocationCounter.count)
     }
 
     @Composable

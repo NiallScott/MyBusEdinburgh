@@ -33,7 +33,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import uk.org.rivernile.android.bustracker.core.alerts.Alert
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
@@ -72,7 +71,6 @@ internal class RealUiContentRetriever @Inject constructor(
         featureRepository.hasStopMapUiFeature
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override val uiContentFlow get() = if (hasAlertManagerFeature) {
         alertsWithStopDetailsFlow
             .combine(
@@ -84,7 +82,6 @@ internal class RealUiContentRetriever @Inject constructor(
                     stopDetails = alertsWithStopDetails?.second
                 )
             }
-            .onStart { emit(UiContent.InProgress) }
     } else {
         flowOf(UiContent.NoAlertsFeature)
     }

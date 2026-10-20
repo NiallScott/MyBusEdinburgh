@@ -28,6 +28,9 @@ package uk.org.rivernile.android.bustracker.ui.alerts.manager
 
 import app.cash.turbine.test
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
@@ -36,6 +39,7 @@ import uk.org.rivernile.android.bustracker.core.alerts.FakeAlertsRepository
 import uk.org.rivernile.android.bustracker.core.alerts.ProximityAlert
 import uk.org.rivernile.android.bustracker.core.busstops.StopOrientation
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.features.FakeFeatureRepository
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
@@ -48,6 +52,8 @@ import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Instant
 
 /**
@@ -88,7 +94,6 @@ class RealUiContentRetrieverTest {
         )
 
         retriever.uiContentFlow.test {
-            assertEquals(UiContent.InProgress, awaitItem())
             assertEquals(UiContent.EmptyAlerts, awaitItem())
             awaitComplete()
         }
@@ -110,7 +115,6 @@ class RealUiContentRetrieverTest {
         )
 
         retriever.uiContentFlow.test {
-            assertEquals(UiContent.InProgress, awaitItem())
             assertEquals(UiContent.EmptyAlerts, awaitItem())
             awaitComplete()
         }
@@ -129,7 +133,6 @@ class RealUiContentRetrieverTest {
         )
 
         retriever.uiContentFlow.test {
-            assertEquals(UiContent.InProgress, awaitItem())
             assertEquals(UiContent.EmptyAlerts, awaitItem())
             awaitComplete()
         }
@@ -148,7 +151,6 @@ class RealUiContentRetrieverTest {
         )
 
         retriever.uiContentFlow.test {
-            assertEquals(UiContent.InProgress, awaitItem())
             assertEquals(UiContent.EmptyAlerts, awaitItem())
             awaitComplete()
         }
@@ -181,7 +183,6 @@ class RealUiContentRetrieverTest {
         )
 
         retriever.uiContentFlow.test {
-            assertEquals(UiContent.InProgress, awaitItem())
             assertEquals(
                 UiContent.Content(
                     alerts = persistentListOf(
@@ -222,7 +223,6 @@ class RealUiContentRetrieverTest {
         )
 
         retriever.uiContentFlow.test {
-            assertEquals(UiContent.InProgress, awaitItem())
             assertEquals(
                 UiContent.Content(
                     alerts = persistentListOf(
@@ -257,7 +257,6 @@ class RealUiContentRetrieverTest {
         )
 
         retriever.uiContentFlow.test {
-            assertEquals(UiContent.InProgress, awaitItem())
             assertEquals(
                 UiContent.Content(
                     alerts = persistentListOf(
@@ -299,7 +298,6 @@ class RealUiContentRetrieverTest {
         )
 
         retriever.uiContentFlow.test {
-            assertEquals(UiContent.InProgress, awaitItem())
             assertEquals(
                 UiContent.Content(
                     alerts = persistentListOf(
@@ -340,7 +338,6 @@ class RealUiContentRetrieverTest {
         )
 
         retriever.uiContentFlow.test {
-            assertEquals(UiContent.InProgress, awaitItem())
             assertEquals(
                 UiContent.Content(
                     alerts = persistentListOf(
@@ -370,7 +367,6 @@ class RealUiContentRetrieverTest {
         )
 
         retriever.uiContentFlow.test {
-            assertEquals(UiContent.InProgress, awaitItem())
             assertEquals(
                 UiContent.Content(
                     alerts = persistentListOf(uiArrivalAlert, uiProximityAlert)
@@ -379,6 +375,248 @@ class RealUiContentRetrieverTest {
             )
             awaitComplete()
         }
+    }
+
+    @Test
+    fun uiContentFlowEmitsEmptyAlertsWhenTransitioningFromSomeToEmptyAlerts() = runTest {
+        val retriever = createRetriever(
+            featureRepository = featureRepositoryWithAllFeaturesEnabled,
+            alertsRepository = FakeAlertsRepository(
+                onAllAlertsFlow = {
+                    flow {
+                        emit(listOf(arrivalAlert, proximityAlert))
+                        delay(1.milliseconds)
+                        emit(null)
+                    }
+                }
+            ),
+            servicesRepository = servicesRepositoryWithServices,
+            stopDetailsRetriever = stopDetailsRetrieverWithStopDetails
+        )
+
+        retriever.uiContentFlow.test {
+            skipItems(1)
+            assertEquals(UiContent.EmptyAlerts, awaitItem())
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun uiContentFlowEmitsNewItemWhenAlertsChange() = runTest {
+        val retriever = createRetriever(
+            featureRepository = featureRepositoryWithAllFeaturesEnabled,
+            alertsRepository = FakeAlertsRepository(
+                onAllAlertsFlow = {
+                    flow {
+                        emit(listOf(arrivalAlert, proximityAlert))
+                        delay(1.milliseconds)
+                        emit(
+                            listOf(
+                                arrivalAlert.copy(timeTriggerMinutes = 10),
+                                proximityAlert.copy(distanceFromMeters = 500)
+                            )
+                        )
+                    }
+                }
+            ),
+            servicesRepository = servicesRepositoryWithServices,
+            stopDetailsRetriever = stopDetailsRetrieverWithStopDetails
+        )
+
+        retriever.uiContentFlow.test {
+            skipItems(1)
+            assertEquals(
+                UiContent.Content(
+                    alerts = persistentListOf(
+                        uiArrivalAlert.copy(timeTriggerMinutes = 10),
+                        uiProximityAlert.copy(distanceFromMeters = 500)
+                    )
+                ),
+                awaitItem()
+            )
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun uiContentFlowEmitsNewItemWhenServiceColoursChange() = runTest {
+        val retriever = createRetriever(
+            featureRepository = featureRepositoryWithAllFeaturesEnabled,
+            alertsRepository = FakeAlertsRepository(
+                onAllAlertsFlow = {
+                    flowOf(
+                        listOf(arrivalAlert, proximityAlert)
+                    )
+                }
+            ),
+            servicesRepository = FakeServicesRepository(
+                onGetColoursForServicesFlow = {
+                    assertNull(it)
+                    flow {
+                        emit(
+                            mapOf(
+                                ServiceDescriptor(
+                                    serviceName = "1",
+                                    operatorCode = "TEST1"
+                                ) to ServiceColours(
+                                    colourPrimary = 1,
+                                    colourOnPrimary = 2
+                                )
+                            )
+                        )
+                        delay(1.milliseconds)
+                        emit(
+                            mapOf(
+                                ServiceDescriptor(
+                                    serviceName = "1",
+                                    operatorCode = "TEST1"
+                                ) to ServiceColours(
+                                    colourPrimary = 3,
+                                    colourOnPrimary = 4
+                                )
+                            )
+                        )
+                    }
+                }
+            ),
+            stopDetailsRetriever = stopDetailsRetrieverWithStopDetails
+        )
+
+        retriever.uiContentFlow.test {
+            skipItems(1)
+            assertEquals(
+                UiContent.Content(
+                    alerts = persistentListOf(
+                        uiArrivalAlert.copy(
+                            services = persistentListOf(
+                                UiServiceName(
+                                    serviceName = "1",
+                                    colours = UiServiceColours(
+                                        backgroundColour = 3,
+                                        textColour = 4
+                                    )
+                                )
+                            )
+                        ),
+                        uiProximityAlert
+                    )
+                ),
+                awaitItem()
+            )
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun uiContentFlowEmitsNewItemWhenStopDetailsChange() = runTest {
+        val retriever = createRetriever(
+            featureRepository = featureRepositoryWithAllFeaturesEnabled,
+            alertsRepository = FakeAlertsRepository(
+                onAllAlertsFlow = {
+                    flowOf(
+                        listOf(arrivalAlert, proximityAlert)
+                    )
+                }
+            ),
+            servicesRepository = servicesRepositoryWithServices,
+            stopDetailsRetriever = FakeUiStopDetailsRetriever(
+                onGetUiStopDetailsFlow = {
+                    assertEquals(
+                        setOf(
+                            "123456".toNaptanStopIdentifier(),
+                            "987654".toNaptanStopIdentifier()
+                        ),
+                        it
+                    )
+                    flow {
+                        emit(
+                            mapOf(
+                                "123456".toNaptanStopIdentifier() to uiStopDetails1,
+                                "987654".toNaptanStopIdentifier() to uiStopDetails2
+                            )
+                        )
+                        delay(1.milliseconds)
+                        emit(
+                            mapOf(
+                                "123456".toNaptanStopIdentifier() to uiStopDetails1.copy(
+                                    orientation = StopOrientation.NORTH_WEST
+                                ),
+                                "987654".toNaptanStopIdentifier() to uiStopDetails2
+                            )
+                        )
+                    }
+                }
+            )
+        )
+
+        retriever.uiContentFlow.test {
+            skipItems(1)
+            assertEquals(
+                UiContent.Content(
+                    alerts = persistentListOf(
+                        uiArrivalAlert.copy(
+                            stopDetails = uiStopDetails1.copy(
+                                orientation = StopOrientation.NORTH_WEST
+                            )
+                        ),
+                        uiProximityAlert
+                    )
+                ),
+                awaitItem()
+            )
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun uiContentFlowEmitsNewItemWhenAlertStopsChange() = runTest {
+        val stopDetailsMapQueue = ArrayDeque<Map<StopIdentifier, UiStopDetails>>().apply {
+            add(
+                mapOf(
+                    "123456".toNaptanStopIdentifier() to uiStopDetails1,
+                    "987654".toNaptanStopIdentifier() to uiStopDetails2
+                )
+            )
+            add(
+                mapOf("987654".toNaptanStopIdentifier() to uiStopDetails2)
+            )
+        }
+        val retriever = createRetriever(
+            featureRepository = featureRepositoryWithAllFeaturesEnabled,
+            alertsRepository = FakeAlertsRepository(
+                onAllAlertsFlow = {
+                    flow {
+                        emit(listOf(arrivalAlert, proximityAlert))
+                        delay(1.milliseconds)
+                        emit(listOf(proximityAlert))
+                    }
+                }
+            ),
+            servicesRepository = servicesRepositoryWithServices,
+            stopDetailsRetriever = FakeUiStopDetailsRetriever(
+                onGetUiStopDetailsFlow = {
+                    val stopDetailsMap = stopDetailsMapQueue.removeFirst()
+                    assertEquals(stopDetailsMap.keys, it)
+                    flow {
+                        // Emit then await cancellation to simulate what Room would do.
+                        emit(stopDetailsMap)
+                        awaitCancellation()
+                    }
+                }
+            )
+        )
+
+        retriever.uiContentFlow.test {
+            skipItems(1)
+            assertEquals(
+                UiContent.Content(
+                    alerts = persistentListOf(uiProximityAlert)
+                ),
+                awaitItem()
+            )
+            ensureAllEventsConsumed()
+        }
+        assertTrue(stopDetailsMapQueue.isEmpty())
     }
 
     private fun createRetriever(

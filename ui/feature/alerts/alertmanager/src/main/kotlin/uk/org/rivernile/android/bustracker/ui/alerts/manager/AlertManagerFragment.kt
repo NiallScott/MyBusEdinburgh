@@ -31,6 +31,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -96,7 +97,17 @@ public class AlertManagerFragment : Fragment() {
     }
 
     private fun handleOnShowLocationSettings() {
-        callbacks?.onShowSystemLocationPreferences()
+        callbacks?.let { cb ->
+            if (!cb.onShowSystemLocationPreferences()) {
+                Toast
+                    .makeText(
+                        requireContext(),
+                        R.string.alertmanager_error_no_location_settings,
+                        Toast.LENGTH_SHORT
+                    )
+                    .show()
+            }
+        }
     }
 
     /**
