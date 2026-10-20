@@ -31,10 +31,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
 import kotlinx.collections.immutable.persistentListOf
 import org.junit.Rule
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
@@ -76,6 +78,35 @@ class AboutActivityTest {
             .performClick()
 
         assertEquals(1, navigateUpTracker.numberOfInvocations)
+    }
+
+    @Test
+    fun longClickingOnNavigateUpIconShowsTooltip() {
+        composeTestRule.setContent {
+            MyBusThemeWithCompositionLocals {
+                AboutScreenWithState(
+                    state = UiState(items = persistentListOf()),
+                    onNavigateUp = { },
+                    onItemClicked = { },
+                    onCreditsDialogDismissed = { },
+                    onOpenSourceLicenceDialogDismissed = { },
+                    onActionLaunched = { }
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithContentDescription(
+                composeTestRule.activity.getString(Rcore.string.navigate_up)
+            )
+            .performTouchInput {
+                longClick()
+            }
+        composeTestRule
+            .onNodeWithText(
+                composeTestRule.activity.getString(Rcore.string.navigate_up)
+            )
+            .assertExists()
     }
 
     @Test

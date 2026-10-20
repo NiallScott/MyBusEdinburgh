@@ -41,13 +41,17 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.longClick
+import androidx.compose.ui.test.onChild
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToKey
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.persistentListOf
 import org.junit.Rule
 import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
+import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
@@ -87,6 +91,42 @@ class ServicesChooserDialogFragmentKtTest {
             .performClick()
 
         assertEquals(1, clickCounter.count)
+    }
+
+    @Test
+    fun closeButtonLongClickShowsTooltip() {
+        composeTestRule.setContent {
+            MyBusTheme {
+                ServicesChooserDialogContentWithState(
+                    appBarTitle = "Test",
+                    state = UiState(
+                        content = UiContent.InProgress,
+                        isClearAllButtonEnabled = false
+                    ),
+                    onCloseClick = { },
+                    onClearAllClick = { },
+                    onServiceClick = { }
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_CLOSE_BUTTON)
+            .performTouchInput {
+                longClick()
+            }
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_CLOSE_BUTTON_TOOLTIP)
+            .apply {
+                assertExists()
+
+                onChild()
+                    .assertTextEquals(
+                        composeTestRule
+                            .activity
+                            .getString(Rcore.string.close)
+                    )
+                }
     }
 
     @Test

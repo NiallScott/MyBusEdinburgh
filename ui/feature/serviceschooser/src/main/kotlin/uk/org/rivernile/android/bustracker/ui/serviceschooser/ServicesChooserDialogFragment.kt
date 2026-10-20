@@ -59,10 +59,15 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -189,6 +194,7 @@ public class ServicesChooserDialogFragment : BottomSheetDialogFragment() {
 }
 
 internal const val TEST_TAG_CLOSE_BUTTON = "button-close"
+internal const val TEST_TAG_CLOSE_BUTTON_TOOLTIP = "button-close-tooltip"
 internal const val TEST_TAG_TITLE = "title"
 internal const val TEST_TAG_CLEAR_ALL_BUTTON = "button-clear-all"
 internal const val TEST_TAG_CONTENT_PROGRESS = "content-progress"
@@ -320,22 +326,43 @@ private fun ServicesChooserTopAppBar(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CloseButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    IconButton(
-        onClick = onClick,
-        modifier = modifier
-            .semantics {
-                testTag = TEST_TAG_CLOSE_BUTTON
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
+            positioning = TooltipAnchorPosition.Below
+        ),
+        tooltip = {
+            PlainTooltip(
+                modifier = Modifier
+                    .semantics {
+                        testTag = TEST_TAG_CLOSE_BUTTON_TOOLTIP
+                    }
+            ) {
+                Text(
+                    text = stringResource(Rcore.string.close)
+                )
             }
+        },
+        state = rememberTooltipState(),
+        modifier = modifier
     ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_action_close),
-            contentDescription = stringResource(Rcore.string.close)
-        )
+        IconButton(
+            onClick = onClick,
+            modifier = Modifier
+                .semantics {
+                    testTag = TEST_TAG_CLOSE_BUTTON
+                }
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_action_close),
+                contentDescription = stringResource(Rcore.string.close)
+            )
+        }
     }
 }
 
