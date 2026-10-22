@@ -39,6 +39,7 @@ import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Tests for [ServicesChooserViewModel].
@@ -52,10 +53,13 @@ class ServicesChooserViewModelTest {
     fun uiStateFlowEmitsValues() = runTest {
         val viewModel = createViewModel(
             state = FakeState(
+                onActionFlow = {
+                    flowOf(UiAction.Close)
+                },
                 onHasSelectedServicesFlow = {
                     flow {
                         emit(false)
-                        delay(2L)
+                        delay(2L.milliseconds)
                         emit(true)
                     }
                 }
@@ -64,7 +68,7 @@ class ServicesChooserViewModelTest {
                 onUiContentFlow = {
                     flow {
                         emit(UiContent.InProgress)
-                        delay(1L)
+                        delay(1L.milliseconds)
                         emit(
                             UiContent.Content(
                                 items = persistentListOf(
@@ -95,6 +99,7 @@ class ServicesChooserViewModelTest {
             assertEquals(
                 UiState(
                     content = UiContent.InProgress,
+                    action = UiAction.Close,
                     isClearAllButtonEnabled = false
                 ),
                 awaitItem()
@@ -120,6 +125,7 @@ class ServicesChooserViewModelTest {
                             )
                         )
                     ),
+                    action = UiAction.Close,
                     isClearAllButtonEnabled = false
                 ),
                 awaitItem()
@@ -145,6 +151,7 @@ class ServicesChooserViewModelTest {
                             )
                         )
                     ),
+                    action = UiAction.Close,
                     isClearAllButtonEnabled = true
                 ),
                 awaitItem()
@@ -154,46 +161,17 @@ class ServicesChooserViewModelTest {
     }
 
     @Test
-    fun selectedServicesReturnsValueFromState() = runTest {
-        val selectedServices = setOf(
-            ServiceDescriptor(
-                serviceName = "1",
-                operatorCode = "TEST1"
-            ),
-            ServiceDescriptor(
-                serviceName = "1",
-                operatorCode = "TEST1"
-            )
-        )
-        val viewModel = createViewModel(
-            state = FakeState(
-                onSelectedServices = { selectedServices },
-                onHasSelectedServicesFlow = { flowOf(true) }
-            ),
-            uiContentFetcher = FakeUiContentFetcher(
-                onUiContentFlow = { flowOf(UiContent.InProgress) }
-            )
-        )
-
-        val result = viewModel.selectedServices
-
-        assertEquals(selectedServices, result)
-    }
-
-    @Test
     fun onServiceClickedTogglesValueInState() = runTest {
-        val clickedServices = mutableListOf<ServiceDescriptor>()
+        val serviceClickTracker = ItemTracker<ServiceDescriptor>()
         val service = ServiceDescriptor(
             serviceName = "1",
             operatorCode = "TEST1"
         )
         val viewModel = createViewModel(
             state = FakeState(
-                onToggleServiceSelectedState = { clickedServices += it },
+                onActionFlow = { flowOf(null) },
+                onToggleServiceSelectedState = serviceClickTracker,
                 onHasSelectedServicesFlow = { flowOf(false) }
-            ),
-            uiContentFetcher = FakeUiContentFetcher(
-                onUiContentFlow = { flowOf(UiContent.InProgress) }
             )
         )
 
@@ -201,7 +179,26 @@ class ServicesChooserViewModelTest {
 
         assertEquals(
             listOf(service),
-            clickedServices
+            serviceClickTracker.items
+        )
+    }
+
+    @Test
+    fun onCloseClickedSetsCloseAction() = runTest {
+        val actionTracker = ItemTracker<UiAction?>()
+        val viewModel = createViewModel(
+            state = FakeState(
+                onActionFlow = { flowOf(null) },
+                onSetAction = actionTracker,
+                onHasSelectedServicesFlow = { flowOf(false) }
+            )
+        )
+
+        viewModel.onCloseClicked()
+
+        assertEquals(
+            listOf(UiAction.Close),
+            actionTracker.items
         )
     }
 
@@ -210,11 +207,9 @@ class ServicesChooserViewModelTest {
         var clearAllClickedCount = 0
         val viewModel = createViewModel(
             state = FakeState(
+                onActionFlow = { flowOf(null) },
                 onClearAllSelectedServices = { clearAllClickedCount++ },
                 onHasSelectedServicesFlow = { flowOf(false) }
-            ),
-            uiContentFetcher = FakeUiContentFetcher(
-                onUiContentFlow = { flowOf(UiContent.InProgress) }
             )
         )
 
@@ -223,9 +218,85 @@ class ServicesChooserViewModelTest {
         assertEquals(1, clearAllClickedCount)
     }
 
+    @Test
+    fun onApplyClickedSetsDispatchResultAndCloseActionWhenSelectedServicesIsEmpty() = runTest {
+        val actionTracker = ItemTracker<UiAction?>()
+        val viewModel = createViewModel(
+            state = FakeState(
+                onActionFlow = { flowOf(null) },
+                onSetAction = actionTracker,
+                onSelectedServices = { emptySet() },
+                onHasSelectedServicesFlow = { flowOf(false) }
+            )
+        )
+
+        viewModel.onApplyClicked()
+
+        assertEquals(
+            listOf(
+                UiAction.DispatchResultAndClose(
+                    selectedServices = emptySet()
+                )
+            ),
+            actionTracker.items
+        )
+    }
+
+    @Test
+    fun onApplyClickedSetsDispatchResultAndCloseActionWhenSelectedServicesIsPopulated() = runTest {
+        val service = ServiceDescriptor(
+            serviceName = "1",
+            operatorCode = "TEST1"
+        )
+        val actionTracker = ItemTracker<UiAction?>()
+        val viewModel = createViewModel(
+            state = FakeState(
+                onActionFlow = { flowOf(null) },
+                onSetAction = actionTracker,
+                onSelectedServices = { setOf(service) },
+                onHasSelectedServicesFlow = { flowOf(false) }
+            )
+        )
+
+        viewModel.onApplyClicked()
+
+        assertEquals(
+            listOf(
+                UiAction.DispatchResultAndClose(
+                    selectedServices = setOf(service)
+                )
+            ),
+            actionTracker.items
+        )
+    }
+
+    @Test
+    fun onActionLaunchedSetsNullAction() = runTest {
+        val actionTracker = ItemTracker<UiAction?>()
+        val viewModel = createViewModel(
+            state = FakeState(
+                onActionFlow = { flowOf(null) },
+                onSetAction = actionTracker,
+                onHasSelectedServicesFlow = { flowOf(false) }
+            )
+        )
+
+        viewModel.onActionLaunched()
+
+        assertEquals(
+            listOf(null),
+            actionTracker.items
+        )
+    }
+
     private fun TestScope.createViewModel(
-        state: State = FakeState(),
-        uiContentFetcher: UiContentFetcher = FakeUiContentFetcher()
+        state: State = FakeState(
+            onActionFlow = { flowOf(null) },
+            onHasSelectedServicesFlow = { flowOf(false) }
+        ),
+        uiContentFetcher: UiContentFetcher = FakeUiContentFetcher(
+            onUiContentFlow = { flowOf(UiContent.InProgress) }
+        )
     ): ServicesChooserViewModel {
         return ServicesChooserViewModel(
             state = state,
@@ -233,5 +304,15 @@ class ServicesChooserViewModelTest {
             defaultCoroutineDispatcher = UnconfinedTestDispatcher(scheduler = testScheduler),
             viewModelCoroutineScope = backgroundScope
         )
+    }
+
+    private class ItemTracker<T> : (T) -> Unit {
+
+        val items get() = _items.toList()
+        private val _items = mutableListOf<T>()
+
+        override fun invoke(p1: T) {
+            _items += p1
+        }
     }
 }

@@ -52,7 +52,7 @@ import javax.inject.Inject
 @HiltViewModel
 internal class ServicesChooserViewModel @Inject constructor(
     private val state: State,
-    uiContentFetcher: UiContentFetcher,
+    private val uiContentFetcher: UiContentFetcher,
     @param:ForDefaultDispatcher private val defaultCoroutineDispatcher: CoroutineDispatcher,
     @ForViewModelCoroutineScope viewModelCoroutineScope: CoroutineScope
 ) : ViewModel(viewModelCoroutineScope) {
@@ -60,20 +60,13 @@ internal class ServicesChooserViewModel @Inject constructor(
     /**
      * This emits the current state of the UI.
      */
-    val uiStateFlow = uiContentFetcher
-        .uiContentFlow
-        .combine(state.hasSelectedServicesFlow, ::UiState)
+    val uiStateFlow = _uiStateFlow
         .flowOn(defaultCoroutineDispatcher)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
             initialValue = UiState()
         )
-
-    /**
-     * The currently selected services.
-     */
-    val selectedServices get() = state.selectedServices
 
     /**
      * This should be called when a service has been clicked.
@@ -85,9 +78,39 @@ internal class ServicesChooserViewModel @Inject constructor(
     }
 
     /**
+     * This should be called when the close button has been clicked.
+     */
+    fun onCloseClicked() {
+        state.action = UiAction.Close
+    }
+
+    /**
      * This should be called when the clear all button has been clicked.
      */
     fun onClearAllClicked() {
         state.clearAllSelectedServices()
     }
+
+    /**
+     * This should be called when the apply button has been clicked.
+     */
+    fun onApplyClicked() {
+        state.action = UiAction.DispatchResultAndClose(
+            selectedServices = state.selectedServices
+        )
+    }
+
+    /**
+     * This should be called when the action has been launched.
+     */
+    fun onActionLaunched() {
+        state.action = null
+    }
+
+    private val _uiStateFlow get() = combine(
+        uiContentFetcher.uiContentFlow,
+        state.actionFlow,
+        state.hasSelectedServicesFlow,
+        ::UiState
+    )
 }

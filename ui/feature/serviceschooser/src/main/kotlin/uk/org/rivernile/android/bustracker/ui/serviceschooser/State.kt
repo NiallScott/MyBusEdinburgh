@@ -28,7 +28,10 @@ package uk.org.rivernile.android.bustracker.ui.serviceschooser
 
 import androidx.lifecycle.SavedStateHandle
 import dagger.hilt.android.scopes.ViewModelScoped
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -42,6 +45,17 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 internal interface State {
+
+    /**
+     * This emits the current [UiAction] to be performed. `null` will be emitted when no action is
+     * to be performed.
+     */
+    val actionFlow: Flow<UiAction?>
+
+    /**
+     * The current [UiAction] in progress, if any.
+     */
+    var action: UiAction?
 
     /**
      * A [Flow] which emits a [Set] of the currently selected services.
@@ -77,6 +91,15 @@ internal class RealState @Inject constructor(
     private val savedState: SavedStateHandle
 ) : State {
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override val actionFlow get() = _actionFlow.asFlow()
+
+    override var action: UiAction?
+        get() = _actionFlow.value
+        set(value) {
+            _actionFlow.value = value
+        }
+
     private val _selectedServicesFlow = savedState
         .getMutableStateFlow(STATE_SELECTED_SERVICES, defaultSelectedServices)
 
@@ -107,6 +130,8 @@ internal class RealState @Inject constructor(
     override fun clearAllSelectedServices() {
         _selectedServicesFlow.value = null
     }
+
+    private val _actionFlow = MutableStateFlow<UiAction?>(null)
 
     private val defaultSelectedServices get() = savedState
         .get<ServicesChooserParams?>(ARG_PARAMS)

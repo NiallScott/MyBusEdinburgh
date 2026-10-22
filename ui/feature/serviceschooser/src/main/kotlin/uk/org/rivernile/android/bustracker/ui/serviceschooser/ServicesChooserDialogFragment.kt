@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.ui.serviceschooser
 
-import android.content.DialogInterface
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -61,7 +60,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
@@ -69,6 +67,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -88,7 +87,6 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.core.os.BundleCompat
-import androidx.fragment.app.viewModels
 import androidx.fragment.compose.content
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -142,8 +140,6 @@ public class ServicesChooserDialogFragment : BottomSheetDialogFragment() {
         }
     }
 
-    private val viewModel by viewModels<ServicesChooserViewModel>()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -164,23 +160,22 @@ public class ServicesChooserDialogFragment : BottomSheetDialogFragment() {
             MyBusTheme {
                 ServicesChooserDialogContent(
                     appBarTitle = stringResource(titleResId),
-                    onCloseClick = ::dismiss,
-                    viewModel = viewModel
+                    onClose = ::dismiss,
+                    onDispatchResultAndClose = ::handleDispatchResultAndClose,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .consumeWindowInsets(WindowInsets.safeContent.only(WindowInsetsSides.Top))
+                        .consumeWindowInsets(
+                            WindowInsets.safeContent.only(WindowInsetsSides.Horizontal)
+                        )
                 )
             }
         }
     }
 
-    override fun onDismiss(dialog: DialogInterface) {
-        super.onDismiss(dialog)
-
-        dispatchSelectedServices()
-    }
-
     override fun getTheme(): Int = R.style.ThemeOverlay_MyBus_BottomSheetDialog_Scrollable
 
-    private fun dispatchSelectedServices() {
-        val selectedServices = viewModel.selectedServices
+    private fun handleDispatchResultAndClose(selectedServices: Set<ServiceDescriptor>) {
         val chosenServices = ArrayList<ParcelableServiceDescriptor>(selectedServices.size)
         selectedServices.mapTo(chosenServices, ServiceDescriptor::toParcelableServiceDescriptor)
 
@@ -190,6 +185,8 @@ public class ServicesChooserDialogFragment : BottomSheetDialogFragment() {
                 putParcelableArrayList(RESULT_CHOSEN_SERVICES, chosenServices)
             }
         )
+
+        dismiss()
     }
 }
 
@@ -197,6 +194,9 @@ internal const val TEST_TAG_CLOSE_BUTTON = "button-close"
 internal const val TEST_TAG_CLOSE_BUTTON_TOOLTIP = "button-close-tooltip"
 internal const val TEST_TAG_TITLE = "title"
 internal const val TEST_TAG_CLEAR_ALL_BUTTON = "button-clear-all"
+internal const val TEST_TAG_CLEAR_ALL_BUTTON_TOOLTIP = "button-clear-all-tooltip"
+internal const val TEST_TAG_APPLY_BUTTON = "button-apply"
+internal const val TEST_TAG_APPLY_BUTTON_TOOLTIP = "button-apply-tooltip"
 internal const val TEST_TAG_CONTENT_PROGRESS = "content-progress"
 internal const val TEST_TAG_CONTENT_CONTENT = "content-content"
 internal const val TEST_TAG_ERROR_NO_SERVICES_GLOBAL = "error-no-services-global"
@@ -210,23 +210,24 @@ private const val CONTENT_TYPE_SERVICE = "service"
 @Composable
 private fun ServicesChooserDialogContent(
     appBarTitle: String,
-    onCloseClick: () -> Unit,
+    onClose: () -> Unit,
+    onDispatchResultAndClose: (Set<ServiceDescriptor>) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ServicesChooserViewModel = viewModel(),
 ) {
     val uiState by viewModel.uiStateFlow.collectAsStateWithLifecycle()
-    val windowInsets = WindowInsets.safeContent
 
     ServicesChooserDialogContentWithState(
         appBarTitle = appBarTitle,
         state = uiState,
-        onCloseClick = onCloseClick,
+        onCloseClick = viewModel::onCloseClicked,
         onClearAllClick = viewModel::onClearAllClicked,
+        onApplyClick = viewModel::onApplyClicked,
         onServiceClick = viewModel::onServiceClicked,
+        onActionLaunched = viewModel::onActionLaunched,
+        onClose = onClose,
+        onDispatchResultAndClose = onDispatchResultAndClose,
         modifier = modifier
-            .fillMaxWidth()
-            .consumeWindowInsets(windowInsets.only(WindowInsetsSides.Top))
-            .consumeWindowInsets(windowInsets.only(WindowInsetsSides.Horizontal))
     )
 }
 
@@ -237,7 +238,12 @@ private fun ServicesChooserDialogContent(
  * @param state The state to be rendered.
  * @param onCloseClick This is called when the close button has been clicked.
  * @param onClearAllClick This is called when the 'Clear all' button has been clicked.
+ * @param onApplyClick This is called when the apply button has been clicked.
  * @param onServiceClick This is called when a service has been clicked.
+ * @param onActionLaunched This is called when an action has been launched.
+ * @param onClose This is called when the services chooser should be closed.
+ * @param onDispatchResultAndClose This is called when the services chooser should dispatch its
+ * result and close itself.
  * @param modifier Any [Modifier]s which should be applied.
  */
 @Composable
@@ -246,7 +252,11 @@ internal fun ServicesChooserDialogContentWithState(
     state: UiState,
     onCloseClick: () -> Unit,
     onClearAllClick: () -> Unit,
+    onApplyClick: () -> Unit,
     onServiceClick: (ServiceDescriptor) -> Unit,
+    onActionLaunched: () -> Unit,
+    onClose: () -> Unit,
+    onDispatchResultAndClose: (Set<ServiceDescriptor>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -256,7 +266,8 @@ internal fun ServicesChooserDialogContentWithState(
             appBarTitle = appBarTitle,
             isClearAllButtonEnabled = state.isClearAllButtonEnabled,
             onCloseClick = onCloseClick,
-            onClearAllClick = onClearAllClick
+            onClearAllClick = onClearAllClick,
+            onApplyClick = onApplyClick
         )
 
         val windowInsets = WindowInsets.safeContent
@@ -288,6 +299,15 @@ internal fun ServicesChooserDialogContentWithState(
             )
         }
     }
+
+    state.action?.let {
+        LaunchAction(
+            action = it,
+            onActionLaunched = onActionLaunched,
+            onClose = onClose,
+            onDispatchResultAndClose = onDispatchResultAndClose
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -297,6 +317,7 @@ private fun ServicesChooserTopAppBar(
     isClearAllButtonEnabled: Boolean,
     onCloseClick: () -> Unit,
     onClearAllClick: () -> Unit,
+    onApplyClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     TopAppBar(
@@ -315,6 +336,10 @@ private fun ServicesChooserTopAppBar(
             ClearAllButton(
                 onClick = onClearAllClick,
                 enabled = isClearAllButtonEnabled
+            )
+
+            ApplyButton(
+                onClick = onApplyClick
             )
         },
         colors = TopAppBarDefaults
@@ -382,23 +407,86 @@ private fun AppBarTitleText(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ClearAllButton(
     onClick: () -> Unit,
     enabled: Boolean,
     modifier: Modifier = Modifier
 ) {
-    TextButton(
-        onClick = onClick,
-        enabled = enabled,
-        modifier = modifier
-            .semantics {
-                testTag = TEST_TAG_CLEAR_ALL_BUTTON
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
+            positioning = TooltipAnchorPosition.Below
+        ),
+        tooltip = {
+            PlainTooltip(
+                modifier = Modifier
+                    .semantics {
+                        testTag = TEST_TAG_CLEAR_ALL_BUTTON_TOOLTIP
+                    }
+            ) {
+                Text(
+                    text = stringResource(R.string.serviceschooserdialog_btn_clear_all)
+                )
             }
+        },
+        state = rememberTooltipState(),
+        modifier = modifier,
+        enableUserInput = enabled
     ) {
-        Text(
-            text = stringResource(R.string.serviceschooserdialog_btn_clear_all)
-        )
+        IconButton(
+            onClick = onClick,
+            enabled = enabled,
+            modifier = Modifier
+                .semantics {
+                    testTag = TEST_TAG_CLEAR_ALL_BUTTON
+                }
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_action_clear_all),
+                contentDescription = stringResource(R.string.serviceschooserdialog_btn_clear_all)
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ApplyButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
+            positioning = TooltipAnchorPosition.Below
+        ),
+        tooltip = {
+            PlainTooltip(
+                modifier = Modifier
+                    .semantics {
+                        testTag = TEST_TAG_APPLY_BUTTON_TOOLTIP
+                    }
+            ) {
+                Text(
+                    text = stringResource(R.string.serviceschooserdialog_btn_apply)
+                )
+            }
+        },
+        state = rememberTooltipState(),
+        modifier = modifier
+    ) {
+        IconButton(
+            onClick = onClick,
+            modifier = Modifier
+                .semantics {
+                    testTag = TEST_TAG_APPLY_BUTTON
+                }
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_action_done),
+                contentDescription = stringResource(R.string.serviceschooserdialog_btn_apply)
+            )
+        }
     }
 }
 
@@ -540,6 +628,23 @@ private fun ErrorText(
     )
 }
 
+@Composable
+private fun LaunchAction(
+    action: UiAction,
+    onActionLaunched: () -> Unit,
+    onClose: () -> Unit,
+    onDispatchResultAndClose: (Set<ServiceDescriptor>) -> Unit
+) {
+    SideEffect(action) {
+        when (action) {
+            is UiAction.Close -> onClose()
+            is UiAction.DispatchResultAndClose -> onDispatchResultAndClose(action.selectedServices)
+        }
+
+        onActionLaunched()
+    }
+}
+
 private fun calculateKeyForItem(item: UiServiceChooserItem): String {
     return when (item) {
         is UiServiceChooserItem.Operator.Unknown -> KEY_UNKNOWN_OPERATOR
@@ -587,7 +692,11 @@ private fun ServicesChooserDialogContentPreview(
             state = state,
             onCloseClick = { },
             onClearAllClick = { },
+            onApplyClick = { },
             onServiceClick = { },
+            onActionLaunched = { },
+            onClose = { },
+            onDispatchResultAndClose = { },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(

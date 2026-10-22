@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.ui.serviceschooser
 
 import kotlinx.collections.immutable.toPersistentList
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -56,7 +55,6 @@ internal class RealUiContentFetcher @Inject constructor(
     private val comparator: Comparator<String>
 ) : UiContentFetcher {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override val uiContentFlow get() = _uiContentFlow
         .onStart { emit(UiContent.InProgress) }
         .distinctUntilChanged()

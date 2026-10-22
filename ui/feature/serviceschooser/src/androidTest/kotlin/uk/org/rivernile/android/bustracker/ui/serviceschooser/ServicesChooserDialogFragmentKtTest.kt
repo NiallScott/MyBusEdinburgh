@@ -30,9 +30,11 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotDisplayed
@@ -69,19 +71,42 @@ class ServicesChooserDialogFragmentKtTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun closeButtonClicksInvokesOnCloseLambda() {
-        val clickCounter = ClickCounter()
+    fun closeButtonHasContentDescription() {
         composeTestRule.setContent {
             MyBusTheme {
-                ServicesChooserDialogContentWithState(
+                ServicesChooserDialogContentWithStateWithDefaults(
                     appBarTitle = "Test",
                     state = UiState(
                         content = UiContent.InProgress,
+                        action = null,
+                        isClearAllButtonEnabled = false
+                    )
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_CLOSE_BUTTON)
+            .assertContentDescriptionEquals(
+                composeTestRule
+                    .activity
+                    .getString(Rcore.string.close)
+            )
+    }
+
+    @Test
+    fun closeButtonClickInvokesOnCloseClickLambda() {
+        val clickCounter = InvocationCounter()
+        composeTestRule.setContent {
+            MyBusTheme {
+                ServicesChooserDialogContentWithStateWithDefaults(
+                    appBarTitle = "Test",
+                    state = UiState(
+                        content = UiContent.InProgress,
+                        action = null,
                         isClearAllButtonEnabled = false
                     ),
-                    onCloseClick = clickCounter,
-                    onClearAllClick = { },
-                    onServiceClick = { }
+                    onCloseClick = clickCounter
                 )
             }
         }
@@ -97,15 +122,13 @@ class ServicesChooserDialogFragmentKtTest {
     fun closeButtonLongClickShowsTooltip() {
         composeTestRule.setContent {
             MyBusTheme {
-                ServicesChooserDialogContentWithState(
+                ServicesChooserDialogContentWithStateWithDefaults(
                     appBarTitle = "Test",
                     state = UiState(
                         content = UiContent.InProgress,
+                        action = null,
                         isClearAllButtonEnabled = false
-                    ),
-                    onCloseClick = { },
-                    onClearAllClick = { },
-                    onServiceClick = { }
+                    )
                 )
             }
         }
@@ -133,15 +156,13 @@ class ServicesChooserDialogFragmentKtTest {
     fun titleShowsAppBarTitleText() {
         composeTestRule.setContent {
             MyBusTheme {
-                ServicesChooserDialogContentWithState(
+                ServicesChooserDialogContentWithStateWithDefaults(
                     appBarTitle = "Test title",
                     state = UiState(
                         content = UiContent.InProgress,
+                        action = null,
                         isClearAllButtonEnabled = false
-                    ),
-                    onCloseClick = { },
-                    onClearAllClick = { },
-                    onServiceClick = { }
+                    )
                 )
             }
         }
@@ -152,19 +173,42 @@ class ServicesChooserDialogFragmentKtTest {
     }
 
     @Test
-    fun clearAllButtonIsDisabledWhenStateIsDisabled() {
-        val clickCounter = ClickCounter()
+    fun clearAllButtonHasContentDescription() {
         composeTestRule.setContent {
             MyBusTheme {
-                ServicesChooserDialogContentWithState(
+                ServicesChooserDialogContentWithStateWithDefaults(
                     appBarTitle = "Test",
                     state = UiState(
                         content = UiContent.InProgress,
+                        action = null,
+                        isClearAllButtonEnabled = true
+                    )
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_CLEAR_ALL_BUTTON)
+            .assertContentDescriptionEquals(
+                composeTestRule
+                    .activity
+                    .getString(R.string.serviceschooserdialog_btn_clear_all)
+            )
+    }
+
+    @Test
+    fun clearAllButtonIsDisabledWhenStateIsDisabled() {
+        val clickCounter = InvocationCounter()
+        composeTestRule.setContent {
+            MyBusTheme {
+                ServicesChooserDialogContentWithStateWithDefaults(
+                    appBarTitle = "Test",
+                    state = UiState(
+                        content = UiContent.InProgress,
+                        action = null,
                         isClearAllButtonEnabled = false
                     ),
-                    onCloseClick = { },
-                    onClearAllClick = clickCounter,
-                    onServiceClick = { }
+                    onClearAllClick = clickCounter
                 )
             }
         }
@@ -180,19 +224,43 @@ class ServicesChooserDialogFragmentKtTest {
     }
 
     @Test
-    fun clearAllButtonIsEnabledWhenStateIsEnabled() {
-        val clickCounter = ClickCounter()
+    fun clearAllButtonDoesNotShowTooltipWhenDisabled() {
         composeTestRule.setContent {
             MyBusTheme {
-                ServicesChooserDialogContentWithState(
+                ServicesChooserDialogContentWithStateWithDefaults(
                     appBarTitle = "Test",
                     state = UiState(
                         content = UiContent.InProgress,
+                        action = null,
+                        isClearAllButtonEnabled = false
+                    )
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_CLEAR_ALL_BUTTON)
+            .performTouchInput {
+                longClick()
+            }
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_CLEAR_ALL_BUTTON_TOOLTIP)
+            .assertDoesNotExist()
+    }
+
+    @Test
+    fun clearAllButtonIsEnabledWhenStateIsEnabled() {
+        val clickCounter = InvocationCounter()
+        composeTestRule.setContent {
+            MyBusTheme {
+                ServicesChooserDialogContentWithStateWithDefaults(
+                    appBarTitle = "Test",
+                    state = UiState(
+                        content = UiContent.InProgress,
+                        action = null,
                         isClearAllButtonEnabled = true
                     ),
-                    onCloseClick = { },
-                    onClearAllClick = clickCounter,
-                    onServiceClick = { }
+                    onClearAllClick = clickCounter
                 )
             }
         }
@@ -208,18 +276,134 @@ class ServicesChooserDialogFragmentKtTest {
     }
 
     @Test
-    fun showsProgressWhenContentIsInProgress() {
+    fun clearAllButtonLongClickShowsToolTipWhenEnabled() {
+        val clickCounter = InvocationCounter()
         composeTestRule.setContent {
             MyBusTheme {
-                ServicesChooserDialogContentWithState(
+                ServicesChooserDialogContentWithStateWithDefaults(
                     appBarTitle = "Test",
                     state = UiState(
                         content = UiContent.InProgress,
+                        action = null,
+                        isClearAllButtonEnabled = true
+                    ),
+                    onClearAllClick = clickCounter
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_CLEAR_ALL_BUTTON)
+            .performTouchInput {
+                longClick()
+            }
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_CLEAR_ALL_BUTTON_TOOLTIP)
+            .apply {
+                assertExists()
+
+                onChild()
+                    .assertTextEquals(
+                        composeTestRule
+                            .activity
+                            .getString(R.string.serviceschooserdialog_btn_clear_all)
+                    )
+            }
+    }
+
+    @Test
+    fun applyButtonHasContentDescription() {
+        composeTestRule.setContent {
+            MyBusTheme {
+                ServicesChooserDialogContentWithStateWithDefaults(
+                    appBarTitle = "Test",
+                    state = UiState(
+                        content = UiContent.InProgress,
+                        action = null,
+                        isClearAllButtonEnabled = false
+                    )
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_APPLY_BUTTON)
+            .assertContentDescriptionEquals(
+                composeTestRule
+                    .activity
+                    .getString(R.string.serviceschooserdialog_btn_apply)
+            )
+    }
+
+    @Test
+    fun applyButtonClickInvokesOnApplyClickLambda() {
+        val clickCounter = InvocationCounter()
+        composeTestRule.setContent {
+            MyBusTheme {
+                ServicesChooserDialogContentWithStateWithDefaults(
+                    appBarTitle = "Test",
+                    state = UiState(
+                        content = UiContent.InProgress,
+                        action = null,
                         isClearAllButtonEnabled = false
                     ),
-                    onCloseClick = { },
-                    onClearAllClick = { },
-                    onServiceClick = { }
+                    onApplyClick = clickCounter
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_APPLY_BUTTON)
+            .performClick()
+
+        assertEquals(1, clickCounter.count)
+    }
+
+    @Test
+    fun applyButtonLongClickShowsTooltip() {
+        composeTestRule.setContent {
+            MyBusTheme {
+                ServicesChooserDialogContentWithStateWithDefaults(
+                    appBarTitle = "Test",
+                    state = UiState(
+                        content = UiContent.InProgress,
+                        action = null,
+                        isClearAllButtonEnabled = false
+                    )
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_APPLY_BUTTON)
+            .performTouchInput {
+                longClick()
+            }
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_APPLY_BUTTON_TOOLTIP)
+            .apply {
+                assertExists()
+
+                onChild()
+                    .assertTextEquals(
+                        composeTestRule
+                            .activity
+                            .getString(R.string.serviceschooserdialog_btn_apply)
+                    )
+            }
+    }
+
+    @Test
+    fun showsProgressWhenContentIsInProgress() {
+        composeTestRule.setContent {
+            MyBusTheme {
+                ServicesChooserDialogContentWithStateWithDefaults(
+                    appBarTitle = "Test",
+                    state = UiState(
+                        content = UiContent.InProgress,
+                        action = null,
+                        isClearAllButtonEnabled = false
+                    )
                 )
             }
         }
@@ -242,7 +426,7 @@ class ServicesChooserDialogFragmentKtTest {
     fun showsContentWhenContentIsContent() {
         composeTestRule.setContent {
             MyBusTheme {
-                ServicesChooserDialogContentWithState(
+                ServicesChooserDialogContentWithStateWithDefaults(
                     appBarTitle = "Test",
                     state = UiState(
                         content = UiContent.Content(
@@ -264,11 +448,9 @@ class ServicesChooserDialogFragmentKtTest {
                                 )
                             )
                         ),
+                        action = null,
                         isClearAllButtonEnabled = false
-                    ),
-                    onCloseClick = { },
-                    onClearAllClick = { },
-                    onServiceClick = { }
+                    )
                 )
             }
         }
@@ -291,15 +473,13 @@ class ServicesChooserDialogFragmentKtTest {
     fun showsNoGlobalServicesErrorWhenContentIsNoGlobalServicesError() {
         composeTestRule.setContent {
             MyBusTheme {
-                ServicesChooserDialogContentWithState(
+                ServicesChooserDialogContentWithStateWithDefaults(
                     appBarTitle = "Test",
                     state = UiState(
                         content = UiContent.Error.NoGlobalServices,
+                        action = null,
                         isClearAllButtonEnabled = false
-                    ),
-                    onCloseClick = { },
-                    onClearAllClick = { },
-                    onServiceClick = { }
+                    )
                 )
             }
         }
@@ -322,15 +502,13 @@ class ServicesChooserDialogFragmentKtTest {
     fun showsNoServicesForStopErrorWhenContentIsNoServicesForStopError() {
         composeTestRule.setContent {
             MyBusTheme {
-                ServicesChooserDialogContentWithState(
+                ServicesChooserDialogContentWithStateWithDefaults(
                     appBarTitle = "Test",
                     state = UiState(
                         content = UiContent.Error.NoServicesForStop,
+                        action = null,
                         isClearAllButtonEnabled = false
-                    ),
-                    onCloseClick = { },
-                    onClearAllClick = { },
-                    onServiceClick = { }
+                    )
                 )
             }
         }
@@ -354,7 +532,7 @@ class ServicesChooserDialogFragmentKtTest {
         var serviceItemClickCount = 0
         composeTestRule.setContent {
             MyBusTheme {
-                ServicesChooserDialogContentWithState(
+                ServicesChooserDialogContentWithStateWithDefaults(
                     appBarTitle = "Test",
                     state = UiState(
                         content = UiContent.Content(
@@ -376,10 +554,9 @@ class ServicesChooserDialogFragmentKtTest {
                                 )
                             )
                         ),
+                        action = null,
                         isClearAllButtonEnabled = false
                     ),
-                    onCloseClick = { },
-                    onClearAllClick = { },
                     onServiceClick = { serviceItemClickCount++ }
                 )
             }
@@ -400,15 +577,13 @@ class ServicesChooserDialogFragmentKtTest {
                         .fillMaxWidth()
                         .height(200.dp)
                 ) {
-                    ServicesChooserDialogContentWithState(
+                    ServicesChooserDialogContentWithStateWithDefaults(
                         appBarTitle = "Test",
                         state = UiState(
                             content = scrollContent,
+                            action = null,
                             isClearAllButtonEnabled = false
-                        ),
-                        onCloseClick = { },
-                        onClearAllClick = { },
-                        onServiceClick = { }
+                        )
                     )
                 }
             }
@@ -428,15 +603,13 @@ class ServicesChooserDialogFragmentKtTest {
                         .fillMaxWidth()
                         .height(200.dp)
                 ) {
-                    ServicesChooserDialogContentWithState(
+                    ServicesChooserDialogContentWithStateWithDefaults(
                         appBarTitle = "Test",
                         state = UiState(
                             content = scrollContent,
+                            action = null,
                             isClearAllButtonEnabled = false
-                        ),
-                        onCloseClick = { },
-                        onClearAllClick = { },
-                        onServiceClick = { }
+                        )
                     )
                 }
             }
@@ -448,6 +621,63 @@ class ServicesChooserDialogFragmentKtTest {
         composeTestRule
             .onNodeWithTag(TEST_TAG_TOP_SCROLL_HORIZONTAL_DIVIDER)
             .assertIsDisplayed()
+    }
+
+    @Test
+    fun closeActionCallsLambdaThenMarksActionAsLaunched() {
+        val closeInvocationCounter = InvocationCounter()
+        val actionLaunchedCounter = InvocationCounter()
+        composeTestRule.setContent {
+            MyBusTheme {
+                ServicesChooserDialogContentWithStateWithDefaults(
+                    appBarTitle = "Test",
+                    state = UiState(
+                        content = UiContent.InProgress,
+                        action = UiAction.Close,
+                        isClearAllButtonEnabled = false
+                    ),
+                    onActionLaunched = actionLaunchedCounter,
+                    onClose = closeInvocationCounter
+                )
+            }
+        }
+
+        assertEquals(1, closeInvocationCounter.count)
+        assertEquals(1, actionLaunchedCounter.count)
+    }
+
+    @Test
+    fun dispatchResultAndCloseCallsLambdaThenMarksActionAsLaunched() {
+        val selectedServicesTracker = mutableListOf<Set<ServiceDescriptor>>()
+        val actionLaunchedCounter = InvocationCounter()
+        val service = ServiceDescriptor(
+            serviceName = "1",
+            operatorCode = "TEST1"
+        )
+        composeTestRule.setContent {
+            MyBusTheme {
+                ServicesChooserDialogContentWithStateWithDefaults(
+                    appBarTitle = "Test",
+                    state = UiState(
+                        content = UiContent.InProgress,
+                        action = UiAction.DispatchResultAndClose(
+                            selectedServices = setOf(service)
+                        ),
+                        isClearAllButtonEnabled = false
+                    ),
+                    onActionLaunched = actionLaunchedCounter,
+                    onDispatchResultAndClose = { selectedServicesTracker += it }
+                )
+            }
+        }
+
+        assertEquals(
+            listOf(
+                setOf(service)
+            ),
+            selectedServicesTracker
+        )
+        assertEquals(1, actionLaunchedCounter.count)
     }
 
     private val scrollContent get() = UiContent.Content(
@@ -485,7 +715,35 @@ class ServicesChooserDialogFragmentKtTest {
         )
     )
 
-    private class ClickCounter : () -> Unit {
+    @Composable
+    private fun ServicesChooserDialogContentWithStateWithDefaults(
+        appBarTitle: String,
+        state: UiState,
+        modifier: Modifier = Modifier,
+        onCloseClick: () -> Unit = { throw NotImplementedError() },
+        onClearAllClick: () -> Unit = { throw NotImplementedError() },
+        onApplyClick: () -> Unit = { throw NotImplementedError() },
+        onServiceClick: (ServiceDescriptor) -> Unit = { throw NotImplementedError() },
+        onActionLaunched: () -> Unit = { throw NotImplementedError() },
+        onClose: () -> Unit = { throw NotImplementedError() },
+        onDispatchResultAndClose: (Set<ServiceDescriptor>) -> Unit =
+            { throw NotImplementedError() }
+    ) {
+        ServicesChooserDialogContentWithState(
+            appBarTitle = appBarTitle,
+            state = state,
+            onCloseClick = onCloseClick,
+            onClearAllClick = onClearAllClick,
+            onApplyClick = onApplyClick,
+            onServiceClick = onServiceClick,
+            onActionLaunched = onActionLaunched,
+            onClose = onClose,
+            onDispatchResultAndClose = onDispatchResultAndClose,
+            modifier = modifier
+        )
+    }
+
+    private class InvocationCounter : () -> Unit {
 
         var count = 0
             private set

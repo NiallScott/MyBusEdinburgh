@@ -26,14 +26,19 @@
 
 package uk.org.rivernile.android.bustracker.ui.serviceschooser
 
+import androidx.compose.runtime.Immutable
+
 /**
  * This represents the current state of the services chooser UI.
  *
  * @property content The current [UiContent] to show.
+ * @property action An action, if any, to be performed.
  * @property isClearAllButtonEnabled Is the 'Clear all' button enabled?
  * @author Niall Scott
  */
+@Immutable
 internal data class UiState(
     val content: UiContent = UiContent.InProgress,
+    val action: UiAction? = null,
     val isClearAllButtonEnabled: Boolean = false
 )

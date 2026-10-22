@@ -35,6 +35,7 @@ import kotlin.collections.emptySet
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -43,6 +44,39 @@ import kotlin.test.assertTrue
  * @author Niall Scott
  */
 class RealStateTest {
+
+    @Test
+    fun actionIsNullByDefault() = runTest {
+        val state = createState()
+
+        state.actionFlow.test {
+            assertNull(awaitItem())
+            ensureAllEventsConsumed()
+        }
+        assertNull(state.action)
+    }
+
+    @Test
+    fun actionIsMutatedToTheCorrectValue() = runTest {
+        val state = createState()
+
+        state.actionFlow.test {
+            assertNull(awaitItem())
+            state.action = UiAction.Close
+            assertEquals(
+                UiAction.Close,
+                awaitItem()
+            )
+            assertEquals(
+                UiAction.Close,
+                state.action
+            )
+            state.action = null
+            assertNull(awaitItem())
+            assertNull(state.action)
+            ensureAllEventsConsumed()
+        }
+    }
 
     @Test
     fun selectedServicesFlowEmitsEmptySetByDefault() = runTest {

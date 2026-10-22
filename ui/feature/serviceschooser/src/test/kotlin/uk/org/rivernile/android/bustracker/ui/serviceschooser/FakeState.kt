@@ -34,7 +34,10 @@ import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
  *
  * @author Niall Scott
  */
-class FakeState(
+internal class FakeState(
+    private val onActionFlow: () -> Flow<UiAction?> = { throw NotImplementedError() },
+    private val onSetAction: (UiAction?) -> Unit = { throw NotImplementedError() },
+    private val onGetAction: () -> UiAction? = { throw NotImplementedError() },
     private val onSelectedServicesFlow: () -> Flow<Set<ServiceDescriptor>> =
         { throw NotImplementedError() },
     private val onSelectedServices: () -> Set<ServiceDescriptor> = { throw NotImplementedError() },
@@ -43,6 +46,14 @@ class FakeState(
         { throw NotImplementedError() },
     private val onClearAllSelectedServices: () -> Unit = { throw NotImplementedError() }
 ) : State {
+
+    override val actionFlow get() = onActionFlow()
+
+    override var action: UiAction?
+        get() = onGetAction()
+        set(value) {
+            onSetAction(value)
+        }
 
     override val selectedServicesFlow get() = onSelectedServicesFlow()
 

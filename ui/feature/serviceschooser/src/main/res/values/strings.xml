@@ -27,6 +27,7 @@
 <resources>
     <string name="serviceschooserdialog_item_unknown_operator">Unknown Operator</string>
     <string name="serviceschooserdialog_btn_clear_all">Clear all</string>
+    <string name="serviceschooserdialog_btn_apply">Apply</string>
     <string name="serviceschooserdialog_error_no_services_global">There are no known services</string>
     <string name="serviceschooserdialog_error_no_services_stop">There are no known services for this stop</string>
 </resources>
