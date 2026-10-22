@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.material.color.MaterialColors
-import com.google.maps.android.ktx.model.polylineOptions
+import com.google.maps.android.model.polylineOptions
 
 /**
  * This class manages the route lines shown on a [GoogleMap].
@@ -72,8 +72,8 @@ class RouteLineManager(
                         color(route.serviceColour ?: defaultColour)
 
                         line.points
-                                .map(this@RouteLineManager::mapToLatLng)
-                                .let(this::addAll)
+                            .map(this@RouteLineManager::mapToLatLng)
+                            .let(this::addAll)
                     }.let {
                         newPolylines += map.addPolyline(it)
                     }
