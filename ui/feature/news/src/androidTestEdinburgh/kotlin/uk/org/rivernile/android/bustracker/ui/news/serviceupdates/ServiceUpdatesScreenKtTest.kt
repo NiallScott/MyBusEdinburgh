@@ -24,8 +24,6 @@
  *
  */
 
-@file:OptIn(ExperimentalTime::class)
-
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
 import androidx.activity.ComponentActivity
@@ -54,7 +52,6 @@ import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIn
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 /*

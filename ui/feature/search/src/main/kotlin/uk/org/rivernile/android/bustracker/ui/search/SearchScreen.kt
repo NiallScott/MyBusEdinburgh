@@ -29,9 +29,7 @@ package uk.org.rivernile.android.bustracker.ui.search
 import android.content.res.Configuration
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.MutableWindowInsets
 import androidx.compose.foundation.layout.PaddingValues
@@ -54,7 +52,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
@@ -70,6 +68,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -84,7 +83,7 @@ import uk.org.rivernile.android.bustracker.core.domain.NaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.text.UiStopName
-import uk.org.rivernile.android.bustracker.ui.text.PrimaryErrorText
+import uk.org.rivernile.android.bustracker.ui.error.ErrorLayout
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
@@ -363,34 +362,30 @@ private fun ErrorLayout(
     @StringRes textResId: Int,
     modifier: Modifier = Modifier
 ) {
-    Column(
+    ErrorLayout(
+        titleText = {
+            Text(
+                text = stringResource(textResId),
+                fontWeight = FontWeight.Normal,
+                modifier = Modifier
+                    .semantics {
+                        testTag = TEST_TAG_ERROR_TEXT
+                    }
+            )
+        },
         modifier = modifier
             .semantics {
                 testTag = TEST_TAG_CONTENT_ERROR
             },
-        verticalArrangement = Arrangement
-            .spacedBy(
-                space = dimensionResource(Rcore.dimen.padding_double),
-                alignment = Alignment.CenterVertically
-            ),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            painter = painterResource(iconResId),
-            contentDescription = null,
-            modifier = Modifier
-                .size(72.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-
-        PrimaryErrorText(
-            text = stringResource(textResId),
-            modifier = Modifier
-                .semantics {
-                    testTag = TEST_TAG_ERROR_TEXT
-                }
-        )
-    }
+        icon = {
+            Icon(
+                painter = painterResource(iconResId),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(72.dp)
+            )
+        }
+    )
 }
 
 @Composable

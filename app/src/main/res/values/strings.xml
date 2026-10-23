@@ -37,10 +37,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     -->
     <string name="cancel">Cancel</string>
     <string name="close">Close</string>
-    <string name="no">No</string>
     <string name="okay">OK</string>
-    <string name="yes">Yes</string>
-    <string name="loading">Loading&#8230;</string>
 
     <!--
     ***************************

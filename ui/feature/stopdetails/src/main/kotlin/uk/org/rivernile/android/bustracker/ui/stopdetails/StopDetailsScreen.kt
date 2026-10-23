@@ -27,9 +27,7 @@
 package uk.org.rivernile.android.bustracker.ui.stopdetails
 
 import android.content.res.Configuration
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.MutableWindowInsets
 import androidx.compose.foundation.layout.PaddingValues
@@ -54,7 +52,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
@@ -73,6 +71,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -86,9 +85,9 @@ import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toAtcoStopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
+import uk.org.rivernile.android.bustracker.ui.error.ErrorLayout
 import uk.org.rivernile.android.bustracker.ui.formatters.LocalNumberFormatter
 import uk.org.rivernile.android.bustracker.ui.formatters.rememberNumberFormatter
-import uk.org.rivernile.android.bustracker.ui.text.PrimaryErrorText
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
@@ -310,30 +309,26 @@ private fun Content(
 private fun NoStopDetailsError(
     modifier: Modifier = Modifier
 ) {
-    Column(
+    ErrorLayout(
+        titleText = {
+            Text(
+                text = stringResource(R.string.stopdetails_not_found),
+                fontWeight = FontWeight.Normal
+            )
+        },
         modifier = modifier
             .semantics {
                 testTag = TEST_TAG_CONTENT_ERROR_NO_STOP_DETAILS
             },
-        verticalArrangement = Arrangement
-            .spacedBy(
-                space = dimensionResource(Rcore.dimen.padding_double),
-                alignment = Alignment.CenterVertically
-            ),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_no_transfer),
-            contentDescription = null,
-            modifier = Modifier
-                .size(72.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-
-        PrimaryErrorText(
-            text = stringResource(R.string.stopdetails_not_found)
-        )
-    }
+        icon = {
+            Icon(
+                painter = painterResource(R.drawable.ic_no_transfer),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(72.dp)
+            )
+        }
+    )
 }
 
 @Composable

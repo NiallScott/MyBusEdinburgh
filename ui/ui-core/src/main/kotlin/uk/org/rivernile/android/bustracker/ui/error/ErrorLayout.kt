@@ -30,6 +30,8 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -40,6 +42,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -64,6 +67,7 @@ import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
  * @param modifier Any [Modifier]s to be applied.
  * @param icon A [Composable] which renders the error icon.
  * @param descriptionText A [Composable] which renders the description text.
+ * @param actions Any actions which appear at the bottom of the error.
  * @author Niall Scott
  */
 @Composable
@@ -71,7 +75,8 @@ public fun ErrorLayout(
     titleText: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     icon: (@Composable () -> Unit)? = null,
-    descriptionText: (@Composable () -> Unit)? = null
+    descriptionText: (@Composable () -> Unit)? = null,
+    actions: (@Composable RowScope.() -> Unit)? = null
 ) {
     Column(
         modifier = modifier,
@@ -109,6 +114,21 @@ public fun ErrorLayout(
                 )
             ) {
                 descriptionText()
+            }
+        }
+
+        if (actions != null) {
+            val paddingDefault = dimensionResource(R.dimen.padding_default)
+
+            Spacer(
+                modifier = Modifier
+                    .height(paddingDefault)
+            )
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(paddingDefault)
+            ) {
+                actions()
             }
         }
     }
@@ -196,6 +216,71 @@ private fun ErrorLayoutWithIconPreview() {
                         text = "Description text that is really long so that it wraps on to a " +
                             "new line."
                     )
+                }
+            )
+        }
+    }
+}
+
+@Preview(
+    name = "Error layout - with actions - light",
+    group = "Error layout - with actions",
+    showBackground = true,
+    backgroundColor = 0xFFFFFFFF,
+    uiMode = Configuration.UI_MODE_NIGHT_NO
+)
+@Preview(
+    name = "Error layout - with actions - dark",
+    group = "Error layout - with actions",
+    showBackground = true,
+    backgroundColor = 0xFF000000,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+private fun ErrorLayoutWithActionsPreview() {
+    MyBusTheme {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            ErrorLayout(
+                titleText = {
+                    Text(
+                        text = "Test text"
+                    )
+                },
+                icon = {
+                    Icon(
+                        painter = painterResource(android.R.drawable.star_on),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(72.dp)
+                    )
+                },
+                descriptionText = {
+                    Text(
+                        text = "Description text that is really long so that it wraps on to a " +
+                            "new line."
+                    )
+                },
+                actions = {
+                    TextButton(
+                        onClick = { }
+                    ) {
+                        Text(
+                            text = "Button 1"
+                        )
+                    }
+
+                    TextButton(
+                        onClick = { }
+                    ) {
+                        Text(
+                            text = "Button 2"
+                        )
+                    }
                 }
             )
         }

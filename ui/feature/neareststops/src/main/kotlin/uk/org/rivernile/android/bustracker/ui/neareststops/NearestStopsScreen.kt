@@ -29,13 +29,11 @@ package uk.org.rivernile.android.bustracker.ui.neareststops
 import android.content.res.Configuration
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.MutableWindowInsets
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
@@ -45,7 +43,6 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.onConsumedWindowInsetsChanged
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -58,7 +55,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -79,7 +75,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -95,8 +90,8 @@ import uk.org.rivernile.android.bustracker.core.domain.ServiceDescriptor
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
 import uk.org.rivernile.android.bustracker.core.domain.toNaptanStopIdentifier
 import uk.org.rivernile.android.bustracker.core.text.UiStopName
+import uk.org.rivernile.android.bustracker.ui.error.ErrorLayout
 import uk.org.rivernile.android.bustracker.ui.interop.MenuProvider
-import uk.org.rivernile.android.bustracker.ui.text.PrimaryErrorText
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
@@ -540,53 +535,45 @@ private fun ErrorLayout(
     modifier: Modifier = Modifier,
     resolveButton: (@Composable () -> Unit)? = null
 ) {
-    Column(
+    ErrorLayout(
+        titleText = {
+            Text(
+                text = stringResource(titleTextResId),
+                modifier = Modifier
+                    .semantics {
+                        testTag = TEST_TAG_ERROR_TITLE
+                    }
+            )
+        },
         modifier = modifier
             .semantics {
                 testTag = TEST_TAG_CONTENT_ERROR
             },
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            painter = painterResource(iconResId),
-            contentDescription = null,
-            modifier = Modifier
-                .size(72.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(
-            modifier = Modifier
-                .height(dimensionResource(Rcore.dimen.padding_double))
-        )
-
-        PrimaryErrorText(
-            text = stringResource(titleTextResId),
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .semantics {
-                    testTag = TEST_TAG_ERROR_TITLE
-                }
-        )
-
-        PrimaryErrorText(
-            text = stringResource(blurbTextResId),
-            modifier = Modifier
-                .semantics {
-                    testTag = TEST_TAG_ERROR_BLURB
-                }
-        )
-
-        if (resolveButton != null) {
-            Spacer(
+        icon = {
+            Icon(
+                painter = painterResource(iconResId),
+                contentDescription = null,
                 modifier = Modifier
-                    .height(dimensionResource(Rcore.dimen.padding_default))
+                    .size(72.dp)
             )
-
-            resolveButton()
+        },
+        descriptionText = {
+            Text(
+                text = stringResource(blurbTextResId),
+                modifier = Modifier
+                    .semantics {
+                        testTag = TEST_TAG_ERROR_BLURB
+                    }
+            )
+        },
+        actions = if (resolveButton != null) {
+            {
+                resolveButton()
+            }
+        } else {
+            null
         }
-    }
+    )
 }
 
 @Composable

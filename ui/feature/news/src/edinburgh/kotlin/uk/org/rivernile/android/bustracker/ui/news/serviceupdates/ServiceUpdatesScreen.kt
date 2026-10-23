@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,7 +32,6 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -49,7 +48,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -71,7 +69,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -79,6 +77,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.constraintlayout.compose.atLeast
 import kotlinx.collections.immutable.ImmutableList
+import uk.org.rivernile.android.bustracker.ui.error.ErrorLayout
 import uk.org.rivernile.android.bustracker.ui.news.R
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import uk.org.rivernile.android.bustracker.ui.core.R as Rcore
@@ -101,7 +100,6 @@ internal const val TEST_TAG_ERROR_SNACKBAR = "error-snackbar"
  * shown.
  * @param itemContent A lambda which generates individual Service Update items.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun <T : UiServiceUpdate> ServiceUpdatesScreen(
     content: UiContent<T>,
@@ -319,26 +317,29 @@ private fun InlineError(
         modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
-        Column(
+        ErrorLayout(
+            titleText = {
+                Text(
+                    text = stringResource(id = error.titleResId),
+                    modifier = Modifier
+                        .semantics {
+                            testTag = TEST_TAG_INLINE_ERROR_TEXT
+                        },
+                    fontWeight = FontWeight.Normal
+                )
+            },
             modifier = Modifier
                 .padding(dimensionResource(Rcore.dimen.padding_double))
                 .semantics {
                     testTag = TEST_TAG_INLINE_ERROR
                 },
-            verticalArrangement = Arrangement.spacedBy(
-                space = dimensionResource(id = Rcore.dimen.padding_default),
-                alignment = Alignment.CenterVertically
-            ),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            ErrorIcon(
-                iconRes = error.iconResId
-            )
-
-            ErrorText(
-                text = stringResource(id = error.titleResId),
-            )
-        }
+            icon = {
+                Icon(
+                    painter = painterResource(id = error.iconResId),
+                    contentDescription = null
+                )
+            }
+        )
     }
 }
 
@@ -404,37 +405,6 @@ private fun ErrorSnackbar(
             onErrorSnackbarShown(loadTimeMillis)
         }
     }
-}
-
-@Composable
-private fun ErrorIcon(
-    @DrawableRes iconRes: Int,
-    modifier: Modifier = Modifier
-) {
-    Icon(
-        painter = painterResource(id = iconRes),
-        contentDescription = null,
-        modifier = modifier,
-        tint = MaterialTheme.colorScheme.primary
-    )
-}
-
-@Composable
-private fun ErrorText(
-    text: String,
-    modifier: Modifier = Modifier
-) {
-    Text(
-        text = text,
-        modifier = modifier
-            .semantics {
-                testTag = TEST_TAG_INLINE_ERROR_TEXT
-            },
-        textAlign = TextAlign.Center,
-        color = MaterialTheme.colorScheme.onSurface,
-        overflow = TextOverflow.Ellipsis,
-        style = MaterialTheme.typography.bodyLarge
-    )
 }
 
 @Composable

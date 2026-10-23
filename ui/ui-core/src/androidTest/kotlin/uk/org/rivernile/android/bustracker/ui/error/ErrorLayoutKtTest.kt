@@ -26,9 +26,11 @@
 
 package uk.org.rivernile.android.bustracker.ui.error
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -45,9 +47,11 @@ import kotlin.test.Test
 private const val TEST_TAG_ICON = "icon"
 private const val TEST_TAG_TITLE_TEXT = "title-text"
 private const val TEST_TAG_DESCRIPTION_TEXT = "description-text"
+private const val TEST_TAG_ACTION_BUTTON_1 = "action-button-1"
 
 private const val TITLE_TEXT = "Title text"
 private const val DESCRIPTION_TEXT = "Description text"
+private const val ACTION_BUTTON_1_TEXT = "Action 1"
 
 /**
  * Tests for `ErrorLayout.kt`.
@@ -134,6 +138,37 @@ class ErrorLayoutKtTest {
             }
     }
 
+    @Test
+    fun errorLayoutDoesNotRenderActionsWhenActionsIsNull() {
+        composeTestRule.setContent {
+            MyBusTheme {
+                ErrorLayoutWithDefaults(
+                    actions = null
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_ACTION_BUTTON_1)
+            .assertDoesNotExist()
+    }
+
+    @Test
+    fun errorLayoutRendersActionsWhenActionsIsNotNull() {
+        composeTestRule.setContent {
+            MyBusTheme {
+                ErrorLayoutWithDefaults()
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG_ACTION_BUTTON_1)
+            .apply {
+                assertExists()
+                assertTextEquals(ACTION_BUTTON_1_TEXT)
+            }
+    }
+
     @Composable
     private fun ErrorLayoutWithDefaults(
         modifier: Modifier = Modifier,
@@ -165,13 +200,27 @@ class ErrorLayoutKtTest {
                         testTag = TEST_TAG_DESCRIPTION_TEXT
                     }
             )
+        },
+        actions: (@Composable RowScope.() -> Unit)? = {
+            TextButton(
+                onClick = { },
+                modifier = Modifier
+                    .semantics {
+                        testTag = TEST_TAG_ACTION_BUTTON_1
+                    }
+            ) {
+                Text(
+                    text = ACTION_BUTTON_1_TEXT
+                )
+            }
         }
     ) {
         ErrorLayout(
             titleText = titleText,
             modifier = modifier,
             icon = icon,
-            descriptionText = descriptionText
+            descriptionText = descriptionText,
+            actions = actions
         )
     }
 }
