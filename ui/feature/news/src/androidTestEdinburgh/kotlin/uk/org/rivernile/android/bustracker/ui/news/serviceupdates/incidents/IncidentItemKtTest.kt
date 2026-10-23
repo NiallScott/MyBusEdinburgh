@@ -24,8 +24,6 @@
  *
  */
 
-@file:OptIn(ExperimentalTime::class)
-
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents
 
 import androidx.activity.ComponentActivity
@@ -50,7 +48,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 /**

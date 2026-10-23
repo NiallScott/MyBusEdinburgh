@@ -24,8 +24,6 @@
  *
  */
 
-@file:OptIn(ExperimentalTime::class)
-
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
 import app.cash.turbine.test
@@ -49,7 +47,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.fail
-import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 /**

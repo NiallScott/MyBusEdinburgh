@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,8 +24,6 @@
  *
  */
 
-@file:OptIn(ExperimentalTime::class)
-
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents
 
 import androidx.compose.runtime.Immutable
@@ -38,7 +36,6 @@ import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiMoreDetails
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiServiceUpdate
 import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.toUiServiceNamesOrNull
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
-import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 /**

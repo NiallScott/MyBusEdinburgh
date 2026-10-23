@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.ui.favouritestops
 
 import app.cash.turbine.test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.domain.StopIdentifier
@@ -47,7 +46,6 @@ import kotlin.test.assertNull
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class RealUiFavouriteDropdownMenuGeneratorTest {
 
     @Test

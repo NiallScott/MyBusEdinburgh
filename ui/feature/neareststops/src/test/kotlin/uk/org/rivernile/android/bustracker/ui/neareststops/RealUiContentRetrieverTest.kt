@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.ui.neareststops
 
 import app.cash.turbine.test
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import uk.org.rivernile.android.bustracker.core.busstops.FakeStopName
@@ -50,7 +49,6 @@ import kotlin.test.assertNull
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class RealUiContentRetrieverTest {
 
     @Test

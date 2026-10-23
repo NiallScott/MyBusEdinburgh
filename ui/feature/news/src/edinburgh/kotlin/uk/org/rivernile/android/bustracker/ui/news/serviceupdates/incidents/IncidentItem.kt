@@ -24,8 +24,6 @@
  *
  */
 
-@file:OptIn(ExperimentalTime::class)
-
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents
 
 import android.content.res.Configuration
@@ -53,7 +51,6 @@ import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.UiMoreDetails
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceColours
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
-import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 - 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,8 +24,6 @@
  *
  */
 
-@file:OptIn(ExperimentalTime::class)
-
 package uk.org.rivernile.android.bustracker.ui.news.serviceupdates
 
 import androidx.compose.foundation.layout.Arrangement
@@ -48,7 +46,6 @@ import uk.org.rivernile.android.bustracker.ui.news.R
 import uk.org.rivernile.android.bustracker.ui.text.SmallDecoratedServiceNamesListingText
 import uk.org.rivernile.android.bustracker.ui.text.UiServiceName
 import java.util.Date
-import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 internal const val TEST_TAG_ITEM_TITLE = "item-title"

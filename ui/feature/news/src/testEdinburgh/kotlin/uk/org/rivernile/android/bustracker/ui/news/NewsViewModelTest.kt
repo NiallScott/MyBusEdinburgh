@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Niall 'Rivernile' Scott
+ * Copyright (C) 2025 - 2026 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,8 +23,6 @@
  *     exempt from clause 2.
  *
  */
-
-@file:OptIn(ExperimentalTime::class)
 
 package uk.org.rivernile.android.bustracker.ui.news
 
@@ -56,7 +54,6 @@ import uk.org.rivernile.android.bustracker.ui.news.serviceupdates.incidents.UiIn
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
-import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 /**

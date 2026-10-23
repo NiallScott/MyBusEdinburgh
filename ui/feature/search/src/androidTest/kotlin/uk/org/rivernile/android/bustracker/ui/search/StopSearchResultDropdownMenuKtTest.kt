@@ -31,7 +31,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
@@ -378,7 +377,6 @@ class StopSearchResultDropdownMenuKtTest {
         assertEquals(1, itemClickedCounter.count)
     }
 
-    @OptIn(ExperimentalTestApi::class)
     @Test
     fun dismissingMenuCausesDismissedHandlerToBeFired() {
         val itemClickedCounter = ItemClickedCounter()

@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.ui.search
 
 import app.cash.turbine.test
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -54,7 +53,6 @@ import kotlin.time.Duration.Companion.milliseconds
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class RealUiContentRetrieverTest {
 
     @Test
