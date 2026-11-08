@@ -52,7 +52,6 @@ android {
     }
 
     // Enable the benchmark to run separately from the app process.
-    @Suppress("UnstableApiUsage")
     experimentalProperties["android.experimental.self-instrumenting"] = true
 }
 
