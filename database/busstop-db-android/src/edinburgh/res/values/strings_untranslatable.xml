@@ -31,5 +31,5 @@
     * Application strings *
     ***********************
     -->
-    <string name="asset_db_version" translatable="false">1771822864000</string>
+    <string name="asset_db_version" translatable="false">1794200541216</string>
 </resources>
