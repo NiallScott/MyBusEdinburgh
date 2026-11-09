@@ -28,7 +28,7 @@ https://play.google.com/store/apps/details?id=uk.org.rivernile.edinburghbustrack
 
 ## Latest Version
 
-The latest stable version of the application is 3.4.
+The latest stable version of the application is 3.5.
 
 The minimum supported version of Android is Android 9.0 Pie (API level 28).
 
