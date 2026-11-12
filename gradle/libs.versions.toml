@@ -112,7 +112,7 @@ firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version = "21.4.0" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.0.0" }
 play-services-maps-compose = { module = "com.google.maps.android:maps-compose", version = "9.0.1" }
-play-services-maps-utils = { module = "com.google.maps.android:android-maps-utils", version = "6.1.0" }
+play-services-maps-utils = { module = "com.google.maps.android:android-maps-utils", version = "7.0.0" }
 
 # Testing dependencies.
 androidx-arch-core-test = { module = "androidx.arch.core:core-testing", version = "2.2.0" }
